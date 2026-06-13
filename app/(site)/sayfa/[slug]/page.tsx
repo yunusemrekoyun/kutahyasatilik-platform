@@ -7,6 +7,14 @@ import TrackView from "@/components/TrackView";
 
 export const revalidate = 300; // ISR: her 5 dakikada yenilenir (CDN cache + admin revalidatePath)
 
+export async function generateStaticParams() {
+  const pages = await prisma.page.findMany({
+    where: { status: "published" },
+    select: { slug: true },
+  });
+  return pages.map((p) => ({ slug: p.slug }));
+}
+
 async function getPage(slug: string) {
   return prisma.page.findFirst({ where: { slug, status: "published" } });
 }
