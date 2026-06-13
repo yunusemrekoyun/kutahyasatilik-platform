@@ -1,0 +1,364 @@
+// Kütahya Satılık - Dijital Emlak Ofisi
+// Prisma 7 schema (SQLite -> kolayca Postgres'e geçirilebilir)
+
+generator client {
+  provider = "prisma-client"
+  output   = "../app/generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+// ---------------------------------------------------------------------------
+// Admin kullanıcısı
+// ---------------------------------------------------------------------------
+model Admin {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  passwordHash String
+  name         String?
+  createdAt    DateTime @default(now())
+}
+
+// ---------------------------------------------------------------------------
+// Emlakçı (danışman) — kayıt olur, admin onaylar, ilan ekleyebilir
+// ---------------------------------------------------------------------------
+model Agent {
+  id           String    @id @default(cuid())
+  email        String    @unique
+  passwordHash String
+  name         String
+  phone        String?
+  title        String? // unvan: "Gayrimenkul Danışmanı"
+  agency       String? // bağlı olduğu ofis / marka adı
+  slug         String    @unique
+  status       String    @default("pending") // pending | approved | rejected | suspended
+  note         String? // admin notu (red/askı sebebi)
+  createdAt    DateTime  @default(now())
+  approvedAt   DateTime?
+
+  listings Listing[]
+
+  @@index([status])
+}
+
+// ---------------------------------------------------------------------------
+// İlan
+// ---------------------------------------------------------------------------
+model Listing {
+  id          String  @id @default(cuid())
+  slug        String  @unique
+  title       String
+  description String
+
+  propertyType String // daire | arsa | villa | tarla | isyeri | mustakil
+  listingType  String @default("sale") // sale | rent
+  status       String @default("active") // active | sold | passive
+
+  // Yayın denetimi: emlakçı ilanları admin onayından geçer
+  moderationStatus String  @default("approved") // pending | approved | rejected
+  note             String? // admin red/moderasyon notu
+
+  // İlanı ekleyen emlakçı (admin eklediyse boş)
+  agentId String?
+  agent   Agent?  @relation(fields: [agentId], references: [id], onDelete: SetNull)
+
+  price    Int
+  currency String @default("TRY")
+
+  district     String // Merkez | Tavşanlı | Simav | Gediz | Emet ...
+  neighborhood String?
+  address      String?
+  lat          Float?
+  lng          Float?
+
+  // Konut detayları
+  areaGross   Int? // brüt m2
+  areaNet     Int? // net m2
+  rooms       String? // "3+1"
+  floor       String?
+  totalFloors Int?
+  buildingAge String?
+  heating     String?
+  furnished   Boolean @default(false)
+  inSite      Boolean @default(false)
+  balcony     Boolean @default(false)
+  parking     Boolean @default(false)
+
+  // Arsa / tarla detayları
+  deedStatus   String? // tapu durumu
+  zoningStatus String? // imar durumu
+  adaNo        String?
+  parselNo     String?
+  kaks         String? // KAKS / emsal
+
+  // Medya (opsiyonel zengin içerik)
+  videoUrl       String? // tanıtım videosu (YouTube/Vimeo)
+  droneUrl       String? // drone / havadan görüntü (YouTube/Vimeo)
+  virtualTourUrl String? // 360° sanal tur (Matterport, Kuula vb. embed linki)
+
+  // Pazarlama & AI
+  featured        Boolean @default(false)
+  verified        Boolean @default(false) // tapu/ekspertiz doğrulanmış ilan
+  investmentScore Int? // 0-100 (boşsa otomatik hesaplanır)
+  valueGrowthPct  Int? // son 3 yıl değer artışı (boşsa ilçe verisinden)
+  features        String? // JSON array (string)
+
+  // SEO
+  metaTitle       String?
+  metaDescription String?
+
+  viewCount Int @default(0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  images       ListingImage[]
+  leads        Lead[]
+  events       AnalyticsEvent[]
+  priceHistory PriceHistory[]
+
+  @@index([propertyType])
+  @@index([district])
+  @@index([status])
+  @@index([featured])
+  @@index([moderationStatus])
+  @@index([agentId])
+}
+
+// ---------------------------------------------------------------------------
+// Fiyat geçmişi (her fiyat değişiminde kayıt) — şeffaflık
+// ---------------------------------------------------------------------------
+model PriceHistory {
+  id        String   @id @default(cuid())
+  listingId String
+  listing   Listing  @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  price     Int
+  createdAt DateTime @default(now())
+
+  @@index([listingId])
+}
+
+// ---------------------------------------------------------------------------
+// Alıcı talebi / kayıtlı arama — yeni uygun ilanlarla eşleşir
+// ---------------------------------------------------------------------------
+model BuyerAlert {
+  id    String @id @default(cuid())
+  name  String
+  phone String
+  email String?
+
+  propertyType String? // daire | arsa | villa | tarla | isyeri | mustakil
+  listingType  String? @default("sale")
+  district     String?
+  minPrice     Int?
+  maxPrice     Int?
+  minArea      Int?
+  rooms        String?
+  note         String?
+
+  status String @default("active") // active | paused | closed
+
+  utmSource   String?
+  utmMedium   String?
+  utmCampaign String?
+
+  createdAt DateTime @default(now())
+
+  @@index([status])
+  @@index([district])
+}
+
+model ListingImage {
+  id        String  @id @default(cuid())
+  listingId String
+  url       String
+  alt       String?
+  sortOrder Int     @default(0)
+  listing   Listing @relation(fields: [listingId], references: [id], onDelete: Cascade)
+
+  @@index([listingId])
+}
+
+// ---------------------------------------------------------------------------
+// Lead (Satıcı formu + Randevu / Ekspertiz / Fiyat teklifi / İletişim)
+// ---------------------------------------------------------------------------
+model Lead {
+  id   String @id @default(cuid())
+  type String // seller | appointment | expertise | price_offer | contact
+
+  name    String
+  phone   String
+  email   String?
+  message String?
+
+  // Satıcı formu alanları
+  district       String?
+  neighborhood   String?
+  propertyType   String?
+  estimatedPrice String?
+  photos         String? // JSON array (string)
+
+  preferredDate String? // randevu için
+
+  // İlişki (talep bir ilana aitse)
+  listingId String?
+  listing   Listing? @relation(fields: [listingId], references: [id], onDelete: SetNull)
+
+  status String @default("new") // new | contacted | closed
+
+  // Kaynak / Google Ads takibi
+  utmSource   String?
+  utmMedium   String?
+  utmCampaign String?
+  referrer    String?
+  pagePath    String?
+
+  createdAt DateTime @default(now())
+
+  @@index([type])
+  @@index([status])
+  @@index([createdAt])
+}
+
+// ---------------------------------------------------------------------------
+// Analitik olayları (görüntülenme, telefon/whatsapp tıklama, dönüşüm)
+// ---------------------------------------------------------------------------
+model AnalyticsEvent {
+  id   String @id @default(cuid())
+  type String // view | phone_click | whatsapp_click | appointment | expertise | price_offer | seller_lead | conversion
+
+  listingId String?
+  listing   Listing? @relation(fields: [listingId], references: [id], onDelete: SetNull)
+
+  district  String?
+  pagePath  String?
+  referrer  String?
+  utmSource String?
+  sessionId String?
+
+  createdAt DateTime @default(now())
+
+  @@index([type])
+  @@index([district])
+  @@index([createdAt])
+  @@index([listingId])
+}
+
+// ---------------------------------------------------------------------------
+// İlçe verisi (AI analiz şablonlarını besler)
+// ---------------------------------------------------------------------------
+model District {
+  id   String @id @default(cuid())
+  name String @unique
+  slug String @unique
+
+  lat Float?
+  lng Float?
+
+  investmentScore  Int? // 0-100
+  valueGrowth3yPct Int?
+  valueGrowth5yPct Int?
+  avgPriceDaire    Int? // ortalama daire fiyatı
+  avgPriceArsaM2   Int? // ortalama arsa m2 fiyatı
+
+  description     String? // bölge analizi metni
+  transportNote   String? // ulaşım / yatırım projeleri notu
+  nearbySchools   String? // JSON array (string)
+  nearbyHospitals String? // JSON array (string)
+
+  sortOrder Int @default(0)
+}
+
+// ---------------------------------------------------------------------------
+// Blog yazısı
+// ---------------------------------------------------------------------------
+model Post {
+  id         String  @id @default(cuid())
+  slug       String  @unique
+  title      String
+  excerpt    String? // kısa özet (liste & SEO)
+  content    String // WYSIWYG HTML
+  coverImage String?
+  author     String?
+  tags       String? // virgülle ayrılmış etiketler
+  status     String  @default("draft") // draft | published
+
+  metaTitle       String?
+  metaDescription String?
+
+  viewCount   Int       @default(0)
+  publishedAt DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@index([status])
+  @@index([publishedAt])
+}
+
+// ---------------------------------------------------------------------------
+// İçerik sayfası (Hakkımızda, KVKK, kampanya sayfaları vb.)
+// ---------------------------------------------------------------------------
+model Page {
+  id      String @id @default(cuid())
+  slug    String @unique
+  title   String
+  content String // WYSIWYG HTML
+  status  String @default("draft") // draft | published
+
+  showInMenu Boolean @default(false) // footer/menü görünürlüğü
+  menuOrder  Int     @default(0)
+
+  metaTitle       String?
+  metaDescription String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([status])
+}
+
+// ---------------------------------------------------------------------------
+// Müşteri yorumu (ana sayfada gösterilir)
+// ---------------------------------------------------------------------------
+model Testimonial {
+  id        String  @id @default(cuid())
+  name      String
+  role      String? // "Daire Sahibi · Merkez"
+  text      String
+  stars     Int     @default(5)
+  published Boolean @default(true)
+  sortOrder Int     @default(0)
+  createdAt DateTime @default(now())
+
+  @@index([published])
+}
+
+// ---------------------------------------------------------------------------
+// Pop-up reklam / duyuru (admin panelinden yönetilir)
+// ---------------------------------------------------------------------------
+model Popup {
+  id        String  @id @default(cuid())
+  title     String
+  body      String? // açıklama metni
+  imageUrl  String?
+  linkUrl   String? // tıklanınca gidilecek adres
+  linkText  String? // buton metni
+  active    Boolean @default(false)
+  frequency String  @default("session") // session | daily | always
+  delaySec  Int     @default(2) // gösterilmeden önce bekleme (saniye)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([active])
+}
+
+// ---------------------------------------------------------------------------
+// Site ayarları (telefon, whatsapp, marka, ana sayfa metinleri vb.) - key/value
+// ---------------------------------------------------------------------------
+model Setting {
+  key   String @id
+  value String
+}
