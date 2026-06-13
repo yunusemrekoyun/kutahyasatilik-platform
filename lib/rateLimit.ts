@@ -68,11 +68,19 @@ async function allow(key: string, limit: number, windowMs: number): Promise<bool
   return memoryAllow(key, limit, windowMs);
 }
 
+// Gerçek ziyaretçi IP'si.
+// Cloudflare arkasında CF-Connecting-IP en güvenilir kaynaktır: istemci forge edemez,
+// çünkü Cloudflare bu başlığı her istekte kendisi yazar. Sonra nginx'in x-real-ip'i,
+// en son (spoof'lanabilir olduğu için son çare) x-forwarded-for'un ilk değeri.
 export function getClientIp(req: Request): string {
   const h = req.headers;
+  const cf = h.get("cf-connecting-ip");
+  if (cf) return cf.trim();
+  const real = h.get("x-real-ip");
+  if (real) return real.trim();
   const fwd = h.get("x-forwarded-for");
   if (fwd) return fwd.split(",")[0].trim();
-  return h.get("x-real-ip") || "unknown";
+  return "unknown";
 }
 
 // Limit aşıldıysa standart 429 yanıtı üretir; aksi halde null döner.

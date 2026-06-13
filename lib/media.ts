@@ -41,3 +41,27 @@ export function hasAnyMedia(listing: {
       toTourEmbed(listing.virtualTourUrl)
   );
 }
+
+// ---------------------------------------------------------------------------
+// Görsel URL yardımcıları
+// ---------------------------------------------------------------------------
+const MEDIA_BASE = (process.env.NEXT_PUBLIC_MEDIA_URL || "").replace(/\/$/, "");
+
+// Yerel /uploads yolunu gerekiyorsa media subdomain'i (NEXT_PUBLIC_MEDIA_URL) ile
+// mutlak hale getirir. Base boşsa URL aynen döner (aynı domain). Dış URL'lere dokunmaz.
+// Böylece ileride medya R2/subdomain'e taşınınca DB/kod değişmeden URL'ler güncellenir.
+export function mediaUrl(url?: string | null): string {
+  if (!url) return "";
+  if (MEDIA_BASE && url.startsWith("/uploads/")) return MEDIA_BASE + url;
+  return url;
+}
+
+// Liste kartı/önizleme için küçük varyant: /uploads/x.webp -> /uploads/x-thumb.webp
+// (upload sırasında üretilir). Yerel-olmayan/uygunsuz URL'lerde mediaUrl ile aynen döner.
+export function thumbUrl(url?: string | null): string {
+  if (!url) return "";
+  if (url.startsWith("/uploads/") && url.endsWith(".webp")) {
+    return mediaUrl(url.replace(/\.webp$/, "-thumb.webp"));
+  }
+  return mediaUrl(url);
+}

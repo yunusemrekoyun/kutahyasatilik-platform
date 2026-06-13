@@ -4,12 +4,22 @@ import Link from "next/link";
 import Image from "next/image";
 import { prisma } from "@/lib/prisma";
 import { sanitizeCmsHtml } from "@/lib/sanitize";
+import { mediaUrl } from "@/lib/media";
 import { formatDate } from "@/lib/format";
 import { SITE } from "@/lib/site";
 import TrackView from "@/components/TrackView";
 import NotFoundCTA from "@/components/NotFoundCTA";
 
 export const revalidate = 300; // ISR: her 5 dakikada yenilenir (CDN cache + admin revalidatePath)
+
+export async function generateStaticParams() {
+  const posts = await prisma.post.findMany({
+    where: { status: "published" },
+    select: { slug: true },
+    take: 1000,
+  });
+  return posts.map((p) => ({ slug: p.slug }));
+}
 
 async function getPost(slug: string) {
   return prisma.post.findFirst({ where: { slug, status: "published" } });
@@ -79,7 +89,7 @@ export default async function BlogPost({ params }: { params: Promise<{ slug: str
 
       {post.coverImage && (
         <div className="relative mt-6 aspect-[16/9] overflow-hidden rounded-2xl bg-slate-100 ring-1 ring-slate-200">
-          <Image src={post.coverImage} alt={post.title} fill sizes="(max-width:768px) 100vw, 768px" className="object-cover" priority />
+          <Image src={mediaUrl(post.coverImage)} alt={post.title} fill sizes="(max-width:768px) 100vw, 768px" className="object-cover" priority />
         </div>
       )}
 

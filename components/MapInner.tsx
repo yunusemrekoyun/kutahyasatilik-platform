@@ -6,6 +6,7 @@ import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import { KUTAHYA_CENTER, PROPERTY_TYPE_LABELS } from "@/lib/constants";
 import { formatPrice } from "@/lib/format";
+import { thumbUrl } from "@/lib/media";
 
 export type MapPoint = {
   id: string;
@@ -85,7 +86,7 @@ export default function MapInner({
                 <a href={`/ilan/${p.slug}`} className="ks-pop-card">
                   <div className="ks-pop-img">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={p.coverImage || PLACEHOLDER} alt={p.title} />
+                    <img src={thumbUrl(p.coverImage) || PLACEHOLDER} alt={p.title} />
                     {p.featured && <span className="ks-pop-badge">★ Öne Çıkan</span>}
                   </div>
                   <div className="ks-pop-body">

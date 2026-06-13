@@ -5,6 +5,10 @@ import { LANDING_PAGES } from "@/lib/constants";
 
 export const dynamic = "force-dynamic";
 
+// Kendi özel route'u olan sayfalar (/hakkimizda, /kvkk) — /sayfa/[slug]'dan
+// tekrar listelenmesin (çift içerik önlenir; kvkk zaten noindex).
+const RESERVED_PAGE_SLUGS = ["hakkimizda", "kvkk"];
+
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const base = SITE.url;
   const staticPages: MetadataRoute.Sitemap = [
@@ -46,7 +50,10 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   try {
     const [posts, pages] = await Promise.all([
       prisma.post.findMany({ where: { status: "published" }, select: { slug: true, updatedAt: true } }),
-      prisma.page.findMany({ where: { status: "published" }, select: { slug: true, updatedAt: true } }),
+      prisma.page.findMany({
+        where: { status: "published", slug: { notIn: RESERVED_PAGE_SLUGS } },
+        select: { slug: true, updatedAt: true },
+      }),
     ]);
     cmsPages = [
       ...posts.map((p) => ({

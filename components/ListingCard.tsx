@@ -3,6 +3,7 @@ import Image from "next/image";
 import { MapPin, BedDouble, Maximize, Star, BadgeCheck, BadgePercent, Flame, Sparkles, ArrowRight } from "lucide-react";
 import { formatPrice } from "@/lib/format";
 import { PROPERTY_TYPE_LABELS } from "@/lib/constants";
+import { thumbUrl } from "@/lib/media";
 import type { Badge, BadgeTone } from "@/lib/badges";
 import CardActions from "./CardActions";
 
@@ -31,7 +32,7 @@ export type ListingCardData = {
 };
 
 export default function ListingCard({ listing }: { listing: ListingCardData }) {
-  const cover = listing.coverImage || "https://picsum.photos/seed/placeholder/800/600";
+  const cover = thumbUrl(listing.coverImage) || "https://picsum.photos/seed/placeholder/800/600";
   const isLand = listing.propertyType === "arsa" || listing.propertyType === "tarla";
   const badges = listing.badges ?? [];
   const dealBadge = badges.find((b) => b.tone === "deal");

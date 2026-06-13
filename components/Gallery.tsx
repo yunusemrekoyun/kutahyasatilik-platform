@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import Image from "next/image";
+import { mediaUrl, thumbUrl } from "@/lib/media";
 
 export default function Gallery({
   images,
@@ -42,7 +43,7 @@ export default function Gallery({
         className="group relative block aspect-[16/10] w-full overflow-hidden rounded-2xl bg-slate-100 ring-1 ring-slate-200"
       >
         <Image
-          src={current.url}
+          src={mediaUrl(current.url)}
           alt={current.alt || title}
           fill
           sizes="(max-width: 1024px) 100vw, 66vw"
@@ -71,7 +72,7 @@ export default function Gallery({
                 i === idx ? "ring-gold-500" : "ring-transparent hover:ring-brand-300"
               }`}
             >
-              <Image src={img.url} alt={img.alt || `${title} ${i + 1}`} fill sizes="120px" className="object-cover" />
+              <Image src={thumbUrl(img.url)} alt={img.alt || `${title} ${i + 1}`} fill sizes="120px" className="object-cover" />
             </button>
           ))}
         </div>
@@ -99,7 +100,7 @@ export default function Gallery({
             <div className="flex gap-2 overflow-x-auto p-4 no-scrollbar" onClick={(e) => e.stopPropagation()}>
               {imgs.map((img, i) => (
                 <button key={i} onClick={() => setActive(i)} className={`relative h-16 w-20 shrink-0 overflow-hidden rounded-md ring-2 ${i === idx ? "ring-gold-500" : "ring-transparent opacity-60 hover:opacity-100"}`}>
-                  <Image src={img.url} alt="" fill sizes="80px" className="object-cover" />
+                  <Image src={thumbUrl(img.url)} alt="" fill sizes="80px" className="object-cover" />
                 </button>
               ))}
             </div>

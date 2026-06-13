@@ -23,6 +23,18 @@ import RecentlyViewed from "@/components/RecentlyViewed";
 
 export const revalidate = 300; // ISR: her 5 dakikada yenilenir (CDN cache + admin revalidatePath)
 
+// Onaylı ilanları build'de önceden üret (ISR cache'lenebilir olur).
+// Yeni ilanlar talep anında üretilip cache'lenir (dynamicParams varsayılan true).
+export async function generateStaticParams() {
+  const listings = await prisma.listing.findMany({
+    where: { moderationStatus: "approved", status: { not: "passive" } },
+    select: { slug: true },
+    orderBy: { createdAt: "desc" },
+    take: 1000,
+  });
+  return listings.map((l) => ({ slug: l.slug }));
+}
+
 async function getListing(slug: string) {
   return prisma.listing.findFirst({
     where: { slug, moderationStatus: "approved" },

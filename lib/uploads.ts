@@ -7,8 +7,10 @@ export function getUploadDir() {
 }
 
 const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif"];
-const MAX_WIDTH = 1920; // büyük görselleri makul web boyutuna indir
+const MAX_WIDTH = 1920; // ana görsel (detay/galeri) maksimum genişlik
 const WEBP_QUALITY = 82;
+const THUMB_WIDTH = 800; // kart/önizleme küçük varyant
+const THUMB_QUALITY = 70;
 
 // Yüklenen dosyaları işler ve URL'lerini döner.
 // sharp ile decode + re-encode: bozuk/zararlı payload nötralize edilir (güvenlik),
@@ -27,20 +29,30 @@ export async function saveImageFiles(
     if (file.size > opts.maxSize) continue;
     const input = Buffer.from(await file.arrayBuffer());
 
-    let output: Buffer;
+    // Tek decode, iki çıktı: ana (detay/galeri) + thumb (kart). Re-encode güvenlik
+    // (zararlı payload nötralize) + EXIF düzeltme + WebP optimizasyon sağlar.
+    let mainBuf: Buffer;
+    let thumbBuf: Buffer;
     try {
-      output = await sharp(input, { failOn: "error" })
-        .rotate() // EXIF orientation'a göre düzelt
-        .resize({ width: MAX_WIDTH, height: MAX_WIDTH, fit: "inside", withoutEnlargement: true })
-        .webp({ quality: WEBP_QUALITY })
-        .toBuffer();
+      const img = sharp(input, { failOn: "error" }).rotate();
+      [mainBuf, thumbBuf] = await Promise.all([
+        img.clone()
+          .resize({ width: MAX_WIDTH, height: MAX_WIDTH, fit: "inside", withoutEnlargement: true })
+          .webp({ quality: WEBP_QUALITY })
+          .toBuffer(),
+        img.clone()
+          .resize({ width: THUMB_WIDTH, height: THUMB_WIDTH, fit: "inside", withoutEnlargement: true })
+          .webp({ quality: THUMB_QUALITY })
+          .toBuffer(),
+      ]);
     } catch {
       continue; // sağlam/gerçek bir görsel değilse atla
     }
 
-    const name = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}.webp`;
-    await writeFile(path.join(uploadDir, name), output);
-    urls.push(`/uploads/${name}`);
+    const base = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+    await writeFile(path.join(uploadDir, `${base}.webp`), mainBuf);
+    await writeFile(path.join(uploadDir, `${base}-thumb.webp`), thumbBuf);
+    urls.push(`/uploads/${base}.webp`);
   }
   return urls;
 }
@@ -52,9 +64,13 @@ export async function deleteUploadFiles(urls: (string | null | undefined)[]): Pr
     if (!url) continue;
     const m = url.match(/^\/uploads\/(.+)$/);
     if (!m) continue;
-    const target = resolveUploadPath([m[1]]);
-    if (!target) continue;
-    await unlink(target).catch(() => {});
+    // ana dosya + thumb varyantı
+    const names = [m[1]];
+    if (m[1].endsWith(".webp")) names.push(m[1].replace(/\.webp$/, "-thumb.webp"));
+    for (const n of names) {
+      const target = resolveUploadPath([n]);
+      if (target) await unlink(target).catch(() => {});
+    }
   }
 }
 
