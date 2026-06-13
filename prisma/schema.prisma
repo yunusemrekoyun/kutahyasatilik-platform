@@ -125,6 +125,12 @@ model Listing {
   @@index([featured])
   @@index([moderationStatus])
   @@index([agentId])
+  // Kamu liste/filtre sorguları her zaman moderationStatus+status ile başlar;
+  // en sık filtreler district/propertyType, varsayılan sıralama featured+createdAt.
+  @@index([moderationStatus, status, district])
+  @@index([moderationStatus, status, propertyType])
+  @@index([featured, createdAt])
+  @@index([price])
 }
 
 // ---------------------------------------------------------------------------

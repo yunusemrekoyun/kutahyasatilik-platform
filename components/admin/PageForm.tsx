@@ -2,8 +2,14 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import dynamic from "next/dynamic";
 import { savePage } from "@/app/admin/actions";
-import RichEditor from "./RichEditor";
+
+// TipTap (ProseMirror) ağır; admin form bundle'ına girmemesi için lazy-load.
+const RichEditor = dynamic(() => import("./RichEditor"), {
+  ssr: false,
+  loading: () => <div className="h-[340px] animate-pulse rounded-xl bg-slate-100" />,
+});
 
 type PageData = {
   id?: string;

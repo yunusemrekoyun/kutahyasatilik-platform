@@ -65,6 +65,18 @@ const nextConfig: NextConfig = {
         source: "/:path*",
         headers: securityHeaders,
       },
+      {
+        // Arama sayfası dinamik (searchParams). Cloudflare'in kısa süre edge'de
+        // tutabilmesi için s-maxage; cache key query string'i içermeli (Cloudflare
+        // Cache Rule ile, DEPLOY.md'ye bakın). Tarayıcı cache'i yok (sadece paylaşımlı).
+        source: "/ilanlar",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "public, max-age=0, s-maxage=60, stale-while-revalidate=300",
+          },
+        ],
+      },
     ];
   },
 };
