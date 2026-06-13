@@ -23,7 +23,7 @@ const schema = z.object({
 });
 
 export async function POST(req: NextRequest) {
-  const limited = checkRate(req, "track", 120, 60_000);
+  const limited = await checkRate(req, "track", 120, 60_000);
   if (limited) return limited;
 
   let data;

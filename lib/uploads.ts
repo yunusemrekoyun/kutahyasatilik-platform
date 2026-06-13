@@ -1,34 +1,18 @@
 import path from "path";
-import { writeFile, mkdir } from "fs/promises";
+import { writeFile, mkdir, unlink } from "fs/promises";
+import sharp from "sharp";
 
 export function getUploadDir() {
   return process.env.UPLOAD_DIR || path.join(process.cwd(), "public", "uploads");
 }
 
 const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif"];
+const MAX_WIDTH = 1920; // büyük görselleri makul web boyutuna indir
+const WEBP_QUALITY = 82;
 
-function safeExt(type: string): string {
-  switch (type) {
-    case "image/png": return ".png";
-    case "image/webp": return ".webp";
-    case "image/gif": return ".gif";
-    default: return ".jpg";
-  }
-}
-
-// Dosya imzası (magic bytes) gerçekten görsel mi? — sahte MIME'a karşı savunma
-function isRealImage(b: Buffer, type: string): boolean {
-  if (b.length < 12) return false;
-  switch (type) {
-    case "image/jpeg": return b[0] === 0xff && b[1] === 0xd8 && b[2] === 0xff;
-    case "image/png": return b[0] === 0x89 && b[1] === 0x50 && b[2] === 0x4e && b[3] === 0x47;
-    case "image/gif": return b[0] === 0x47 && b[1] === 0x49 && b[2] === 0x46 && b[3] === 0x38;
-    case "image/webp": return b.toString("ascii", 0, 4) === "RIFF" && b.toString("ascii", 8, 12) === "WEBP";
-    default: return false;
-  }
-}
-
-// Yüklenen dosyaları doğrular (tip, boyut, imza), diske yazar ve URL'lerini döner.
+// Yüklenen dosyaları işler ve URL'lerini döner.
+// sharp ile decode + re-encode: bozuk/zararlı payload nötralize edilir (güvenlik),
+// EXIF dönüşü uygulanır, metadata temizlenir, boyut küçültülür, WebP'ye optimize edilir.
 // maxFiles / maxSize çağrı bağlamına göre değişir (admin geniş, satıcı dar).
 export async function saveImageFiles(
   files: File[],
@@ -41,13 +25,37 @@ export async function saveImageFiles(
   for (const file of files.slice(0, opts.maxFiles)) {
     if (!ALLOWED_TYPES.includes(file.type)) continue;
     if (file.size > opts.maxSize) continue;
-    const buffer = Buffer.from(await file.arrayBuffer());
-    if (!isRealImage(buffer, file.type)) continue; // imza uyuşmuyorsa atla
-    const name = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}${safeExt(file.type)}`;
-    await writeFile(path.join(uploadDir, name), buffer);
+    const input = Buffer.from(await file.arrayBuffer());
+
+    let output: Buffer;
+    try {
+      output = await sharp(input, { failOn: "error" })
+        .rotate() // EXIF orientation'a göre düzelt
+        .resize({ width: MAX_WIDTH, height: MAX_WIDTH, fit: "inside", withoutEnlargement: true })
+        .webp({ quality: WEBP_QUALITY })
+        .toBuffer();
+    } catch {
+      continue; // sağlam/gerçek bir görsel değilse atla
+    }
+
+    const name = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}.webp`;
+    await writeFile(path.join(uploadDir, name), output);
     urls.push(`/uploads/${name}`);
   }
   return urls;
+}
+
+// Verilen /uploads/* URL'lerine ait fiziksel dosyaları siler (disk şişmesini önler).
+// Yalnızca kendi upload klasörümüzdeki dosyalara dokunur; dış URL'leri yok sayar.
+export async function deleteUploadFiles(urls: (string | null | undefined)[]): Promise<void> {
+  for (const url of urls) {
+    if (!url) continue;
+    const m = url.match(/^\/uploads\/(.+)$/);
+    if (!m) continue;
+    const target = resolveUploadPath([m[1]]);
+    if (!target) continue;
+    await unlink(target).catch(() => {});
+  }
 }
 
 export function getContentType(filePath: string) {

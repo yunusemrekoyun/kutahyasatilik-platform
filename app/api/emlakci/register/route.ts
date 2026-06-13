@@ -25,7 +25,7 @@ async function uniqueSlug(base: string): Promise<string> {
 }
 
 export async function POST(req: NextRequest) {
-  const limited = checkRate(req, "agent-register", 5, 3_600_000);
+  const limited = await checkRate(req, "agent-register", 5, 3_600_000);
   if (limited) return limited;
   let data;
   try {

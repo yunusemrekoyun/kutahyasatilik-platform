@@ -6,7 +6,7 @@ import { SITE, telLink } from "@/lib/site";
 import NotFoundCTA from "@/components/NotFoundCTA";
 import TrackView from "@/components/TrackView";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 300; // ISR: her 5 dakikada yenilenir (CDN cache + admin revalidatePath)
 
 async function getPage() {
   try {

@@ -14,7 +14,7 @@ import ListingsMap from "@/components/ListingsMap";
 import NotFoundCTA from "@/components/NotFoundCTA";
 import TrackView from "@/components/TrackView";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 300; // ISR: her 5 dakikada yenilenir (CDN cache + admin revalidatePath)
 
 const TESTIMONIALS = [
   { name: "Ahmet Y.", role: "Daire Sahibi · Merkez", text: "Dairemi 3 hafta içinde, beklediğim fiyata sattılar. Süreç boyunca her adımda bilgilendirildim. Çok profesyonel bir ekip.", stars: 5 },

@@ -113,3 +113,9 @@ prisma/dev.db
 *.db-journal
 *.sqlite
 *.sqlite3
+
+# veritabanı yedekleri (tüm veriyi içerir — ASLA repoya gitmez)
+# Not: prisma migration .sql dosyaları takip edilmeli; bu yüzden geniş "*.sql" KULLANMA.
+/backups/
+*.sql.gz
+*.dump

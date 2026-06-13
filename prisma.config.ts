@@ -9,6 +9,7 @@ export default defineConfig({
     path: "prisma/migrations",
   },
   datasource: {
-    url: process.env["DATABASE_URL"],
+    // Migration'lar pooler değil, doğrudan (direct) bağlantıyı kullanmalı (Supabase: 5432).
+    url: process.env["DIRECT_URL"] ?? process.env["DATABASE_URL"],
   },
 });

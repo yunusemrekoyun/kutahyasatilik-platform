@@ -3,7 +3,7 @@ import { verifyCredentials, createSession } from "@/lib/auth";
 import { checkRate } from "@/lib/rateLimit";
 
 export async function POST(req: NextRequest) {
-  const limited = checkRate(req, "admin-login", 15, 300_000);
+  const limited = await checkRate(req, "admin-login", 15, 300_000);
   if (limited) return limited;
   try {
     const { email, password } = await req.json();

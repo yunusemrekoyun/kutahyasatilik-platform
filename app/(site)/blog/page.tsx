@@ -5,7 +5,7 @@ import { prisma } from "@/lib/prisma";
 import { formatDate } from "@/lib/format";
 import TrackView from "@/components/TrackView";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 300; // ISR: her 5 dakikada yenilenir (CDN cache + admin revalidatePath)
 
 export const metadata: Metadata = {
   title: "Gayrimenkul Rehberi - Doğru Mülk Nasıl Alınır?",

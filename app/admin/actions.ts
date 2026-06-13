@@ -6,6 +6,7 @@ import { prisma } from "@/lib/prisma";
 import { getSession } from "@/lib/auth";
 import { slugify } from "@/lib/format";
 import { sanitizeCmsHtml } from "@/lib/sanitize";
+import { deleteUploadFiles } from "@/lib/uploads";
 
 async function ensureAuth() {
   const session = await getSession();
@@ -24,6 +25,18 @@ function str(v: FormDataEntryValue | null): string | null {
 }
 function bool(v: FormDataEntryValue | null): boolean {
   return v === "on" || v === "true" || v === "1";
+}
+
+// İlan değişikliğinde etkilenen kamu (ISR) sayfalarını anında tazele.
+function revalidateListingSurfaces(slug?: string) {
+  revalidatePath("/");
+  revalidatePath("/ilanlar");
+  revalidatePath("/harita");
+  revalidatePath("/kutahya-satilik-daire");
+  revalidatePath("/kutahya-satilik-arsa");
+  revalidatePath("/kutahya-satilik-villa");
+  revalidatePath("/kutahya-yatirimlik-arsa");
+  if (slug) revalidatePath(`/ilan/${slug}`);
 }
 
 export async function saveListing(formData: FormData) {
@@ -114,12 +127,19 @@ export async function saveListing(formData: FormData) {
   let listingId: string;
   let oldPrice: number | null = null;
   if (id) {
-    const existing = await prisma.listing.findUnique({ where: { id }, select: { price: true } });
+    const existing = await prisma.listing.findUnique({
+      where: { id },
+      select: { price: true, images: { select: { url: true } } },
+    });
     oldPrice = existing?.price ?? null;
     await prisma.listing.update({ where: { id }, data });
     listingId = id;
-    // görselleri tazele
+    // görselleri tazele; artık kullanılmayan dosyaları diskten sil
     await prisma.listingImage.deleteMany({ where: { listingId: id } });
+    const removed = (existing?.images ?? [])
+      .map((i) => i.url)
+      .filter((u) => !imageUrls.includes(u));
+    await deleteUploadFiles(removed);
   } else {
     const created = await prisma.listing.create({ data });
     listingId = created.id;
@@ -137,7 +157,7 @@ export async function saveListing(formData: FormData) {
   }
 
   revalidatePath("/admin/ilanlar");
-  revalidatePath("/");
+  revalidateListingSurfaces(slug);
   redirect("/admin/ilanlar");
 }
 
@@ -145,9 +165,14 @@ export async function deleteListing(formData: FormData) {
   await ensureAuth();
   const id = String(formData.get("id") || "");
   if (id) {
+    const existing = await prisma.listing.findUnique({
+      where: { id },
+      select: { slug: true, images: { select: { url: true } } },
+    });
     await prisma.listing.delete({ where: { id } });
+    await deleteUploadFiles(existing?.images.map((i) => i.url) ?? []);
     revalidatePath("/admin/ilanlar");
-    revalidatePath("/");
+    revalidateListingSurfaces(existing?.slug);
   }
 }
 
@@ -218,13 +243,14 @@ export async function approveListing(formData: FormData) {
   await ensureAuth();
   const id = String(formData.get("id") || "");
   if (!id) return;
-  await prisma.listing.update({
+  const updated = await prisma.listing.update({
     where: { id },
     data: { moderationStatus: "approved", note: null },
+    select: { slug: true },
   });
   revalidatePath("/admin/onay");
   revalidatePath("/admin/ilanlar");
-  revalidatePath("/");
+  revalidateListingSurfaces(updated.slug);
 }
 
 export async function rejectListing(formData: FormData) {
@@ -232,12 +258,14 @@ export async function rejectListing(formData: FormData) {
   const id = String(formData.get("id") || "");
   const note = str(formData.get("note"));
   if (!id) return;
-  await prisma.listing.update({
+  const updated = await prisma.listing.update({
     where: { id },
     data: { moderationStatus: "rejected", note },
+    select: { slug: true },
   });
   revalidatePath("/admin/onay");
   revalidatePath("/admin/ilanlar");
+  revalidateListingSurfaces(updated.slug);
 }
 
 export async function saveSettings(formData: FormData) {

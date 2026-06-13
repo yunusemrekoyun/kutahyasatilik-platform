@@ -6,7 +6,7 @@ import TrackView from "@/components/TrackView";
 import PriceHeatmap from "@/components/PriceHeatmap";
 import DistrictCompare, { type DistrictStat } from "@/components/DistrictCompare";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 300; // ISR: her 5 dakikada yenilenir (CDN cache + admin revalidatePath)
 
 export const metadata: Metadata = {
   title: "Kütahya Bölge Fiyat Analizi & Isı Haritası",

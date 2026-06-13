@@ -33,7 +33,7 @@ const EVENT_BY_TYPE: Record<string, string> = {
 };
 
 export async function POST(req: NextRequest) {
-  const limited = checkRate(req, "leads", 8, 60_000);
+  const limited = await checkRate(req, "leads", 8, 60_000);
   if (limited) return limited;
   let data;
   try {
