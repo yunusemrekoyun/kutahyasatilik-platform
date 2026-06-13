@@ -9,7 +9,7 @@ const MAX_FILES = 6;
 
 export async function POST(req: NextRequest) {
   // 10 dakikada en fazla 5 yükleme isteği / IP.
-  const limited = checkRate(req, "upload_seller", 5, 600_000);
+  const limited = await checkRate(req, "upload_seller", 5, 600_000);
   if (limited) return limited;
   try {
     const form = await req.formData();

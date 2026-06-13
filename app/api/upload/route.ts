@@ -17,7 +17,7 @@ export async function POST(req: NextRequest) {
   if (!(await isAuthenticated())) {
     return NextResponse.json({ ok: false, error: "Yetkisiz" }, { status: 401 });
   }
-  const limited = checkRate(req, "upload", 30, 60_000);
+  const limited = await checkRate(req, "upload", 30, 60_000);
   if (limited) return limited;
   try {
     const form = await req.formData();

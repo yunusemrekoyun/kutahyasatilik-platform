@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { requireApprovedAgent } from "@/lib/agentAuth";
 import { slugify } from "@/lib/format";
+import { deleteUploadFiles } from "@/lib/uploads";
 
 function num(v: FormDataEntryValue | null): number | null {
   if (v === null || v === "") return null;
@@ -107,11 +108,18 @@ export async function submitAgentListing(formData: FormData) {
   let listingId: string;
   let oldPrice: number | null = null;
   if (id) {
-    const existing = await prisma.listing.findUnique({ where: { id }, select: { price: true } });
+    const existing = await prisma.listing.findUnique({
+      where: { id },
+      select: { price: true, images: { select: { url: true } } },
+    });
     oldPrice = existing?.price ?? null;
     await prisma.listing.update({ where: { id }, data });
     listingId = id;
     await prisma.listingImage.deleteMany({ where: { listingId: id } });
+    const removed = (existing?.images ?? [])
+      .map((i) => i.url)
+      .filter((u) => !imageUrls.includes(u));
+    await deleteUploadFiles(removed);
   } else {
     const created = await prisma.listing.create({ data });
     listingId = created.id;
@@ -137,10 +145,11 @@ export async function deleteAgentListing(formData: FormData) {
   if (!id) return;
   const owned = await prisma.listing.findUnique({
     where: { id },
-    select: { agentId: true },
+    select: { agentId: true, images: { select: { url: true } } },
   });
   if (!owned || owned.agentId !== agent.id) throw new Error("Yetkisiz");
   await prisma.listing.delete({ where: { id } });
+  await deleteUploadFiles(owned.images.map((i) => i.url));
   revalidatePath("/emlakci/panel");
   revalidatePath("/");
 }

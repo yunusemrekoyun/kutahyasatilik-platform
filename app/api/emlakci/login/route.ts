@@ -9,7 +9,7 @@ const STATUS_MESSAGE: Record<string, string> = {
 };
 
 export async function POST(req: NextRequest) {
-  const limited = checkRate(req, "agent-login", 15, 300_000);
+  const limited = await checkRate(req, "agent-login", 15, 300_000);
   if (limited) return limited;
   try {
     const { email, password } = await req.json();

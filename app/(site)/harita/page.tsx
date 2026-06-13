@@ -4,7 +4,7 @@ import ListingsMap from "@/components/ListingsMap";
 import NotFoundCTA from "@/components/NotFoundCTA";
 import TrackView from "@/components/TrackView";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 300; // ISR: her 5 dakikada yenilenir (CDN cache + admin revalidatePath)
 
 export const metadata: Metadata = {
   title: "Harita ile Kütahya'da İlan Ara",

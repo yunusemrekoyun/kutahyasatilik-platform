@@ -9,7 +9,7 @@ import { SITE } from "@/lib/site";
 import TrackView from "@/components/TrackView";
 import NotFoundCTA from "@/components/NotFoundCTA";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 300; // ISR: her 5 dakikada yenilenir (CDN cache + admin revalidatePath)
 
 async function getPost(slug: string) {
   return prisma.post.findFirst({ where: { slug, status: "published" } });

@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import BuyerAlertForm from "@/components/BuyerAlertForm";
 import TrackView from "@/components/TrackView";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 300; // ISR: her 5 dakikada yenilenir (CDN cache + admin revalidatePath)
 
 export const metadata: Metadata = {
   title: "Aradığınızı Bulamadınız mı? Talebinizi Bırakın",

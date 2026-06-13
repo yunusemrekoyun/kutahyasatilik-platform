@@ -5,7 +5,7 @@ import { sanitizeCmsHtml } from "@/lib/sanitize";
 import { SITE } from "@/lib/site";
 import TrackView from "@/components/TrackView";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 300; // ISR: her 5 dakikada yenilenir (CDN cache + admin revalidatePath)
 
 async function getPage(slug: string) {
   return prisma.page.findFirst({ where: { slug, status: "published" } });

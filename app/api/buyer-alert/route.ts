@@ -22,7 +22,7 @@ const schema = z.object({
 });
 
 export async function POST(req: NextRequest) {
-  const limited = checkRate(req, "buyer-alert", 8, 60_000);
+  const limited = await checkRate(req, "buyer-alert", 8, 60_000);
   if (limited) return limited;
   let data;
   try {

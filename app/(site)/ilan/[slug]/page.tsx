@@ -21,7 +21,7 @@ import ShareButtons from "@/components/ShareButtons";
 import MobileContactBar from "@/components/MobileContactBar";
 import RecentlyViewed from "@/components/RecentlyViewed";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 300; // ISR: her 5 dakikada yenilenir (CDN cache + admin revalidatePath)
 
 async function getListing(slug: string) {
   return prisma.listing.findFirst({

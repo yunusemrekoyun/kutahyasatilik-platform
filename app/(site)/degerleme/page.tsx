@@ -5,7 +5,7 @@ import ValuationTool from "@/components/ValuationTool";
 import { getDistrictStatsObject } from "@/lib/districtStats";
 import { SITE, telLink, whatsappLink } from "@/lib/site";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 300; // ISR: her 5 dakikada yenilenir (CDN cache + admin revalidatePath)
 
 export const metadata: Metadata = {
   title: "Kütahya Ev & Arsa Değerleme - Evimin Değeri Ne Kadar?",
