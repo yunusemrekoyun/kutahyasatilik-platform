@@ -7,6 +7,8 @@ import { updateAlertStatus, deleteAlert } from "../actions";
 
 export const dynamic = "force-dynamic";
 
+const PER_PAGE = 30;
+
 function waLink(phone: string, name: string) {
   const digits = phone.replace(/[^\d]/g, "").replace(/^0/, "90");
   const msg = encodeURIComponent(`Merhaba ${name}, Kütahya Satılık'tan ulaşıyoruz. Aradığınız kriterlere uygun ilanlarımız hakkında bilgi vermek isteriz.`);
@@ -28,20 +30,36 @@ function criteriaText(a: {
   return parts.join(" · ");
 }
 
-export default async function AdminBuyerAlerts() {
-  const alerts = await prisma.buyerAlert.findMany({ orderBy: { createdAt: "desc" } });
-  const counts = await Promise.all(alerts.map((a) => countListingsForAlert(a)));
+export default async function AdminBuyerAlerts({
+  searchParams,
+}: {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}) {
+  const sp = await searchParams;
+  const page = Math.max(1, Number(typeof sp.sayfa === "string" ? sp.sayfa : "1") || 1);
 
-  const active = alerts.filter((a) => a.status === "active").length;
+  // Sayfalama ZORUNLU: sınırsız findMany + her talep için ayrı count (N+1, 54k ilanda) ölçekte çöker.
+  const [total, activeCount, alerts] = await Promise.all([
+    prisma.buyerAlert.count(),
+    prisma.buyerAlert.count({ where: { status: "active" } }),
+    prisma.buyerAlert.findMany({
+      orderBy: { createdAt: "desc" },
+      take: PER_PAGE,
+      skip: (page - 1) * PER_PAGE,
+    }),
+  ]);
+  // Eşleşme sayımı yalnızca bu sayfadaki talepler için (en fazla PER_PAGE adet).
+  const counts = await Promise.all(alerts.map((a) => countListingsForAlert(a)));
+  const totalPages = Math.max(1, Math.ceil(total / PER_PAGE));
 
   return (
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-extrabold text-slate-900">Alıcı Talepleri</h1>
-        <p className="text-sm text-slate-500">{alerts.length} talep · {active} aktif · her talep için stoktaki uygun ilan sayısı gösterilir</p>
+        <p className="text-sm text-slate-500">{total} talep · {activeCount} aktif · her talep için stoktaki uygun ilan sayısı gösterilir</p>
       </div>
 
-      {alerts.length === 0 && (
+      {total === 0 && (
         <p className="rounded-2xl bg-white p-10 text-center text-slate-400 ring-1 ring-slate-200">
           Henüz alıcı talebi yok. /alici-talebi sayfasından gelen talepler burada listelenir.
         </p>
@@ -94,6 +112,20 @@ export default async function AdminBuyerAlerts() {
           </div>
         ))}
       </div>
+
+      {totalPages > 1 && (
+        <div className="flex items-center justify-between text-sm">
+          <span className="text-slate-500">Sayfa {page} / {totalPages}</span>
+          <div className="flex gap-2">
+            {page > 1 && (
+              <Link href={`/admin/alici-talepleri?sayfa=${page - 1}`} className="rounded-lg bg-white px-3 py-1.5 font-medium text-slate-700 ring-1 ring-slate-200 hover:ring-brand-300">‹ Önceki</Link>
+            )}
+            {page < totalPages && (
+              <Link href={`/admin/alici-talepleri?sayfa=${page + 1}`} className="rounded-lg bg-white px-3 py-1.5 font-medium text-slate-700 ring-1 ring-slate-200 hover:ring-brand-300">Sonraki ›</Link>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
