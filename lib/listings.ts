@@ -1,3 +1,4 @@
+import { unstable_cache } from "next/cache";
 import { prisma } from "./prisma";
 import type { ListingCardData } from "@/components/ListingCard";
 import { getDistrictStats } from "./districtStats";
@@ -41,27 +42,31 @@ type RawCard = {
   agent: { name: string; title: string | null } | null;
 };
 
-// Son 7 günde ilan başına görüntülenme sayısı (analitik olaylarından).
-async function getRecentViews(ids: string[]): Promise<Map<string, number>> {
-  if (ids.length === 0) return new Map();
-  const since = new Date(Date.now() - 7 * 86_400_000);
-  const grouped = await prisma.analyticsEvent.groupBy({
-    by: ["listingId"],
-    where: { type: "view", listingId: { in: ids }, createdAt: { gte: since } },
-    _count: { _all: true },
-  });
-  const map = new Map<string, number>();
-  for (const g of grouped) {
-    if (g.listingId) map.set(g.listingId, g._count._all);
-  }
-  return map;
-}
+// Son 7 günde ilan başına görüntülenme — TÜM ilanlar için tek, cache'li sorgu.
+// Eskiden her liste render'ında (id'lere göre) groupBy çalışıyordu; artık 5 dk'da bir.
+const getRecentViewsMap = unstable_cache(
+  async (): Promise<Record<string, number>> => {
+    const since = new Date(Date.now() - 7 * 86_400_000);
+    const grouped = await prisma.analyticsEvent.groupBy({
+      by: ["listingId"],
+      where: { type: "view", createdAt: { gte: since }, listingId: { not: null } },
+      _count: { _all: true },
+    });
+    const map: Record<string, number> = {};
+    for (const g of grouped) {
+      if (g.listingId) map[g.listingId] = g._count._all;
+    }
+    return map;
+  },
+  ["recent-views-7d"],
+  { revalidate: 300 }
+);
 
 // Ham satırları rozetlerle birlikte kart verisine çevirir.
 async function decorate(rows: RawCard[]): Promise<ListingCardData[]> {
   const [stats, views] = await Promise.all([
     getDistrictStats(),
-    getRecentViews(rows.map((r) => r.id)),
+    getRecentViewsMap(),
   ]);
   return rows.map((l) => {
     const stat = stats.get(l.district);
@@ -70,7 +75,7 @@ async function decorate(rows: RawCard[]): Promise<ListingCardData[]> {
       propertyType: l.propertyType,
       areaGross: l.areaGross,
       createdAt: l.createdAt,
-      recentViews: views.get(l.id) ?? 0,
+      recentViews: views[l.id] ?? 0,
       avgPriceDaire: stat?.avgPriceDaire ?? null,
       avgPriceArsaM2: stat?.avgPriceArsaM2 ?? null,
     });
@@ -176,12 +181,23 @@ export async function getListings(filter: ListingFilter = {}, take = 60): Promis
   return decorate(rows as RawCard[]);
 }
 
+// Filtresiz toplam sayım (en sık durum) cache'lenir; 52k+ satırda her istekteki
+// count(*) maliyetini kaldırır. Filtreli sorgularda sayım taze hesaplanır (index'li).
+const getCachedTotalCount = unstable_cache(
+  async (): Promise<number> =>
+    prisma.listing.count({ where: { status: { not: "passive" }, moderationStatus: "approved" } }),
+  ["listing-total-approved"],
+  { revalidate: 120 }
+);
+
 export async function getListingsPaged(
   filter: ListingFilter = {},
   page = 1,
   perPage = 12
 ): Promise<{ items: ListingCardData[]; total: number; page: number; perPage: number; totalPages: number }> {
   const where = buildWhere(filter);
+  // Ekstra filtre yoksa (yalnızca status + moderationStatus) sayım cache'li gelir.
+  const isUnfiltered = Object.keys(where).length === 2;
   const [rows, total] = await Promise.all([
     prisma.listing.findMany({
       where,
@@ -190,7 +206,7 @@ export async function getListingsPaged(
       take: perPage,
       select: cardSelect,
     }),
-    prisma.listing.count({ where }),
+    isUnfiltered ? getCachedTotalCount() : prisma.listing.count({ where }),
   ]);
   return {
     items: await decorate(rows as RawCard[]),

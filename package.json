@@ -13,6 +13,8 @@
     "postinstall": "prisma generate",
     "seed": "tsx prisma/seed.ts",
     "seed:cms": "tsx prisma/seed-cms.ts",
+    "seed:bulk": "tsx prisma/seed-bulk.ts",
+    "seed:media": "tsx prisma/seed-media.ts",
     "setup:demo": "prisma migrate deploy && npm run seed",
     "db:reset": "prisma migrate reset --force"
   },
