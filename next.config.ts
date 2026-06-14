@@ -59,6 +59,12 @@ const nextConfig: NextConfig = {
     ],
   },
   serverExternalPackages: ["pg", "sharp", "ioredis"],
+  // sharp'ın native binary'sini (@img/sharp-linux-x64 vb.) standalone çıktısına zorla dahil et.
+  // Aksi halde NFT trace dinamik native yüklemeyi kaçırır → standalone'da "Could not load sharp".
+  outputFileTracingIncludes: {
+    "/api/upload": ["./node_modules/@img/**", "./node_modules/sharp/**"],
+    "/api/upload/seller": ["./node_modules/@img/**", "./node_modules/sharp/**"],
+  },
   async headers() {
     return [
       {

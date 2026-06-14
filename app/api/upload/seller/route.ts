@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { saveImageFiles } from "@/lib/uploads";
+import { saveImageFiles } from "@/lib/imageProcessing";
 import { checkRate } from "@/lib/rateLimit";
 
 // Satıcı formu için PUBLIC (anonim) upload — bilinçli olarak dar limitli:

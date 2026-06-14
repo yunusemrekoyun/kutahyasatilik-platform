@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { saveImageFiles } from "@/lib/uploads";
+import { saveImageFiles } from "@/lib/imageProcessing";
 import { getSession } from "@/lib/auth";
 import { getAgentSession } from "@/lib/agentAuth";
 import { checkRate } from "@/lib/rateLimit";
