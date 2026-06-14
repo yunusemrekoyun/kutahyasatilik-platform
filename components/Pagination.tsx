@@ -21,10 +21,17 @@ export default function Pagination({
     return `/ilanlar${qs ? `?${qs}` : ""}`;
   };
 
+  // Yalnızca gerekli sayfaları hesapla (1, son, ve current±1) — totalPages kadar
+  // döngü kurmadan. Çok büyük katalogda (binlerce sayfa) gereksiz CPU'yu önler.
+  const want = new Set<number>([1, totalPages]);
+  for (let i = Math.max(1, page - 1); i <= Math.min(totalPages, page + 1); i++) want.add(i);
+  const sorted = [...want].sort((a, b) => a - b);
   const pages: (number | "...")[] = [];
-  for (let i = 1; i <= totalPages; i++) {
-    if (i === 1 || i === totalPages || Math.abs(i - page) <= 1) pages.push(i);
-    else if (pages[pages.length - 1] !== "...") pages.push("...");
+  let prev = 0;
+  for (const p of sorted) {
+    if (p - prev > 1) pages.push("...");
+    pages.push(p);
+    prev = p;
   }
 
   const btn = "grid h-10 min-w-10 place-items-center rounded-lg px-3 text-sm font-medium transition";
