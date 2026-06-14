@@ -253,6 +253,24 @@ model AnalyticsEvent {
 }
 
 // ---------------------------------------------------------------------------
+// Analitik GÜNLÜK ÖZETİ (rollup) — kalıcı arşiv.
+// 90 günden eski ham AnalyticsEvent'ler (gün, tip, ilçe) bazında buraya
+// özetlenir ve ham tablodan silinir. Dashboard ömür-boyu toplamı = özet + son 90 gün ham.
+// Böylece tarih korunur ama AnalyticsEvent sınırsız büyümez.
+// ---------------------------------------------------------------------------
+model AnalyticsDaily {
+  id       String   @id @default(cuid())
+  date     DateTime // gün (UTC 00:00)
+  type     String
+  district String   @default("") // "" = ilçesiz
+  count    Int
+
+  @@unique([date, type, district])
+  @@index([type])
+  @@index([date])
+}
+
+// ---------------------------------------------------------------------------
 // İlçe verisi (AI analiz şablonlarını besler)
 // ---------------------------------------------------------------------------
 model District {
