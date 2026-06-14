@@ -7,11 +7,40 @@ import { deleteListing } from "../actions";
 
 export const dynamic = "force-dynamic";
 
-export default async function AdminListings() {
-  const listings = await prisma.listing.findMany({
-    orderBy: { createdAt: "desc" },
-    include: { images: { take: 1, orderBy: { sortOrder: "asc" } }, _count: { select: { leads: true } } },
-  });
+const PER_PAGE = 50;
+
+export default async function AdminListings({
+  searchParams,
+}: {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}) {
+  const sp = await searchParams;
+  const q = (typeof sp.q === "string" ? sp.q : "").trim();
+  const page = Math.max(1, Number(typeof sp.sayfa === "string" ? sp.sayfa : "1") || 1);
+
+  const where = q
+    ? {
+        OR: [
+          { title: { contains: q } },
+          { district: { contains: q } },
+          { slug: { contains: q } },
+        ],
+      }
+    : {};
+
+  // Sayfalama ZORUNLU: 50k+ ilanda sınırsız findMany sayfayı çökertir.
+  const [total, listings] = await Promise.all([
+    prisma.listing.count({ where }),
+    prisma.listing.findMany({
+      where,
+      orderBy: { createdAt: "desc" },
+      include: { images: { take: 1, orderBy: { sortOrder: "asc" } }, _count: { select: { leads: true } } },
+      take: PER_PAGE,
+      skip: (page - 1) * PER_PAGE,
+    }),
+  ]);
+  const totalPages = Math.max(1, Math.ceil(total / PER_PAGE));
+  const qPrefix = q ? `q=${encodeURIComponent(q)}&` : "";
 
   const statusBadge: Record<string, string> = {
     active: "bg-green-100 text-green-700",
@@ -21,14 +50,25 @@ export default async function AdminListings() {
 
   return (
     <div>
-      <div className="flex items-center justify-between">
+      <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <h1 className="text-2xl font-extrabold text-slate-900">İlanlar</h1>
-          <p className="text-sm text-slate-500">{listings.length} ilan</p>
+          <p className="text-sm text-slate-500">{total} ilan{q ? ` · "${q}" araması` : ""}</p>
         </div>
-        <Link href="/admin/ilanlar/yeni" className="rounded-lg bg-brand-700 px-4 py-2 text-sm font-bold text-white hover:bg-brand-800">
-          + Yeni İlan
-        </Link>
+        <div className="flex items-center gap-2">
+          <form method="get" className="flex items-center gap-2">
+            <input
+              name="q"
+              defaultValue={q}
+              placeholder="Başlık / ilçe / slug ara…"
+              className="rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-brand-500"
+            />
+            <button className="rounded-lg bg-slate-100 px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-200">Ara</button>
+          </form>
+          <Link href="/admin/ilanlar/yeni" className="rounded-lg bg-brand-700 px-4 py-2 text-sm font-bold text-white hover:bg-brand-800">
+            + Yeni İlan
+          </Link>
+        </div>
       </div>
 
       <div className="mt-6 overflow-hidden rounded-2xl bg-white ring-1 ring-slate-200">
@@ -48,7 +88,7 @@ export default async function AdminListings() {
             </thead>
             <tbody>
               {listings.length === 0 && (
-                <tr><td colSpan={8} className="p-8 text-center text-slate-400">Henüz ilan yok. Yeni ilan ekleyin.</td></tr>
+                <tr><td colSpan={8} className="p-8 text-center text-slate-400">İlan bulunamadı.</td></tr>
               )}
               {listings.map((l) => (
                 <tr key={l.id} className="border-b border-slate-50 hover:bg-slate-50">
@@ -89,6 +129,20 @@ export default async function AdminListings() {
           </table>
         </div>
       </div>
+
+      {totalPages > 1 && (
+        <div className="mt-4 flex items-center justify-between text-sm">
+          <span className="text-slate-500">Sayfa {page} / {totalPages}</span>
+          <div className="flex gap-2">
+            {page > 1 && (
+              <Link href={`/admin/ilanlar?${qPrefix}sayfa=${page - 1}`} className="rounded-lg bg-white px-3 py-1.5 font-medium text-slate-700 ring-1 ring-slate-200 hover:ring-brand-300">‹ Önceki</Link>
+            )}
+            {page < totalPages && (
+              <Link href={`/admin/ilanlar?${qPrefix}sayfa=${page + 1}`} className="rounded-lg bg-white px-3 py-1.5 font-medium text-slate-700 ring-1 ring-slate-200 hover:ring-brand-300">Sonraki ›</Link>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
