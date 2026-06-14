@@ -2,94 +2,45 @@ import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { formatNumber, formatDateTime } from "@/lib/format";
 import { LEAD_TYPE_LABELS } from "@/lib/constants";
+import { getAnalyticsStats } from "@/lib/dashboard";
 
 export const dynamic = "force-dynamic";
 
-async function countEvent(type: string) {
-  return prisma.analyticsEvent.count({ where: { type } });
-}
-
-function daysAgo(days: number) {
-  return new Date(Date.now() - days * 24 * 60 * 60 * 1000);
-}
-
 export default async function AdminDashboard() {
-  const since = daysAgo(30);
+  // Ağır analitik sayımlar cache'li (5 dk, özet+ham); ucuz sorgular taze.
+  const [analytics, totalLeads, newLeads, activeListings, soldListings, topListings, leadsByListing, recentLeads] =
+    await Promise.all([
+      getAnalyticsStats(),
+      prisma.lead.count(),
+      prisma.lead.count({ where: { status: "new" } }),
+      prisma.listing.count({ where: { status: "active" } }),
+      prisma.listing.count({ where: { status: "sold" } }),
+      prisma.listing.findMany({
+        orderBy: { viewCount: "desc" },
+        take: 6,
+        select: { id: true, slug: true, title: true, viewCount: true },
+      }),
+      prisma.lead.groupBy({
+        by: ["listingId"],
+        where: { listingId: { not: null } },
+        _count: { listingId: true },
+        orderBy: { _count: { listingId: "desc" } },
+        take: 6,
+      }),
+      prisma.lead.findMany({ orderBy: { createdAt: "desc" }, take: 6 }),
+    ]);
 
-  const [
-    views,
-    phoneClicks,
-    whatsappClicks,
-    totalLeads,
-    newLeads,
-    activeListings,
-    soldListings,
-    conversions,
-  ] = await Promise.all([
-    countEvent("view"),
-    countEvent("phone_click"),
-    countEvent("whatsapp_click"),
-    prisma.lead.count(),
-    prisma.lead.count({ where: { status: "new" } }),
-    prisma.listing.count({ where: { status: "active" } }),
-    prisma.listing.count({ where: { status: "sold" } }),
-    prisma.analyticsEvent.count({
-      where: { type: { in: ["seller_lead", "appointment", "expertise", "price_offer", "conversion"] } },
-    }),
-  ]);
-
-  // En çok görüntülenen ilçeler (view eventlerinden)
-  const districtViews = await prisma.analyticsEvent.groupBy({
-    by: ["district"],
-    where: { type: "view", district: { not: null } },
-    _count: { district: true },
-    orderBy: { _count: { district: "desc" } },
-    take: 6,
-  });
-
-  // En çok görüntülenen ilanlar
-  const topListings = await prisma.listing.findMany({
-    orderBy: { viewCount: "desc" },
-    take: 6,
-    select: { id: true, slug: true, title: true, viewCount: true, district: true },
-  });
-
-  // En çok talep alan ilanlar
-  const leadsByListing = await prisma.lead.groupBy({
-    by: ["listingId"],
-    where: { listingId: { not: null } },
-    _count: { listingId: true },
-    orderBy: { _count: { listingId: "desc" } },
-    take: 6,
-  });
   const listingIds = leadsByListing.map((l) => l.listingId!).filter(Boolean);
   const listingMap = new Map(
     (await prisma.listing.findMany({ where: { id: { in: listingIds } }, select: { id: true, title: true, slug: true } }))
       .map((l) => [l.id, l])
   );
 
-  // Dönüşüm kaynakları (Google Ads vb.)
-  const bySource = await prisma.analyticsEvent.groupBy({
-    by: ["utmSource"],
-    where: {
-      type: { in: ["seller_lead", "appointment", "expertise", "price_offer", "conversion"] },
-      createdAt: { gte: since },
-    },
-    _count: { utmSource: true },
-    orderBy: { _count: { utmSource: "desc" } },
-    take: 6,
-  });
-
-  const recentLeads = await prisma.lead.findMany({
-    orderBy: { createdAt: "desc" },
-    take: 6,
-  });
-
   const stats = [
-    { label: "İlan Görüntülenme", value: views, icon: "👁️", color: "text-brand-700" },
-    { label: "Telefon Tıklama", value: phoneClicks, icon: "📞", color: "text-green-600" },
-    { label: "WhatsApp Tıklama", value: whatsappClicks, icon: "💬", color: "text-green-600" },
-    { label: "Toplam Dönüşüm", value: conversions, icon: "🎯", color: "text-gold-600" },
+    { label: "İlan Görüntülenme", value: analytics.views, icon: "👁️", color: "text-brand-700" },
+    { label: "Telefon Tıklama", value: analytics.phoneClicks, icon: "📞", color: "text-green-600" },
+    { label: "WhatsApp Tıklama", value: analytics.whatsappClicks, icon: "💬", color: "text-green-600" },
+    { label: "Toplam Dönüşüm", value: analytics.conversions, icon: "🎯", color: "text-gold-600" },
     { label: "Toplam Talep", value: totalLeads, icon: "📬", color: "text-brand-700" },
     { label: "Yeni Talep", value: newLeads, icon: "🆕", color: "text-red-600" },
     { label: "Aktif İlan", value: activeListings, icon: "🏠", color: "text-slate-700" },
@@ -123,15 +74,15 @@ export default async function AdminDashboard() {
         <div className="rounded-2xl bg-white p-6 ring-1 ring-slate-200">
           <h2 className="font-bold text-slate-900">En Çok Görüntülenen İlçeler</h2>
           <div className="mt-4 space-y-3">
-            {districtViews.length === 0 && <p className="text-sm text-slate-400">Henüz veri yok.</p>}
-            {districtViews.map((d) => {
-              const max = districtViews[0]._count.district || 1;
-              const pct = Math.round(((d._count.district || 0) / max) * 100);
+            {analytics.districtViews.length === 0 && <p className="text-sm text-slate-400">Henüz veri yok.</p>}
+            {analytics.districtViews.map((d) => {
+              const max = analytics.districtViews[0].count || 1;
+              const pct = Math.round((d.count / max) * 100);
               return (
                 <div key={d.district}>
                   <div className="flex justify-between text-sm">
                     <span className="font-medium text-slate-700">{d.district}</span>
-                    <span className="text-slate-500">{d._count.district}</span>
+                    <span className="text-slate-500">{d.count}</span>
                   </div>
                   <div className="mt-1 h-2 rounded-full bg-slate-100">
                     <div className="h-full rounded-full bg-brand-600" style={{ width: `${pct}%` }} />
@@ -183,11 +134,11 @@ export default async function AdminDashboard() {
           <h2 className="font-bold text-slate-900">Dönüşüm Kaynakları (Son 30 Gün)</h2>
           <p className="text-xs text-slate-400">Google Ads dönüşüm takibi (utm_source / gclid)</p>
           <div className="mt-4 space-y-2">
-            {bySource.length === 0 && <p className="text-sm text-slate-400">Henüz dönüşüm verisi yok.</p>}
-            {bySource.map((s) => (
-              <div key={s.utmSource || "direkt"} className="flex items-center justify-between rounded-lg bg-slate-50 px-3 py-2">
-                <span className="text-sm font-medium text-slate-700">{s.utmSource || "Doğrudan / Organik"}</span>
-                <span className="text-sm font-bold text-brand-700">{s._count.utmSource}</span>
+            {analytics.bySource.length === 0 && <p className="text-sm text-slate-400">Henüz dönüşüm verisi yok.</p>}
+            {analytics.bySource.map((s) => (
+              <div key={s.source} className="flex items-center justify-between rounded-lg bg-slate-50 px-3 py-2">
+                <span className="text-sm font-medium text-slate-700">{s.source}</span>
+                <span className="text-sm font-bold text-brand-700">{s.count}</span>
               </div>
             ))}
           </div>
