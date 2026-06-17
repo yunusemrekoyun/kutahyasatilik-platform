@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { BarChart3, Tag, CheckCircle2 } from "lucide-react";
+import { BarChart3, Tag, CheckCircle2, Lock } from "lucide-react";
 import { useUtm } from "@/lib/useUtm";
 import { trackConversion } from "@/lib/track";
 import { DISTRICTS, PROPERTY_TYPES } from "@/lib/constants";
@@ -79,83 +79,98 @@ export default function ValuationTool({
     }
   }
 
+  const labelCls = "mb-1.5 block text-sm font-semibold text-slate-700";
   const inputCls =
-    "w-full rounded-lg border border-slate-300 px-3.5 py-3 text-sm focus:border-brand-500 focus:ring-1 focus:ring-brand-500 outline-none";
+    "w-full h-12 rounded-[10px] border border-slate-300 bg-white px-3.5 text-base text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/30";
 
   return (
-    <div className="overflow-hidden rounded-3xl bg-white shadow-2xl ring-1 ring-slate-200">
+    <div className="overflow-hidden rounded-2xl bg-white shadow-prestige ring-1 ring-slate-200">
       <div className="grid md:grid-cols-2">
         {/* SOL: Form */}
         <div className="p-6 sm:p-8">
-          <div className="flex items-center gap-2">
-            <span className="grid h-10 w-10 place-items-center rounded-xl bg-brand-50 text-brand-700">
-              <BarChart3 className="h-5 w-5" />
-            </span>
-            <h2 className="text-lg font-bold text-slate-900">Mülk Bilgileri</h2>
+          <div className="flex items-center gap-2.5">
+            <BarChart3 className="h-6 w-6 text-brand-700" strokeWidth={1.7} />
+            <h2 className="font-display text-lg font-bold text-slate-900">Mülk Bilgileri</h2>
           </div>
 
-          <div className="mt-5 space-y-3.5">
-            <select
-              value={district}
-              onChange={(e) => setDistrict(e.target.value)}
-              className={inputCls}
-            >
-              <option value="" disabled>
-                İlçe seçin
-              </option>
-              {DISTRICTS.map((d) => (
-                <option key={d.slug} value={d.name}>
-                  {d.name}
-                </option>
-              ))}
-            </select>
-
-            <div className="grid grid-cols-2 gap-3.5">
+          <div className="mt-5 space-y-4">
+            <div>
+              <label htmlFor="vt-district" className={labelCls}>İlçe</label>
               <select
-                value={propertyType}
-                onChange={(e) => setPropertyType(e.target.value)}
+                id="vt-district"
+                value={district}
+                onChange={(e) => setDistrict(e.target.value)}
                 className={inputCls}
               >
-                {PROPERTY_TYPES.map((p) => (
-                  <option key={p.value} value={p.value}>
-                    {p.label}
+                <option value="" disabled>
+                  İlçe seçin
+                </option>
+                {DISTRICTS.map((d) => (
+                  <option key={d.slug} value={d.name}>
+                    {d.name}
                   </option>
                 ))}
               </select>
-              <input
-                type="number"
-                min={1}
-                inputMode="numeric"
-                value={area}
-                onChange={(e) => setArea(e.target.value)}
-                placeholder="Alan (m²)"
-                className={inputCls}
-              />
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label htmlFor="vt-type" className={labelCls}>Mülk Türü</label>
+                <select
+                  id="vt-type"
+                  value={propertyType}
+                  onChange={(e) => setPropertyType(e.target.value)}
+                  className={inputCls}
+                >
+                  {PROPERTY_TYPES.map((p) => (
+                    <option key={p.value} value={p.value}>
+                      {p.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label htmlFor="vt-area" className={labelCls}>Alan (m²)</label>
+                <input
+                  id="vt-area"
+                  type="number"
+                  min={1}
+                  inputMode="numeric"
+                  value={area}
+                  onChange={(e) => setArea(e.target.value)}
+                  placeholder="Örn. 120"
+                  className={inputCls}
+                />
+              </div>
             </div>
 
             {!isLand && (
-              <select
-                value={rooms}
-                onChange={(e) => setRooms(e.target.value)}
-                className={inputCls}
-              >
-                {ROOM_OPTIONS.map((r) => (
-                  <option key={r} value={r}>
-                    {r}
-                  </option>
-                ))}
-              </select>
+              <div>
+                <label htmlFor="vt-rooms" className={labelCls}>Oda Sayısı</label>
+                <select
+                  id="vt-rooms"
+                  value={rooms}
+                  onChange={(e) => setRooms(e.target.value)}
+                  className={inputCls}
+                >
+                  {ROOM_OPTIONS.map((r) => (
+                    <option key={r} value={r}>
+                      {r}
+                    </option>
+                  ))}
+                </select>
+              </div>
             )}
           </div>
 
-          <p className="mt-4 text-[11px] leading-relaxed text-slate-400">
+          <p className="mt-4 text-xs leading-relaxed text-slate-400">
             * Tahmin; ilçe ortalama m² değerleri ve mülk özelliklerine dayalı otomatik
             bir ön değerlendirmedir. Kesin değer için ücretsiz ekspertiz talep edin.
           </p>
         </div>
 
         {/* SAĞ: Sonuç */}
-        <div className="bg-gradient-to-br from-brand-800 to-brand-950 p-6 text-white sm:p-8">
+        <div className="bg-brand-950 p-6 text-white sm:p-8">
           {!result ? (
             <div className="flex h-full min-h-[220px] flex-col items-center justify-center text-center text-brand-200">
               <Tag className="h-10 w-10 text-brand-200" />
@@ -194,39 +209,48 @@ export default function ValuationTool({
               {!showLead ? (
                 <button
                   onClick={() => setShowLead(true)}
-                  className="mt-6 w-full rounded-xl bg-gold-500 px-4 py-3.5 text-base font-bold text-brand-950 transition hover:bg-gold-400"
+                  className="mt-6 w-full rounded-[10px] bg-white px-4 py-3.5 text-base font-semibold text-brand-800 transition hover:bg-brand-50"
                 >
-                  Ücretsiz Detaylı Ekspertiz İste →
+                  Ücretsiz Detaylı Ekspertiz İste
                 </button>
               ) : (
                 <form onSubmit={handleLead} className="mt-6 space-y-3">
-                  <input
-                    required
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    placeholder="Ad Soyad *"
-                    className="w-full rounded-lg border border-white/20 bg-white/10 px-3.5 py-3 text-sm text-white placeholder:text-brand-200 outline-none focus:border-gold-400"
-                  />
-                  <input
-                    required
-                    type="tel"
-                    value={phone}
-                    onChange={(e) => setPhone(e.target.value)}
-                    placeholder="Telefon *"
-                    className="w-full rounded-lg border border-white/20 bg-white/10 px-3.5 py-3 text-sm text-white placeholder:text-brand-200 outline-none focus:border-gold-400"
-                  />
+                  <div>
+                    <label htmlFor="vt-name" className="mb-1.5 block text-sm font-semibold text-brand-100">Ad Soyad <span className="text-gold-300">*</span></label>
+                    <input
+                      id="vt-name"
+                      required
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
+                      placeholder="Adınız ve soyadınız"
+                      className="h-12 w-full rounded-[10px] border border-white/20 bg-white/10 px-3.5 text-base text-white outline-none transition placeholder:text-brand-200 focus:border-gold-400 focus:ring-2 focus:ring-gold-400/30"
+                    />
+                  </div>
+                  <div>
+                    <label htmlFor="vt-phone" className="mb-1.5 block text-sm font-semibold text-brand-100">Telefon <span className="text-gold-300">*</span></label>
+                    <input
+                      id="vt-phone"
+                      required
+                      type="tel"
+                      inputMode="tel"
+                      value={phone}
+                      onChange={(e) => setPhone(e.target.value)}
+                      placeholder="05__ ___ __ __"
+                      className="h-12 w-full rounded-[10px] border border-white/20 bg-white/10 px-3.5 text-base text-white outline-none transition placeholder:text-brand-200 focus:border-gold-400 focus:ring-2 focus:ring-gold-400/30"
+                    />
+                  </div>
                   {status === "error" && (
-                    <p className="text-sm text-red-300">{error}</p>
+                    <p className="rounded-[10px] bg-red-500/15 px-3.5 py-2.5 text-sm font-medium text-red-200 ring-1 ring-red-400/30">{error}</p>
                   )}
                   <button
                     type="submit"
                     disabled={status === "loading"}
-                    className="w-full rounded-xl bg-gold-500 px-4 py-3.5 text-base font-bold text-brand-950 transition hover:bg-gold-400 disabled:opacity-60"
+                    className="w-full rounded-[10px] bg-white px-4 py-3.5 text-base font-semibold text-brand-800 transition hover:bg-brand-50 disabled:opacity-60"
                   >
                     {status === "loading" ? "Gönderiliyor..." : "Ekspertiz Talebini Gönder"}
                   </button>
-                  <p className="text-center text-[11px] text-brand-200">
-                    Bilgileriniz yalnızca sizinle iletişim için kullanılır.
+                  <p className="flex items-center justify-center gap-1.5 text-center text-[13px] text-brand-200">
+                    <Lock className="h-3.5 w-3.5" /> Bilgileriniz yalnızca iletişim için kullanılır.
                   </p>
                 </form>
               )}

@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { saveSettings } from "../actions";
 import { SITE } from "@/lib/site";
+import SettingImageField from "@/components/admin/SettingImageField";
 
 export const dynamic = "force-dynamic";
 
@@ -39,6 +40,21 @@ export default async function SettingsPage() {
           <span className="mb-1 block text-sm font-medium text-slate-700">Marka Sloganı</span>
           <input name="brand" defaultValue={s.brand || SITE.brand} className={inputCls} />
         </label>
+        <div className="block">
+          <span className="mb-1 block text-sm font-medium text-slate-700">Ana Sayfa Hero Görseli</span>
+          <SettingImageField name="home_hero_image" defaultValue={s.home_hero_image || ""} />
+          <span className="mt-1.5 block text-xs text-slate-400">
+            Ana sayfanın üst (lacivert) arama alanında silik arka plan olarak görünür. Boş bırakılırsa düz lacivert kullanılır.
+          </span>
+        </div>
+
+        <div className="block">
+          <span className="mb-1 block text-sm font-medium text-slate-700">&ldquo;Mülkünü Sat&rdquo; Hero Görseli</span>
+          <SettingImageField name="seller_hero_image" defaultValue={s.seller_hero_image || ""} />
+          <span className="mt-1.5 block text-xs text-slate-400">
+            Mülkünü Sat sayfasının üst (lacivert) alanında silik arka plan olarak görünür. Boş bırakılırsa düz lacivert kullanılır.
+          </span>
+        </div>
         <button className="rounded-lg bg-brand-700 px-6 py-2.5 font-bold text-white hover:bg-brand-800">Kaydet</button>
       </form>
 

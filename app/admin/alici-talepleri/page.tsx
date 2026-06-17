@@ -55,19 +55,19 @@ export default async function AdminBuyerAlerts({
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-extrabold text-slate-900">Alıcı Talepleri</h1>
+        <h1 className="text-2xl font-bold tracking-tight text-slate-900">Alıcı Talepleri</h1>
         <p className="text-sm text-slate-500">{total} talep · {activeCount} aktif · her talep için stoktaki uygun ilan sayısı gösterilir</p>
       </div>
 
       {total === 0 && (
-        <p className="rounded-2xl bg-white p-10 text-center text-slate-400 ring-1 ring-slate-200">
+        <p className="rounded-xl bg-white p-10 text-center text-slate-400 ring-1 ring-slate-200">
           Henüz alıcı talebi yok. /alici-talebi sayfasından gelen talepler burada listelenir.
         </p>
       )}
 
       <div className="space-y-3">
         {alerts.map((a, i) => (
-          <div key={a.id} className={`rounded-2xl bg-white p-5 ring-1 ${counts[i] > 0 ? "ring-green-200" : "ring-slate-200"}`}>
+          <div key={a.id} className={`rounded-xl bg-white p-5 ring-1 ${counts[i] > 0 ? "ring-green-200" : "ring-slate-200"}`}>
             <div className="flex flex-wrap items-start justify-between gap-4">
               <div className="min-w-0">
                 <div className="flex items-center gap-2">
@@ -76,7 +76,7 @@ export default async function AdminBuyerAlerts({
                     {a.status === "active" ? "Aktif" : "Kapalı"}
                   </span>
                 </div>
-                <p className="mt-1 text-sm text-slate-600">📞 {a.phone}{a.email ? ` · ${a.email}` : ""}</p>
+                <p className="mt-1 text-sm text-slate-600">{a.phone}{a.email ? ` · ${a.email}` : ""}</p>
                 <p className="mt-1 text-sm font-medium text-brand-700">🎯 {criteriaText(a)}</p>
                 {a.note && <p className="mt-1 text-sm text-slate-500">“{a.note}”</p>}
                 <p className="mt-1 text-xs text-slate-400">{formatDate(a.createdAt)}</p>
@@ -95,8 +95,8 @@ export default async function AdminBuyerAlerts({
             </div>
 
             <div className="mt-4 flex flex-wrap items-center gap-2 border-t border-slate-100 pt-4">
-              <a href={`tel:${a.phone.replace(/[^\d+]/g, "")}`} className="rounded-lg bg-brand-700 px-3.5 py-2 text-sm font-semibold text-white hover:bg-brand-800">📞 Ara</a>
-              <a href={waLink(a.phone, a.name)} target="_blank" rel="noopener noreferrer" className="rounded-lg bg-green-600 px-3.5 py-2 text-sm font-semibold text-white hover:bg-green-700">💬 WhatsApp</a>
+              <a href={`tel:${a.phone.replace(/[^\d+]/g, "")}`} className="rounded-lg bg-brand-700 px-3.5 py-2 text-sm font-semibold text-white hover:bg-brand-800">Ara</a>
+              <a href={waLink(a.phone, a.name)} target="_blank" rel="noopener noreferrer" className="rounded-lg bg-green-600 px-3.5 py-2 text-sm font-semibold text-white hover:bg-green-700">WhatsApp</a>
               <form action={updateAlertStatus}>
                 <input type="hidden" name="id" value={a.id} />
                 <input type="hidden" name="status" value={a.status === "active" ? "closed" : "active"} />

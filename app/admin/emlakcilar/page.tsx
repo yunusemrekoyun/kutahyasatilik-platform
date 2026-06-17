@@ -24,7 +24,7 @@ export default async function AdminAgents() {
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-2xl font-extrabold text-slate-900">Emlakçılar</h1>
+        <h1 className="text-2xl font-bold tracking-tight text-slate-900">Emlakçılar</h1>
         <p className="text-sm text-slate-500">
           {agents.length} danışman · {pending.length} onay bekliyor
         </p>
@@ -34,18 +34,18 @@ export default async function AdminAgents() {
       {pending.length > 0 && (
         <section>
           <h2 className="mb-3 text-sm font-bold uppercase tracking-wide text-amber-600">
-            🔔 Onay Bekleyen Başvurular ({pending.length})
+            Onay Bekleyen Başvurular ({pending.length})
           </h2>
           <div className="space-y-3">
             {pending.map((a) => (
-              <div key={a.id} className="rounded-2xl bg-white p-5 ring-1 ring-amber-200">
+              <div key={a.id} className="rounded-xl bg-white p-5 ring-1 ring-amber-200">
                 <div className="flex flex-wrap items-start justify-between gap-4">
                   <div>
                     <p className="font-bold text-slate-900">{a.name}</p>
                     <p className="text-sm text-slate-500">
                       {a.title || "Gayrimenkul Danışmanı"}{a.agency ? ` · ${a.agency}` : ""}
                     </p>
-                    <p className="mt-1 text-sm text-slate-600">📧 {a.email} · 📞 {a.phone || "-"}</p>
+                    <p className="mt-1 text-sm text-slate-600">{a.email} · {a.phone || "-"}</p>
                     <p className="mt-1 text-xs text-slate-400">Başvuru: {formatDate(a.createdAt)}</p>
                   </div>
                   <div className="flex flex-col items-end gap-2">
@@ -71,7 +71,7 @@ export default async function AdminAgents() {
       {/* Tüm danışmanlar */}
       <section>
         <h2 className="mb-3 text-sm font-bold uppercase tracking-wide text-slate-500">Danışmanlar</h2>
-        <div className="overflow-hidden rounded-2xl bg-white ring-1 ring-slate-200">
+        <div className="overflow-hidden rounded-xl bg-white ring-1 ring-slate-200">
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>

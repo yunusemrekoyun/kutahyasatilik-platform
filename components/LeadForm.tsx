@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { CheckCircle2, Lock } from "lucide-react";
 import { useUtm } from "@/lib/useUtm";
 import { trackConversion } from "@/lib/track";
 
@@ -85,9 +86,11 @@ export default function LeadForm({
 
   if (status === "ok") {
     return (
-      <div className="rounded-xl bg-green-50 border border-green-200 p-6 text-center">
-        <div className="text-3xl">✅</div>
-        <h3 className="mt-2 text-lg font-bold text-green-800">Talebiniz alındı!</h3>
+      <div className="rounded-xl border border-green-200 bg-green-50 p-6 text-center">
+        <span className="mx-auto grid h-12 w-12 place-items-center rounded-full bg-white text-green-600 ring-1 ring-green-200">
+          <CheckCircle2 className="h-7 w-7" />
+        </span>
+        <h3 className="mt-3 font-display text-lg font-bold text-green-800">Talebiniz alındı</h3>
         <p className="mt-1 text-sm text-green-700">
           En kısa sürede sizi arayacağız. İlginiz için teşekkürler.
         </p>
@@ -95,61 +98,56 @@ export default function LeadForm({
     );
   }
 
+  const labelCls = "mb-1.5 block text-sm font-semibold text-slate-700";
+  const inputCls =
+    "w-full h-12 rounded-[10px] border border-slate-300 bg-white px-3.5 text-base text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/30";
+
   return (
-    <form onSubmit={handleSubmit} className="space-y-3">
+    <form onSubmit={handleSubmit} className="space-y-4">
       {!compact && (
         <div>
-          <h3 className="text-lg font-bold text-slate-900">{cfg.title}</h3>
+          <h3 className="font-display text-lg font-bold text-slate-900">{cfg.title}</h3>
           {listingTitle && (
-            <p className="text-xs text-slate-500 mt-0.5">İlan: {listingTitle}</p>
+            <p className="mt-0.5 text-[13px] text-slate-500">İlan: {listingTitle}</p>
           )}
         </div>
       )}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-        <input
-          name="name"
-          required
-          placeholder="Ad Soyad *"
-          className="rounded-lg border border-slate-300 px-3 py-2.5 text-sm focus:border-brand-500 focus:ring-1 focus:ring-brand-500 outline-none"
-        />
-        <input
-          name="phone"
-          required
-          type="tel"
-          placeholder="Telefon *"
-          className="rounded-lg border border-slate-300 px-3 py-2.5 text-sm focus:border-brand-500 focus:ring-1 focus:ring-brand-500 outline-none"
-        />
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <div>
+          <label htmlFor="lf-name" className={labelCls}>Ad Soyad <span className="text-red-500">*</span></label>
+          <input id="lf-name" name="name" required placeholder="Adınız ve soyadınız" className={inputCls} />
+        </div>
+        <div>
+          <label htmlFor="lf-phone" className={labelCls}>Telefon <span className="text-red-500">*</span></label>
+          <input id="lf-phone" name="phone" required type="tel" inputMode="tel" placeholder="05__ ___ __ __" className={inputCls} />
+        </div>
       </div>
-      <input
-        name="email"
-        type="email"
-        placeholder="E-posta (opsiyonel)"
-        className="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm focus:border-brand-500 focus:ring-1 focus:ring-brand-500 outline-none"
-      />
+      <div>
+        <label htmlFor="lf-email" className={labelCls}>E-posta <span className="font-normal text-slate-400">(opsiyonel)</span></label>
+        <input id="lf-email" name="email" type="email" placeholder="ornek@eposta.com" className={inputCls} />
+      </div>
       {cfg.showDate && (
-        <input
-          name="preferredDate"
-          type="text"
-          placeholder="Tercih ettiğiniz gün/saat (örn: Cumartesi 14:00)"
-          className="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm focus:border-brand-500 focus:ring-1 focus:ring-brand-500 outline-none"
-        />
+        <div>
+          <label htmlFor="lf-date" className={labelCls}>Tercih ettiğiniz gün/saat</label>
+          <input id="lf-date" name="preferredDate" type="text" placeholder="Örn: Cumartesi 14:00" className={inputCls} />
+        </div>
       )}
-      <textarea
-        name="message"
-        rows={compact ? 2 : 3}
-        placeholder={cfg.messagePlaceholder}
-        className="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm focus:border-brand-500 focus:ring-1 focus:ring-brand-500 outline-none"
-      />
-      {status === "error" && <p className="text-sm text-red-600">{error}</p>}
+      <div>
+        <label htmlFor="lf-message" className={labelCls}>Mesajınız</label>
+        <textarea id="lf-message" name="message" rows={compact ? 2 : 3} placeholder={cfg.messagePlaceholder} className={`${inputCls} h-auto py-3 leading-relaxed`} />
+      </div>
+      {status === "error" && (
+        <p className="rounded-[10px] bg-red-50 px-3.5 py-2.5 text-sm font-medium text-red-700 ring-1 ring-red-200">{error}</p>
+      )}
       <button
         type="submit"
         disabled={status === "loading"}
-        className="w-full rounded-lg bg-brand-700 px-4 py-3 text-sm font-bold text-white hover:bg-brand-800 disabled:opacity-60 transition"
+        className="w-full rounded-[10px] bg-brand-700 px-4 py-3.5 text-base font-semibold text-white transition hover:bg-brand-800 disabled:opacity-60"
       >
         {status === "loading" ? "Gönderiliyor..." : cfg.cta}
       </button>
-      <p className="text-[11px] text-slate-400 text-center">
-        Bilgileriniz yalnızca sizinle iletişim için kullanılır.
+      <p className="flex items-center justify-center gap-1.5 text-center text-[13px] text-slate-500">
+        <Lock className="h-3.5 w-3.5" /> Bilgileriniz yalnızca sizinle iletişim için kullanılır.
       </p>
     </form>
   );

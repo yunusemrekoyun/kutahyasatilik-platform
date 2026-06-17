@@ -270,7 +270,7 @@ export async function rejectListing(formData: FormData) {
 
 export async function saveSettings(formData: FormData) {
   await ensureAuth();
-  const keys = ["phone", "whatsapp", "email", "brand"];
+  const keys = ["phone", "whatsapp", "email", "brand", "seller_hero_image", "home_hero_image"];
   for (const key of keys) {
     const value = String(formData.get(key) || "");
     await prisma.setting.upsert({
@@ -280,6 +280,8 @@ export async function saveSettings(formData: FormData) {
     });
   }
   revalidatePath("/admin/ayarlar");
+  revalidatePath("/satici");
+  revalidatePath("/");
 }
 
 // --- Blog yazıları ---

@@ -52,7 +52,7 @@ export default function Header() {
             </Link>
             <Link
               href="/emlakci/kayit"
-              className="inline-flex items-center gap-1.5 rounded-full bg-gold-500 px-3 py-1 font-semibold text-brand-950 transition hover:bg-gold-400"
+              className="inline-flex items-center gap-1.5 rounded-full bg-white/10 px-3 py-1 font-semibold text-white ring-1 ring-white/25 transition hover:bg-white/20"
             >
               <UserPlus className="h-3.5 w-3.5" /> Danışman Başvurusu Yap
             </Link>
@@ -64,18 +64,8 @@ export default function Header() {
       <div className="bg-white/95 backdrop-blur border-b border-slate-200 shadow-sm">
         <div className="mx-auto max-w-7xl px-4">
           <div className="flex h-16 items-center justify-between gap-4">
-            <Link href="/" className="flex items-center gap-2.5 shrink-0">
-              <span className="grid h-10 w-10 place-items-center rounded-lg bg-gradient-to-br from-brand-700 to-brand-900 text-gold-300 font-display font-bold text-lg shadow-sm">
-                K
-              </span>
-              <span className="leading-tight">
-                <span className="block font-display text-lg font-bold text-brand-900">
-                  Kütahya<span className="text-gold-500">Satılık</span>
-                </span>
-                <span className="block text-[9px] uppercase tracking-[0.18em] text-slate-400">
-                  Dijital Emlak Ofisi
-                </span>
-              </span>
+            <Link href="/" className="shrink-0 font-display text-xl font-bold tracking-tight text-brand-900">
+              Kütahya<span className="text-gold-600">Satılık</span>
             </Link>
 
             <nav className="hidden lg:flex items-center gap-0.5">
@@ -83,13 +73,17 @@ export default function Header() {
                 <Link
                   key={n.href}
                   href={n.href}
-                  className={`px-3 py-2 text-sm font-medium rounded-md transition ${
+                  aria-current={isActive(n.href) ? "page" : undefined}
+                  className={`relative px-3 py-2 text-sm transition ${
                     isActive(n.href)
-                      ? "text-brand-700 bg-brand-50"
-                      : "text-slate-700 hover:text-brand-700 hover:bg-brand-50"
+                      ? "font-semibold text-brand-800"
+                      : "font-medium text-slate-700 hover:text-brand-700"
                   }`}
                 >
                   {n.label}
+                  {isActive(n.href) && (
+                    <span className="absolute inset-x-3 -bottom-0.5 h-0.5 rounded-full bg-brand-700" />
+                  )}
                 </Link>
               ))}
             </nav>
@@ -117,7 +111,7 @@ export default function Header() {
               </a>
               <Link
                 href="/satici"
-                className="hidden sm:inline-flex items-center gap-1.5 rounded-lg bg-gold-500 px-3.5 py-2 text-sm font-bold text-brand-950 hover:bg-gold-400 transition"
+                className="hidden sm:inline-flex items-center gap-1.5 rounded-[10px] bg-brand-700 px-4 py-2 text-sm font-semibold text-white hover:bg-brand-800 transition"
               >
                 Mülkünü Sat
               </Link>
@@ -152,7 +146,7 @@ export default function Header() {
               <Link href="/emlakci/giris" onClick={() => setOpen(false)} className="flex items-center gap-2 px-3 py-2.5 text-sm font-medium text-brand-700 hover:bg-brand-50 rounded-md">
                 <LogIn className="h-4 w-4" /> Danışman Girişi
               </Link>
-              <Link href="/emlakci/kayit" onClick={() => setOpen(false)} className="flex items-center gap-2 px-3 py-2.5 text-sm font-semibold text-brand-950 bg-gold-500 hover:bg-gold-400 rounded-md">
+              <Link href="/emlakci/kayit" onClick={() => setOpen(false)} className="flex items-center gap-2 px-3 py-2.5 text-sm font-semibold text-white bg-brand-700 hover:bg-brand-800 rounded-[10px]">
                 <UserPlus className="h-4 w-4" /> Danışman Başvurusu Yap
               </Link>
             </nav>

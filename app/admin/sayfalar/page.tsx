@@ -12,7 +12,7 @@ export default async function AdminPages() {
     <div>
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-extrabold text-slate-900">Sayfalar</h1>
+          <h1 className="text-2xl font-bold tracking-tight text-slate-900">Sayfalar</h1>
           <p className="text-sm text-slate-500">{pages.length} içerik sayfası</p>
         </div>
         <Link href="/admin/sayfalar/yeni" className="rounded-lg bg-brand-700 px-4 py-2 text-sm font-bold text-white hover:bg-brand-800">
@@ -20,7 +20,7 @@ export default async function AdminPages() {
         </Link>
       </div>
 
-      <div className="mt-6 overflow-hidden rounded-2xl bg-white ring-1 ring-slate-200">
+      <div className="mt-6 overflow-hidden rounded-xl bg-white ring-1 ring-slate-200">
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-slate-100 bg-slate-50 text-left text-xs text-slate-500">

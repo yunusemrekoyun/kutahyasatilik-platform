@@ -2,7 +2,7 @@
 
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
-import { X, SlidersHorizontal } from "lucide-react";
+import { X, SlidersHorizontal, Search, Check } from "lucide-react";
 import { DISTRICTS, PROPERTY_TYPES, PROPERTY_TYPE_LABELS } from "@/lib/constants";
 import { formatNumber } from "@/lib/format";
 
@@ -13,12 +13,12 @@ const AMENITIES: { key: string; label: string }[] = [
   { key: "otopark", label: "Otoparklı" },
   { key: "balkon", label: "Balkonlu" },
   { key: "site", label: "Site İçinde" },
-  { key: "dogrulanmis", label: "✓ Doğrulanmış" },
+  { key: "dogrulanmis", label: "Doğrulanmış" },
 ];
 
 const CHIP_KEYS = ["q", "tur", "ilce", "oda", "min", "max", "minAlan", "maxAlan", "imar", "esyali", "otopark", "balkon", "site", "dogrulanmis"];
 
-export default function ListingFilters({ total }: { total?: number }) {
+export default function ListingFilters() {
   const router = useRouter();
   const sp = useSearchParams();
   const [open, setOpen] = useState(false);
@@ -39,7 +39,6 @@ export default function ListingFilters({ total }: { total?: number }) {
     pushWith((p) => (p.get(key) ? p.delete(key) : p.set(key, "1")));
   }
   function setBirim(value: string) {
-    // Birim değişince alan değerlerini sıfırla (karışmasın)
     pushWith((p) => {
       if (value === "donum") p.set("birim", "donum");
       else p.delete("birim");
@@ -72,146 +71,188 @@ export default function ListingFilters({ total }: { total?: number }) {
   const activeChips = CHIP_KEYS.map((k) => ({ k, v: sp.get(k) })).filter((c) => c.v) as { k: string; v: string }[];
 
   const fieldCls =
-    "rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm focus:border-brand-500 focus:ring-1 focus:ring-brand-500 outline-none";
+    "h-11 w-full rounded-lg border border-slate-300 bg-white px-3.5 text-[15px] text-slate-900 outline-none transition focus:border-brand-500 focus:ring-2 focus:ring-brand-500/30";
+  const sectionCls = "border-t border-slate-100 pt-5";
+  const headCls = "mb-3 text-sm font-semibold text-slate-900";
 
-  return (
-    <div className="rounded-2xl bg-white p-4 ring-1 ring-slate-200 shadow-sm">
-      {/* Üst satır */}
-      <div className="grid grid-cols-2 gap-3 md:grid-cols-6">
-        <input
-          defaultValue={sp.get("q") || ""}
-          key={sp.get("q") || "q-empty"}
-          onKeyDown={(e) => { if (e.key === "Enter") update("q", (e.target as HTMLInputElement).value); }}
-          placeholder="🔍 Kelime, mahalle, adres..."
-          className={`${fieldCls} col-span-2`}
-        />
-        <select value={sp.get("tur") || ""} onChange={(e) => update("tur", e.target.value)} className={fieldCls}>
-          <option value="">Tüm Türler</option>
-          {PROPERTY_TYPES.map((p) => <option key={p.value} value={p.value}>{p.label}</option>)}
-        </select>
-        <select value={sp.get("ilce") || ""} onChange={(e) => update("ilce", e.target.value)} className={fieldCls}>
-          <option value="">Tüm İlçeler</option>
-          {DISTRICTS.map((d) => <option key={d.slug} value={d.name}>{d.name}</option>)}
-        </select>
-        <select value={sp.get("sira") || ""} onChange={(e) => update("sira", e.target.value)} className={fieldCls}>
-          <option value="">Önerilen</option>
-          <option value="price_asc">Fiyat ↑</option>
-          <option value="price_desc">Fiyat ↓</option>
-          <option value="oldest">En Eski</option>
-        </select>
-        <button
-          onClick={() => setOpen((o) => !o)}
-          className={`${fieldCls} flex items-center justify-center gap-1.5 font-medium ${activeCount ? "border-brand-400 text-brand-700" : "text-slate-600"}`}
-        >
-          <SlidersHorizontal className="h-4 w-4" /> Filtreler
-          {activeCount > 0 && <span className="rounded-full bg-brand-600 px-1.5 text-xs text-white">{activeCount}</span>}
-        </button>
+  const content = (
+    <>
+      {/* Başlık */}
+      <div className="mb-4 flex items-center justify-between border-b border-slate-200 pb-4">
+        <h2 className="font-display text-lg font-bold text-brand-900">Filtreler</h2>
+        <div className="flex items-center gap-3">
+          {activeCount > 0 && (
+            <button onClick={() => router.push("/ilanlar")} className="text-sm font-medium text-slate-500 transition hover:text-brand-700">
+              Temizle
+            </button>
+          )}
+          <button onClick={() => setOpen(false)} aria-label="Kapat" className="text-slate-400 hover:text-slate-700 lg:hidden">
+            <X className="h-5 w-5" />
+          </button>
+        </div>
       </div>
 
-      {/* Gelişmiş panel */}
-      {open && (
-        <div className="mt-3 space-y-4 border-t border-slate-100 pt-4">
-          {/* Oda + Fiyat aralığı */}
-          <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
-            <label className="text-xs font-medium text-slate-500">
-              Oda Sayısı
-              <select value={sp.get("oda") || ""} onChange={(e) => update("oda", e.target.value)} className={`${fieldCls} mt-1 w-full`}>
-                <option value="">Farketmez</option>
-                {ROOMS.map((r) => <option key={r} value={r}>{r}</option>)}
-              </select>
-            </label>
-            <label className="text-xs font-medium text-slate-500">
-              Min Fiyat (₺)
-              <input key={sp.get("min") || "min"} defaultValue={sp.get("min") || ""} onBlur={(e) => update("min", e.target.value)} onKeyDown={(e) => { if (e.key === "Enter") update("min", (e.target as HTMLInputElement).value); }} type="number" min={0} inputMode="numeric" placeholder="Alt sınır" className={`${fieldCls} mt-1 w-full`} />
-            </label>
-            <label className="text-xs font-medium text-slate-500">
-              Max Fiyat (₺)
-              <input key={sp.get("max") || "max"} defaultValue={sp.get("max") || ""} onBlur={(e) => update("max", e.target.value)} onKeyDown={(e) => { if (e.key === "Enter") update("max", (e.target as HTMLInputElement).value); }} type="number" min={0} inputMode="numeric" placeholder="Üst sınır" className={`${fieldCls} mt-1 w-full`} />
-            </label>
-            <label className="text-xs font-medium text-slate-500">
-              İmar Durumu (arsa/tarla)
-              <input key={sp.get("imar") || "imar"} defaultValue={sp.get("imar") || ""} onBlur={(e) => update("imar", e.target.value)} onKeyDown={(e) => { if (e.key === "Enter") update("imar", (e.target as HTMLInputElement).value); }} placeholder="Konut, Ticari..." className={`${fieldCls} mt-1 w-full`} />
-            </label>
-          </div>
+      <div className="space-y-5">
+        {/* Arama */}
+        <div className="relative">
+          <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+          <input
+            key={sp.get("q") || "q-empty"}
+            defaultValue={sp.get("q") || ""}
+            onKeyDown={(e) => { if (e.key === "Enter") update("q", (e.target as HTMLInputElement).value); }}
+            placeholder="Kelime, mahalle, adres..."
+            aria-label="Arama"
+            className={`${fieldCls} pl-9`}
+          />
+        </div>
 
-          {/* Alan aralığı (m² veya dönüm) */}
-          <div>
-            <p className="mb-1.5 text-xs font-medium text-slate-500">Alan Aralığı</p>
-            <div className="grid grid-cols-3 gap-3">
-              <select value={birim} onChange={(e) => setBirim(e.target.value)} className={fieldCls}>
-                <option value="m2">m²</option>
-                <option value="donum">Dönüm</option>
-              </select>
-              <input
-                key={`minAlan-${sp.get("minAlan") || ""}`}
-                defaultValue={sp.get("minAlan") || ""}
-                onBlur={(e) => update("minAlan", e.target.value)}
-                onKeyDown={(e) => { if (e.key === "Enter") update("minAlan", (e.target as HTMLInputElement).value); }}
-                type="number" min={0} inputMode="numeric" placeholder={`Min ${unitLabel}`} className={fieldCls}
-              />
-              <input
-                key={`maxAlan-${sp.get("maxAlan") || ""}`}
-                defaultValue={sp.get("maxAlan") || ""}
-                onBlur={(e) => update("maxAlan", e.target.value)}
-                onKeyDown={(e) => { if (e.key === "Enter") update("maxAlan", (e.target as HTMLInputElement).value); }}
-                type="number" min={0} inputMode="numeric" placeholder={`Max ${unitLabel}`} className={fieldCls}
-              />
-            </div>
-            {birim === "donum" && <p className="mt-1 text-[11px] text-slate-400">1 dönüm = 1.000 m² (arsa/tarla için pratik)</p>}
+        {/* Emlak Tipi (tek seçim) */}
+        <div className={sectionCls}>
+          <h3 className={headCls}>Emlak Tipi</h3>
+          <div className="space-y-1">
+            {PROPERTY_TYPES.map((p) => {
+              const on = sp.get("tur") === p.value;
+              return (
+                <button
+                  key={p.value}
+                  onClick={() => update("tur", on ? "" : p.value)}
+                  className={`flex w-full items-center gap-3 rounded-lg px-2.5 py-2 text-left text-[15px] transition ${on ? "bg-brand-50 font-semibold text-brand-700" : "text-slate-700 hover:bg-slate-50"}`}
+                >
+                  <span className={`grid h-5 w-5 shrink-0 place-items-center rounded border ${on ? "border-brand-600 bg-brand-600 text-white" : "border-slate-300"}`}>
+                    {on && <Check className="h-3.5 w-3.5" strokeWidth={3} />}
+                  </span>
+                  {p.label}
+                </button>
+              );
+            })}
           </div>
+        </div>
 
-          {/* Olanaklar */}
-          <div>
-            <p className="mb-2 text-xs font-medium text-slate-500">Olanaklar</p>
+        {/* İlçe */}
+        <div className={sectionCls}>
+          <h3 className={headCls}>İlçe</h3>
+          <select value={sp.get("ilce") || ""} onChange={(e) => update("ilce", e.target.value)} className={fieldCls}>
+            <option value="">Tüm İlçeler</option>
+            {DISTRICTS.map((d) => <option key={d.slug} value={d.name}>{d.name}</option>)}
+          </select>
+        </div>
+
+        {/* Fiyat Aralığı */}
+        <div className={sectionCls}>
+          <h3 className={headCls}>Fiyat Aralığı (₺)</h3>
+          <div className="flex items-center gap-2">
+            <input key={sp.get("min") || "min"} defaultValue={sp.get("min") || ""} onBlur={(e) => update("min", e.target.value)} onKeyDown={(e) => { if (e.key === "Enter") update("min", (e.target as HTMLInputElement).value); }} type="number" min={0} inputMode="numeric" placeholder="Min" className={fieldCls} />
+            <span className="text-slate-400">–</span>
+            <input key={sp.get("max") || "max"} defaultValue={sp.get("max") || ""} onBlur={(e) => update("max", e.target.value)} onKeyDown={(e) => { if (e.key === "Enter") update("max", (e.target as HTMLInputElement).value); }} type="number" min={0} inputMode="numeric" placeholder="Max" className={fieldCls} />
+          </div>
+        </div>
+
+        {/* Oda Sayısı */}
+        <div className={sectionCls}>
+          <h3 className={headCls}>Oda Sayısı</h3>
+          <div className="grid grid-cols-3 gap-2">
+            {ROOMS.map((r) => {
+              const on = sp.get("oda") === r;
+              return (
+                <button
+                  key={r}
+                  onClick={() => update("oda", on ? "" : r)}
+                  className={`rounded-lg border py-2 text-sm font-medium transition ${on ? "border-brand-600 bg-brand-50 text-brand-700" : "border-slate-300 text-slate-600 hover:border-brand-300"}`}
+                >
+                  {r}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Alan Aralığı */}
+        <div className={sectionCls}>
+          <h3 className={headCls}>Alan Aralığı</h3>
+          <div className="grid grid-cols-3 gap-2">
+            <select value={birim} onChange={(e) => setBirim(e.target.value)} className={fieldCls}>
+              <option value="m2">m²</option>
+              <option value="donum">Dönüm</option>
+            </select>
+            <input key={`minAlan-${sp.get("minAlan") || ""}`} defaultValue={sp.get("minAlan") || ""} onBlur={(e) => update("minAlan", e.target.value)} onKeyDown={(e) => { if (e.key === "Enter") update("minAlan", (e.target as HTMLInputElement).value); }} type="number" min={0} inputMode="numeric" placeholder={`Min`} className={fieldCls} />
+            <input key={`maxAlan-${sp.get("maxAlan") || ""}`} defaultValue={sp.get("maxAlan") || ""} onBlur={(e) => update("maxAlan", e.target.value)} onKeyDown={(e) => { if (e.key === "Enter") update("maxAlan", (e.target as HTMLInputElement).value); }} type="number" min={0} inputMode="numeric" placeholder={`Max`} className={fieldCls} />
+          </div>
+          {birim === "donum" && <p className="mt-1.5 text-[11px] text-slate-400">1 dönüm = 1.000 m²</p>}
+        </div>
+
+        {/* İmar (arsa/tarla) */}
+        <div className={sectionCls}>
+          <h3 className={headCls}>İmar Durumu <span className="font-normal text-slate-400">(arsa/tarla)</span></h3>
+          <input key={sp.get("imar") || "imar"} defaultValue={sp.get("imar") || ""} onBlur={(e) => update("imar", e.target.value)} onKeyDown={(e) => { if (e.key === "Enter") update("imar", (e.target as HTMLInputElement).value); }} placeholder="Konut, Ticari..." className={fieldCls} />
+        </div>
+
+        {/* Olanaklar */}
+        <div className={sectionCls}>
+          <h3 className={headCls}>Olanaklar</h3>
+          <div className="flex flex-wrap gap-2">
+            {AMENITIES.map((a) => {
+              const on = !!sp.get(a.key);
+              return (
+                <button
+                  key={a.key}
+                  onClick={() => toggle(a.key)}
+                  className={`rounded-full px-3.5 py-1.5 text-sm font-medium transition ${on ? "bg-brand-700 text-white" : "bg-slate-100 text-slate-600 hover:bg-slate-200"}`}
+                >
+                  {a.label}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Aktif çipler */}
+        {activeChips.length > 0 && (
+          <div className={sectionCls}>
+            <h3 className={headCls}>Aktif Filtreler</h3>
             <div className="flex flex-wrap gap-2">
-              {AMENITIES.map((a) => {
-                const on = !!sp.get(a.key);
+              {activeChips.map((c) => {
+                const label = chipLabel(c.k, c.v);
+                if (!label) return null;
                 return (
-                  <button
-                    key={a.key}
-                    onClick={() => toggle(a.key)}
-                    className={`rounded-full px-3.5 py-1.5 text-sm font-medium transition ${
-                      on ? "bg-brand-700 text-white" : "bg-slate-100 text-slate-600 hover:bg-slate-200"
-                    }`}
-                  >
-                    {a.label}
+                  <button key={c.k} onClick={() => update(c.k, "")} className="inline-flex items-center gap-1 rounded-full bg-brand-50 px-3 py-1 text-xs font-medium text-brand-700 hover:bg-brand-100">
+                    {label} <X className="h-3 w-3" />
                   </button>
                 );
               })}
             </div>
           </div>
+        )}
+      </div>
 
-          <button onClick={() => router.push("/ilanlar")} className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50">
-            Tüm Filtreleri Temizle
-          </button>
-        </div>
-      )}
+      {/* Mobil: sonuçları gör (sheet'i kapatır; filtreler zaten anında uygulanır) */}
+      <div className="mt-6 lg:hidden">
+        <button onClick={() => setOpen(false)} className="w-full rounded-lg bg-brand-700 px-4 py-3 text-base font-semibold text-white transition hover:bg-brand-800">
+          Sonuçları Gör
+        </button>
+      </div>
+    </>
+  );
 
-      {/* Aktif filtre çipleri */}
-      {activeChips.length > 0 && (
-        <div className="mt-3 flex flex-wrap items-center gap-2 border-t border-slate-100 pt-3">
-          {activeChips.map((c) => {
-            const label = chipLabel(c.k, c.v);
-            if (!label) return null;
-            return (
-              <button
-                key={c.k}
-                onClick={() => update(c.k, "")}
-                className="inline-flex items-center gap-1 rounded-full bg-brand-50 px-3 py-1 text-xs font-medium text-brand-700 hover:bg-brand-100"
-              >
-                {label} <X className="h-3 w-3" />
-              </button>
-            );
-          })}
-          <button onClick={() => router.push("/ilanlar")} className="text-xs font-medium text-slate-400 hover:text-red-600">
-            Tümünü temizle
-          </button>
-        </div>
-      )}
+  return (
+    <>
+      {/* Mobil tetikleyici */}
+      <button
+        onClick={() => setOpen(true)}
+        className="mb-4 flex w-full items-center justify-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-3 text-[15px] font-medium text-slate-700 lg:hidden"
+      >
+        <SlidersHorizontal className="h-5 w-5" /> Filtrele
+        {activeCount > 0 && <span className="rounded-full bg-brand-600 px-2 py-0.5 text-xs font-semibold text-white">{activeCount}</span>}
+      </button>
 
-      {typeof total === "number" && (
-        <p className="mt-3 text-sm text-slate-500"><strong className="text-slate-800">{total}</strong> ilan listeleniyor</p>
-      )}
-    </div>
+      {/* Mobil arka plan */}
+      {open && <div onClick={() => setOpen(false)} className="fixed inset-0 z-40 bg-black/40 lg:hidden" />}
+
+      {/* Sidebar (masaüstü) / Sheet (mobil) */}
+      <aside
+        className={`${open ? "fixed inset-y-0 right-0 z-50 w-[88%] max-w-sm overflow-y-auto" : "hidden"} bg-white p-5 lg:sticky lg:top-24 lg:z-auto lg:block lg:max-h-[calc(100vh-7rem)] lg:w-auto lg:overflow-y-auto lg:rounded-xl lg:p-5 lg:ring-1 lg:ring-slate-200`}
+      >
+        {content}
+      </aside>
+    </>
   );
 }

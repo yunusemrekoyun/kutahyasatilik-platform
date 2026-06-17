@@ -20,7 +20,7 @@ export default async function AdminHomeTexts() {
   const map = new Map(rows.map((r) => [r.key, r.value]));
 
   const inputCls =
-    "w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm focus:border-brand-500 focus:ring-1 focus:ring-brand-500 outline-none";
+    "w-full rounded-lg border border-slate-300 bg-white px-3.5 py-2.5 text-[15px] text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/30";
 
   return (
     <div>

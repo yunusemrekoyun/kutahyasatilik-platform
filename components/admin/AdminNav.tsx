@@ -2,24 +2,61 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
+import {
+  LayoutDashboard, Building2, PlusCircle, Newspaper, FileText,
+  ClipboardCheck, Inbox, BellRing, Users, MessageSquare, Megaphone,
+  Home, Settings, LogOut, type LucideIcon,
+} from "lucide-react";
 
-const ITEMS = [
-  { href: "/admin", label: "Panel", icon: "📊", exact: true },
-  { href: "/admin/ilanlar", label: "İlanlar", icon: "🏠" },
-  { href: "/admin/ilanlar/yeni", label: "Yeni İlan", icon: "➕" },
-  { href: "/admin/onay", label: "Onay Bekleyen", icon: "✅" },
-  { href: "/admin/emlakcilar", label: "Emlakçılar", icon: "🤝" },
-  { href: "/admin/talepler", label: "Talepler", icon: "📬" },
-  { href: "/admin/alici-talepleri", label: "Alıcı Talepleri", icon: "🔔" },
-  { href: "/admin/blog", label: "Blog", icon: "📝" },
-  { href: "/admin/sayfalar", label: "Sayfalar", icon: "📄" },
-  { href: "/admin/yorumlar", label: "Müşteri Yorumları", icon: "💬" },
-  { href: "/admin/reklamlar", label: "Pop-up Reklamlar", icon: "📣" },
-  { href: "/admin/ana-sayfa", label: "Ana Sayfa Metinleri", icon: "🏠" },
-  { href: "/admin/ayarlar", label: "Ayarlar", icon: "⚙️" },
+export type AdminCounts = {
+  pendingListings: number;
+  newLeads: number;
+  newAlerts: number;
+};
+
+type Item = { href: string; label: string; Icon: LucideIcon; exact?: boolean; badge?: keyof AdminCounts };
+type Group = { label: string | null; items: Item[] };
+
+const GROUPS: Group[] = [
+  { label: null, items: [{ href: "/admin", label: "Panel", Icon: LayoutDashboard, exact: true }] },
+  {
+    label: "İçerik",
+    items: [
+      { href: "/admin/ilanlar", label: "İlanlar", Icon: Building2 },
+      { href: "/admin/ilanlar/yeni", label: "Yeni İlan", Icon: PlusCircle },
+      { href: "/admin/blog", label: "Blog", Icon: Newspaper },
+      { href: "/admin/sayfalar", label: "Sayfalar", Icon: FileText },
+    ],
+  },
+  {
+    label: "Talepler & Kişiler",
+    items: [
+      { href: "/admin/onay", label: "Onay Bekleyen", Icon: ClipboardCheck, badge: "pendingListings" },
+      { href: "/admin/talepler", label: "Talepler", Icon: Inbox, badge: "newLeads" },
+      { href: "/admin/alici-talepleri", label: "Alıcı Talepleri", Icon: BellRing, badge: "newAlerts" },
+      { href: "/admin/emlakcilar", label: "Emlakçılar", Icon: Users },
+    ],
+  },
+  {
+    label: "Site",
+    items: [
+      { href: "/admin/yorumlar", label: "Müşteri Yorumları", Icon: MessageSquare },
+      { href: "/admin/reklamlar", label: "Pop-up Reklamlar", Icon: Megaphone },
+      { href: "/admin/ana-sayfa", label: "Ana Sayfa Metinleri", Icon: Home },
+    ],
+  },
+  { label: "Ayarlar", items: [{ href: "/admin/ayarlar", label: "Ayarlar", Icon: Settings }] },
 ];
 
-export default function AdminNav({ mobile = false }: { mobile?: boolean }) {
+export default function AdminNav({
+  counts,
+  collapsed = false,
+  onNavigate,
+}: {
+  counts: AdminCounts;
+  collapsed?: boolean;
+  onNavigate?: () => void;
+}) {
   const pathname = usePathname();
   const router = useRouter();
 
@@ -33,28 +70,59 @@ export default function AdminNav({ mobile = false }: { mobile?: boolean }) {
     exact ? pathname === href : pathname === href || pathname.startsWith(href + "/");
 
   return (
-    <nav className={mobile ? "flex gap-1 overflow-x-auto no-scrollbar" : "flex flex-col gap-1 p-3"}>
-      {ITEMS.map((it) => (
-        <Link
-          key={it.href}
-          href={it.href}
-          className={`flex items-center gap-2.5 rounded-lg px-3 py-2.5 text-sm font-medium whitespace-nowrap transition ${
-            isActive(it.href, it.exact)
-              ? "bg-brand-700 text-white"
-              : "text-slate-700 hover:bg-slate-100"
-          }`}
-        >
-          <span>{it.icon}</span>
-          {it.label}
-        </Link>
+    <nav className="flex flex-1 flex-col gap-5 overflow-y-auto px-3 py-4">
+      {GROUPS.map((group, gi) => (
+        <div key={gi}>
+          {group.label && !collapsed && (
+            <p className="mb-1.5 px-3 text-[11px] font-semibold uppercase tracking-wider text-slate-400">{group.label}</p>
+          )}
+          {group.label && collapsed && gi > 0 && <div className="mx-3 mb-2 border-t border-slate-100" />}
+          <div className="flex flex-col gap-0.5">
+            {group.items.map((it) => {
+              const active = isActive(it.href, it.exact);
+              const count = it.badge ? counts[it.badge] : 0;
+              return (
+                <Link
+                  key={it.href}
+                  href={it.href}
+                  onClick={onNavigate}
+                  title={collapsed ? it.label : undefined}
+                  aria-current={active ? "page" : undefined}
+                  className={`group relative flex items-center rounded-lg text-sm font-medium transition ${
+                    collapsed ? "justify-center px-0 py-2.5" : "gap-3 px-3 py-2.5"
+                  } ${active ? "bg-brand-700 text-white" : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"}`}
+                >
+                  {active && !collapsed && (
+                    <span className="absolute left-0 top-1/2 h-5 w-1 -translate-y-1/2 rounded-r-full bg-gold-400" />
+                  )}
+                  <span className="relative shrink-0">
+                    <it.Icon className="h-[18px] w-[18px]" strokeWidth={active ? 2.3 : 2} />
+                    {count > 0 && collapsed && (
+                      <span className="absolute -right-1.5 -top-1.5 h-2 w-2 rounded-full bg-red-500 ring-2 ring-white" />
+                    )}
+                  </span>
+                  {!collapsed && <span className="flex-1 truncate">{it.label}</span>}
+                  {!collapsed && count > 0 && (
+                    <span className={`rounded-full px-2 py-0.5 text-[11px] font-bold tabular-nums ${active ? "bg-white/20 text-white" : "bg-red-100 text-red-700"}`}>
+                      {count}
+                    </span>
+                  )}
+                </Link>
+              );
+            })}
+          </div>
+        </div>
       ))}
+
       <button
         onClick={logout}
-        className={`flex items-center gap-2.5 rounded-lg px-3 py-2.5 text-sm font-medium text-red-600 hover:bg-red-50 whitespace-nowrap ${
-          mobile ? "" : "mt-2"
+        title={collapsed ? "Çıkış" : undefined}
+        className={`mt-auto flex items-center rounded-lg text-sm font-medium text-red-600 transition hover:bg-red-50 ${
+          collapsed ? "justify-center px-0 py-2.5" : "gap-3 px-3 py-2.5"
         }`}
       >
-        <span>🚪</span> Çıkış
+        <LogOut className="h-[18px] w-[18px] shrink-0" strokeWidth={2} />
+        {!collapsed && "Çıkış"}
       </button>
     </nav>
   );

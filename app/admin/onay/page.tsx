@@ -23,21 +23,21 @@ export default async function AdminModeration() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-extrabold text-slate-900">Onay Bekleyen İlanlar</h1>
+        <h1 className="text-2xl font-bold tracking-tight text-slate-900">Onay Bekleyen İlanlar</h1>
         <p className="text-sm text-slate-500">
           Emlakçıların eklediği {listings.length} ilan yayın onayı bekliyor.
         </p>
       </div>
 
       {listings.length === 0 && (
-        <div className="rounded-2xl bg-white p-10 text-center text-slate-400 ring-1 ring-slate-200">
+        <div className="rounded-xl bg-white p-10 text-center text-slate-400 ring-1 ring-slate-200">
           🎉 Onay bekleyen ilan yok.
         </div>
       )}
 
       <div className="space-y-4">
         {listings.map((l, idx) => (
-          <div key={l.id} className="overflow-hidden rounded-2xl bg-white ring-1 ring-amber-200">
+          <div key={l.id} className="overflow-hidden rounded-xl bg-white ring-1 ring-amber-200">
             <div className="flex flex-col gap-4 p-5 sm:flex-row">
               <div className="relative h-40 w-full shrink-0 overflow-hidden rounded-xl bg-slate-100 sm:h-32 sm:w-44">
                 {l.images[0] && (
@@ -57,7 +57,7 @@ export default async function AdminModeration() {
                 </p>
                 {alertCounts[idx] > 0 && (
                   <Link href="/admin/alici-talepleri" className="mt-1 inline-flex items-center gap-1 rounded-md bg-green-50 px-2 py-1 text-xs font-bold text-green-700 hover:bg-green-100">
-                    🔔 Bu ilana uygun {alertCounts[idx]} alıcı talebi bekliyor
+                    Bu ilana uygun {alertCounts[idx]} alıcı talebi bekliyor
                   </Link>
                 )}
                 <p className="mt-2 line-clamp-2 text-sm text-slate-600">{l.description}</p>

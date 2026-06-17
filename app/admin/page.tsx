@@ -1,8 +1,13 @@
 import Link from "next/link";
+import {
+  Eye, Phone, MessageCircle, Target, Inbox, Sparkles, Building2, CheckCircle2,
+  PlusCircle, ArrowRight,
+} from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { formatNumber, formatDateTime } from "@/lib/format";
 import { LEAD_TYPE_LABELS } from "@/lib/constants";
 import { getAnalyticsStats } from "@/lib/dashboard";
+import { PageHeader, StatTile, StatusBadge, adminCard, adminBtnPrimary } from "@/components/admin/ui";
 
 export const dynamic = "force-dynamic";
 
@@ -37,42 +42,35 @@ export default async function AdminDashboard() {
   );
 
   const stats = [
-    { label: "İlan Görüntülenme", value: analytics.views, icon: "👁️", color: "text-brand-700" },
-    { label: "Telefon Tıklama", value: analytics.phoneClicks, icon: "📞", color: "text-green-600" },
-    { label: "WhatsApp Tıklama", value: analytics.whatsappClicks, icon: "💬", color: "text-green-600" },
-    { label: "Toplam Dönüşüm", value: analytics.conversions, icon: "🎯", color: "text-gold-600" },
-    { label: "Toplam Talep", value: totalLeads, icon: "📬", color: "text-brand-700" },
-    { label: "Yeni Talep", value: newLeads, icon: "🆕", color: "text-red-600" },
-    { label: "Aktif İlan", value: activeListings, icon: "🏠", color: "text-slate-700" },
-    { label: "Satılan", value: soldListings, icon: "✅", color: "text-slate-700" },
+    { label: "İlan Görüntülenme", value: analytics.views, Icon: Eye, tone: "brand" as const },
+    { label: "Telefon Tıklama", value: analytics.phoneClicks, Icon: Phone, tone: "green" as const },
+    { label: "WhatsApp Tıklama", value: analytics.whatsappClicks, Icon: MessageCircle, tone: "green" as const },
+    { label: "Toplam Dönüşüm", value: analytics.conversions, Icon: Target, tone: "gold" as const },
+    { label: "Toplam Talep", value: totalLeads, Icon: Inbox, tone: "brand" as const },
+    { label: "Yeni Talep", value: newLeads, Icon: Sparkles, tone: "red" as const },
+    { label: "Aktif İlan", value: activeListings, Icon: Building2, tone: "slate" as const },
+    { label: "Satılan", value: soldListings, Icon: CheckCircle2, tone: "slate" as const },
   ];
 
   return (
     <div>
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-extrabold text-slate-900">Panel</h1>
-        <Link href="/admin/ilanlar/yeni" className="rounded-lg bg-brand-700 px-4 py-2 text-sm font-bold text-white hover:bg-brand-800">
-          + Yeni İlan
+      <PageHeader title="Panel" description="Sitenin genel durumu ve son hareketler">
+        <Link href="/admin/ilanlar/yeni" className={adminBtnPrimary}>
+          <PlusCircle className="h-4 w-4" /> Yeni İlan
         </Link>
-      </div>
+      </PageHeader>
 
       {/* İstatistik kartları */}
-      <div className="mt-6 grid grid-cols-2 gap-4 lg:grid-cols-4">
+      <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
         {stats.map((s) => (
-          <div key={s.label} className="rounded-2xl bg-white p-5 ring-1 ring-slate-200">
-            <div className="flex items-center justify-between">
-              <span className="text-2xl">{s.icon}</span>
-            </div>
-            <p className={`mt-3 text-3xl font-black ${s.color}`}>{formatNumber(s.value)}</p>
-            <p className="text-xs font-medium text-slate-500">{s.label}</p>
-          </div>
+          <StatTile key={s.label} Icon={s.Icon} label={s.label} value={formatNumber(s.value)} tone={s.tone} />
         ))}
       </div>
 
       <div className="mt-6 grid gap-6 lg:grid-cols-2">
         {/* En çok görüntülenen ilçeler */}
-        <div className="rounded-2xl bg-white p-6 ring-1 ring-slate-200">
-          <h2 className="font-bold text-slate-900">En Çok Görüntülenen İlçeler</h2>
+        <div className={`${adminCard} p-6`}>
+          <h2 className="font-semibold text-slate-900">En Çok Görüntülenen İlçeler</h2>
           <div className="mt-4 space-y-3">
             {analytics.districtViews.length === 0 && <p className="text-sm text-slate-400">Henüz veri yok.</p>}
             {analytics.districtViews.map((d) => {
@@ -94,15 +92,15 @@ export default async function AdminDashboard() {
         </div>
 
         {/* En çok görüntülenen ilanlar */}
-        <div className="rounded-2xl bg-white p-6 ring-1 ring-slate-200">
-          <h2 className="font-bold text-slate-900">En Çok Görüntülenen İlanlar</h2>
+        <div className={`${adminCard} p-6`}>
+          <h2 className="font-semibold text-slate-900">En Çok Görüntülenen İlanlar</h2>
           <div className="mt-4 space-y-2">
             {topListings.length === 0 && <p className="text-sm text-slate-400">Henüz veri yok.</p>}
             {topListings.map((l) => (
               <Link key={l.id} href={`/ilan/${l.slug}`} className="flex items-center justify-between rounded-lg px-2 py-2 hover:bg-slate-50">
                 <span className="line-clamp-1 text-sm text-slate-700">{l.title}</span>
-                <span className="ml-2 shrink-0 rounded-full bg-brand-50 px-2.5 py-0.5 text-xs font-semibold text-brand-700">
-                  👁️ {l.viewCount}
+                <span className="ml-2 inline-flex shrink-0 items-center gap-1 rounded-full bg-brand-50 px-2.5 py-0.5 text-xs font-semibold text-brand-700">
+                  <Eye className="h-3.5 w-3.5" /> {l.viewCount}
                 </span>
               </Link>
             ))}
@@ -110,8 +108,8 @@ export default async function AdminDashboard() {
         </div>
 
         {/* En çok talep alan ilanlar */}
-        <div className="rounded-2xl bg-white p-6 ring-1 ring-slate-200">
-          <h2 className="font-bold text-slate-900">En Çok Talep Alan İlanlar</h2>
+        <div className={`${adminCard} p-6`}>
+          <h2 className="font-semibold text-slate-900">En Çok Talep Alan İlanlar</h2>
           <div className="mt-4 space-y-2">
             {leadsByListing.length === 0 && <p className="text-sm text-slate-400">Henüz talep yok.</p>}
             {leadsByListing.map((l) => {
@@ -120,8 +118,8 @@ export default async function AdminDashboard() {
               return (
                 <Link key={l.listingId} href={`/ilan/${listing.slug}`} className="flex items-center justify-between rounded-lg px-2 py-2 hover:bg-slate-50">
                   <span className="line-clamp-1 text-sm text-slate-700">{listing.title}</span>
-                  <span className="ml-2 shrink-0 rounded-full bg-gold-50 px-2.5 py-0.5 text-xs font-semibold text-gold-600">
-                    📬 {l._count.listingId}
+                  <span className="ml-2 inline-flex shrink-0 items-center gap-1 rounded-full bg-gold-100 px-2.5 py-0.5 text-xs font-semibold text-gold-700">
+                    <Inbox className="h-3.5 w-3.5" /> {l._count.listingId}
                   </span>
                 </Link>
               );
@@ -130,8 +128,8 @@ export default async function AdminDashboard() {
         </div>
 
         {/* Dönüşüm kaynakları */}
-        <div className="rounded-2xl bg-white p-6 ring-1 ring-slate-200">
-          <h2 className="font-bold text-slate-900">Dönüşüm Kaynakları (Son 30 Gün)</h2>
+        <div className={`${adminCard} p-6`}>
+          <h2 className="font-semibold text-slate-900">Dönüşüm Kaynakları (Son 30 Gün)</h2>
           <p className="text-xs text-slate-400">Google Ads dönüşüm takibi (utm_source / gclid)</p>
           <div className="mt-4 space-y-2">
             {analytics.bySource.length === 0 && <p className="text-sm text-slate-400">Henüz dönüşüm verisi yok.</p>}
@@ -146,10 +144,10 @@ export default async function AdminDashboard() {
       </div>
 
       {/* Son talepler */}
-      <div className="mt-6 rounded-2xl bg-white p-6 ring-1 ring-slate-200">
+      <div className={`mt-6 ${adminCard} p-6`}>
         <div className="flex items-center justify-between">
-          <h2 className="font-bold text-slate-900">Son Gelen Talepler</h2>
-          <Link href="/admin/talepler" className="text-sm font-semibold text-brand-700 hover:underline">Tümü →</Link>
+          <h2 className="font-semibold text-slate-900">Son Gelen Talepler</h2>
+          <Link href="/admin/talepler" className="inline-flex items-center gap-1 text-sm font-semibold text-brand-700 hover:underline">Tümü <ArrowRight className="h-4 w-4" /></Link>
         </div>
         <div className="mt-4 overflow-x-auto">
           <table className="w-full text-sm">
@@ -168,7 +166,7 @@ export default async function AdminDashboard() {
               {recentLeads.map((l) => (
                 <tr key={l.id} className="border-b border-slate-50">
                   <td className="py-2.5 pr-4 text-slate-500 whitespace-nowrap">{formatDateTime(l.createdAt)}</td>
-                  <td className="py-2.5 pr-4"><span className="rounded-full bg-brand-50 px-2 py-0.5 text-xs font-medium text-brand-700">{LEAD_TYPE_LABELS[l.type] || l.type}</span></td>
+                  <td className="py-2.5 pr-4"><StatusBadge tone="brand">{LEAD_TYPE_LABELS[l.type] || l.type}</StatusBadge></td>
                   <td className="py-2.5 pr-4 font-medium text-slate-800">{l.name}</td>
                   <td className="py-2.5 pr-4"><a href={`tel:${l.phone}`} className="text-brand-700 hover:underline">{l.phone}</a></td>
                 </tr>
