@@ -1,8 +1,10 @@
 import Link from "next/link";
+import { Phone, Mail, MessageCircle, Inbox } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { formatDateTime, parseJsonArray } from "@/lib/format";
 import { LEAD_TYPE_LABELS, LEAD_STATUS_LABELS } from "@/lib/constants";
 import { updateLeadStatus, deleteLead } from "../actions";
+import { PageHeader, StatusBadge, EmptyState, adminCard } from "@/components/admin/ui";
 
 export const dynamic = "force-dynamic";
 
@@ -15,10 +17,10 @@ const TYPE_TABS = [
   { key: "contact", label: "İletişim" },
 ];
 
-const statusColor: Record<string, string> = {
-  new: "bg-red-100 text-red-700",
-  contacted: "bg-amber-100 text-amber-700",
-  closed: "bg-green-100 text-green-700",
+const STATUS_TONE: Record<string, "danger" | "warning" | "success"> = {
+  new: "danger",
+  contacted: "warning",
+  closed: "success",
 };
 
 export default async function AdminLeads({
@@ -40,11 +42,10 @@ export default async function AdminLeads({
 
   return (
     <div>
-      <h1 className="text-2xl font-extrabold text-slate-900">Gelen Talepler</h1>
-      <p className="text-sm text-slate-500">{leads.length} kayıt</p>
+      <PageHeader title="Gelen Talepler" description={`${leads.length} kayıt`} />
 
       {/* Tip sekmeleri */}
-      <div className="mt-5 flex flex-wrap gap-2">
+      <div className="flex flex-wrap gap-2">
         {TYPE_TABS.map((t) => {
           const active = (sp.tip || "") === t.key;
           const qs = new URLSearchParams();
@@ -64,30 +65,24 @@ export default async function AdminLeads({
 
       <div className="mt-6 space-y-3">
         {leads.length === 0 && (
-          <div className="rounded-2xl bg-white p-10 text-center text-slate-400 ring-1 ring-slate-200">
-            Bu filtreye uygun talep yok.
-          </div>
+          <EmptyState Icon={Inbox} title="Bu filtreye uygun talep yok" text="Farklı bir sekme seçin ya da tüm talepleri görüntüleyin." />
         )}
         {leads.map((l) => {
           const photos = parseJsonArray(l.photos);
           return (
-            <div key={l.id} className="rounded-2xl bg-white p-5 ring-1 ring-slate-200">
+            <div key={l.id} className={`${adminCard} p-5`}>
               <div className="flex flex-wrap items-start justify-between gap-3">
                 <div>
-                  <div className="flex items-center gap-2">
-                    <span className="rounded-full bg-brand-50 px-2.5 py-0.5 text-xs font-semibold text-brand-700">
-                      {LEAD_TYPE_LABELS[l.type] || l.type}
-                    </span>
-                    <span className={`rounded-full px-2.5 py-0.5 text-xs font-semibold ${statusColor[l.status]}`}>
-                      {LEAD_STATUS_LABELS[l.status]}
-                    </span>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <StatusBadge tone="brand">{LEAD_TYPE_LABELS[l.type] || l.type}</StatusBadge>
+                    <StatusBadge tone={STATUS_TONE[l.status] || "neutral"}>{LEAD_STATUS_LABELS[l.status]}</StatusBadge>
                     <span className="text-xs text-slate-400">{formatDateTime(l.createdAt)}</span>
                   </div>
-                  <h3 className="mt-2 text-lg font-bold text-slate-900">{l.name}</h3>
-                  <div className="mt-1 flex flex-wrap gap-x-4 gap-y-1 text-sm text-slate-600">
-                    <a href={`tel:${l.phone}`} className="font-semibold text-brand-700 hover:underline">📞 {l.phone}</a>
-                    {l.email && <span>✉️ {l.email}</span>}
-                    <a href={`https://wa.me/${l.phone.replace(/[^\d]/g, "")}`} target="_blank" rel="noopener noreferrer" className="text-green-600 hover:underline">💬 WhatsApp</a>
+                  <h3 className="mt-2 text-lg font-semibold text-slate-900">{l.name}</h3>
+                  <div className="mt-1.5 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-slate-600">
+                    <a href={`tel:${l.phone}`} className="inline-flex items-center gap-1.5 font-semibold text-brand-700 hover:underline"><Phone className="h-4 w-4" /> {l.phone}</a>
+                    {l.email && <span className="inline-flex items-center gap-1.5"><Mail className="h-4 w-4 text-slate-400" /> {l.email}</span>}
+                    <a href={`https://wa.me/${l.phone.replace(/[^\d]/g, "")}`} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 text-green-600 hover:underline"><MessageCircle className="h-4 w-4" /> WhatsApp</a>
                   </div>
                 </div>
 

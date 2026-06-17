@@ -19,7 +19,7 @@ export default function MobileContactBar({
       <a
         href={telLink()}
         onClick={() => trackConversion({ type: "phone_click", listingId, district })}
-        className="flex items-center justify-center gap-2 rounded-xl bg-brand-700 py-3 text-sm font-bold text-white"
+        className="flex items-center justify-center gap-2 rounded-[10px] bg-brand-700 py-3.5 text-sm font-semibold text-white"
       >
         <Phone className="h-4 w-4" /> Ara
       </a>
@@ -28,7 +28,7 @@ export default function MobileContactBar({
         target="_blank"
         rel="noopener noreferrer"
         onClick={() => trackConversion({ type: "whatsapp_click", listingId, district })}
-        className="flex items-center justify-center gap-2 rounded-xl bg-green-600 py-3 text-sm font-bold text-white"
+        className="flex items-center justify-center gap-2 rounded-[10px] bg-green-600 py-3.5 text-sm font-semibold text-white"
       >
         <MessageCircle className="h-4 w-4" /> WhatsApp
       </a>

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { CheckCircle2, Lock } from "lucide-react";
 import { useUtm } from "@/lib/useUtm";
 import { trackConversion } from "@/lib/track";
 import { DISTRICTS, PROPERTY_TYPES } from "@/lib/constants";
@@ -61,10 +62,12 @@ export default function SellerForm() {
 
   if (status === "ok") {
     return (
-      <div className="rounded-2xl bg-white p-8 text-center shadow-xl">
-        <div className="text-5xl">🎉</div>
-        <h3 className="mt-3 text-2xl font-bold text-slate-900">Talebiniz alındı!</h3>
-        <p className="mt-2 text-slate-600">
+      <div className="rounded-xl bg-white p-8 text-center ring-1 ring-slate-200">
+        <span className="mx-auto grid h-14 w-14 place-items-center rounded-full bg-green-50 text-green-600 ring-1 ring-green-200">
+          <CheckCircle2 className="h-8 w-8" />
+        </span>
+        <h3 className="mt-4 font-display text-2xl font-bold text-slate-900">Talebiniz alındı</h3>
+        <p className="mt-2 leading-relaxed text-slate-600">
           Mülkünüz için en kısa sürede sizinle iletişime geçeceğiz. Doğru fiyatlandırma
           ve hızlı satış için ekibimiz sizi arayacak.
         </p>
@@ -72,66 +75,88 @@ export default function SellerForm() {
     );
   }
 
+  const labelCls = "mb-1.5 block text-sm font-semibold text-slate-700";
   const inputCls =
-    "w-full rounded-lg border border-slate-300 px-3.5 py-3 text-sm focus:border-brand-500 focus:ring-1 focus:ring-brand-500 outline-none";
+    "w-full h-12 rounded-[10px] border border-slate-300 bg-white px-3.5 text-base text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/30";
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-3.5">
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
-        <input name="name" required placeholder="Ad Soyad *" className={inputCls} />
-        <input name="phone" required type="tel" placeholder="Telefon *" className={inputCls} />
+    <form onSubmit={handleSubmit} className="space-y-4">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <div>
+          <label htmlFor="sf-name" className={labelCls}>Ad Soyad <span className="text-red-500">*</span></label>
+          <input id="sf-name" name="name" required placeholder="Adınız ve soyadınız" className={inputCls} />
+        </div>
+        <div>
+          <label htmlFor="sf-phone" className={labelCls}>Telefon <span className="text-red-500">*</span></label>
+          <input id="sf-phone" name="phone" required type="tel" inputMode="tel" placeholder="05__ ___ __ __" className={inputCls} />
+        </div>
       </div>
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
-        <select name="district" required defaultValue="" className={inputCls}>
-          <option value="" disabled>İlçe seçin *</option>
-          {DISTRICTS.map((d) => (
-            <option key={d.slug} value={d.name}>{d.name}</option>
-          ))}
-        </select>
-        <input name="neighborhood" placeholder="Mahalle" className={inputCls} />
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <div>
+          <label htmlFor="sf-district" className={labelCls}>İlçe <span className="text-red-500">*</span></label>
+          <select id="sf-district" name="district" required defaultValue="" className={inputCls}>
+            <option value="" disabled>İlçe seçin</option>
+            {DISTRICTS.map((d) => (
+              <option key={d.slug} value={d.name}>{d.name}</option>
+            ))}
+          </select>
+        </div>
+        <div>
+          <label htmlFor="sf-neighborhood" className={labelCls}>Mahalle</label>
+          <input id="sf-neighborhood" name="neighborhood" placeholder="Mahalle (opsiyonel)" className={inputCls} />
+        </div>
       </div>
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
-        <select name="propertyType" required defaultValue="" className={inputCls}>
-          <option value="" disabled>Mülk Türü *</option>
-          {PROPERTY_TYPES.map((p) => (
-            <option key={p.value} value={p.label}>{p.label}</option>
-          ))}
-        </select>
-        <input name="estimatedPrice" placeholder="Tahmini Fiyat (₺)" className={inputCls} />
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <div>
+          <label htmlFor="sf-type" className={labelCls}>Mülk Türü <span className="text-red-500">*</span></label>
+          <select id="sf-type" name="propertyType" required defaultValue="" className={inputCls}>
+            <option value="" disabled>Tür seçin</option>
+            {PROPERTY_TYPES.map((p) => (
+              <option key={p.value} value={p.label}>{p.label}</option>
+            ))}
+          </select>
+        </div>
+        <div>
+          <label htmlFor="sf-price" className={labelCls}>Tahmini Fiyat</label>
+          <input id="sf-price" name="estimatedPrice" inputMode="numeric" placeholder="Örn. 2.500.000 ₺" className={inputCls} />
+        </div>
       </div>
-      <textarea name="message" rows={2} placeholder="Eklemek istedikleriniz (m², oda sayısı, durum...)" className={inputCls} />
+      <div>
+        <label htmlFor="sf-message" className={labelCls}>Eklemek istedikleriniz</label>
+        <textarea id="sf-message" name="message" rows={3} placeholder="m², oda sayısı, bina durumu gibi detaylar..." className={`${inputCls} h-auto py-3 leading-relaxed`} />
+      </div>
 
       <div>
-        <label className="block">
-          <span className="text-sm font-medium text-slate-700">Fotoğraf Yükle (opsiyonel, en fazla 6)</span>
-          <input
-            type="file"
-            accept="image/*"
-            multiple
-            onChange={(e) => setFiles(Array.from(e.target.files || []))}
-            className="mt-1.5 block w-full text-sm text-slate-600 file:mr-3 file:rounded-lg file:border-0 file:bg-brand-50 file:px-4 file:py-2.5 file:text-sm file:font-semibold file:text-brand-700 hover:file:bg-brand-100"
-          />
-        </label>
+        <span className={labelCls}>Fotoğraf ekleyin <span className="font-normal text-slate-400">(opsiyonel, en fazla 6)</span></span>
+        <input
+          type="file"
+          accept="image/*"
+          multiple
+          onChange={(e) => setFiles(Array.from(e.target.files || []))}
+          className="block w-full text-sm text-slate-600 file:mr-3 file:rounded-[10px] file:border-0 file:bg-brand-50 file:px-4 file:py-2.5 file:text-sm file:font-semibold file:text-brand-700 hover:file:bg-brand-100"
+        />
         {files.length > 0 && (
-          <p className="mt-1.5 text-xs text-slate-500">{files.length} fotoğraf seçildi</p>
+          <p className="mt-1.5 text-sm text-slate-500">{files.length} fotoğraf seçildi</p>
         )}
       </div>
 
-      {status === "error" && <p className="text-sm text-red-600">{error}</p>}
+      {status === "error" && (
+        <p className="rounded-[10px] bg-red-50 px-3.5 py-2.5 text-sm font-medium text-red-700 ring-1 ring-red-200">{error}</p>
+      )}
 
       <button
         type="submit"
         disabled={status === "uploading" || status === "loading"}
-        className="w-full rounded-xl bg-gold-500 px-4 py-3.5 text-base font-bold text-slate-900 hover:bg-gold-400 disabled:opacity-60 transition shadow-md"
+        className="w-full rounded-[10px] bg-brand-700 px-4 py-3.5 text-base font-semibold text-white transition hover:bg-brand-800 disabled:opacity-60"
       >
         {status === "uploading"
           ? "Fotoğraflar yükleniyor..."
           : status === "loading"
           ? "Gönderiliyor..."
-          : "Ücretsiz Değerleme Talep Et →"}
+          : "Ücretsiz Değerleme Talep Et"}
       </button>
-      <p className="text-center text-xs text-slate-500">
-        Komisyon ve satış sürecini sizin için yönetiyoruz. Hızlı, güvenli, şeffaf.
+      <p className="flex items-center justify-center gap-1.5 text-center text-[13px] text-slate-500">
+        <Lock className="h-3.5 w-3.5" /> Bilgileriniz KVKK kapsamında korunur. Spam göndermiyoruz.
       </p>
     </form>
   );

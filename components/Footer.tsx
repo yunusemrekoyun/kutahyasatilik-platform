@@ -27,10 +27,8 @@ export default async function Footer() {
             { Icon: Zap, t: "Hızlı Dönüş", s: "Taleplere aynı gün geri dönüş" },
             { Icon: LineChart, t: "Dijital Analiz", s: "Veri destekli yatırım analizi" },
           ].map((f) => (
-            <div key={f.t} className="flex items-start gap-3">
-              <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-white/10 text-gold-300 ring-1 ring-white/10">
-                <f.Icon className="h-5 w-5" strokeWidth={1.7} />
-              </span>
+            <div key={f.t} className="flex items-start gap-2.5">
+              <f.Icon className="mt-0.5 h-5 w-5 shrink-0 text-gold-400" strokeWidth={1.7} />
               <div>
                 <p className="text-sm font-semibold text-white">{f.t}</p>
                 <p className="text-xs text-slate-400">{f.s}</p>
@@ -42,12 +40,9 @@ export default async function Footer() {
 
       <div className="mx-auto max-w-7xl px-4 py-12 grid gap-8 md:grid-cols-5">
         <div className="md:col-span-2">
-          <div className="flex items-center gap-2.5">
-            <span className="grid h-10 w-10 place-items-center rounded-lg bg-gradient-to-br from-brand-700 to-brand-900 text-gold-300 font-display font-bold text-lg">K</span>
-            <span className="font-display text-lg font-bold text-white">
-              Kütahya<span className="text-gold-400">Satılık</span>
-            </span>
-          </div>
+          <span className="font-display text-xl font-bold tracking-tight text-white">
+            Kütahya<span className="text-gold-400">Satılık</span>
+          </span>
           <p className="mt-4 max-w-sm text-sm leading-relaxed text-slate-400">
             {SITE.brand}. Kütahya merkez ve tüm ilçelerinde satılık daire, arsa, villa
             ve yatırımlık tarla portföyü. Alım, satım ve yatırım danışmanlığında
@@ -60,7 +55,7 @@ export default async function Footer() {
         </div>
 
         <div>
-          <h4 className="font-semibold text-white">Kategoriler</h4>
+          <h4 className="text-sm font-bold uppercase tracking-wider text-gold-300">Kategoriler</h4>
           <ul className="mt-4 space-y-2.5 text-sm">
             <li><Link href="/kutahya-satilik-daire" className="hover:text-gold-300">Satılık Daire</Link></li>
             <li><Link href="/kutahya-satilik-arsa" className="hover:text-gold-300">Satılık Arsa</Link></li>
@@ -72,7 +67,7 @@ export default async function Footer() {
         </div>
 
         <div>
-          <h4 className="font-semibold text-white">Kurumsal</h4>
+          <h4 className="text-sm font-bold uppercase tracking-wider text-gold-300">Kurumsal</h4>
           <ul className="mt-4 space-y-2.5 text-sm">
             <li><Link href="/hakkimizda" className="hover:text-gold-300">Hakkımızda</Link></li>
             <li><Link href="/blog" className="hover:text-gold-300">Blog</Link></li>
@@ -89,7 +84,7 @@ export default async function Footer() {
         </div>
 
         <div>
-          <h4 className="font-semibold text-white">İlçeler</h4>
+          <h4 className="text-sm font-bold uppercase tracking-wider text-gold-300">İlçeler</h4>
           <ul className="mt-4 grid grid-cols-2 gap-x-4 gap-y-2.5 text-sm">
             {DISTRICTS.slice(0, 8).map((d) => (
               <li key={d.slug}>

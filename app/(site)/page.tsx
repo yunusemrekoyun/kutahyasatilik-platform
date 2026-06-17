@@ -1,7 +1,7 @@
 import Link from "next/link";
 import {
   Building2, LandPlot, Home as HomeIcon, Trees, LineChart, Headset, ShieldCheck,
-  CheckCircle2, MapPin, Award, Star, BarChart3, ArrowRight, Phone,
+  CheckCircle2, Star, BarChart3, ArrowRight, Phone,
 } from "lucide-react";
 import { getFeaturedListings, getMapPoints } from "@/lib/listings";
 import { prisma } from "@/lib/prisma";
@@ -9,7 +9,6 @@ import { DISTRICTS, LANDING_PAGES } from "@/lib/constants";
 import { SITE, telLink } from "@/lib/site";
 import ListingCard from "@/components/ListingCard";
 import HomeSearch from "@/components/HomeSearch";
-import SellerForm from "@/components/SellerForm";
 import ListingsMap from "@/components/ListingsMap";
 import NotFoundCTA from "@/components/NotFoundCTA";
 import TrackView from "@/components/TrackView";
@@ -26,6 +25,7 @@ async function getHomeTexts() {
   const keys = [
     "home_hero_badge", "home_hero_title", "home_hero_highlight",
     "home_hero_subtitle", "home_stat_sales", "home_stat_years", "home_why_title",
+    "home_hero_image",
   ];
   try {
     const rows = await prisma.setting.findMany({ where: { key: { in: keys } } });
@@ -60,76 +60,65 @@ export default async function Home() {
   const statSales = texts.get("home_stat_sales");
   const statYears = texts.get("home_stat_years") || "15";
   const whyTitle = t("home_why_title", `Neden ${SITE.name}?`);
+  const heroImage = texts.get("home_hero_image");
 
   return (
     <>
       <TrackView />
 
-      {/* HERO */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-brand-800 via-brand-900 to-brand-950 text-white">
-        <div className="absolute inset-0 opacity-[0.07]" style={{ backgroundImage: "radial-gradient(circle at 20% 30%, #fff 1px, transparent 1px)", backgroundSize: "34px 34px" }} />
-        <div className="relative mx-auto grid max-w-7xl items-center gap-12 px-4 py-14 sm:py-20 lg:grid-cols-2">
-          <div className="animate-fade-up">
-            <span className="inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-1.5 text-sm font-medium ring-1 ring-gold-400/40">
-              <Star className="h-3.5 w-3.5 fill-current text-gold-400" /> {heroBadge}
-            </span>
-            <h1 className="mt-5 font-display text-4xl font-bold leading-[1.1] sm:text-5xl lg:text-[3.4rem]">
-              {heroTitle}
-              <span className="text-gold-400"> {heroHighlight}</span>
-            </h1>
-            <p className="mt-5 max-w-xl text-lg text-brand-100">{heroSubtitle}</p>
-            <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-              <Link href="/ilanlar" className="rounded-xl bg-gold-500 px-6 py-3.5 text-center font-bold text-brand-950 transition hover:bg-gold-400">
-                İlanları İncele
-              </Link>
-              <a href={telLink()} className="inline-flex items-center justify-center gap-2 rounded-xl bg-white/10 px-6 py-3.5 text-center font-bold text-white ring-1 ring-white/30 transition hover:bg-white/20">
-                <Phone className="h-4 w-4" /> {SITE.phone}
-              </a>
-            </div>
-            <div className="mt-8 flex flex-wrap items-center gap-x-7 gap-y-3 text-sm text-brand-100">
-              <Link href="/degerleme" className="inline-flex items-center gap-1.5 font-medium text-gold-300 underline-offset-4 hover:underline">
+      {/* HERO — arama odakta */}
+      <section className="relative isolate overflow-hidden bg-brand-950 text-white">
+        {heroImage ? (
+          <>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={heroImage} alt="" className="absolute inset-0 -z-10 h-full w-full object-cover opacity-55" />
+            <div className="absolute inset-0 -z-10 bg-gradient-to-b from-brand-950/70 via-brand-950/45 to-brand-950/80" />
+          </>
+        ) : (
+          <div className="absolute inset-0 -z-10 bg-gradient-to-b from-brand-900/60 to-transparent" />
+        )}
+        <div className="relative mx-auto max-w-3xl px-4 py-16 text-center sm:py-20">
+          <span className="animate-fade-up inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-1.5 text-sm font-medium ring-1 ring-gold-400/40">
+            <Star className="h-3.5 w-3.5 fill-current text-gold-400" /> {heroBadge}
+          </span>
+          <h1 className="animate-fade-up mt-5 text-balance font-display text-4xl font-bold leading-[1.08] tracking-[-0.01em] sm:text-5xl">
+            {heroTitle}
+            <span className="text-gold-400"> {heroHighlight}</span>
+          </h1>
+          <p className="animate-fade-up mx-auto mt-5 max-w-2xl text-lg leading-relaxed text-brand-100">
+            {heroSubtitle}
+          </p>
+        </div>
+
+        {/* Arama — sayfanın tek en önemli öğesi */}
+        <div className="relative mx-auto -mb-10 max-w-5xl px-4 sm:-mb-12">
+          <div className="animate-fade-up rounded-2xl bg-white p-4 text-slate-900 shadow-prestige ring-1 ring-slate-200 sm:p-5">
+            <HomeSearch />
+            <div className="mt-3 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-[13px] text-slate-500">
+              <Link href="/degerleme" className="inline-flex items-center gap-1.5 font-medium text-brand-700 hover:text-brand-800">
                 <BarChart3 className="h-4 w-4" /> Evimin değeri ne kadar?
               </Link>
-              <span className="inline-flex items-center gap-1.5"><CheckCircle2 className="h-4 w-4 text-gold-400" /> Komisyonlu Güvenli Satış</span>
-              <span className="inline-flex items-center gap-1.5"><CheckCircle2 className="h-4 w-4 text-gold-400" /> Yatırım Danışmanlığı</span>
-            </div>
-          </div>
-
-          {/* SATICI FORMU */}
-          <div className="animate-fade-up rounded-3xl bg-white p-6 text-slate-900 shadow-2xl sm:p-7" id="satici-formu">
-            <div className="text-center">
-              <h2 className="font-display text-2xl font-bold text-brand-900">Mülkünüzü Satmak mı İstiyorsunuz?</h2>
-              <p className="mt-1.5 text-sm text-slate-600">
-                Formu doldurun, uzman ekibimiz <strong className="text-brand-700">ücretsiz değerleme</strong> için sizi arasın.
-              </p>
-            </div>
-            <div className="mt-5">
-              <SellerForm />
+              <span className="inline-flex items-center gap-1.5"><CheckCircle2 className="h-4 w-4 text-green-600" /> Komisyonlu güvenli satış</span>
+              <a href={telLink()} className="inline-flex items-center gap-1.5 font-medium text-brand-700 hover:text-brand-800">
+                <Phone className="h-4 w-4" /> {SITE.phone}
+              </a>
             </div>
           </div>
         </div>
       </section>
 
-      {/* ARAMA / FİLTRE BANDI */}
-      <section className="relative z-10 mx-auto -mt-7 max-w-6xl px-4">
-        <HomeSearch />
-      </section>
-
-      {/* İSTATİSTİK BANDI */}
-      <section className="border-b border-slate-200 bg-white pt-8">
-        <div className="mx-auto grid max-w-7xl grid-cols-2 gap-6 px-4 py-8 sm:grid-cols-4">
+      {/* İSTATİSTİK BANDI — ikon kutusuz, hairline ayraçlı */}
+      <section className="border-b border-slate-200 bg-white pt-16 sm:pt-20">
+        <div className="mx-auto grid max-w-5xl grid-cols-2 divide-x divide-y divide-slate-100 px-4 py-2 sm:grid-cols-4 sm:divide-y-0">
           {[
-            { v: `${totalActive}+`, l: "Aktif İlan", Icon: Building2 },
-            { v: `${totalSold + Number(statSales || 850)}+`, l: "Tamamlanan Satış", Icon: CheckCircle2 },
-            { v: "13", l: "İlçede Hizmet", Icon: MapPin },
-            { v: `${statYears}+`, l: "Yıl Tecrübe", Icon: Award },
+            { v: `${totalActive}+`, l: "Aktif İlan" },
+            { v: `${totalSold + Number(statSales || 850)}+`, l: "Tamamlanan Satış" },
+            { v: "13", l: "İlçede Hizmet" },
+            { v: `${statYears}+`, l: "Yıl Tecrübe" },
           ].map((s) => (
-            <div key={s.l} className="flex flex-col items-center text-center">
-              <span className="mb-2 grid h-10 w-10 place-items-center rounded-xl bg-brand-50 text-brand-700">
-                <s.Icon className="h-5 w-5" />
-              </span>
-              <p className="font-display text-3xl font-bold text-brand-800 sm:text-4xl">{s.v}</p>
-              <p className="mt-1 text-xs font-medium text-slate-500 sm:text-sm">{s.l}</p>
+            <div key={s.l} className="px-4 py-7 text-center">
+              <p className="font-display text-3xl font-bold tabular-nums text-brand-800 sm:text-4xl">{s.v}</p>
+              <p className="mt-1 text-sm font-medium text-slate-500">{s.l}</p>
             </div>
           ))}
         </div>
@@ -137,11 +126,9 @@ export default async function Home() {
 
       {/* KATEGORİLER */}
       <section className="mx-auto max-w-7xl px-4 py-14">
-        <div className="text-center">
-          <h2 className="font-display text-3xl font-bold text-brand-900">Ne Arıyorsunuz?</h2>
-          <div className="gold-divider mx-auto mt-3" />
-        </div>
-        <div className="mt-8 grid grid-cols-2 gap-4 lg:grid-cols-4">
+        <h2 className="font-display text-2xl font-bold text-brand-900 sm:text-3xl">Ne Arıyorsunuz?</h2>
+        <p className="mt-1.5 text-slate-500">Mülk türüne göre Kütahya portföyünü keşfedin.</p>
+        <div className="mt-7 grid grid-cols-2 gap-4 lg:grid-cols-4">
           {LANDING_PAGES.map((c) => {
             const Icon =
               c.propertyType === "daire" ? Building2 :
@@ -151,15 +138,12 @@ export default async function Home() {
               <Link
                 key={c.slug}
                 href={`/${c.slug}`}
-                className="group rounded-2xl bg-white p-7 text-center ring-1 ring-slate-200 transition hover:-translate-y-1 hover:shadow-prestige hover:ring-brand-200"
+                className="group flex flex-col items-center justify-center gap-4 rounded-xl bg-white p-6 text-center ring-1 ring-slate-200 transition duration-300 hover:shadow-card hover:ring-brand-200"
               >
-                <span className="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-gradient-to-br from-brand-50 to-brand-100 text-brand-700 transition group-hover:from-brand-700 group-hover:to-brand-900 group-hover:text-gold-300">
+                <span className="grid h-16 w-16 place-items-center rounded-full bg-slate-100 text-brand-700 transition-colors group-hover:bg-brand-700 group-hover:text-white">
                   <Icon className="h-7 w-7" strokeWidth={1.6} />
                 </span>
-                <h3 className="mt-4 font-semibold text-slate-800 group-hover:text-brand-700">{c.title}</h3>
-                <p className="mt-1 inline-flex items-center justify-center gap-1 text-xs font-medium text-gold-600 opacity-0 transition group-hover:opacity-100">
-                  İncele <ArrowRight className="h-3 w-3" />
-                </p>
+                <span className="font-display text-lg font-semibold text-slate-900">{c.title}</span>
               </Link>
             );
           })}
@@ -168,17 +152,16 @@ export default async function Home() {
 
       {/* ÖNE ÇIKAN İLANLAR */}
       <section className="mx-auto max-w-7xl px-4">
-        <div className="flex items-end justify-between">
+        <div className="flex items-end justify-between gap-4">
           <div>
-            <p className="text-sm font-medium uppercase tracking-wider text-gold-600">Vitrin</p>
-            <h2 className="font-display text-3xl font-bold text-brand-900">Öne Çıkan İlanlar</h2>
-            <div className="gold-divider mt-2" />
+            <h2 className="font-display text-2xl font-bold text-brand-900 sm:text-3xl">Öne Çıkan İlanlar</h2>
+            <p className="mt-1.5 text-slate-500">Editörün seçtiği güncel fırsatlar.</p>
           </div>
-          <Link href="/ilanlar" className="hidden text-sm font-semibold text-brand-700 hover:underline sm:inline-flex">
-            Tümünü Gör →
+          <Link href="/ilanlar" className="inline-flex shrink-0 items-center gap-1 text-sm font-semibold text-brand-700 hover:text-brand-800">
+            Tümünü gör <ArrowRight className="h-4 w-4" />
           </Link>
         </div>
-        <div className="mt-8 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="mt-7 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
           {featured.map((l) => (
             <ListingCard key={l.slug} listing={l} />
           ))}
@@ -190,36 +173,60 @@ export default async function Home() {
         )}
       </section>
 
+      {/* MÜLKÜNÜ SAT — CTA */}
+      <section className="px-4 py-16">
+        <div className="relative mx-auto max-w-4xl overflow-hidden rounded-2xl bg-brand-950 p-10 text-center sm:p-14">
+          <div className="pointer-events-none absolute -right-20 -top-20 h-64 w-64 rounded-full bg-brand-700/40 blur-3xl" />
+          <div className="pointer-events-none absolute -bottom-20 -left-20 h-64 w-64 rounded-full bg-gold-500/20 blur-3xl" />
+          <div className="relative">
+            <h2 className="font-display text-2xl font-bold text-white sm:text-3xl">
+              Mülkünüzü satmak mı istiyorsunuz?
+            </h2>
+            <p className="mx-auto mt-4 max-w-xl leading-relaxed text-brand-100">
+              Uzman ekibimizle gayrimenkulünüzün gerçek piyasa değerini öğrenin ve güvenle satışa çıkarın.
+            </p>
+            <Link
+              href="/satici"
+              className="mt-8 inline-flex items-center justify-center rounded-lg bg-white px-8 py-4 font-semibold text-brand-800 transition-colors hover:bg-brand-50"
+            >
+              Ücretsiz Değerleme Al
+            </Link>
+          </div>
+        </div>
+      </section>
+
       {/* HARİTA */}
       <section className="mx-auto max-w-7xl px-4 py-14">
-        <div className="rounded-3xl bg-white p-6 ring-1 ring-slate-200 sm:p-8">
-          <h2 className="font-display text-3xl font-bold text-brand-900">Haritada Keşfedin</h2>
-          <p className="mt-1 text-slate-600">İlçe seçerek bölgedeki tüm ilanları harita üzerinde görüntüleyin.</p>
-          <div className="mt-6">
+        <div className="rounded-2xl bg-white p-5 ring-1 ring-slate-200 sm:p-7">
+          <h2 className="font-display text-2xl font-bold text-brand-900 sm:text-3xl">Haritada Keşfedin</h2>
+          <p className="mt-1.5 text-slate-500">İlçe seçerek bölgedeki tüm ilanları harita üzerinde görüntüleyin.</p>
+          <div className="mt-6 overflow-hidden rounded-xl ring-1 ring-slate-200">
             <ListingsMap points={points} height="480px" />
           </div>
         </div>
       </section>
 
       {/* SÜREÇ / NEDEN BİZ */}
-      <section className="bg-white">
-        <div className="mx-auto max-w-7xl px-4 py-16">
-          <div className="text-center">
-            <h2 className="font-display text-3xl font-bold text-brand-900">{whyTitle}</h2>
-            <div className="gold-divider mx-auto mt-3" />
+      <section className="border-y border-slate-200 bg-white">
+        <div className="mx-auto max-w-7xl px-4 py-16 sm:py-20">
+          <div className="mx-auto mb-12 max-w-2xl text-center">
+            <h2 className="font-display text-2xl font-bold text-brand-900 sm:text-3xl">{whyTitle}</h2>
+            <p className="mt-3 leading-relaxed text-slate-600">
+              Kütahya gayrimenkul piyasasında güven, hız ve uzmanlık standartlarını belirliyoruz.
+            </p>
           </div>
-          <div className="mt-10 grid gap-6 md:grid-cols-3">
+          <div className="grid gap-10 md:grid-cols-3">
             {[
               { Icon: LineChart, title: "Veri Destekli Bölge Analizi", text: "Her ilanda bölge analizi, yatırım puanı ve gelişim potansiyeli otomatik sunulur." },
               { Icon: Headset, title: "Dakikalar İçinde İletişim", text: "Telefon, WhatsApp, randevu ve ekspertiz talebiyle saniyeler içinde bize ulaşın." },
               { Icon: ShieldCheck, title: "Güvenli & Şeffaf Satış", text: "Tüm satış sürecini şeffaf ve güvenli şekilde sizin için yönetiyoruz." },
             ].map((f) => (
-              <div key={f.title} className="rounded-2xl bg-brand-50 p-7 ring-1 ring-brand-100">
-                <span className="grid h-12 w-12 place-items-center rounded-xl bg-white text-brand-700 ring-1 ring-brand-100">
-                  <f.Icon className="h-6 w-6" strokeWidth={1.7} />
+              <div key={f.title} className="flex flex-col items-center text-center">
+                <span className="mb-6 grid h-20 w-20 place-items-center rounded-full bg-brand-50 text-brand-700">
+                  <f.Icon className="h-9 w-9" strokeWidth={1.6} />
                 </span>
-                <h3 className="mt-4 text-lg font-bold text-brand-900">{f.title}</h3>
-                <p className="mt-1.5 text-sm text-slate-600">{f.text}</p>
+                <h3 className="font-display text-xl font-semibold text-brand-900">{f.title}</h3>
+                <p className="mt-3 leading-relaxed text-slate-600">{f.text}</p>
               </div>
             ))}
           </div>
@@ -228,22 +235,19 @@ export default async function Home() {
 
       {/* MÜŞTERİ YORUMLARI */}
       <section className="mx-auto max-w-7xl px-4 py-16">
-        <div className="text-center">
-          <h2 className="font-display text-3xl font-bold text-brand-900">Müşterilerimiz Ne Diyor?</h2>
-          <div className="gold-divider mx-auto mt-3" />
-        </div>
-        <div className="mt-10 grid gap-6 md:grid-cols-3">
+        <h2 className="font-display text-2xl font-bold text-brand-900 sm:text-3xl">Müşterilerimiz Ne Diyor?</h2>
+        <div className="mt-8 grid gap-5 md:grid-cols-3">
           {testimonials.map((t, i) => (
-            <figure key={i} className="rounded-2xl bg-white p-6 ring-1 ring-slate-200">
-              <div className="flex gap-0.5 text-gold-400">
+            <figure key={i} className="rounded-xl bg-white p-6 ring-1 ring-slate-200">
+              <div className="flex gap-0.5 text-gold-500">
                 {Array.from({ length: Math.max(1, Math.min(5, t.stars)) }).map((_, s) => (
                   <Star key={s} className="h-4 w-4 fill-current" />
                 ))}
               </div>
-              <blockquote className="mt-3 text-sm leading-relaxed text-slate-700">&ldquo;{t.text}&rdquo;</blockquote>
+              <blockquote className="mt-3 text-[15px] leading-relaxed text-slate-700">&ldquo;{t.text}&rdquo;</blockquote>
               <figcaption className="mt-4 border-t border-slate-100 pt-3">
                 <p className="font-semibold text-brand-900">{t.name}</p>
-                <p className="text-xs text-slate-500">{t.role}</p>
+                <p className="text-[13px] text-slate-500">{t.role}</p>
               </figcaption>
             </figure>
           ))}
@@ -252,14 +256,14 @@ export default async function Home() {
 
       {/* İLÇELER */}
       <section className="mx-auto max-w-7xl px-4">
-        <h2 className="font-display text-2xl font-bold text-brand-900">İlçelere Göre Ara</h2>
-        <div className="gold-divider mt-2 mb-5" />
-        <div className="flex flex-wrap gap-3">
+        <h2 className="font-display text-2xl font-bold text-brand-900 sm:text-3xl">İlçelere Göre Ara</h2>
+        <p className="mt-1.5 text-slate-500">Kütahya merkez ve tüm ilçelerde güncel ilanlar.</p>
+        <div className="mt-6 flex flex-wrap gap-2.5">
           {DISTRICTS.map((d) => (
             <Link
               key={d.slug}
               href={`/ilanlar?ilce=${encodeURIComponent(d.name)}`}
-              className="rounded-xl bg-white px-5 py-3 text-sm font-semibold text-slate-700 ring-1 ring-slate-200 transition hover:text-brand-700 hover:ring-brand-300"
+              className="rounded-lg bg-white px-4 py-2.5 text-sm font-medium text-slate-700 ring-1 ring-slate-200 transition hover:text-brand-700 hover:ring-brand-300"
             >
               {d.name}
             </Link>

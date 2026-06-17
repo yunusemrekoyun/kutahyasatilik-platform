@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { BarChart3 } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { formatNumber } from "@/lib/format";
 import TrackView from "@/components/TrackView";
@@ -54,10 +55,10 @@ export default async function RegionAnalysis() {
     <div className="bg-slate-50">
       <TrackView />
 
-      <section className="bg-gradient-to-br from-brand-800 via-brand-900 to-brand-950 text-white">
+      <section className="bg-brand-950 text-white">
         <div className="mx-auto max-w-6xl px-4 py-12 text-center sm:py-16">
           <span className="inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-1.5 text-sm font-medium ring-1 ring-gold-400/40">
-            📊 Yerel Piyasa Zekâsı
+            <BarChart3 className="h-4 w-4 text-gold-400" /> Yerel Piyasa Zekâsı
           </span>
           <h1 className="mt-5 font-display text-3xl font-bold leading-tight sm:text-4xl">
             Kütahya Bölge <span className="text-gold-400">Fiyat Analizi</span>
@@ -71,7 +72,7 @@ export default async function RegionAnalysis() {
 
       {/* Isı haritası */}
       <section className="mx-auto max-w-6xl px-4 py-10">
-        <div className="rounded-3xl bg-white p-6 ring-1 ring-slate-200 sm:p-8">
+        <div className="rounded-2xl bg-white p-5 ring-1 ring-slate-200 sm:p-7">
           <h2 className="font-display text-2xl font-bold text-brand-900">Fiyat Isı Haritası</h2>
           <p className="mt-1 text-sm text-slate-600">
             Arsa m² fiyatına göre renklendirilmiştir — <span className="font-semibold text-green-600">yeşil: uygun</span>, <span className="font-semibold text-red-600">kırmızı: yüksek</span>. Marker üzerine gelin.

@@ -24,15 +24,15 @@ export default async function LandingPageView({
     <div>
       <TrackView />
       {/* HERO */}
-      <section className="bg-gradient-to-br from-brand-800 to-brand-950 text-white">
+      <section className="bg-brand-950 text-white">
         <div className="mx-auto max-w-7xl px-4 py-14">
-          <h1 className="text-3xl sm:text-4xl font-black">{heading}</h1>
-          <p className="mt-4 max-w-3xl text-brand-100">{intro}</p>
+          <h1 className="font-display text-3xl font-bold sm:text-4xl">{heading}</h1>
+          <p className="mt-4 max-w-3xl leading-relaxed text-brand-100">{intro}</p>
           <div className="mt-6 flex flex-wrap gap-3">
-            <Link href="#ilanlar" className="rounded-xl bg-gold-500 px-5 py-3 font-bold text-slate-900 hover:bg-gold-400">
+            <Link href="#ilanlar" className="rounded-[10px] bg-white px-5 py-3 font-semibold text-brand-800 transition hover:bg-brand-50">
               İlanları Gör ({listings.length})
             </Link>
-            <Link href="/satici" className="rounded-xl bg-white/10 px-5 py-3 font-bold text-white ring-1 ring-white/30 hover:bg-white/20">
+            <Link href="/satici" className="rounded-[10px] bg-white/10 px-5 py-3 font-semibold text-white ring-1 ring-white/25 transition hover:bg-white/20">
               Mülkümü Sat
             </Link>
           </div>
@@ -68,9 +68,9 @@ export default async function LandingPageView({
         </section>
 
         {points.length > 0 && (
-          <section className="mt-12 rounded-3xl bg-white p-6 ring-1 ring-slate-200">
-            <h2 className="text-2xl font-extrabold text-slate-900">Harita Üzerinde</h2>
-            <div className="mt-5">
+          <section className="mt-12 rounded-2xl bg-white p-5 ring-1 ring-slate-200 sm:p-6">
+            <h2 className="font-display text-2xl font-bold text-slate-900">Harita Üzerinde</h2>
+            <div className="mt-5 overflow-hidden rounded-xl ring-1 ring-slate-200">
               <ListingsMap points={points} height="420px" />
             </div>
           </section>

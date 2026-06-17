@@ -20,7 +20,7 @@ export default async function AdminPopups() {
     <div>
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-extrabold text-slate-900">Pop-up Reklamlar</h1>
+          <h1 className="text-2xl font-bold tracking-tight text-slate-900">Pop-up Reklamlar</h1>
           <p className="text-sm text-slate-500">{popups.length} reklam · {activeCount} aktif. Birden fazla aktifse en son güncellenen gösterilir.</p>
         </div>
         <Link href="/admin/reklamlar/yeni" className="rounded-lg bg-brand-700 px-4 py-2 text-sm font-bold text-white hover:bg-brand-800">
@@ -30,12 +30,12 @@ export default async function AdminPopups() {
 
       <div className="mt-6 space-y-3">
         {popups.length === 0 && (
-          <p className="rounded-2xl bg-white p-10 text-center text-slate-400 ring-1 ring-slate-200">
+          <p className="rounded-xl bg-white p-10 text-center text-slate-400 ring-1 ring-slate-200">
             Henüz reklam yok. Kampanya/duyuru pop-up&apos;ı oluşturun.
           </p>
         )}
         {popups.map((p) => (
-          <div key={p.id} className={`flex flex-wrap items-center gap-4 rounded-2xl bg-white p-4 ring-1 ${p.active ? "ring-green-200" : "ring-slate-200"}`}>
+          <div key={p.id} className={`flex flex-wrap items-center gap-4 rounded-xl bg-white p-4 ring-1 ${p.active ? "ring-green-200" : "ring-slate-200"}`}>
             <div className="relative h-16 w-24 shrink-0 overflow-hidden rounded-lg bg-slate-100">
               {p.imageUrl && <Image src={p.imageUrl} alt="" fill sizes="96px" className="object-cover" />}
             </div>

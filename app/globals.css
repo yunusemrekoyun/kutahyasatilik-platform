@@ -29,12 +29,16 @@
   --font-sans: var(--font-geist-sans), system-ui, Arial, sans-serif;
   --font-display: var(--font-display), Georgia, "Times New Roman", serif;
 
-  --shadow-prestige: 0 10px 40px -12px rgba(10, 23, 48, 0.25);
+  /* Rafine yükselti — glow yerine yumuşak, laciverte çalan gölgeler */
+  --shadow-card: 0 1px 2px rgba(15, 23, 42, 0.04), 0 6px 16px -10px rgba(15, 23, 42, 0.12);
+  --shadow-prestige: 0 10px 30px -16px rgba(10, 23, 48, 0.2);
 }
 
 :root {
-  --background: #f7f8fb;
+  --background: #f6f7f9;
   --foreground: #0f172a;
+  /* Hareket eğrileri (emil) */
+  --ease-out-quart: cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 html {
@@ -67,26 +71,37 @@ body {
 .line-clamp-2 { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
 .line-clamp-3 { display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
 
-/* İnce altın ayraç */
+/* İnce altın ayraç — düz, rafine (gradient yok) */
 .gold-divider {
-  height: 3px;
-  width: 56px;
-  background: linear-gradient(90deg, var(--color-gold-400), var(--color-gold-600));
+  height: 2px;
+  width: 36px;
+  background: var(--color-gold-600);
   border-radius: 9999px;
 }
 
-/* Animasyonlar */
+/* Animasyonlar — hafif, hızlı, ease-out (emil) */
 @keyframes fadeInUp {
-  from { opacity: 0; transform: translateY(12px); }
+  from { opacity: 0; transform: translateY(10px); }
   to { opacity: 1; transform: translateY(0); }
 }
-.animate-fade-up { animation: fadeInUp 0.5s ease both; }
+.animate-fade-up { animation: fadeInUp 0.4s var(--ease-out-quart) both; }
 
 @keyframes slideInRight {
   from { opacity: 0; transform: translateX(20px); }
   to { opacity: 1; transform: translateX(0); }
 }
-.animate-toast { animation: slideInRight 0.3s ease both; }
+.animate-toast { animation: slideInRight 0.3s var(--ease-out-quart) both; }
+
+/* Erişilebilirlik — hareketi azalt: konum/ölçek animasyonlarını kaldır, sadece crossfade kalsın */
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+  .animate-fade-up, .animate-toast { animation: none !important; opacity: 1 !important; transform: none !important; }
+}
 
 @keyframes shimmer {
   0% { background-position: -1000px 0; }

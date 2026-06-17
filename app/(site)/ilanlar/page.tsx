@@ -1,8 +1,11 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
+import Link from "next/link";
+import { SearchX } from "lucide-react";
 import { getListingsPaged } from "@/lib/listings";
 import ListingCard from "@/components/ListingCard";
 import ListingFilters from "@/components/ListingFilters";
+import ListingSort from "@/components/ListingSort";
 import Pagination from "@/components/Pagination";
 import NotFoundCTA from "@/components/NotFoundCTA";
 import TrackView from "@/components/TrackView";
@@ -64,34 +67,56 @@ export default async function ListingsPage({
   return (
     <div className="mx-auto max-w-7xl px-4 py-8">
       <TrackView />
-      <div className="mb-6">
-        <p className="text-sm font-medium uppercase tracking-wider text-gold-600">Portföy</p>
-        <h1 className="font-display text-3xl font-bold text-brand-900">
-          {get("ilce") ? `${get("ilce")} İlanları` : "Tüm İlanlar"}
-        </h1>
-        <div className="gold-divider mt-2" />
+      <nav className="mb-2 text-sm text-slate-500">
+        <Link href="/" className="hover:text-brand-700">Ana Sayfa</Link>
+        <span className="mx-2 text-slate-300">/</span>
+        <span className="text-slate-700">{get("ilce") ? `${get("ilce")} İlanları` : "Tüm İlanlar"}</span>
+      </nav>
+      <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+        <div>
+          <h1 className="font-display text-2xl font-bold text-brand-900 sm:text-3xl">
+            {get("ilce") ? `${get("ilce")} İlanları` : "Tüm İlanlar"}
+          </h1>
+          <p className="mt-1.5 text-slate-500">
+            Sizin için <strong className="font-semibold text-slate-700 tabular-nums">{total}</strong> sonuç bulundu.
+          </p>
+        </div>
+        <Suspense fallback={<div className="h-11 w-44 rounded-lg bg-white ring-1 ring-slate-200" />}>
+          <ListingSort />
+        </Suspense>
       </div>
 
-      <Suspense fallback={<div className="h-24 rounded-2xl bg-white ring-1 ring-slate-200" />}>
-        <ListingFilters total={total} />
-      </Suspense>
-
-      {items.length > 0 ? (
-        <>
-          <div className="mt-6 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
-            {items.map((l) => (
-              <ListingCard key={l.slug} listing={l} />
-            ))}
-          </div>
-          <Pagination page={page} totalPages={totalPages} searchParams={flatParams} />
-        </>
-      ) : (
-        <div className="mt-8 rounded-2xl bg-white p-12 text-center ring-1 ring-slate-200">
-          <div className="text-5xl">🔍</div>
-          <h2 className="mt-4 text-lg font-bold text-slate-800">Bu kriterlere uygun ilan bulunamadı</h2>
-          <p className="mt-1 text-slate-500">Filtreleri değiştirin veya bizimle iletişime geçin; portföyümüzdeki diğer seçenekleri sunalım.</p>
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-4">
+        <div className="lg:col-span-1">
+          <Suspense fallback={<div className="h-24 rounded-xl bg-white ring-1 ring-slate-200" />}>
+            <ListingFilters />
+          </Suspense>
         </div>
-      )}
+
+        <div className="lg:col-span-3">
+          {items.length > 0 ? (
+            <>
+              <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-3">
+                {items.map((l) => (
+                  <ListingCard key={l.slug} listing={l} />
+                ))}
+              </div>
+              <Pagination page={page} totalPages={totalPages} searchParams={flatParams} />
+            </>
+          ) : (
+            <div className="rounded-xl bg-white p-12 text-center ring-1 ring-slate-200">
+              <span className="mx-auto grid h-14 w-14 place-items-center rounded-full bg-slate-100 text-slate-400">
+                <SearchX className="h-7 w-7" />
+              </span>
+              <h2 className="mt-4 font-display text-lg font-bold text-slate-800">Bu kriterlere uygun ilan bulunamadı</h2>
+              <p className="mx-auto mt-1.5 max-w-md text-slate-500">Filtreleri biraz gevşetin ya da talebinizi bırakın; portföyümüzdeki diğer seçenekleri size sunalım.</p>
+              <Link href="/alici-talebi" className="mt-5 inline-flex items-center justify-center rounded-lg bg-brand-700 px-5 py-3 text-sm font-semibold text-white transition hover:bg-brand-800">
+                Talep Bırak
+              </Link>
+            </div>
+          )}
+        </div>
+      </div>
 
       <div className="mt-14">
         <NotFoundCTA />

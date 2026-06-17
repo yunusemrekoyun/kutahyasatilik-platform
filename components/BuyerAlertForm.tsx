@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { CheckCircle2, Lock } from "lucide-react";
 import { useUtm } from "@/lib/useUtm";
 import { DISTRICTS, PROPERTY_TYPES } from "@/lib/constants";
 import ListingCard, { type ListingCardData } from "./ListingCard";
@@ -45,15 +46,18 @@ export default function BuyerAlertForm() {
     }
   }
 
+  const labelCls = "mb-1.5 block text-sm font-semibold text-slate-700";
   const inputCls =
-    "w-full rounded-lg border border-slate-300 px-3.5 py-3 text-sm focus:border-brand-500 focus:ring-1 focus:ring-brand-500 outline-none";
+    "w-full h-12 rounded-[10px] border border-slate-300 bg-white px-3.5 text-base text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/30";
 
   if (status === "ok") {
     return (
       <div className="space-y-8">
-        <div className="rounded-2xl bg-green-50 p-6 text-center ring-1 ring-green-200">
-          <div className="text-4xl">✅</div>
-          <h3 className="mt-3 text-xl font-bold text-slate-900">Talebiniz kaydedildi!</h3>
+        <div className="rounded-xl bg-green-50 p-6 text-center ring-1 ring-green-200">
+          <span className="mx-auto grid h-14 w-14 place-items-center rounded-full bg-white text-green-600 ring-1 ring-green-200">
+            <CheckCircle2 className="h-8 w-8" />
+          </span>
+          <h3 className="mt-4 font-display text-xl font-bold text-slate-900">Talebiniz kaydedildi</h3>
           <p className="mt-2 text-sm text-slate-600">
             Kriterlerinize uygun yeni bir ilan geldiğinde uzmanımız sizi arayacak.
             {matches.length > 0
@@ -74,48 +78,82 @@ export default function BuyerAlertForm() {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-3.5">
-      <div className="grid grid-cols-1 gap-3.5 sm:grid-cols-2">
-        <input name="name" required placeholder="Ad Soyad *" className={inputCls} />
-        <input name="phone" required type="tel" placeholder="Telefon *" className={inputCls} />
+    <form onSubmit={handleSubmit} className="space-y-4">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <div>
+          <label htmlFor="ba-name" className={labelCls}>Ad Soyad <span className="text-red-500">*</span></label>
+          <input id="ba-name" name="name" required placeholder="Adınız ve soyadınız" className={inputCls} />
+        </div>
+        <div>
+          <label htmlFor="ba-phone" className={labelCls}>Telefon <span className="text-red-500">*</span></label>
+          <input id="ba-phone" name="phone" required type="tel" inputMode="tel" placeholder="05__ ___ __ __" className={inputCls} />
+        </div>
       </div>
-      <input name="email" type="email" placeholder="E-posta (opsiyonel)" className={inputCls} />
-
-      <div className="grid grid-cols-1 gap-3.5 sm:grid-cols-2">
-        <select name="propertyType" defaultValue="" className={inputCls}>
-          <option value="">Mülk türü (farketmez)</option>
-          {PROPERTY_TYPES.map((p) => (
-            <option key={p.value} value={p.value}>{p.label}</option>
-          ))}
-        </select>
-        <select name="district" defaultValue="" className={inputCls}>
-          <option value="">İlçe (farketmez)</option>
-          {DISTRICTS.map((d) => (
-            <option key={d.slug} value={d.name}>{d.name}</option>
-          ))}
-        </select>
+      <div>
+        <label htmlFor="ba-email" className={labelCls}>E-posta <span className="font-normal text-slate-400">(opsiyonel)</span></label>
+        <input id="ba-email" name="email" type="email" placeholder="ornek@eposta.com" className={inputCls} />
       </div>
 
-      <div className="grid grid-cols-1 gap-3.5 sm:grid-cols-3">
-        <input name="minPrice" type="number" min={0} inputMode="numeric" placeholder="Min. fiyat (₺)" className={inputCls} />
-        <input name="maxPrice" type="number" min={0} inputMode="numeric" placeholder="Maks. fiyat (₺)" className={inputCls} />
-        <input name="minArea" type="number" min={0} inputMode="numeric" placeholder="Min. m²" className={inputCls} />
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <div>
+          <label htmlFor="ba-type" className={labelCls}>Mülk Türü</label>
+          <select id="ba-type" name="propertyType" defaultValue="" className={inputCls}>
+            <option value="">Farketmez</option>
+            {PROPERTY_TYPES.map((p) => (
+              <option key={p.value} value={p.value}>{p.label}</option>
+            ))}
+          </select>
+        </div>
+        <div>
+          <label htmlFor="ba-district" className={labelCls}>İlçe</label>
+          <select id="ba-district" name="district" defaultValue="" className={inputCls}>
+            <option value="">Farketmez</option>
+            {DISTRICTS.map((d) => (
+              <option key={d.slug} value={d.name}>{d.name}</option>
+            ))}
+          </select>
+        </div>
       </div>
 
-      <input name="rooms" placeholder="Oda sayısı (örn. 3+1 — opsiyonel)" className={inputCls} />
-      <textarea name="note" rows={2} placeholder="Eklemek istedikleriniz (mahalle, özellik vb.)" className={inputCls} />
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+        <div>
+          <label htmlFor="ba-min" className={labelCls}>Min. Fiyat</label>
+          <input id="ba-min" name="minPrice" type="number" min={0} inputMode="numeric" placeholder="₺" className={inputCls} />
+        </div>
+        <div>
+          <label htmlFor="ba-max" className={labelCls}>Maks. Fiyat</label>
+          <input id="ba-max" name="maxPrice" type="number" min={0} inputMode="numeric" placeholder="₺" className={inputCls} />
+        </div>
+        <div>
+          <label htmlFor="ba-area" className={labelCls}>Min. m²</label>
+          <input id="ba-area" name="minArea" type="number" min={0} inputMode="numeric" placeholder="m²" className={inputCls} />
+        </div>
+      </div>
 
-      {status === "error" && <p className="text-sm text-red-600">{error}</p>}
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <div>
+          <label htmlFor="ba-rooms" className={labelCls}>Oda Sayısı</label>
+          <input id="ba-rooms" name="rooms" placeholder="Örn. 3+1 (opsiyonel)" className={inputCls} />
+        </div>
+        <div>
+          <label htmlFor="ba-note" className={labelCls}>Eklemek istedikleriniz</label>
+          <input id="ba-note" name="note" placeholder="Mahalle, özellik vb." className={inputCls} />
+        </div>
+      </div>
+
+      {status === "error" && (
+        <p className="rounded-[10px] bg-red-50 px-3.5 py-2.5 text-sm font-medium text-red-700 ring-1 ring-red-200">{error}</p>
+      )}
 
       <button
         type="submit"
         disabled={status === "loading"}
-        className="w-full rounded-xl bg-gold-500 px-4 py-3.5 text-base font-bold text-brand-950 transition hover:bg-gold-400 disabled:opacity-60"
+        className="w-full rounded-[10px] bg-brand-700 px-4 py-3.5 text-base font-semibold text-white transition hover:bg-brand-800 disabled:opacity-60"
       >
-        {status === "loading" ? "Aranıyor..." : "Talebimi Bırak & Uygun İlanları Gör →"}
+        {status === "loading" ? "Aranıyor..." : "Talebimi Bırak ve Uygun İlanları Gör"}
       </button>
-      <p className="text-center text-xs text-slate-500">
-        Kriterlerinize uyan ilan geldiğinde size haber veririz. Spam yok, sadece size uygun fırsatlar.
+      <p className="flex items-center justify-center gap-1.5 text-center text-[13px] text-slate-500">
+        <Lock className="h-3.5 w-3.5" /> Kriterlerinize uyan ilan geldiğinde haber veririz. Spam göndermiyoruz.
       </p>
     </form>
   );
