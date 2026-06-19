@@ -1,14 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSession } from "@/lib/auth";
-import { getAgentSession } from "@/lib/agentAuth";
+import { isApprovedAgentSession } from "@/lib/agentAuth";
 import { getJob } from "@/lib/videoJobs";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 export async function GET(req: NextRequest) {
-  const [admin, agent] = await Promise.all([getSession(), getAgentSession()]);
-  if (!admin && !agent) {
+  const [admin, approvedAgent] = await Promise.all([getSession(), isApprovedAgentSession()]);
+  if (!admin && !approvedAgent) {
     return NextResponse.json({ ok: false, error: "Yetkisiz" }, { status: 401 });
   }
   const id = req.nextUrl.searchParams.get("id");

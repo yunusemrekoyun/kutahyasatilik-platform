@@ -42,6 +42,23 @@ export async function submitAgentListing(formData: FormData) {
   if (!isLand && !str(formData.get("rooms"))) throw new Error("Oda sayısı zorunludur");
   if (isLand && !str(formData.get("zoningStatus"))) throw new Error("İmar durumu zorunludur");
 
+  // İlan kotası (§5/§26): YENİ ilan oluştururken tek paketin listingQuota'sını aşma.
+  if (!id) {
+    let quota: number | null = null;
+    try {
+      const pkg = await prisma.package.findFirst({ orderBy: { createdAt: "asc" }, select: { listingQuota: true } });
+      quota = pkg?.listingQuota ?? null;
+    } catch {
+      quota = null; // paket tablosu yoksa kotayı atla (kademeli)
+    }
+    if (quota != null) {
+      const count = await prisma.listing.count({ where: { agentId: agent.id } });
+      if (count >= quota) {
+        throw new Error(`İlan kotanız dolu (${quota}). Yeni ilan için yönetimle iletişime geçin.`);
+      }
+    }
+  }
+
   // Düzenleme ise: yalnızca kendi ilanı
   if (id) {
     const owned = await prisma.listing.findUnique({
@@ -160,13 +177,23 @@ export async function submitBid(formData: FormData) {
   if (commissionPct === null || commissionPct < 0 || commissionPct > 100) {
     throw new Error("Geçerli bir komisyon yüzdesi girin (0–100)");
   }
-  const opp = await prisma.portfolioOpportunity.findUnique({ where: { id: opportunityId }, select: { status: true } });
+  const opp = await prisma.portfolioOpportunity.findUnique({
+    where: { id: opportunityId },
+    select: { status: true, biddingEndsAt: true, title: true },
+  });
   if (!opp || opp.status !== "open") throw new Error("Bu fırsat tekliflere kapalı");
+  if (opp.biddingEndsAt && opp.biddingEndsAt < new Date()) throw new Error("Teklif süresi doldu");
 
   await prisma.bid.upsert({
     where: { opportunityId_agentId: { opportunityId, agentId: agent.id } },
     create: { opportunityId, agentId: agent.id, commissionPct, note: str(formData.get("note")) },
     update: { commissionPct, note: str(formData.get("note")), status: "active" },
+  });
+  await notifyAdmins({
+    type: "system",
+    title: "Portföy fırsatına yeni teklif",
+    body: `${agent.name} · %${commissionPct} — ${opp.title}`,
+    link: "/admin/firsatlar",
   });
   revalidatePath("/emlakci/panel/firsatlar");
 }

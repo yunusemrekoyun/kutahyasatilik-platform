@@ -3,7 +3,7 @@ import { Phone, Mail, MessageCircle, Inbox } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { formatDateTime, parseJsonArray } from "@/lib/format";
 import { LEAD_TYPE_LABELS, LEAD_STATUS_LABELS } from "@/lib/constants";
-import { updateLeadStatus, deleteLead } from "../actions";
+import { updateLeadStatus, deleteLead, promoteLeadToOpportunity } from "../actions";
 import { PageHeader, StatusBadge, EmptyState, adminCard } from "@/components/admin/ui";
 
 export const dynamic = "force-dynamic";
@@ -97,6 +97,12 @@ export default async function AdminLeads({
                     </select>
                     <button className="rounded-lg bg-slate-100 px-2.5 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-200">Kaydet</button>
                   </form>
+                  {l.type === "seller" && (
+                    <form action={promoteLeadToOpportunity}>
+                      <input type="hidden" name="id" value={l.id} />
+                      <button className="rounded-lg bg-indigo-600 px-2.5 py-1.5 text-xs font-semibold text-white hover:bg-indigo-700">Fırsata Dönüştür</button>
+                    </form>
+                  )}
                   <form action={deleteLead}>
                     <input type="hidden" name="id" value={l.id} />
                     <button className="rounded-lg px-2.5 py-1.5 text-xs text-red-600 hover:bg-red-50">Sil</button>

@@ -8,7 +8,7 @@ import { slugify } from "@/lib/format";
 import { sanitizeCmsHtml } from "@/lib/sanitize";
 import { deleteUploadFiles } from "@/lib/uploads";
 import { deleteVideo } from "@/lib/videoStorage";
-import { notifyAgent, notifyMatchingAlerts } from "@/lib/notify";
+import { notifyAgent, notifyUser, notifyMatchingAlerts } from "@/lib/notify";
 import { sendEmail, notificationEmail } from "@/lib/email";
 import bcrypt from "bcryptjs";
 
@@ -133,7 +133,7 @@ export async function saveListing(formData: FormData) {
   if (id) {
     const existing = await prisma.listing.findUnique({
       where: { id },
-      select: { price: true, videoUrl: true, images: { select: { url: true } } },
+      select: { price: true, videoUrl: true, status: true, moderationStatus: true, images: { select: { url: true } } },
     });
     oldPrice = existing?.price ?? null;
     await prisma.listing.update({ where: { id }, data });
@@ -147,6 +147,10 @@ export async function saveListing(formData: FormData) {
     // video değiştiyse/kaldırıldıysa eski yerel videoyu (mp4+poster) diskten sil
     if (existing?.videoUrl && existing.videoUrl !== data.videoUrl) {
       await deleteVideo(existing.videoUrl);
+    }
+    // passive/sold → active geçişi de (onaylı ilan) eşleşen aramalara bildirilsin.
+    if (data.status === "active" && existing?.status !== "active" && existing?.moderationStatus === "approved") {
+      await notifyMatchingAlerts({ ...data, slug });
     }
   } else {
     const created = await prisma.listing.create({ data });
@@ -362,10 +366,17 @@ export async function updatePaymentStatus(formData: FormData) {
   const id = String(formData.get("id") || "");
   const status = String(formData.get("status") || "pending");
   if (!id) return;
-  await prisma.payment.update({
+  const payment = await prisma.payment.update({
     where: { id },
     data: { status, paidAt: status === "paid" ? new Date() : null },
+    select: { agentId: true, period: true },
   });
+  const periodPrefix = payment.period ? `${payment.period} — ` : "";
+  if (status === "paid") {
+    await notifyAgent(payment.agentId, { type: "payment", title: "Ödemeniz onaylandı", body: `${periodPrefix}ödemeniz alındı.`, link: "/emlakci/panel" });
+  } else if (status === "overdue") {
+    await notifyAgent(payment.agentId, { type: "payment", title: "Ödeme gecikti", body: `${periodPrefix}ödemeniz bekleniyor.`, link: "/emlakci/panel" });
+  }
   revalidatePath("/admin/tahsilat");
 }
 
@@ -384,7 +395,17 @@ export async function updateApplicationStatus(formData: FormData) {
   const status = String(formData.get("status") || "applied");
   const adminNote = str(formData.get("adminNote"));
   if (!id) return;
-  await prisma.agentApplication.update({ where: { id }, data: { status, adminNote } });
+  // Sistemce ilerletilmiş başvurular (kabul/ödeme/aktif) bu dropdown ile erken bir
+  // statüye GERİ düşürülemez — yalnız not güncellenir. (Aksi halde 'awaiting_payment'
+  // başvuru sessizce 'applied'a dönüyordu.)
+  const advanced = ["accepted", "awaiting_payment", "activated"];
+  const current = await prisma.agentApplication.findUnique({ where: { id }, select: { status: true } });
+  if (!current) return;
+  if (advanced.includes(current.status) && !advanced.includes(status)) {
+    await prisma.agentApplication.update({ where: { id }, data: { adminNote } });
+  } else {
+    await prisma.agentApplication.update({ where: { id }, data: { status, adminNote } });
+  }
   revalidatePath("/admin/basvurular");
 }
 
@@ -399,6 +420,7 @@ export async function activateApplication(formData: FormData) {
   const app = await prisma.agentApplication.findUnique({ where: { id } });
   if (!app) throw new Error("Başvuru bulunamadı");
   if (app.agentId) throw new Error("Bu başvuru zaten aktive edilmiş");
+  if (app.status === "rejected") throw new Error("Reddedilmiş başvuru aktive edilemez");
 
   const email = app.email.toLowerCase();
   const dup = await prisma.agent.findUnique({ where: { email }, select: { id: true } });
@@ -444,7 +466,12 @@ export async function createOffer(formData: FormData) {
   if (!app) throw new Error("Başvuru bulunamadı");
   if (app.agentId) throw new Error("Bu başvuru zaten aktive edilmiş");
 
-  const pkg = await prisma.package.findFirst({ orderBy: { createdAt: "asc" } });
+  let pkg;
+  try {
+    pkg = await prisma.package.findFirst({ orderBy: { createdAt: "asc" } });
+  } catch {
+    throw new Error("Paket tablosu henüz hazır değil (migration deploy edilmedi).");
+  }
   if (!pkg) throw new Error("Önce /admin/paket'ten paket tanımlayın");
 
   await prisma.offer.updateMany({ where: { applicationId, status: "active" }, data: { status: "superseded" } });
@@ -500,6 +527,32 @@ export async function createOpportunity(formData: FormData) {
   redirect("/admin/firsatlar");
 }
 
+// Satıcı talebini (§8) portföy fırsatına dönüştürür — leadId bağlanır, alanlar önden dolar.
+export async function promoteLeadToOpportunity(formData: FormData) {
+  await ensureAuth();
+  const leadId = String(formData.get("id") || "");
+  if (!leadId) return;
+  const lead = await prisma.lead.findUnique({ where: { id: leadId } });
+  if (!lead) throw new Error("Talep bulunamadı");
+  const rawPrice = lead.estimatedPrice ? Number(lead.estimatedPrice.replace(/[^\d]/g, "")) : NaN;
+  const price = Number.isFinite(rawPrice) && rawPrice > 0 ? rawPrice : null;
+  const title = `${lead.propertyType || "Mülk"}${lead.district ? ` · ${lead.district}` : ""} — ${lead.name}`;
+  await prisma.portfolioOpportunity.create({
+    data: {
+      leadId: lead.id,
+      title,
+      description: lead.message || null,
+      district: lead.district,
+      propertyType: lead.propertyType,
+      estimatedPrice: price,
+      biddingEndsAt: new Date(Date.now() + 7 * 24 * 3600_000),
+    },
+  });
+  await prisma.lead.update({ where: { id: leadId }, data: { status: "closed" } });
+  revalidatePath("/admin/talepler");
+  redirect("/admin/firsatlar");
+}
+
 export async function closeOpportunity(formData: FormData) {
   await ensureAuth();
   const id = String(formData.get("id") || "");
@@ -521,42 +574,70 @@ export async function selectWinningBid(formData: FormData) {
   const bid = await prisma.bid.findUnique({ where: { id: bidId } });
   if (!bid || bid.opportunityId !== opportunityId) throw new Error("Teklif bulunamadı");
 
-  await prisma.bid.updateMany({ where: { opportunityId }, data: { status: "lost" } });
-  await prisma.bid.update({ where: { id: bidId }, data: { status: "won" } });
-
   const base = slugify(opp.title) || "ilan";
   let slug = base;
   let i = 1;
   while (await prisma.listing.findUnique({ where: { slug }, select: { id: true } })) slug = `${base}-${i++}`;
-
   const price = opp.estimatedPrice ?? 0;
-  const listing = await prisma.listing.create({
-    data: {
-      slug,
-      title: opp.title,
-      description: opp.description || opp.title,
-      propertyType: opp.propertyType || "daire",
-      listingType: "sale",
-      status: "active",
-      moderationStatus: "pending", // kazanan emlakçı düzenler, admin onaylar
-      agentId: bid.agentId,
-      price,
-      district: opp.district || "Merkez",
-      areaGross: opp.areaGross,
-      rooms: opp.rooms,
-    },
+
+  // Atomik: çift-tıklama/yarış → koşullu kilit (yalnız listingId hâlâ null ise ilerle).
+  const created = await prisma.$transaction(async (tx) => {
+    const claim = await tx.portfolioOpportunity.updateMany({
+      where: { id: opportunityId, listingId: null },
+      data: { status: "awarded" },
+    });
+    if (claim.count !== 1) return null; // başka bir işlem kazananı zaten seçti
+    await tx.bid.updateMany({ where: { opportunityId }, data: { status: "lost" } });
+    await tx.bid.update({ where: { id: bidId }, data: { status: "won" } });
+    const listing = await tx.listing.create({
+      data: {
+        slug,
+        title: opp.title,
+        description: opp.description || opp.title,
+        propertyType: opp.propertyType || "daire",
+        listingType: "sale",
+        status: "active",
+        moderationStatus: "pending", // kazanan emlakçı düzenler, admin onaylar
+        agentId: bid.agentId,
+        price,
+        district: opp.district || "Merkez",
+        areaGross: opp.areaGross,
+        rooms: opp.rooms,
+      },
+    });
+    // Sahte 0₺ PriceHistory yazma (fiyat-grafiğini kirletir); yalnız gerçek fiyatta.
+    if (price > 0) await tx.priceHistory.create({ data: { listingId: listing.id, price } });
+    await tx.portfolioOpportunity.update({ where: { id: opportunityId }, data: { status: "listed", listingId: listing.id } });
+    return listing;
   });
-  await prisma.priceHistory.create({ data: { listingId: listing.id, price } });
-  await prisma.portfolioOpportunity.update({
-    where: { id: opportunityId },
-    data: { status: "listed", listingId: listing.id },
-  });
+  if (!created) throw new Error("Bu fırsat için kazanan zaten seçilmiş");
+
+  // Bildirimler (ikincil): kazanan + kaybedenler + talep sahibi.
   await notifyAgent(bid.agentId, {
     type: "system",
     title: "Portföy fırsatını kazandınız",
     body: `${opp.title} — size atanmış ilan oluşturuldu (onay bekliyor, düzenleyebilirsiniz).`,
     link: "/emlakci/panel",
   });
+  const losers = await prisma.bid.findMany({ where: { opportunityId, status: "lost" }, select: { agentId: true } });
+  for (const l of losers) {
+    if (l.agentId !== bid.agentId) {
+      await notifyAgent(l.agentId, {
+        type: "system",
+        title: "Portföy teklifi sonuçlandı",
+        body: `${opp.title} fırsatında başka bir teklif kazandı.`,
+        link: "/emlakci/panel/firsatlar",
+      });
+    }
+  }
+  if (opp.userId) {
+    await notifyUser(opp.userId, {
+      type: "system",
+      title: "Talebiniz ilana dönüştü",
+      body: `${opp.title} için bir danışman atandı; ilanınız hazırlanıyor.`,
+      link: "/hesabim",
+    });
+  }
   revalidatePath("/admin/firsatlar");
 }
 
