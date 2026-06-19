@@ -9,6 +9,7 @@ import { sanitizeCmsHtml } from "@/lib/sanitize";
 import { deleteUploadFiles } from "@/lib/uploads";
 import { deleteVideo } from "@/lib/videoStorage";
 import { notifyAgent, notifyMatchingAlerts } from "@/lib/notify";
+import { sendEmail, notificationEmail } from "@/lib/email";
 import bcrypt from "bcryptjs";
 
 async function ensureAuth() {
@@ -431,6 +432,49 @@ export async function activateApplication(formData: FormData) {
   });
   revalidatePath("/admin/basvurular");
   revalidatePath("/admin/emlakcilar");
+}
+
+// Teklif oluştur (§4): paketten SNAPSHOT alır, önceki aktif teklifi supersede eder,
+// versiyon++; başvurana e-posta OTP görüntüleme linki gönderir.
+export async function createOffer(formData: FormData) {
+  await ensureAuth();
+  const applicationId = String(formData.get("id") || "");
+  if (!applicationId) return;
+  const app = await prisma.agentApplication.findUnique({ where: { id: applicationId } });
+  if (!app) throw new Error("Başvuru bulunamadı");
+  if (app.agentId) throw new Error("Bu başvuru zaten aktive edilmiş");
+
+  const pkg = await prisma.package.findFirst({ orderBy: { createdAt: "asc" } });
+  if (!pkg) throw new Error("Önce /admin/paket'ten paket tanımlayın");
+
+  await prisma.offer.updateMany({ where: { applicationId, status: "active" }, data: { status: "superseded" } });
+  const last = await prisma.offer.findFirst({ where: { applicationId }, orderBy: { version: "desc" }, select: { version: true } });
+  const version = (last?.version ?? 0) + 1;
+
+  await prisma.offer.create({
+    data: {
+      applicationId,
+      version,
+      snapshotName: pkg.name,
+      snapshotPrice: pkg.price,
+      snapshotFeatures: pkg.features,
+      interval: pkg.interval,
+      validUntil: new Date(Date.now() + 7 * 24 * 3600_000),
+    },
+  });
+  await prisma.agentApplication.update({ where: { id: applicationId }, data: { status: "offer_sent" } });
+
+  await sendEmail({
+    to: app.email,
+    subject: "Danışman teklifiniz hazır",
+    html: notificationEmail({
+      title: "Danışman teklifiniz hazır",
+      body: "Teklifinizi görüntülemek için e-postanız ve telefonunuzun son 4 hanesiyle doğrulama yapın.",
+      link: "/emlakci/teklif",
+    }),
+  });
+
+  revalidatePath("/admin/basvurular");
 }
 
 export async function saveSettings(formData: FormData) {
