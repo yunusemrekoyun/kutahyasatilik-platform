@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { CheckCircle2, Lock } from "lucide-react";
 import { useUtm } from "@/lib/useUtm";
+import { isValidTrPhone, TR_PHONE_ERROR } from "@/lib/validation";
 import { DISTRICTS, PROPERTY_TYPES } from "@/lib/constants";
 import ListingCard, { type ListingCardData } from "./ListingCard";
 
@@ -17,6 +18,11 @@ export default function BuyerAlertForm() {
     setError("");
     setStatus("loading");
     const fd = new FormData(e.currentTarget);
+    if (!isValidTrPhone(String(fd.get("phone") || ""))) {
+      setStatus("error");
+      setError(TR_PHONE_ERROR);
+      return;
+    }
     try {
       const payload = {
         name: fd.get("name"),

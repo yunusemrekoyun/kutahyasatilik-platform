@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { isValidTrPhone, TR_PHONE_ERROR } from "@/lib/validation";
 
 export default function AgentRegisterForm() {
   const [status, setStatus] = useState<"idle" | "loading" | "ok">("idle");
@@ -12,6 +13,11 @@ export default function AgentRegisterForm() {
     setError("");
     setStatus("loading");
     const fd = new FormData(e.currentTarget);
+    if (!isValidTrPhone(String(fd.get("phone") || ""))) {
+      setStatus("idle");
+      setError(TR_PHONE_ERROR);
+      return;
+    }
     try {
       const res = await fetch("/api/emlakci/register", {
         method: "POST",

@@ -2,11 +2,12 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { checkRate } from "@/lib/rateLimit";
+import { trPhoneSchema } from "@/lib/validation";
 
 const schema = z.object({
   type: z.enum(["seller", "appointment", "expertise", "price_offer", "contact"]),
   name: z.string().min(2, "Ad soyad gerekli").max(120),
-  phone: z.string().min(7, "Geçerli bir telefon girin").max(30),
+  phone: trPhoneSchema,
   email: z.string().email().optional().or(z.literal("")),
   message: z.string().max(2000).optional(),
   district: z.string().max(60).optional(),

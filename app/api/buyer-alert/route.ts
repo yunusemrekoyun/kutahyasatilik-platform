@@ -3,10 +3,11 @@ import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { findListingsForAlert } from "@/lib/matching";
 import { checkRate } from "@/lib/rateLimit";
+import { trPhoneSchema } from "@/lib/validation";
 
 const schema = z.object({
   name: z.string().min(2, "Ad soyad gerekli").max(120),
-  phone: z.string().min(7, "Geçerli bir telefon girin").max(30),
+  phone: trPhoneSchema,
   email: z.string().email().optional().or(z.literal("")),
   propertyType: z.string().max(40).optional().or(z.literal("")),
   listingType: z.string().max(20).optional().or(z.literal("")),

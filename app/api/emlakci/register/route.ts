@@ -4,11 +4,12 @@ import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/prisma";
 import { slugify } from "@/lib/format";
 import { checkRate } from "@/lib/rateLimit";
+import { trPhoneSchema } from "@/lib/validation";
 
 const schema = z.object({
   name: z.string().min(2, "Ad soyad gerekli").max(120),
   email: z.string().email("Geçerli bir e-posta girin").max(160),
-  phone: z.string().min(7, "Geçerli bir telefon girin").max(30),
+  phone: trPhoneSchema,
   password: z.string().min(6, "Şifre en az 6 karakter olmalı").max(100),
   title: z.string().max(80).optional(),
   agency: z.string().max(120).optional(),
