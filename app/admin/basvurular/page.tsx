@@ -9,6 +9,8 @@ const STATUS: Record<string, { label: string; cls: string }> = {
   reviewing: { label: "İnceleniyor", cls: "bg-amber-50 text-amber-700 ring-amber-200" },
   meeting: { label: "Görüşme", cls: "bg-violet-50 text-violet-700 ring-violet-200" },
   offer_sent: { label: "Teklif gönderildi", cls: "bg-indigo-50 text-indigo-700 ring-indigo-200" },
+  accepted: { label: "Teklif kabul edildi", cls: "bg-teal-50 text-teal-700 ring-teal-200" },
+  awaiting_payment: { label: "Ödeme bekleniyor", cls: "bg-orange-50 text-orange-700 ring-orange-200" },
   rejected: { label: "Reddedildi", cls: "bg-red-50 text-red-700 ring-red-200" },
   activated: { label: "Aktive edildi", cls: "bg-green-50 text-green-700 ring-green-200" },
 };
