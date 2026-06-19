@@ -5,7 +5,7 @@ import { usePathname, useRouter } from "next/navigation";
 import {
   LayoutDashboard, Building2, PlusCircle, Newspaper, FileText,
   ClipboardCheck, Inbox, BellRing, Users, MessageSquare, Megaphone,
-  Home, Settings, LogOut, Package as PackageIcon, Wallet, type LucideIcon,
+  Home, Settings, LogOut, Package as PackageIcon, Wallet, UserPlus, type LucideIcon,
 } from "lucide-react";
 
 export type AdminCounts = {
@@ -34,6 +34,7 @@ const GROUPS: Group[] = [
       { href: "/admin/onay", label: "Onay Bekleyen", Icon: ClipboardCheck, badge: "pendingListings" },
       { href: "/admin/talepler", label: "Talepler", Icon: Inbox, badge: "newLeads" },
       { href: "/admin/alici-talepleri", label: "Alıcı Talepleri", Icon: BellRing, badge: "newAlerts" },
+      { href: "/admin/basvurular", label: "Başvurular", Icon: UserPlus },
       { href: "/admin/emlakcilar", label: "Emlakçılar", Icon: Users },
       { href: "/admin/paket", label: "Paket", Icon: PackageIcon },
       { href: "/admin/tahsilat", label: "Tahsilat", Icon: Wallet },
