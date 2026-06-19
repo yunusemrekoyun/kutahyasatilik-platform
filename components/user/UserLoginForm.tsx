@@ -8,9 +8,10 @@ const inputCls =
   "h-12 w-full rounded-[10px] border border-slate-300 bg-white px-3.5 text-base text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/30";
 const labelCls = "mb-1.5 block text-sm font-semibold text-slate-700";
 
-// Açık-yönlendirme koruması: yalnız site-içi yollar.
+// Açık-yönlendirme koruması: yalnız site-içi yollar. Tek '/' ile başlamalı; '//' veya
+// '/\\' (tarayıcının harici host'a çözdüğü) reddedilir.
 function safeNext(raw: string | null): string {
-  if (raw && raw.startsWith("/") && !raw.startsWith("//")) return raw;
+  if (raw && /^\/[^/\\]/.test(raw)) return raw;
   return "/hesabim";
 }
 
