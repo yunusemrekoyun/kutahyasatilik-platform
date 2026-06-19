@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { isValidTrPhone, TR_PHONE_ERROR } from "@/lib/validation";
 
@@ -10,7 +9,6 @@ const inputCls =
 const labelCls = "mb-1.5 block text-sm font-semibold text-slate-700";
 
 export default function UserRegisterForm() {
-  const router = useRouter();
   const [status, setStatus] = useState<"idle" | "loading">("idle");
   const [error, setError] = useState("");
 
@@ -37,9 +35,8 @@ export default function UserRegisterForm() {
       });
       const data = await res.json();
       if (!res.ok || !data.ok) throw new Error(data.error || "Kayıt başarısız");
-      // Kayıt sonrası otomatik giriş yapıldı
-      router.push("/hesabim");
-      router.refresh();
+      // Kayıt sonrası otomatik giriş yapıldı. Tam sayfa yükleme: store remount + favori birleştirme.
+      window.location.assign("/hesabim");
     } catch (err) {
       setStatus("idle");
       setError(err instanceof Error ? err.message : "Bir hata oluştu");
