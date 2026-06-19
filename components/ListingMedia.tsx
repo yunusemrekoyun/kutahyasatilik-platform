@@ -1,6 +1,8 @@
 import { Video, Plane, Rotate3d, ExternalLink } from "lucide-react";
 import { toVideoEmbed, toTourEmbed } from "@/lib/media";
 
+const isLocalMp4 = (url?: string | null) => !!url && /^\/uploads\/videos\/[\w.-]+\.mp4$/.test(url);
+
 function Frame({ src, title }: { src: string; title: string }) {
   return (
     <div className="relative aspect-video w-full overflow-hidden rounded-xl bg-slate-900 ring-1 ring-slate-200">
@@ -16,6 +18,17 @@ function Frame({ src, title }: { src: string; title: string }) {
   );
 }
 
+function LocalVideo({ src }: { src: string }) {
+  const poster = src.replace(/\.mp4$/, ".jpg");
+  return (
+    <div className="relative aspect-video w-full overflow-hidden rounded-xl bg-slate-900 ring-1 ring-slate-200">
+      <video controls preload="metadata" poster={poster} playsInline className="absolute inset-0 h-full w-full bg-black">
+        <source src={src} type="video/mp4" />
+      </video>
+    </div>
+  );
+}
+
 export default function ListingMedia({
   videoUrl,
   droneUrl,
@@ -25,11 +38,12 @@ export default function ListingMedia({
   droneUrl?: string | null;
   virtualTourUrl?: string | null;
 }) {
-  const video = toVideoEmbed(videoUrl);
+  const localVideo = isLocalMp4(videoUrl) ? videoUrl! : null;
+  const video = localVideo ? null : toVideoEmbed(videoUrl);
   const drone = toVideoEmbed(droneUrl);
   const tour = toTourEmbed(virtualTourUrl);
 
-  if (!video && !drone && !tour) return null;
+  if (!video && !localVideo && !drone && !tour) return null;
 
   return (
     <section className="rounded-2xl bg-white p-6 ring-1 ring-slate-200">
@@ -44,12 +58,12 @@ export default function ListingMedia({
       </div>
 
       <div className="mt-5 space-y-6">
-        {video && (
+        {(localVideo || video) && (
           <div>
             <h3 className="mb-2 flex items-center gap-1.5 text-sm font-semibold text-slate-800">
               <Video className="h-4 w-4 text-brand-600" /> Tanıtım Videosu
             </h3>
-            <Frame src={video} title="Tanıtım videosu" />
+            {localVideo ? <LocalVideo src={localVideo} /> : <Frame src={video!} title="Tanıtım videosu" />}
           </div>
         )}
 
