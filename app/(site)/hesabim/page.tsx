@@ -1,9 +1,10 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { Heart, LogOut, Mail, Phone, User as UserIcon } from "lucide-react";
-import { getUserSession, destroyUserSession } from "@/lib/userAuth";
+import { Heart, Mail, Phone, User as UserIcon } from "lucide-react";
+import { getUserSession } from "@/lib/userAuth";
 import { prisma } from "@/lib/prisma";
+import LogoutButton from "@/components/user/LogoutButton";
 
 export const metadata: Metadata = {
   title: "Hesabım",
@@ -11,12 +12,6 @@ export const metadata: Metadata = {
 };
 
 export const dynamic = "force-dynamic";
-
-async function logout() {
-  "use server";
-  await destroyUserSession();
-  redirect("/");
-}
 
 export default async function AccountPage() {
   const session = await getUserSession();
@@ -72,11 +67,9 @@ export default async function AccountPage() {
         </div>
       </div>
 
-      <form action={logout} className="mt-8">
-        <button type="submit" className="inline-flex items-center gap-2 rounded-[10px] border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50">
-          <LogOut className="h-4 w-4" /> Çıkış Yap
-        </button>
-      </form>
+      <div className="mt-8">
+        <LogoutButton />
+      </div>
     </div>
   );
 }

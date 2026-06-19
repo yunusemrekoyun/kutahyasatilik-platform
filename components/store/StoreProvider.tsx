@@ -87,11 +87,20 @@ export default function StoreProvider({ children }: { children: React.ReactNode 
             });
             const md = await m.json().catch(() => null);
             if (cancelled) return;
-            setFavorites(md?.items ?? d.items ?? []);
+            if (md?.ok) {
+              setFavorites(md.items ?? []);
+              try { localStorage.removeItem("ks_fav"); } catch { /* yoksay */ }
+            } else {
+              // Merge başarısız: yerel favorileri KAYBETME — sunucu + yerel birleşik göster,
+              // ks_fav korunur (sonraki yüklemede tekrar denenir).
+              const server = (d.items ?? []) as ListingSnapshot[];
+              const seen = new Set(server.map((x) => x.slug));
+              setFavorites([...server, ...localFavs.filter((f) => !seen.has(f.slug))]);
+            }
           } else {
             setFavorites(d.items ?? []);
+            try { localStorage.removeItem("ks_fav"); } catch { /* yoksay */ }
           }
-          try { localStorage.removeItem("ks_fav"); } catch { /* yoksay */ }
           authedRef.current = true;
           setAuthed(true);
         } else {
