@@ -6,6 +6,7 @@ import Link from "next/link";
 import { saveListing } from "@/app/admin/actions";
 import { DISTRICTS, PROPERTY_TYPES } from "@/lib/constants";
 import VideoUploadField from "@/components/admin/VideoUploadField";
+import LocationPicker from "@/components/LocationPicker";
 
 type ListingData = {
   id?: string;
@@ -238,13 +239,15 @@ export default function ListingForm({ listing }: { listing?: ListingData }) {
       {/* Konum + AI */}
       <section className="rounded-2xl bg-white p-6 ring-1 ring-slate-200">
         <h2 className="font-bold text-slate-900">Konum & Yatırım Verisi</h2>
-        <div className="mt-4 grid grid-cols-2 gap-4 sm:grid-cols-4">
-          <Field label="Enlem (lat)"><input name="lat" type="number" step="any" defaultValue={listing?.lat ?? ""} placeholder="39.4242" className={inputCls} /></Field>
-          <Field label="Boylam (lng)"><input name="lng" type="number" step="any" defaultValue={listing?.lng ?? ""} placeholder="29.9833" className={inputCls} /></Field>
+        <p className="mt-1 text-xs text-slate-500">Haritada tıklayarak veya pini sürükleyerek konumu işaretleyin; enlem/boylam otomatik dolar ve ilan haritada görünür.</p>
+        <div className="mt-4">
+          <LocationPicker initialLat={listing?.lat ?? null} initialLng={listing?.lng ?? null} />
+        </div>
+        <div className="mt-4 grid grid-cols-2 gap-4">
           <Field label="Yatırım Puanı (0-100)"><input name="investmentScore" type="number" min="0" max="100" defaultValue={listing?.investmentScore ?? ""} className={inputCls} /></Field>
           <Field label="Değer Artışı %"><input name="valueGrowthPct" type="number" defaultValue={listing?.valueGrowthPct ?? ""} className={inputCls} /></Field>
         </div>
-        <p className="mt-2 text-xs text-slate-400">Yatırım puanı / değer artışı boş bırakılırsa ilçe verisinden otomatik hesaplanır. Lat/Lng girilirse ilan haritada görünür.</p>
+        <p className="mt-2 text-xs text-slate-400">Yatırım puanı / değer artışı boş bırakılırsa ilçe verisinden otomatik hesaplanır.</p>
       </section>
 
       {/* SEO */}
