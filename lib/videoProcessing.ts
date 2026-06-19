@@ -14,6 +14,42 @@ class FfmpegMissingError extends Error {
   }
 }
 
+// Eşzamanlı transcode sınırı — mütevazı VPS'i (KVM2: 2 vCPU) doyurmamak için.
+// ffmpeg zaten çok-çekirdek kullanır; varsayılan 1 (sıralı). VIDEO_CONCURRENCY ile artırılır.
+const MAX_CONCURRENT_TRANSCODE = Math.max(1, Number(process.env.VIDEO_CONCURRENCY) || 1);
+let activeTranscodes = 0;
+const transcodeQueue: Array<() => void> = [];
+
+function acquireTranscodeSlot(): Promise<void> {
+  return new Promise((resolve) => {
+    if (activeTranscodes < MAX_CONCURRENT_TRANSCODE) {
+      activeTranscodes++;
+      resolve();
+    } else {
+      transcodeQueue.push(() => {
+        activeTranscodes++;
+        resolve();
+      });
+    }
+  });
+}
+
+function releaseTranscodeSlot() {
+  activeTranscodes = Math.max(0, activeTranscodes - 1);
+  const next = transcodeQueue.shift();
+  if (next) next();
+}
+
+/** Transcode'u eşzamanlılık sınırı içinde çalıştırır; slot doluysa kuyrukta bekler. */
+export async function withTranscodeSlot<T>(fn: () => Promise<T>): Promise<T> {
+  await acquireTranscodeSlot();
+  try {
+    return await fn();
+  } finally {
+    releaseTranscodeSlot();
+  }
+}
+
 function run(cmd: string, args: string[]): Promise<string> {
   return new Promise((resolve, reject) => {
     const proc = spawn(cmd, args);

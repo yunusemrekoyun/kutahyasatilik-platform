@@ -6,6 +6,7 @@ import Link from "next/link";
 import { submitAgentListing } from "@/app/emlakci/panel/actions";
 import { DISTRICTS, PROPERTY_TYPES } from "@/lib/constants";
 import LocationPicker from "@/components/LocationPicker";
+import VideoUploadField from "@/components/admin/VideoUploadField";
 
 type ListingData = {
   id?: string;
@@ -186,10 +187,10 @@ export default function AgentListingForm({ listing }: { listing?: ListingData })
       {/* Medya: video / drone / sanal tur */}
       <section className="rounded-2xl bg-white p-6 ring-1 ring-slate-200">
         <h2 className="font-bold text-slate-900">Video & Sanal Tur (opsiyonel)</h2>
-        <p className="text-xs text-slate-500">YouTube/Vimeo videosu veya Matterport/360 sanal tur linki yapıştırın.</p>
+        <p className="text-xs text-slate-500">Tanıtım videosunu doğrudan yükleyin (önerilen) ya da YouTube/Vimeo linki yapıştırın. Sanal tur için Matterport/360 linki kullanın.</p>
         <div className="mt-4 grid gap-4">
-          <Field label="Tanıtım Videosu (YouTube/Vimeo)">
-            <input name="videoUrl" defaultValue={listing?.videoUrl ?? ""} placeholder="https://www.youtube.com/watch?v=..." className={inputCls} />
+          <Field label="Tanıtım Videosu (yükle veya link)">
+            <VideoUploadField name="videoUrl" defaultValue={listing?.videoUrl ?? ""} />
           </Field>
           <Field label="Drone / Havadan Görüntü (YouTube/Vimeo)">
             <input name="droneUrl" defaultValue={listing?.droneUrl ?? ""} placeholder="https://www.youtube.com/watch?v=..." className={inputCls} />
