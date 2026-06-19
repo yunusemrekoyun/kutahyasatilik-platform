@@ -46,14 +46,15 @@ export default function AgentRegisterForm() {
         <div className="text-5xl">✅</div>
         <h3 className="mt-3 text-2xl font-bold text-slate-900">Başvurunuz alındı!</h3>
         <p className="mt-2 text-slate-600">
-          Danışman başvurunuz yönetim ekibimize iletildi. Onaylandığında giriş yapıp
-          ilan eklemeye başlayabilirsiniz. Bilgilendirme için sizi arayacağız.
+          Danışman başvurunuz yönetim ekibimize iletildi. Değerlendirme sonrası size bir
+          <b> teklif</b> sunulacak; kabul ve ödeme sonrası hesabınız açılır ve
+          <b> giriş bilgileriniz tarafımızca iletilir</b>. Süreç boyunca sizinle iletişimde olacağız.
         </p>
         <Link
-          href="/emlakci/giris"
+          href="/"
           className="mt-5 inline-block rounded-xl bg-brand-700 px-5 py-3 font-bold text-white hover:bg-brand-800"
         >
-          Giriş sayfasına git →
+          Ana sayfaya dön →
         </Link>
       </div>
     );

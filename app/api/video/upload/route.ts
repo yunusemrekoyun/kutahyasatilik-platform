@@ -4,7 +4,7 @@ import { randomBytes } from "crypto";
 import path from "path";
 import os from "os";
 import { getSession } from "@/lib/auth";
-import { getAgentSession } from "@/lib/agentAuth";
+import { isApprovedAgentSession } from "@/lib/agentAuth";
 import { checkRate } from "@/lib/rateLimit";
 import { createJob, updateJob } from "@/lib/videoJobs";
 import { transcodeToWeb, cleanupWorkDir, withTranscodeSlot } from "@/lib/videoProcessing";
@@ -20,8 +20,8 @@ function partPath(uploadId: string) {
 }
 
 async function isAuthenticated(): Promise<boolean> {
-  const [admin, agent] = await Promise.all([getSession(), getAgentSession()]);
-  return Boolean(admin || agent);
+  const [admin, approvedAgent] = await Promise.all([getSession(), isApprovedAgentSession()]);
+  return Boolean(admin || approvedAgent);
 }
 
 // Arka plan: transcode → kalıcı konuma yayınla → job güncelle. İSTEK BEKLEMEZ.

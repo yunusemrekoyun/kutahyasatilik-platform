@@ -119,6 +119,8 @@ export default async function AdminBasvurularPage() {
                           <option value="reviewing">İnceleniyor</option>
                           <option value="meeting">Görüşme</option>
                           <option value="offer_sent">Teklif gönderildi</option>
+                          <option value="accepted">Teklif kabul edildi</option>
+                          <option value="awaiting_payment">Ödeme bekleniyor</option>
                           <option value="rejected">Reddedildi</option>
                         </select>
                         <button type="submit" className="rounded-lg bg-slate-100 px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-200">Durum</button>

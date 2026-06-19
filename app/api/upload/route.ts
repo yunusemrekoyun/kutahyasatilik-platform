@@ -1,16 +1,16 @@
 import { NextRequest, NextResponse } from "next/server";
 import { saveImageFiles } from "@/lib/imageProcessing";
 import { getSession } from "@/lib/auth";
-import { getAgentSession } from "@/lib/agentAuth";
+import { isApprovedAgentSession } from "@/lib/agentAuth";
 import { checkRate } from "@/lib/rateLimit";
 
 const MAX_SIZE = 8 * 1024 * 1024; // 8MB
 const MAX_FILES = 15;
 
-// Yalnızca giriş yapmış admin veya emlakçı yükleyebilir (anonim istismarı kapatır).
+// Yalnızca admin veya ONAYLI emlakçı yükleyebilir (anonim + askıya alınmış emlakçıyı kapatır).
 async function isAuthenticated(): Promise<boolean> {
-  const [admin, agent] = await Promise.all([getSession(), getAgentSession()]);
-  return Boolean(admin || agent);
+  const [admin, approvedAgent] = await Promise.all([getSession(), isApprovedAgentSession()]);
+  return Boolean(admin || approvedAgent);
 }
 
 export async function POST(req: NextRequest) {
