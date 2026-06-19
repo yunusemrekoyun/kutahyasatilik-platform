@@ -62,8 +62,10 @@ export async function getUserSession(): Promise<UserSession | null> {
   if (!token) return null;
   try {
     const { payload } = await jwtVerify(token, secret);
+    // Çapraz-silo koruması (bkz. lib/auth.ts): userId yoksa kabul etme.
+    if (typeof payload.userId !== "string" || !payload.userId) return null;
     return {
-      userId: payload.userId as string,
+      userId: payload.userId,
       email: payload.email as string,
       name: payload.name as string,
     };

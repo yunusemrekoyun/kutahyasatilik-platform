@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getUserSession } from "@/lib/userAuth";
+import { checkRate } from "@/lib/rateLimit";
 import { favoriteCards, addFavoriteBySlug, removeFavoriteBySlug } from "@/lib/favorites";
 
 export const runtime = "nodejs";
@@ -18,6 +19,8 @@ export async function GET() {
 }
 
 export async function POST(req: NextRequest) {
+  const limited = await checkRate(req, "fav-write", 60, 60_000);
+  if (limited) return limited;
   const session = await getUserSession();
   if (!session) return NextResponse.json({ ok: false, error: "Yetkisiz" }, { status: 401 });
   const body = await req.json().catch(() => ({}));
@@ -32,6 +35,8 @@ export async function POST(req: NextRequest) {
 }
 
 export async function DELETE(req: NextRequest) {
+  const limited = await checkRate(req, "fav-write", 60, 60_000);
+  if (limited) return limited;
   const session = await getUserSession();
   if (!session) return NextResponse.json({ ok: false, error: "Yetkisiz" }, { status: 401 });
   const body = await req.json().catch(() => ({}));

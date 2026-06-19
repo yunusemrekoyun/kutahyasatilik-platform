@@ -1,11 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getUserSession } from "@/lib/userAuth";
+import { checkRate } from "@/lib/rateLimit";
 import { mergeFavoriteSlugs, favoriteCards } from "@/lib/favorites";
 
 export const runtime = "nodejs";
 
 // Giriş anında localStorage favorilerini hesaba birleştirir, güncel listeyi döner.
 export async function POST(req: NextRequest) {
+  const limited = await checkRate(req, "fav-merge", 20, 60_000);
+  if (limited) return limited;
   const session = await getUserSession();
   if (!session) return NextResponse.json({ ok: false, error: "Yetkisiz" }, { status: 401 });
   const body = await req.json().catch(() => ({}));
@@ -15,6 +18,7 @@ export async function POST(req: NextRequest) {
     const items = await favoriteCards(session.userId);
     return NextResponse.json({ ok: true, items });
   } catch {
-    return NextResponse.json({ ok: true, items: [] });
+    // Hata yutup 'ok' DÖNME — aksi halde istemci yerel favorileri silip veri kaybeder.
+    return NextResponse.json({ ok: false, error: "Birleştirilemedi" }, { status: 500 });
   }
 }

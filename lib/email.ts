@@ -10,6 +10,23 @@ export function emailEnabled(): boolean {
   return Boolean(process.env.RESEND_API_KEY && process.env.EMAIL_FROM);
 }
 
+// Alıcı bazında kaba saatlik üst sınır — IP-rotasyonlu lead spam'inin admin kutusunu
+// ve Resend kotasını boğmasını engeller. (Bellek-içi; tek instance için yeterli.)
+const EMAIL_CAP_PER_HOUR = Number(process.env.EMAIL_CAP_PER_HOUR) || 60;
+const sentLog = new Map<string, number[]>();
+function underEmailCap(to: string): boolean {
+  const now = Date.now();
+  const since = now - 3_600_000;
+  const arr = (sentLog.get(to) || []).filter((t) => t > since);
+  if (arr.length >= EMAIL_CAP_PER_HOUR) {
+    sentLog.set(to, arr);
+    return false;
+  }
+  arr.push(now);
+  sentLog.set(to, arr);
+  return true;
+}
+
 export async function sendEmail({
   to,
   subject,
@@ -20,8 +37,9 @@ export async function sendEmail({
   html: string;
 }): Promise<void> {
   if (!emailEnabled() || !to) return;
+  if (!underEmailCap(to)) return;
   try {
-    await fetch(RESEND_ENDPOINT, {
+    const res = await fetch(RESEND_ENDPOINT, {
       method: "POST",
       headers: {
         Authorization: `Bearer ${process.env.RESEND_API_KEY}`,
@@ -29,6 +47,7 @@ export async function sendEmail({
       },
       body: JSON.stringify({ from: process.env.EMAIL_FROM, to, subject, html }),
     });
+    if (!res.ok) console.warn(`[email] Resend yanıtı ${res.status} (alıcı: ${to})`);
   } catch {
     // En iyi çaba — e-posta ikincildir, hata yutulur.
   }
@@ -39,13 +58,16 @@ function escapeHtml(s: string): string {
     .replace(/&/g, "&amp;")
     .replace(/</g, "&lt;")
     .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;");
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
 }
 
 // Bildirim e-postası için basit markalı şablon (lacivert + altın).
 export function notificationEmail(opts: { title: string; body?: string | null; link?: string | null }): string {
   const site = process.env.NEXT_PUBLIC_SITE_URL || "https://kutahyasatilik.com";
-  const href = opts.link ? (opts.link.startsWith("http") ? opts.link : `${site}${opts.link}`) : site;
+  const rawHref = opts.link ? (opts.link.startsWith("http") ? opts.link : `${site}${opts.link}`) : site;
+  // Yalnız http(s)'e izin ver (javascript: vb. değil) ve attribute için escape et.
+  const href = escapeHtml(/^https?:\/\//.test(rawHref) ? rawHref : site);
   const title = escapeHtml(opts.title);
   const body = opts.body ? `<p style="margin:0 0 18px;color:#334155;font-size:15px;line-height:1.6">${escapeHtml(opts.body)}</p>` : "";
   return `<div style="background:#f6f7f9;padding:28px">

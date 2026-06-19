@@ -1,9 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { currentNotificationActor, markRead, markAllRead } from "@/lib/notify";
+import { checkRate } from "@/lib/rateLimit";
 
 export const runtime = "nodejs";
 
 export async function POST(req: NextRequest) {
+  const limited = await checkRate(req, "notif-read", 60, 60_000);
+  if (limited) return limited;
   const actor = await currentNotificationActor();
   if (!actor) return NextResponse.json({ ok: false, error: "Yetkisiz" }, { status: 401 });
 

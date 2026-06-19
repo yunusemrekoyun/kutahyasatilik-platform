@@ -76,6 +76,8 @@ export function notifyUser(userId: string, opts: RoleOpts) {
 function recipientWhere(role: NotificationRole, recipientId: string | null) {
   // admin kutusu ortak (recipientId null); agent/user kendi id'si.
   if (role === "admin") return { recipientRole: "admin" };
+  // Defansif: alıcı id'si yoksa hiçbir kayıt eşleşmesin (undefined WHERE'den düşmesin).
+  if (!recipientId) return { id: "__none__" };
   return { recipientRole: role, recipientId };
 }
 

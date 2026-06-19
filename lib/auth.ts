@@ -60,7 +60,11 @@ export async function getSession(): Promise<SessionPayload | null> {
   if (!token) return null;
   try {
     const { payload } = await jwtVerify(token, secret);
-    return { adminId: payload.adminId as string, email: payload.email as string };
+    // Çapraz-silo koruması: tüm oturumlar aynı AUTH_SECRET ile imzalı; bu cookie'ye
+    // başka silonun (ör. ks_user) token'ı konsa imza geçerli olur. adminId'nin
+    // varlığını şart koşarak yalnız gerçek admin token'ını kabul et.
+    if (typeof payload.adminId !== "string" || !payload.adminId) return null;
+    return { adminId: payload.adminId, email: payload.email as string };
   } catch {
     return null;
   }
