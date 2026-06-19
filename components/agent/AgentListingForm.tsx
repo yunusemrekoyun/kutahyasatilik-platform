@@ -5,6 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { submitAgentListing } from "@/app/emlakci/panel/actions";
 import { DISTRICTS, PROPERTY_TYPES } from "@/lib/constants";
+import LocationPicker from "@/components/LocationPicker";
 
 type ListingData = {
   id?: string;
@@ -239,11 +240,10 @@ export default function AgentListingForm({ listing }: { listing?: ListingData })
       {/* Konum */}
       <section className="rounded-2xl bg-white p-6 ring-1 ring-slate-200">
         <h2 className="font-bold text-slate-900">Konum (opsiyonel)</h2>
-        <div className="mt-4 grid grid-cols-2 gap-4">
-          <Field label="Enlem (lat)"><input name="lat" type="number" step="any" defaultValue={listing?.lat ?? ""} placeholder="39.4242" className={inputCls} /></Field>
-          <Field label="Boylam (lng)"><input name="lng" type="number" step="any" defaultValue={listing?.lng ?? ""} placeholder="29.9833" className={inputCls} /></Field>
+        <p className="mt-1 text-xs text-slate-500">Haritada tıklayarak veya pini sürükleyerek konumu işaretleyin; ilan haritada görünür.</p>
+        <div className="mt-4">
+          <LocationPicker initialLat={listing?.lat ?? null} initialLng={listing?.lng ?? null} />
         </div>
-        <p className="mt-2 text-xs text-slate-400">Lat/Lng girilirse ilan haritada görünür.</p>
       </section>
 
       <div className="flex items-center gap-3">
