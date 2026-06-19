@@ -39,6 +39,7 @@ model Agent {
   approvedAt   DateTime?
 
   listings Listing[]
+  payments Payment[]
 
   @@index([status])
 }
@@ -464,4 +465,28 @@ model Package {
   active        Boolean  @default(true)
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
+}
+
+// ---------------------------------------------------------------------------
+// Tahsilat (§6) — ÖDEME ENTEGRASYONU YOK. Ödeme havale/EFT/elden; sistem yalnız
+// KAYIT + TAKİP tutar: bekleyen / ödendi / geciken. Emlakçı bazında defter.
+// ---------------------------------------------------------------------------
+model Payment {
+  id        String    @id @default(cuid())
+  agentId   String
+  agent     Agent     @relation(fields: [agentId], references: [id], onDelete: Cascade)
+  packageId String? // hangi paket için (snapshot değil, referans)
+  amount    Int
+  currency  String    @default("TRY")
+  period    String? // "Haziran 2026" / "2026-06"
+  method    String? // havale | EFT | nakit
+  purpose   String    @default("package") // package | listing | featured
+  status    String    @default("pending") // pending | paid | overdue
+  paidAt    DateTime?
+  note      String?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  @@index([agentId])
+  @@index([status])
 }
