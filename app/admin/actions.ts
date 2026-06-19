@@ -477,6 +477,89 @@ export async function createOffer(formData: FormData) {
   revalidatePath("/admin/basvurular");
 }
 
+// --- Portföy fırsatları (§8) ---
+export async function createOpportunity(formData: FormData) {
+  await ensureAuth();
+  const title = String(formData.get("title") || "").trim();
+  if (!title) throw new Error("Başlık gerekli");
+  const days = num(formData.get("biddingDays")) ?? 7;
+  await prisma.portfolioOpportunity.create({
+    data: {
+      title,
+      description: str(formData.get("description")),
+      district: str(formData.get("district")),
+      propertyType: str(formData.get("propertyType")),
+      estimatedPrice: num(formData.get("estimatedPrice")),
+      areaGross: num(formData.get("areaGross")),
+      rooms: str(formData.get("rooms")),
+      leadId: str(formData.get("leadId")),
+      biddingEndsAt: new Date(Date.now() + days * 24 * 3600_000),
+    },
+  });
+  revalidatePath("/admin/firsatlar");
+  redirect("/admin/firsatlar");
+}
+
+export async function closeOpportunity(formData: FormData) {
+  await ensureAuth();
+  const id = String(formData.get("id") || "");
+  if (!id) return;
+  await prisma.portfolioOpportunity.update({ where: { id }, data: { status: "closed" } });
+  revalidatePath("/admin/firsatlar");
+}
+
+// Kazanan teklifi seç → kazanan emlakçıya atanmış ilan oluştur (onay bekler).
+export async function selectWinningBid(formData: FormData) {
+  await ensureAuth();
+  const opportunityId = String(formData.get("opportunityId") || "");
+  const bidId = String(formData.get("bidId") || "");
+  if (!opportunityId || !bidId) return;
+
+  const opp = await prisma.portfolioOpportunity.findUnique({ where: { id: opportunityId } });
+  if (!opp) throw new Error("Fırsat bulunamadı");
+  if (opp.listingId) throw new Error("Bu fırsat zaten ilana dönüştürülmüş");
+  const bid = await prisma.bid.findUnique({ where: { id: bidId } });
+  if (!bid || bid.opportunityId !== opportunityId) throw new Error("Teklif bulunamadı");
+
+  await prisma.bid.updateMany({ where: { opportunityId }, data: { status: "lost" } });
+  await prisma.bid.update({ where: { id: bidId }, data: { status: "won" } });
+
+  const base = slugify(opp.title) || "ilan";
+  let slug = base;
+  let i = 1;
+  while (await prisma.listing.findUnique({ where: { slug }, select: { id: true } })) slug = `${base}-${i++}`;
+
+  const price = opp.estimatedPrice ?? 0;
+  const listing = await prisma.listing.create({
+    data: {
+      slug,
+      title: opp.title,
+      description: opp.description || opp.title,
+      propertyType: opp.propertyType || "daire",
+      listingType: "sale",
+      status: "active",
+      moderationStatus: "pending", // kazanan emlakçı düzenler, admin onaylar
+      agentId: bid.agentId,
+      price,
+      district: opp.district || "Merkez",
+      areaGross: opp.areaGross,
+      rooms: opp.rooms,
+    },
+  });
+  await prisma.priceHistory.create({ data: { listingId: listing.id, price } });
+  await prisma.portfolioOpportunity.update({
+    where: { id: opportunityId },
+    data: { status: "listed", listingId: listing.id },
+  });
+  await notifyAgent(bid.agentId, {
+    type: "system",
+    title: "Portföy fırsatını kazandınız",
+    body: `${opp.title} — size atanmış ilan oluşturuldu (onay bekliyor, düzenleyebilirsiniz).`,
+    link: "/emlakci/panel",
+  });
+  revalidatePath("/admin/firsatlar");
+}
+
 export async function saveSettings(formData: FormData) {
   await ensureAuth();
   const keys = ["phone", "whatsapp", "email", "brand", "seller_hero_image", "home_hero_image"];
