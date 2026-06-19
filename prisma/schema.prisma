@@ -503,11 +503,51 @@ model AgentApplication {
   title      String?
   agency     String?
   experience String? // serbest metin (deneyim/ofis)
-  status     String   @default("applied") // applied | reviewing | meeting | offer_sent | rejected | activated
+  status     String   @default("applied") // applied | reviewing | meeting | offer_sent | accepted | awaiting_payment | rejected | activated
   adminNote  String?
   agentId    String? // aktive edilince oluşan Agent (gevşek referans)
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
 
+  offers Offer[]
+
   @@index([status])
+}
+
+// ---------------------------------------------------------------------------
+// Teklif (§4/§4b) — versiyonlu. Teklif anında paketin adı/fiyat/özellikleri
+// SNAPSHOT'lanır; paket sonradan değişse de eski teklif sabit kalır. Emlakçı yalnız
+// son (aktif) sürümü görür (e-posta OTP ile); admin tüm geçmişi görür.
+// ---------------------------------------------------------------------------
+model Offer {
+  id               String           @id @default(cuid())
+  applicationId    String
+  application      AgentApplication @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  version          Int
+  snapshotName     String
+  snapshotPrice    Int
+  snapshotFeatures String? // JSON array (string)
+  interval         String           @default("monthly")
+  status           String           @default("active") // active | superseded | accepted | expired
+  validUntil       DateTime?
+  viewedAt         DateTime?
+  acceptedAt       DateTime?
+  viewCount        Int              @default(0)
+  createdAt        DateTime         @default(now())
+
+  @@index([applicationId])
+}
+
+// ---------------------------------------------------------------------------
+// E-posta OTP — teklif görüntüleme doğrulaması (e-posta + tel son 4 + 6 hane kod).
+// ---------------------------------------------------------------------------
+model EmailOtp {
+  id            String   @id @default(cuid())
+  applicationId String
+  codeHash      String
+  expiresAt     DateTime
+  attempts      Int      @default(0)
+  createdAt     DateTime @default(now())
+
+  @@index([applicationId])
 }
