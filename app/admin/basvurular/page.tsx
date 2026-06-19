@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma";
-import { updateApplicationStatus, activateApplication } from "@/app/admin/actions";
+import { updateApplicationStatus, activateApplication, createOffer } from "@/app/admin/actions";
+import { formatPrice } from "@/lib/format";
 
 export const dynamic = "force-dynamic";
 
@@ -12,16 +13,30 @@ const STATUS: Record<string, { label: string; cls: string }> = {
   activated: { label: "Aktive edildi", cls: "bg-green-50 text-green-700 ring-green-200" },
 };
 
+type Offer = {
+  id: string; version: number; snapshotPrice: number; status: string;
+  viewedAt: Date | null; acceptedAt: Date | null;
+};
 type App = {
   id: string; name: string; email: string; phone: string;
   title: string | null; agency: string | null; experience: string | null;
   status: string; adminNote: string | null; createdAt: Date;
+  offers: Offer[];
 };
 
 export default async function AdminBasvurularPage() {
   let apps: App[] = [];
   try {
-    apps = await prisma.agentApplication.findMany({ orderBy: { createdAt: "desc" }, take: 200 });
+    apps = await prisma.agentApplication.findMany({
+      orderBy: { createdAt: "desc" },
+      take: 200,
+      include: {
+        offers: {
+          orderBy: { version: "desc" },
+          select: { id: true, version: true, snapshotPrice: true, status: true, viewedAt: true, acceptedAt: true },
+        },
+      },
+    });
   } catch {
     /* tablo henüz yoksa (migration deploy edilmedi) */
   }
@@ -57,6 +72,39 @@ export default async function AdminBasvurularPage() {
                   <span className={`shrink-0 rounded-full px-2.5 py-0.5 text-xs font-semibold ring-1 ${s.cls}`}>{s.label}</span>
                 </div>
                 {a.experience && <p className="mt-2 rounded-lg bg-slate-50 p-3 text-sm text-slate-600">{a.experience}</p>}
+
+                {a.offers.length > 0 && (
+                  <div className="mt-3 space-y-1.5">
+                    {a.offers.map((o) => (
+                      <div key={o.id} className="flex flex-wrap items-center gap-2 text-xs">
+                        <span className="font-medium text-slate-700">Teklif v{o.version}</span>
+                        <span className="tabular-nums text-slate-600">{formatPrice(o.snapshotPrice, "TRY")}</span>
+                        <span
+                          className={`rounded-full px-2 py-0.5 font-medium ${
+                            o.status === "active"
+                              ? "bg-indigo-50 text-indigo-700"
+                              : o.status === "accepted"
+                              ? "bg-green-50 text-green-700"
+                              : "bg-slate-100 text-slate-500"
+                          }`}
+                        >
+                          {o.status === "active" ? "Aktif" : o.status === "accepted" ? "Kabul edildi" : o.status === "superseded" ? "Eski sürüm" : o.status}
+                        </span>
+                        {o.viewedAt && <span className="text-slate-400">· görüntülendi</span>}
+                        {o.acceptedAt && <span className="text-green-600">· kabul</span>}
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {a.status !== "activated" && (
+                  <form action={createOffer} className="mt-3">
+                    <input type="hidden" name="id" value={a.id} />
+                    <button type="submit" className="rounded-lg bg-indigo-600 px-3 py-2 text-sm font-semibold text-white hover:bg-indigo-700">
+                      {a.offers.some((o) => o.status === "active") ? "Yeni Teklif Sürümü" : "Teklif Oluştur"}
+                    </button>
+                  </form>
+                )}
 
                 {a.status !== "activated" && (
                   <div className="mt-4 grid gap-3 border-t border-slate-100 pt-4 sm:grid-cols-2">
