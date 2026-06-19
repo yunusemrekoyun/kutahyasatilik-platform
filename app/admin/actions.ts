@@ -8,7 +8,7 @@ import { slugify } from "@/lib/format";
 import { sanitizeCmsHtml } from "@/lib/sanitize";
 import { deleteUploadFiles } from "@/lib/uploads";
 import { deleteVideo } from "@/lib/videoStorage";
-import { notifyAgent } from "@/lib/notify";
+import { notifyAgent, notifyMatchingAlerts } from "@/lib/notify";
 
 async function ensureAuth() {
   const session = await getSession();
@@ -149,6 +149,11 @@ export async function saveListing(formData: FormData) {
   } else {
     const created = await prisma.listing.create({ data });
     listingId = created.id;
+    // Yeni admin ilanı aktif olarak yayınlanıyorsa (admin ilanları otomatik onaylı)
+    // eşleşen aktif kayıtlı aramalara haber ver.
+    if (data.status === "active") {
+      await notifyMatchingAlerts(data);
+    }
   }
 
   // Fiyat geçmişi: yeni ilanda ilk kayıt, düzenlemede fiyat değiştiyse kayıt
@@ -259,7 +264,10 @@ export async function approveListing(formData: FormData) {
   const updated = await prisma.listing.update({
     where: { id },
     data: { moderationStatus: "approved", note: null },
-    select: { slug: true, agentId: true, title: true },
+    select: {
+      slug: true, agentId: true, title: true, status: true,
+      propertyType: true, listingType: true, district: true, price: true, areaGross: true, rooms: true,
+    },
   });
   if (updated.agentId) {
     await notifyAgent(updated.agentId, {
@@ -268,6 +276,10 @@ export async function approveListing(formData: FormData) {
       body: updated.title,
       link: "/emlakci/panel",
     });
+  }
+  // Onaylanan ilan artık herkese açık → eşleşen aktif kayıtlı aramalara haber ver.
+  if (updated.status === "active") {
+    await notifyMatchingAlerts(updated);
   }
   revalidatePath("/admin/onay");
   revalidatePath("/admin/ilanlar");

@@ -75,10 +75,11 @@ export function listingToAlertWhere(listing: ListingForMatch): Record<string, un
   };
 }
 
-export async function findAlertsForListing(listing: ListingForMatch) {
+export async function findAlertsForListing(listing: ListingForMatch, take = 100) {
   return prisma.buyerAlert.findMany({
     where: listingToAlertWhere(listing),
     orderBy: { createdAt: "desc" },
+    take,
   });
 }
 
