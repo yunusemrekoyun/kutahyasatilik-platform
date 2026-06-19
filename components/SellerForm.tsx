@@ -4,6 +4,7 @@ import { useState } from "react";
 import { CheckCircle2, Lock } from "lucide-react";
 import { useUtm } from "@/lib/useUtm";
 import { trackConversion } from "@/lib/track";
+import { isValidTrPhone, TR_PHONE_ERROR } from "@/lib/validation";
 import { DISTRICTS, PROPERTY_TYPES } from "@/lib/constants";
 
 export default function SellerForm() {
@@ -26,6 +27,11 @@ export default function SellerForm() {
     e.preventDefault();
     setError("");
     const fd = new FormData(e.currentTarget);
+    if (!isValidTrPhone(String(fd.get("phone") || ""))) {
+      setStatus("error");
+      setError(TR_PHONE_ERROR);
+      return;
+    }
     try {
       let photos: string[] = [];
       if (files.length > 0) {
