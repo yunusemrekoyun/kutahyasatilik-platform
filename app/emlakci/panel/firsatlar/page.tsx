@@ -62,6 +62,11 @@ export default async function AgentOpportunitiesPage() {
                     o.estimatedPrice ? `~${formatPrice(o.estimatedPrice, "TRY")}` : null,
                   ].filter(Boolean).join(" · ")}
                 </p>
+                {o.biddingEndsAt && (
+                  <p className="mt-1 text-xs font-medium text-amber-600">
+                    Son teklif: {new Date(o.biddingEndsAt).toLocaleDateString("tr-TR", { day: "numeric", month: "long", year: "numeric" })}
+                  </p>
+                )}
                 {o.description && <p className="mt-2 text-sm text-slate-600">{o.description}</p>}
 
                 {myBid && (

@@ -24,6 +24,8 @@ export async function POST(req: NextRequest) {
 
   await prisma.offer.update({ where: { id: offer.id }, data: { status: "accepted", acceptedAt: new Date() } });
   await prisma.agentApplication.update({ where: { id: app.id }, data: { status: "awaiting_payment" } });
+  // OTP'yi tüket — kabul geri alınamaz, kod tekrar kullanılamasın (replay önleme).
+  await prisma.emailOtp.deleteMany({ where: { applicationId: app.id } });
 
   await notifyAdmins({
     type: "system",

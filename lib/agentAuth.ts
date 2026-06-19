@@ -69,6 +69,15 @@ export async function getAgentSession(): Promise<AgentSession | null> {
   }
 }
 
+// Oturumdaki emlakçı ONAYLI mı? (throw etmez; upload gibi route'larda kullanılır —
+// askıya alınmış/onaysız emlakçının lingering cookie'si işlem tetikleyemesin.)
+export async function isApprovedAgentSession(): Promise<boolean> {
+  const session = await getAgentSession();
+  if (!session) return false;
+  const agent = await prisma.agent.findUnique({ where: { id: session.agentId }, select: { status: true } });
+  return agent?.status === "approved";
+}
+
 // Panel sunucu aksiyonları için: oturum + onaylı emlakçı şartı.
 export async function requireApprovedAgent() {
   const session = await getAgentSession();
