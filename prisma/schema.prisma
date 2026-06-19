@@ -446,3 +446,22 @@ model Notification {
   @@index([recipientRole, recipientId, isRead, createdAt])
   @@index([createdAt])
 }
+
+// ---------------------------------------------------------------------------
+// Emlakçı paketi (§5) — ilk sürümde TEK paket. Admin alanları düzenler, yeni
+// paket OLUŞTURMAZ. Teklif yapıldığında ad/özellik/fiyat teklife snapshot'lanır.
+// ---------------------------------------------------------------------------
+model Package {
+  id            String   @id @default(cuid())
+  name          String   @default("Kurumsal Emlakçı Paketi")
+  description   String?
+  price         Int      @default(2500) // dönem ücreti (TRY)
+  currency      String   @default("TRY")
+  interval      String   @default("monthly") // monthly | yearly | one_time
+  listingQuota  Int? // null = sınırsız ilan
+  featuredQuota Int? // öne çıkarma kotası (null = yok/sınırsız)
+  features      String? // JSON array (string) — özellik satırları
+  active        Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
