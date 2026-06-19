@@ -5,6 +5,7 @@ import { findListingsForAlert } from "@/lib/matching";
 import { checkRate } from "@/lib/rateLimit";
 import { trPhoneSchema } from "@/lib/validation";
 import { notifyAdmins } from "@/lib/notify";
+import { getUserSession } from "@/lib/userAuth";
 
 const schema = z.object({
   name: z.string().min(2, "Ad soyad gerekli").max(120),
@@ -46,6 +47,7 @@ export async function POST(req: NextRequest) {
     rooms: data.rooms || null,
   };
 
+  const session = await getUserSession();
   const alert = await prisma.buyerAlert.create({
     data: {
       name: data.name.trim(),
@@ -53,6 +55,7 @@ export async function POST(req: NextRequest) {
       email: data.email || null,
       note: data.note || null,
       status: "active",
+      userId: session?.userId ?? null,
       utmSource: data.utmSource || null,
       utmMedium: data.utmMedium || null,
       utmCampaign: data.utmCampaign || null,
