@@ -5,7 +5,7 @@ import { usePathname, useRouter } from "next/navigation";
 import {
   LayoutDashboard, Building2, PlusCircle, Newspaper, FileText,
   ClipboardCheck, Inbox, BellRing, Users, MessageSquare, Megaphone,
-  Home, Settings, LogOut, Package as PackageIcon, Wallet, UserPlus, Gavel, type LucideIcon,
+  Home, Settings, LogOut, Package as PackageIcon, Wallet, UserPlus, Gavel, HandCoins, type LucideIcon,
 } from "lucide-react";
 
 export type AdminCounts = {
@@ -46,6 +46,7 @@ const GROUPS: Group[] = [
     items: [
       { href: "/admin/yorumlar", label: "Müşteri Yorumları", Icon: MessageSquare },
       { href: "/admin/reklamlar", label: "Pop-up Reklamlar", Icon: Megaphone },
+      { href: "/admin/reklam-talepleri", label: "Reklam Talepleri", Icon: HandCoins },
       { href: "/admin/ana-sayfa", label: "Ana Sayfa Metinleri", Icon: Home },
     ],
   },
