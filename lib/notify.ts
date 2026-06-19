@@ -4,6 +4,7 @@ import { getSession } from "./auth";
 import { getAgentSession } from "./agentAuth";
 import { getUserSession } from "./userAuth";
 import { sendEmail, notificationEmail, emailEnabled } from "./email";
+import { findAlertsForListing, type ListingForMatch } from "./matching";
 
 // Merkezi bildirim yardımcıları. İlk sürüm: site-içi (e-posta katmanı sonra eklenecek).
 // notify() çağrıları İKİNCİLDİR: hata olsa bile çağıran akışı (lead/onay vb.) bozmaz.
@@ -69,6 +70,31 @@ export function notifyAgent(agentId: string, opts: RoleOpts) {
 }
 export function notifyUser(userId: string, opts: RoleOpts) {
   return notify({ ...opts, recipientRole: "user", recipientId: userId });
+}
+
+// Yeni yayınlanan/onaylanan ilanı eşleşen AKTİF kayıtlı aramalara bildirir.
+// userId varsa in-app (+ e-posta hesap adresine); anonim alert ise yalnız e-posta.
+export async function notifyMatchingAlerts(
+  listing: ListingForMatch & { title: string; slug: string }
+): Promise<void> {
+  try {
+    const alerts = await findAlertsForListing(listing, 100);
+    const link = `/ilan/${listing.slug}`;
+    const title = "Aramanıza uygun yeni ilan";
+    const body = listing.title;
+    let n = 0;
+    for (const a of alerts) {
+      if (n >= 50) break; // güvenlik sınırı (tek ilan çok alert'i tetiklemesin)
+      n++;
+      if (a.userId) {
+        await notifyUser(a.userId, { type: "new_match", title, body, link });
+      } else if (a.email) {
+        await sendEmail({ to: a.email, subject: title, html: notificationEmail({ title, body, link }) });
+      }
+    }
+  } catch {
+    // ikincil — eşleştirme/bildirim ana akışı bozmaz
+  }
 }
 
 // --- Listeleme / okuma (alıcı = mevcut aktör) ---

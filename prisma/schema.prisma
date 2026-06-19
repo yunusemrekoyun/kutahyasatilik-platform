@@ -171,10 +171,15 @@ model BuyerAlert {
   utmMedium   String?
   utmCampaign String?
 
+  // Hesaba bağlı kayıtlı arama (giriş yapan kullanıcı kaydederse). Anonimse null.
+  userId String?
+  user   User?   @relation(fields: [userId], references: [id], onDelete: SetNull)
+
   createdAt DateTime @default(now())
 
   @@index([status])
   @@index([district])
+  @@index([userId])
 }
 
 model ListingImage {
@@ -403,6 +408,7 @@ model User {
   createdAt    DateTime  @default(now())
 
   favorites Favorite[]
+  alerts    BuyerAlert[]
 }
 
 // ---------------------------------------------------------------------------

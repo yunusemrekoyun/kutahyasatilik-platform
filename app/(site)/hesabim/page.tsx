@@ -5,6 +5,7 @@ import { Heart, Mail, Phone, User as UserIcon } from "lucide-react";
 import { getUserSession } from "@/lib/userAuth";
 import { prisma } from "@/lib/prisma";
 import LogoutButton from "@/components/user/LogoutButton";
+import SavedSearches from "@/components/user/SavedSearches";
 
 export const metadata: Metadata = {
   title: "Hesabım",
@@ -50,21 +51,16 @@ export default async function AccountPage() {
         </dl>
       </div>
 
-      <div className="mt-4 grid gap-3 sm:grid-cols-2">
-        <Link href="/favoriler" className="flex items-center gap-3 rounded-2xl bg-white p-5 ring-1 ring-slate-200 transition hover:ring-brand-300">
-          <span className="grid h-10 w-10 place-items-center rounded-lg bg-rose-50 text-rose-600"><Heart className="h-5 w-5" /></span>
-          <div>
-            <p className="font-semibold text-slate-900">Favorilerim</p>
-            <p className="text-xs text-slate-500">Beğendiğiniz ilanlar</p>
-          </div>
-        </Link>
-        <div className="flex items-center gap-3 rounded-2xl bg-slate-50 p-5 ring-1 ring-slate-200">
-          <span className="grid h-10 w-10 place-items-center rounded-lg bg-slate-200 text-slate-500"><UserIcon className="h-5 w-5" /></span>
-          <div>
-            <p className="font-semibold text-slate-700">Kayıtlı aramalar</p>
-            <p className="text-xs text-slate-400">Yakında — yeni eşleşen ilanlarda bildirim</p>
-          </div>
+      <Link href="/favoriler" className="mt-4 flex items-center gap-3 rounded-2xl bg-white p-5 ring-1 ring-slate-200 transition hover:ring-brand-300">
+        <span className="grid h-10 w-10 place-items-center rounded-lg bg-rose-50 text-rose-600"><Heart className="h-5 w-5" /></span>
+        <div>
+          <p className="font-semibold text-slate-900">Favorilerim</p>
+          <p className="text-xs text-slate-500">Beğendiğiniz ilanlar</p>
         </div>
+      </Link>
+
+      <div className="mt-4">
+        <SavedSearches />
       </div>
 
       <div className="mt-8">
