@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 
 const inputCls =
@@ -15,7 +15,6 @@ function safeNext(raw: string | null): string {
 }
 
 export default function UserLoginForm() {
-  const router = useRouter();
   const params = useSearchParams();
   const next = safeNext(params.get("next"));
   const [status, setStatus] = useState<"idle" | "loading">("idle");
@@ -34,8 +33,8 @@ export default function UserLoginForm() {
       });
       const data = await res.json();
       if (!res.ok || !data.ok) throw new Error(data.error || "Giriş başarısız");
-      router.push(next);
-      router.refresh();
+      // Tam sayfa yükleme: StoreProvider remount olur, localStorage favorileri hesaba birleşir.
+      window.location.assign(next);
     } catch (err) {
       setStatus("idle");
       setError(err instanceof Error ? err.message : "Bir hata oluştu");

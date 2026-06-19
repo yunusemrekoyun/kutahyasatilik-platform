@@ -118,6 +118,7 @@ model Listing {
   leads        Lead[]
   events       AnalyticsEvent[]
   priceHistory PriceHistory[]
+  favorites    Favorite[]
 
   @@index([propertyType])
   @@index([district])
@@ -400,6 +401,23 @@ model User {
   phone        String?
   verifiedAt   DateTime? // e-posta doğrulama (ileride OTP/link ile)
   createdAt    DateTime  @default(now())
+
+  favorites Favorite[]
+}
+
+// ---------------------------------------------------------------------------
+// Favori (hesaba bağlı) — cihazdan bağımsız senkron. Giriş yoksa localStorage.
+// ---------------------------------------------------------------------------
+model Favorite {
+  id        String  @id @default(cuid())
+  userId    String
+  user      User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  listingId String
+  listing   Listing @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@unique([userId, listingId])
+  @@index([userId])
 }
 
 // ---------------------------------------------------------------------------

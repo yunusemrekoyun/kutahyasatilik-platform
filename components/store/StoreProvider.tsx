@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, useEffect, useState, useCallback } from "react";
+import { createContext, useContext, useEffect, useState, useCallback, useRef } from "react";
 import type { ListingCardData } from "@/components/ListingCard";
 
 export type ListingSnapshot = ListingCardData & {
@@ -44,28 +44,77 @@ function load(key: string): ListingSnapshot[] {
   }
 }
 
+const JSON_HEADERS = { "Content-Type": "application/json" };
+
 export default function StoreProvider({ children }: { children: React.ReactNode }) {
   const [favorites, setFavorites] = useState<ListingSnapshot[]>([]);
   const [compare, setCompare] = useState<ListingSnapshot[]>([]);
   const [recent, setRecent] = useState<ListingSnapshot[]>([]);
   const [toasts, setToasts] = useState<Toast[]>([]);
   const [hydrated, setHydrated] = useState(false);
+  // null = bilinmiyor, false = anonim (localStorage), true = girişli (sunucu)
+  const [authed, setAuthed] = useState<boolean | null>(null);
 
+  // Callback'lerin güncel değere erişmesi için ref'ler (stale closure'ı önler).
+  const authedRef = useRef(false);
+  const favoritesRef = useRef<ListingSnapshot[]>([]);
+  useEffect(() => { favoritesRef.current = favorites; }, [favorites]);
+
+  // Mount: compare/recent her zaman localStorage. Favoriler girişliyse sunucudan
+  // (cihazlar arası senkron); girişte localStorage favorileri hesaba birleştirilir.
   useEffect(() => {
     let cancelled = false;
+    const localFavs = load("ks_fav");
     queueMicrotask(() => {
       if (cancelled) return;
-      setFavorites(load("ks_fav"));
       setCompare(load("ks_cmp"));
       setRecent(load("ks_recent"));
-      setHydrated(true);
+      setFavorites(localFavs);
     });
-    return () => {
-      cancelled = true;
-    };
+
+    (async () => {
+      try {
+        const res = await fetch("/api/favorites");
+        const d = await res.json();
+        if (cancelled) return;
+        if (d?.authed) {
+          const localSlugs = localFavs.map((f) => f.slug).filter(Boolean);
+          if (localSlugs.length) {
+            const m = await fetch("/api/favorites/merge", {
+              method: "POST",
+              headers: JSON_HEADERS,
+              body: JSON.stringify({ slugs: localSlugs }),
+            });
+            const md = await m.json().catch(() => null);
+            if (cancelled) return;
+            setFavorites(md?.items ?? d.items ?? []);
+          } else {
+            setFavorites(d.items ?? []);
+          }
+          try { localStorage.removeItem("ks_fav"); } catch { /* yoksay */ }
+          authedRef.current = true;
+          setAuthed(true);
+        } else {
+          authedRef.current = false;
+          setAuthed(false);
+        }
+      } catch {
+        if (!cancelled) {
+          authedRef.current = false;
+          setAuthed(false);
+        }
+      } finally {
+        if (!cancelled) setHydrated(true);
+      }
+    })();
+
+    return () => { cancelled = true; };
   }, []);
 
-  useEffect(() => { if (hydrated) localStorage.setItem("ks_fav", JSON.stringify(favorites)); }, [favorites, hydrated]);
+  // Favoriler: yalnız anonimken localStorage'a yaz (girişliyken kaynak sunucu).
+  useEffect(() => {
+    if (hydrated && authed === false) localStorage.setItem("ks_fav", JSON.stringify(favorites));
+  }, [favorites, hydrated, authed]);
   useEffect(() => { if (hydrated) localStorage.setItem("ks_cmp", JSON.stringify(compare)); }, [compare, hydrated]);
   useEffect(() => { if (hydrated) localStorage.setItem("ks_recent", JSON.stringify(recent)); }, [recent, hydrated]);
 
@@ -78,19 +127,28 @@ export default function StoreProvider({ children }: { children: React.ReactNode 
   const isFavorite = useCallback((slug: string) => favorites.some((f) => f.slug === slug), [favorites]);
   const isInCompare = useCallback((slug: string) => compare.some((c) => c.slug === slug), [compare]);
 
+  // Sunucu senkronu (girişliyse). Hata yutulur — yerel state yine güncellenir.
+  function syncFavorite(method: "POST" | "DELETE", slug: string) {
+    if (!authedRef.current) return;
+    fetch("/api/favorites", { method, headers: JSON_HEADERS, body: JSON.stringify({ slug }) }).catch(() => {});
+  }
+
   const toggleFavorite = useCallback((l: ListingSnapshot) => {
-    setFavorites((prev) => {
-      if (prev.some((f) => f.slug === l.slug)) {
-        toast("Favorilerden çıkarıldı", "info");
-        return prev.filter((f) => f.slug !== l.slug);
-      }
-      toast("Favorilere eklendi ❤️");
-      return [l, ...prev];
-    });
+    const exists = favoritesRef.current.some((f) => f.slug === l.slug);
+    if (exists) {
+      setFavorites((prev) => prev.filter((f) => f.slug !== l.slug));
+      toast("Favorilerden çıkarıldı", "info");
+      syncFavorite("DELETE", l.slug);
+    } else {
+      setFavorites((prev) => [l, ...prev.filter((f) => f.slug !== l.slug)]);
+      toast("Favorilere eklendi");
+      syncFavorite("POST", l.slug);
+    }
   }, [toast]);
 
   const removeFavorite = useCallback((slug: string) => {
     setFavorites((prev) => prev.filter((f) => f.slug !== slug));
+    syncFavorite("DELETE", slug);
   }, []);
 
   const toggleCompare = useCallback((l: ListingSnapshot) => {
