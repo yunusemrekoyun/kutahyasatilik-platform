@@ -6,6 +6,7 @@ import { useState, useEffect } from "react";
 import { Mail, Phone, LogIn, UserPlus, Heart, MessageCircle, Menu, X, User } from "lucide-react";
 import { SITE, telLink, whatsappLink } from "@/lib/site";
 import { useStore } from "@/components/store/StoreProvider";
+import NotificationBell from "@/components/NotificationBell";
 
 const NAV = [
   { href: "/ilanlar", label: "Tüm İlanlar" },
@@ -113,6 +114,7 @@ export default function Header() {
                   </span>
                 )}
               </Link>
+              {account && <NotificationBell />}
               <Link
                 href={account ? "/hesabim" : "/giris"}
                 className="hidden items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-100 sm:inline-flex"
