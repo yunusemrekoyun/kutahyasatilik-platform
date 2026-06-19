@@ -60,6 +60,10 @@ AGENTS.md
 .agents/
 skills-lock.json
 .codex/
+
+# İç çalışma notları (commit edilmez)
+NOTLAR.md
+/rapor/
 .aider*
 .continue/
 # Cursor
