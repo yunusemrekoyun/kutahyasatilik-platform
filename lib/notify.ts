@@ -3,6 +3,7 @@ import { prisma } from "./prisma";
 import { getSession } from "./auth";
 import { getAgentSession } from "./agentAuth";
 import { getUserSession } from "./userAuth";
+import { sendEmail, notificationEmail, emailEnabled } from "./email";
 
 // Merkezi bildirim yardımcıları. İlk sürüm: site-içi (e-posta katmanı sonra eklenecek).
 // notify() çağrıları İKİNCİLDİR: hata olsa bile çağıran akışı (lead/onay vb.) bozmaz.
@@ -32,6 +33,29 @@ export async function notify(opts: CreateOpts): Promise<void> {
     });
   } catch {
     // Bildirim ikincil — tablo henüz yoksa ya da hata olursa sessizce geç.
+  }
+  // E-posta kanalı (ikincil, fire-and-forget; isteği bloke etmez, anahtar yoksa atlanır).
+  void dispatchEmail(opts);
+}
+
+// Bildirimi alıcının e-postasına da gönderir: admin -> ADMIN_EMAIL, agent/user -> kendi e-postası.
+async function dispatchEmail(opts: CreateOpts): Promise<void> {
+  if (!emailEnabled()) return;
+  try {
+    let to: string | null = null;
+    if (opts.recipientRole === "admin") {
+      to = process.env.ADMIN_EMAIL || null;
+    } else if (opts.recipientRole === "agent" && opts.recipientId) {
+      const a = await prisma.agent.findUnique({ where: { id: opts.recipientId }, select: { email: true } });
+      to = a?.email ?? null;
+    } else if (opts.recipientRole === "user" && opts.recipientId) {
+      const u = await prisma.user.findUnique({ where: { id: opts.recipientId }, select: { email: true } });
+      to = u?.email ?? null;
+    }
+    if (!to) return;
+    await sendEmail({ to, subject: opts.title, html: notificationEmail(opts) });
+  } catch {
+    // En iyi çaba.
   }
 }
 
