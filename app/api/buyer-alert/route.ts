@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { findListingsForAlert } from "@/lib/matching";
 import { checkRate } from "@/lib/rateLimit";
 import { trPhoneSchema } from "@/lib/validation";
+import { notifyAdmins } from "@/lib/notify";
 
 const schema = z.object({
   name: z.string().min(2, "Ad soyad gerekli").max(120),
@@ -63,6 +64,13 @@ export async function POST(req: NextRequest) {
   await prisma.analyticsEvent
     .create({ data: { type: "conversion", district: data.district || null, utmSource: data.utmSource || null } })
     .catch(() => {});
+
+  await notifyAdmins({
+    type: "new_alert",
+    title: "Yeni alıcı talebi",
+    body: `${data.name.trim()} · ${data.phone.trim()}`,
+    link: "/admin/alici-talepleri",
+  });
 
   // Anında uygun ilanları döndür (anlık tatmin)
   const matches = await findListingsForAlert(criteria, 12);
