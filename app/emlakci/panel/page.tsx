@@ -48,12 +48,20 @@ export default async function AgentDashboard() {
             {agent.agency ? ` · ${agent.agency}` : ""}
           </p>
         </div>
-        <Link
-          href="/emlakci/panel/ilan/yeni"
-          className="rounded-lg bg-brand-700 px-4 py-2.5 text-sm font-bold text-white hover:bg-brand-800"
-        >
-          + Yeni İlan Ekle
-        </Link>
+        <div className="flex items-center gap-2">
+          <Link
+            href="/emlakci/panel/firsatlar"
+            className="rounded-lg bg-white px-4 py-2.5 text-sm font-semibold text-brand-700 ring-1 ring-brand-200 hover:bg-brand-50"
+          >
+            Portföy Fırsatları
+          </Link>
+          <Link
+            href="/emlakci/panel/ilan/yeni"
+            className="rounded-lg bg-brand-700 px-4 py-2.5 text-sm font-bold text-white hover:bg-brand-800"
+          >
+            + Yeni İlan Ekle
+          </Link>
+        </div>
       </div>
 
       {/* İstatistik */}
