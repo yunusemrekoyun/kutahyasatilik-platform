@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import NotificationBell from "@/components/NotificationBell";
 
 export default function AgentPanelHeader({ name }: { name: string }) {
   const router = useRouter();
@@ -25,6 +26,7 @@ export default function AgentPanelHeader({ name }: { name: string }) {
           </span>
         </Link>
         <div className="flex items-center gap-3">
+          <NotificationBell />
           <span className="hidden text-sm text-slate-600 sm:inline">👤 {name}</span>
           <Link href="/" className="hidden text-sm text-brand-700 hover:underline sm:inline">
             Siteye dön
