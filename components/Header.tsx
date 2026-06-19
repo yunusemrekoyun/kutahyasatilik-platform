@@ -2,8 +2,8 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState } from "react";
-import { Mail, Phone, LogIn, UserPlus, Heart, MessageCircle, Menu, X } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Mail, Phone, LogIn, UserPlus, Heart, MessageCircle, Menu, X, User } from "lucide-react";
 import { SITE, telLink, whatsappLink } from "@/lib/site";
 import { useStore } from "@/components/store/StoreProvider";
 
@@ -25,6 +25,18 @@ export default function Header() {
   const pathname = usePathname();
   const { favorites, hydrated } = useStore();
   const favCount = hydrated ? favorites.length : 0;
+
+  // Oturum durumunu client-side al (layout statik/ISR kalsın diye sunucuda cookie okumuyoruz).
+  const [account, setAccount] = useState<{ name: string } | null>(null);
+  useEffect(() => {
+    let active = true;
+    fetch("/api/user/me")
+      .then((r) => r.json())
+      .then((d) => { if (active && d?.user) setAccount({ name: d.user.name }); })
+      .catch(() => {});
+    return () => { active = false; };
+  }, []);
+  const firstName = account?.name.trim().split(" ")[0] || "Hesabım";
 
   if (pathname?.startsWith("/admin")) return null;
 
@@ -101,6 +113,12 @@ export default function Header() {
                   </span>
                 )}
               </Link>
+              <Link
+                href={account ? "/hesabim" : "/giris"}
+                className="hidden items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-100 sm:inline-flex"
+              >
+                <User className="h-4 w-4" /> {account ? firstName : "Giriş"}
+              </Link>
               <a
                 href={whatsappLink("Merhaba, gayrimenkul hakkında bilgi almak istiyorum.")}
                 target="_blank"
@@ -142,6 +160,9 @@ export default function Header() {
               ))}
               <Link href="/favoriler" onClick={() => setOpen(false)} className="flex items-center gap-2 px-3 py-2.5 text-sm font-medium text-slate-700 hover:bg-brand-50 rounded-md">
                 <Heart className="h-4 w-4" /> Favorilerim {favCount > 0 ? `(${favCount})` : ""}
+              </Link>
+              <Link href={account ? "/hesabim" : "/giris"} onClick={() => setOpen(false)} className="flex items-center gap-2 px-3 py-2.5 text-sm font-medium text-slate-700 hover:bg-brand-50 rounded-md">
+                <User className="h-4 w-4" /> {account ? firstName : "Giriş / Kayıt"}
               </Link>
               <Link href="/emlakci/giris" onClick={() => setOpen(false)} className="flex items-center gap-2 px-3 py-2.5 text-sm font-medium text-brand-700 hover:bg-brand-50 rounded-md">
                 <LogIn className="h-4 w-4" /> Danışman Girişi
