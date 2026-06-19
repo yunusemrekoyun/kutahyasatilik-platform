@@ -19,18 +19,31 @@ async function hasValidToken(req: NextRequest, cookieName: string): Promise<bool
 export async function proxy(req: NextRequest) {
   const { pathname } = req.nextUrl;
 
-  // --- Emlakçı paneli ---
+  // --- Standart kullanıcı (ks_user) ---
+  if (pathname === "/hesabim" || pathname.startsWith("/hesabim/")) {
+    if (!(await hasValidToken(req, "ks_user"))) {
+      const url = new URL("/giris", req.url);
+      url.searchParams.set("next", pathname);
+      return NextResponse.redirect(url);
+    }
+    return NextResponse.next();
+  }
+  if (pathname === "/giris" || pathname === "/kayit") {
+    if (await hasValidToken(req, "ks_user")) {
+      return NextResponse.redirect(new URL("/hesabim", req.url));
+    }
+    return NextResponse.next();
+  }
+
+  // --- Emlakçı paneli (ks_agent) ---
   if (pathname.startsWith("/emlakci/panel")) {
-    const validAgent = await hasValidToken(req, "ks_agent");
-    if (!validAgent) {
+    if (!(await hasValidToken(req, "ks_agent"))) {
       const url = new URL("/emlakci/giris", req.url);
       url.searchParams.set("next", pathname);
       return NextResponse.redirect(url);
     }
     return NextResponse.next();
   }
-
-  // Giriş yapmış emlakçı giriş/kayıt sayfasına gelirse panele yönlendir
   if (pathname === "/emlakci/giris" || pathname === "/emlakci/kayit") {
     if (await hasValidToken(req, "ks_agent")) {
       return NextResponse.redirect(new URL("/emlakci/panel", req.url));
@@ -38,21 +51,31 @@ export async function proxy(req: NextRequest) {
     return NextResponse.next();
   }
 
-  // --- Admin paneli ---
-  const isAdminLogin = pathname === "/admin/login";
-  const validAdmin = await hasValidToken(req, "ks_admin");
-
-  if (isAdminLogin) {
-    if (validAdmin) return NextResponse.redirect(new URL("/admin", req.url));
+  // --- Admin paneli (ks_admin) ---
+  if (pathname === "/admin/login") {
+    if (await hasValidToken(req, "ks_admin")) {
+      return NextResponse.redirect(new URL("/admin", req.url));
+    }
+    return NextResponse.next();
+  }
+  if (pathname === "/admin" || pathname.startsWith("/admin/")) {
+    if (!(await hasValidToken(req, "ks_admin"))) {
+      return NextResponse.redirect(new URL("/admin/login", req.url));
+    }
     return NextResponse.next();
   }
 
-  if (!validAdmin) {
-    return NextResponse.redirect(new URL("/admin/login", req.url));
-  }
   return NextResponse.next();
 }
 
 export const config = {
-  matcher: ["/admin/:path*", "/emlakci/:path*"],
+  matcher: [
+    "/admin",
+    "/admin/:path*",
+    "/emlakci/:path*",
+    "/hesabim",
+    "/hesabim/:path*",
+    "/giris",
+    "/kayit",
+  ],
 };
