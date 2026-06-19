@@ -4,6 +4,7 @@ import { useState } from "react";
 import { CheckCircle2, Lock } from "lucide-react";
 import { useUtm } from "@/lib/useUtm";
 import { trackConversion } from "@/lib/track";
+import { isValidTrPhone, TR_PHONE_ERROR } from "@/lib/validation";
 
 type LeadType = "appointment" | "expertise" | "price_offer" | "contact";
 
@@ -67,6 +68,11 @@ export default function LeadForm({
       district,
       ...utm,
     };
+    if (!isValidTrPhone(payload.phone)) {
+      setStatus("error");
+      setError(TR_PHONE_ERROR);
+      return;
+    }
     try {
       const res = await fetch("/api/leads", {
         method: "POST",
