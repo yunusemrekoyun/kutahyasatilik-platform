@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { PanelLeftClose, PanelLeftOpen, Menu, X, ExternalLink } from "lucide-react";
 import AdminNav, { type AdminCounts } from "./AdminNav";
+import NotificationBell from "@/components/NotificationBell";
 
 export default function AdminShell({
   email,
@@ -84,13 +85,20 @@ export default function AdminShell({
           {/* Mobil üst bar */}
           <div className="sticky top-0 z-30 flex h-16 items-center justify-between border-b border-slate-200 bg-white px-4 md:hidden">
             <Logo />
-            <button
-              onClick={() => setMobileOpen(true)}
-              aria-label="Menüyü aç"
-              className="grid h-10 w-10 place-items-center rounded-lg border border-slate-300 text-slate-700"
-            >
-              <Menu className="h-5 w-5" />
-            </button>
+            <div className="flex items-center gap-2">
+              <NotificationBell />
+              <button
+                onClick={() => setMobileOpen(true)}
+                aria-label="Menüyü aç"
+                className="grid h-10 w-10 place-items-center rounded-lg border border-slate-300 text-slate-700"
+              >
+                <Menu className="h-5 w-5" />
+              </button>
+            </div>
+          </div>
+          {/* Masaüstü üst şerit (bildirim) */}
+          <div className="sticky top-0 z-20 hidden h-14 items-center justify-end border-b border-slate-200 bg-white px-6 md:flex">
+            <NotificationBell />
           </div>
 
           <div className="p-4 sm:p-6 lg:p-8">{children}</div>
