@@ -44,7 +44,7 @@ export default function AdminLoginPage() {
           <form onSubmit={handleSubmit} className="mt-6 space-y-4">
             <div>
               <label htmlFor="admin-email" className="mb-1.5 block text-sm font-medium text-slate-700">E-posta</label>
-              <input id="admin-email" name="email" type="email" required placeholder="ornek@eposta.com" defaultValue="admin@kutahyasatilik.com" className={fieldCls} />
+              <input id="admin-email" name="email" type="email" required placeholder="ornek@eposta.com" className={fieldCls} />
             </div>
             <div>
               <label htmlFor="admin-password" className="mb-1.5 block text-sm font-medium text-slate-700">Şifre</label>

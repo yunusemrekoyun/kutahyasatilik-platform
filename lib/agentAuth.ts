@@ -6,6 +6,15 @@ import { prisma } from "./prisma";
 
 // Emlakçı (danışman) oturumu — admin oturumundan (ks_admin) ayrı bir cookie kullanır.
 const COOKIE_NAME = "ks_agent";
+
+// Üretimde AUTH_SECRET zorunludur — yoksa oturum imzaları herkese açık fallback
+// secret ile üretilir ve forge edilebilir. Boot etmeyi reddet (fail-fast).
+if (process.env.NODE_ENV === "production" && !process.env.AUTH_SECRET) {
+  throw new Error(
+    "AUTH_SECRET tanımlı değil. Üretimde .env içinde en az 32 karakterlik rastgele bir AUTH_SECRET zorunludur."
+  );
+}
+
 const secret = new TextEncoder().encode(
   process.env.AUTH_SECRET || "kutahya-satilik-dev-secret-change-in-production-please"
 );

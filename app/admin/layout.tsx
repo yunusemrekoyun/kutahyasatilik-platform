@@ -10,7 +10,7 @@ async function getCounts(): Promise<AdminCounts> {
     const [pendingListings, newLeads, newAlerts] = await Promise.all([
       prisma.listing.count({ where: { moderationStatus: "pending" } }),
       prisma.lead.count({ where: { status: "new" } }),
-      prisma.buyerAlert.count({ where: { status: "new" } }),
+      prisma.buyerAlert.count({ where: { status: "active" } }),
     ]);
     return { pendingListings, newLeads, newAlerts };
   } catch {
