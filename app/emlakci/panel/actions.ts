@@ -151,6 +151,26 @@ export async function submitAgentListing(formData: FormData) {
   redirect("/emlakci/panel");
 }
 
+// Portföy fırsatına komisyon teklifi ver/güncelle (§8).
+export async function submitBid(formData: FormData) {
+  const agent = await requireApprovedAgent();
+  const opportunityId = String(formData.get("opportunityId") || "");
+  const commissionPct = num(formData.get("commissionPct"));
+  if (!opportunityId) throw new Error("Fırsat gerekli");
+  if (commissionPct === null || commissionPct < 0 || commissionPct > 100) {
+    throw new Error("Geçerli bir komisyon yüzdesi girin (0–100)");
+  }
+  const opp = await prisma.portfolioOpportunity.findUnique({ where: { id: opportunityId }, select: { status: true } });
+  if (!opp || opp.status !== "open") throw new Error("Bu fırsat tekliflere kapalı");
+
+  await prisma.bid.upsert({
+    where: { opportunityId_agentId: { opportunityId, agentId: agent.id } },
+    create: { opportunityId, agentId: agent.id, commissionPct, note: str(formData.get("note")) },
+    update: { commissionPct, note: str(formData.get("note")), status: "active" },
+  });
+  revalidatePath("/emlakci/panel/firsatlar");
+}
+
 export async function deleteAgentListing(formData: FormData) {
   const agent = await requireApprovedAgent();
   const id = String(formData.get("id") || "");

@@ -40,6 +40,7 @@ model Agent {
 
   listings Listing[]
   payments Payment[]
+  bids     Bid[]
 
   @@index([status])
 }
@@ -550,4 +551,47 @@ model EmailOtp {
   createdAt     DateTime @default(now())
 
   @@index([applicationId])
+}
+
+// ---------------------------------------------------------------------------
+// Portföy fırsatı (§8) — "mülkümü satmak istiyorum" → admin → fırsat → emlakçılar
+// komisyon teklifi verir → kazanan seçilir → ilan otomatik oluşur (kazanan emlakçıya).
+// ---------------------------------------------------------------------------
+model PortfolioOpportunity {
+  id             String    @id @default(cuid())
+  leadId         String? // kaynak satıcı talebi (varsa)
+  userId         String? // talebi yapan kayıtlı kullanıcı (varsa) — seçim yetkisi
+  title          String
+  description    String?
+  district       String?
+  propertyType   String?
+  estimatedPrice Int?
+  areaGross      Int?
+  rooms          String?
+  biddingEndsAt  DateTime?
+  status         String    @default("open") // open | selecting | awarded | listed | closed
+  listingId      String? // oluşan ilan
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  bids Bid[]
+
+  @@index([status])
+  @@index([userId])
+}
+
+model Bid {
+  id            String               @id @default(cuid())
+  opportunityId String
+  opportunity   PortfolioOpportunity @relation(fields: [opportunityId], references: [id], onDelete: Cascade)
+  agentId       String
+  agent         Agent                @relation(fields: [agentId], references: [id], onDelete: Cascade)
+  commissionPct Float
+  note          String?
+  status        String               @default("active") // active | won | lost | withdrawn
+  createdAt     DateTime             @default(now())
+
+  @@unique([opportunityId, agentId])
+  @@index([opportunityId])
+  @@index([agentId])
 }
