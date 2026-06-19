@@ -386,3 +386,39 @@ model Setting {
   key   String @id
   value String
 }
+
+// ---------------------------------------------------------------------------
+// Standart kullanıcı hesabı (Admin/Agent'tan AYRI, ayrı oturum: ks_user)
+// Favori senkronu, kayıtlı arama, bildirim kutusu, portföy talebi sahipliği için.
+// ÖNEMLİ: Kullanıcı İLAN YAYINLAYAMAZ — yalnız emlakçı/admin ekler (rapor §7).
+// ---------------------------------------------------------------------------
+model User {
+  id           String    @id @default(cuid())
+  email        String    @unique
+  passwordHash String
+  name         String
+  phone        String?
+  verifiedAt   DateTime? // e-posta doğrulama (ileride OTP/link ile)
+  createdAt    DateTime  @default(now())
+}
+
+// ---------------------------------------------------------------------------
+// Merkezi bildirim — tüm roller. İlk sürüm: site-içi (sonra e-posta katmanı).
+// recipientId polimorfik: recipientRole'e göre user.id / agent.id'yi gösterir;
+// admin için null = tüm adminler. (Tek tabloya FK kurulamadığı için düz alan.)
+// ---------------------------------------------------------------------------
+model Notification {
+  id            String    @id @default(cuid())
+  recipientRole String // user | agent | admin
+  recipientId   String? // user.id / agent.id; admin için null
+  type          String // new_match | new_lead | listing_approved | offer | payment | ad_request | system
+  title         String
+  body          String?
+  link          String? // tıklanınca gidilecek yol
+  isRead        Boolean   @default(false)
+  readAt        DateTime?
+  createdAt     DateTime  @default(now())
+
+  @@index([recipientRole, recipientId, isRead, createdAt])
+  @@index([createdAt])
+}
