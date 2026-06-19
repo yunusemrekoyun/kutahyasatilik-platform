@@ -333,6 +333,48 @@ export async function savePackage(formData: FormData) {
   redirect("/admin/paket");
 }
 
+// --- Tahsilat (§6): manuel ödeme defteri ---
+export async function savePayment(formData: FormData) {
+  await ensureAuth();
+  const agentId = str(formData.get("agentId"));
+  if (!agentId) throw new Error("Emlakçı seçilmeli");
+  const status = String(formData.get("status") || "pending");
+  await prisma.payment.create({
+    data: {
+      agentId,
+      amount: num(formData.get("amount")) ?? 0,
+      period: str(formData.get("period")),
+      method: str(formData.get("method")),
+      purpose: String(formData.get("purpose") || "package"),
+      status,
+      paidAt: status === "paid" ? new Date() : null,
+      note: str(formData.get("note")),
+    },
+  });
+  revalidatePath("/admin/tahsilat");
+  redirect("/admin/tahsilat");
+}
+
+export async function updatePaymentStatus(formData: FormData) {
+  await ensureAuth();
+  const id = String(formData.get("id") || "");
+  const status = String(formData.get("status") || "pending");
+  if (!id) return;
+  await prisma.payment.update({
+    where: { id },
+    data: { status, paidAt: status === "paid" ? new Date() : null },
+  });
+  revalidatePath("/admin/tahsilat");
+}
+
+export async function deletePayment(formData: FormData) {
+  await ensureAuth();
+  const id = String(formData.get("id") || "");
+  if (!id) return;
+  await prisma.payment.delete({ where: { id } });
+  revalidatePath("/admin/tahsilat");
+}
+
 export async function saveSettings(formData: FormData) {
   await ensureAuth();
   const keys = ["phone", "whatsapp", "email", "brand", "seller_hero_image", "home_hero_image"];
