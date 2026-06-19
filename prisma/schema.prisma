@@ -595,3 +595,19 @@ model Bid {
   @@index([opportunityId])
   @@index([agentId])
 }
+
+// ---------------------------------------------------------------------------
+// Reklam talebi (§12) — self-servis YOK. "Reklam Vermek İstiyorum" CTA → admin kuyruğu.
+// ---------------------------------------------------------------------------
+model AdRequest {
+  id        String   @id @default(cuid())
+  name      String
+  company   String?
+  phone     String
+  email     String?
+  message   String?
+  status    String   @default("new") // new | contacted | accepted | rejected
+  createdAt DateTime @default(now())
+
+  @@index([status])
+}

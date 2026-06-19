@@ -12,6 +12,7 @@ import HomeSearch from "@/components/HomeSearch";
 import ListingsMap from "@/components/ListingsMap";
 import NotFoundCTA from "@/components/NotFoundCTA";
 import TrackView from "@/components/TrackView";
+import HomeJsonLd from "@/components/HomeJsonLd";
 
 export const revalidate = 300; // ISR: her 5 dakikada yenilenir (CDN cache + admin revalidatePath)
 
@@ -65,6 +66,7 @@ export default async function Home() {
   return (
     <>
       <TrackView />
+      <HomeJsonLd />
 
       {/* HERO — arama odakta */}
       <section className="relative isolate overflow-hidden bg-brand-950 text-white">

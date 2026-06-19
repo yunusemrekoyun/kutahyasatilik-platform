@@ -560,6 +560,24 @@ export async function selectWinningBid(formData: FormData) {
   revalidatePath("/admin/firsatlar");
 }
 
+// --- Reklam talepleri (§12) ---
+export async function updateAdRequestStatus(formData: FormData) {
+  await ensureAuth();
+  const id = String(formData.get("id") || "");
+  const status = String(formData.get("status") || "new");
+  if (!id) return;
+  await prisma.adRequest.update({ where: { id }, data: { status } });
+  revalidatePath("/admin/reklam-talepleri");
+}
+
+export async function deleteAdRequest(formData: FormData) {
+  await ensureAuth();
+  const id = String(formData.get("id") || "");
+  if (!id) return;
+  await prisma.adRequest.delete({ where: { id } });
+  revalidatePath("/admin/reklam-talepleri");
+}
+
 export async function saveSettings(formData: FormData) {
   await ensureAuth();
   const keys = ["phone", "whatsapp", "email", "brand", "seller_hero_image", "home_hero_image"];

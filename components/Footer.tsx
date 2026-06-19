@@ -75,6 +75,7 @@ export default async function Footer() {
             <li><Link href="/alici-talebi" className="hover:text-gold-300">Aradığını Bulamadın mı?</Link></li>
             <li><Link href="/degerleme" className="hover:text-gold-300">Ücretsiz Değerleme</Link></li>
             <li><Link href="/emlakci/kayit" className="hover:text-gold-300">Danışman Ol</Link></li>
+            <li><Link href="/reklam" className="hover:text-gold-300">Reklam Vermek İstiyorum</Link></li>
             <li><Link href="/iletisim" className="hover:text-gold-300">İletişim</Link></li>
             <li><Link href="/kvkk" className="hover:text-gold-300">KVKK & Gizlilik</Link></li>
             {menuPages.map((p) => (
