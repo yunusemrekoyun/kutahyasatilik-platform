@@ -26,9 +26,9 @@ export default function AgentRegisterForm() {
           name: fd.get("name"),
           email: fd.get("email"),
           phone: fd.get("phone"),
-          password: fd.get("password"),
           title: fd.get("title"),
           agency: fd.get("agency"),
+          experience: fd.get("experience"),
         }),
       });
       const data = await res.json();
@@ -73,12 +73,10 @@ export default function AgentRegisterForm() {
         <input name="title" placeholder="Unvan (örn. Gayrimenkul Danışmanı)" className={inputCls} />
         <input name="agency" placeholder="Ofis / Marka (opsiyonel)" className={inputCls} />
       </div>
-      <input
-        name="password"
-        required
-        type="password"
-        minLength={6}
-        placeholder="Şifre (en az 6 karakter) *"
+      <textarea
+        name="experience"
+        rows={3}
+        placeholder="Deneyim / ofis bilgisi (kaç yıl, hangi bölge, portföy büyüklüğü...)"
         className={inputCls}
       />
 

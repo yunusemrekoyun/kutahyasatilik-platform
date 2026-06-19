@@ -490,3 +490,24 @@ model Payment {
   @@index([agentId])
   @@index([status])
 }
+
+// ---------------------------------------------------------------------------
+// Emlakçı başvurusu (§4) — klasik kayıt YOK. /emlakci/kayit hesap açmaz, başvuru
+// düşürür. Admin: inceleme→görüşme→teklif→...→aktivasyon. Aktivasyonda Agent oluşur.
+// ---------------------------------------------------------------------------
+model AgentApplication {
+  id         String   @id @default(cuid())
+  name       String
+  email      String
+  phone      String
+  title      String?
+  agency     String?
+  experience String? // serbest metin (deneyim/ofis)
+  status     String   @default("applied") // applied | reviewing | meeting | offer_sent | rejected | activated
+  adminNote  String?
+  agentId    String? // aktive edilince oluşan Agent (gevşek referans)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([status])
+}
