@@ -7,6 +7,7 @@ import { getSession } from "@/lib/auth";
 import { slugify } from "@/lib/format";
 import { sanitizeCmsHtml } from "@/lib/sanitize";
 import { deleteUploadFiles } from "@/lib/uploads";
+import { deleteVideo } from "@/lib/videoStorage";
 
 async function ensureAuth() {
   const session = await getSession();
@@ -129,7 +130,7 @@ export async function saveListing(formData: FormData) {
   if (id) {
     const existing = await prisma.listing.findUnique({
       where: { id },
-      select: { price: true, images: { select: { url: true } } },
+      select: { price: true, videoUrl: true, images: { select: { url: true } } },
     });
     oldPrice = existing?.price ?? null;
     await prisma.listing.update({ where: { id }, data });
@@ -140,6 +141,10 @@ export async function saveListing(formData: FormData) {
       .map((i) => i.url)
       .filter((u) => !imageUrls.includes(u));
     await deleteUploadFiles(removed);
+    // video değiştiyse/kaldırıldıysa eski yerel videoyu (mp4+poster) diskten sil
+    if (existing?.videoUrl && existing.videoUrl !== data.videoUrl) {
+      await deleteVideo(existing.videoUrl);
+    }
   } else {
     const created = await prisma.listing.create({ data });
     listingId = created.id;
@@ -167,10 +172,11 @@ export async function deleteListing(formData: FormData) {
   if (id) {
     const existing = await prisma.listing.findUnique({
       where: { id },
-      select: { slug: true, images: { select: { url: true } } },
+      select: { slug: true, videoUrl: true, images: { select: { url: true } } },
     });
     await prisma.listing.delete({ where: { id } });
     await deleteUploadFiles(existing?.images.map((i) => i.url) ?? []);
+    await deleteVideo(existing?.videoUrl);
     revalidatePath("/admin/ilanlar");
     revalidateListingSurfaces(existing?.slug);
   }

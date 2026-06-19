@@ -7,7 +7,7 @@ import { getSession } from "@/lib/auth";
 import { getAgentSession } from "@/lib/agentAuth";
 import { checkRate } from "@/lib/rateLimit";
 import { createJob, updateJob } from "@/lib/videoJobs";
-import { transcodeToWeb, cleanupWorkDir } from "@/lib/videoProcessing";
+import { transcodeToWeb, cleanupWorkDir, withTranscodeSlot } from "@/lib/videoProcessing";
 import { publishVideo } from "@/lib/videoStorage";
 
 export const runtime = "nodejs"; // ffmpeg + fs (edge değil)
@@ -27,8 +27,11 @@ async function isAuthenticated(): Promise<boolean> {
 // Arka plan: transcode → kalıcı konuma yayınla → job güncelle. İSTEK BEKLEMEZ.
 async function processInBackground(id: string, inputPath: string) {
   try {
-    updateJob(id, { progress: 25 });
-    const { workDir, mp4Path, posterPath } = await transcodeToWeb(inputPath, id);
+    // Eşzamanlılık sınırı: slot boşalana dek kuyrukta bekler (VPS'i doyurmaz).
+    const { workDir, mp4Path, posterPath } = await withTranscodeSlot(async () => {
+      updateJob(id, { progress: 25 });
+      return transcodeToWeb(inputPath, id);
+    });
     updateJob(id, { progress: 85 });
     const { videoUrl, posterUrl } = await publishVideo(id, mp4Path, posterPath);
     updateJob(id, { status: "ready", progress: 100, videoUrl, posterUrl });
