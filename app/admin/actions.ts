@@ -9,6 +9,7 @@ import { sanitizeCmsHtml } from "@/lib/sanitize";
 import { deleteUploadFiles } from "@/lib/uploads";
 import { deleteVideo } from "@/lib/videoStorage";
 import { notifyAgent, notifyMatchingAlerts } from "@/lib/notify";
+import bcrypt from "bcryptjs";
 
 async function ensureAuth() {
   const session = await getSession();
@@ -373,6 +374,63 @@ export async function deletePayment(formData: FormData) {
   if (!id) return;
   await prisma.payment.delete({ where: { id } });
   revalidatePath("/admin/tahsilat");
+}
+
+// --- Emlakçı başvuruları (§4) ---
+export async function updateApplicationStatus(formData: FormData) {
+  await ensureAuth();
+  const id = String(formData.get("id") || "");
+  const status = String(formData.get("status") || "applied");
+  const adminNote = str(formData.get("adminNote"));
+  if (!id) return;
+  await prisma.agentApplication.update({ where: { id }, data: { status, adminNote } });
+  revalidatePath("/admin/basvurular");
+}
+
+// Aktivasyon: başvurudan Agent hesabı oluşturur (admin parolayı belirler).
+export async function activateApplication(formData: FormData) {
+  await ensureAuth();
+  const id = String(formData.get("id") || "");
+  const password = String(formData.get("password") || "");
+  if (!id) return;
+  if (password.length < 6) throw new Error("Parola en az 6 karakter olmalı");
+
+  const app = await prisma.agentApplication.findUnique({ where: { id } });
+  if (!app) throw new Error("Başvuru bulunamadı");
+  if (app.agentId) throw new Error("Bu başvuru zaten aktive edilmiş");
+
+  const email = app.email.toLowerCase();
+  const dup = await prisma.agent.findUnique({ where: { email }, select: { id: true } });
+  if (dup) throw new Error("Bu e-posta zaten kayıtlı bir danışmana ait");
+
+  const root = slugify(app.name) || "danisman";
+  let slug = root;
+  let i = 1;
+  while (await prisma.agent.findUnique({ where: { slug }, select: { id: true } })) slug = `${root}-${i++}`;
+
+  const passwordHash = await bcrypt.hash(password, 10);
+  const agent = await prisma.agent.create({
+    data: {
+      email,
+      passwordHash,
+      name: app.name,
+      phone: app.phone,
+      title: app.title || "Gayrimenkul Danışmanı",
+      agency: app.agency || null,
+      slug,
+      status: "approved",
+      approvedAt: new Date(),
+    },
+  });
+  await prisma.agentApplication.update({ where: { id }, data: { status: "activated", agentId: agent.id } });
+  await notifyAgent(agent.id, {
+    type: "system",
+    title: "Hesabınız aktif",
+    body: "Danışman hesabınız açıldı. Giriş yapıp ilan ekleyebilirsiniz.",
+    link: "/emlakci/panel",
+  });
+  revalidatePath("/admin/basvurular");
+  revalidatePath("/admin/emlakcilar");
 }
 
 export async function saveSettings(formData: FormData) {
