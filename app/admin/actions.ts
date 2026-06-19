@@ -309,6 +309,30 @@ export async function rejectListing(formData: FormData) {
   revalidateListingSurfaces(updated.slug);
 }
 
+// --- Paket (§5): tek paket; admin düzenler, yeni paket oluşturmaz ---
+export async function savePackage(formData: FormData) {
+  await ensureAuth();
+  const id = str(formData.get("id"));
+  const featuresArr = String(formData.get("features") || "")
+    .split("\n")
+    .map((s) => s.trim())
+    .filter(Boolean);
+  const data = {
+    name: String(formData.get("name") || "").trim() || "Kurumsal Emlakçı Paketi",
+    description: str(formData.get("description")),
+    price: num(formData.get("price")) ?? 0,
+    interval: String(formData.get("interval") || "monthly"),
+    listingQuota: num(formData.get("listingQuota")),
+    featuredQuota: num(formData.get("featuredQuota")),
+    features: featuresArr.length ? JSON.stringify(featuresArr) : null,
+    active: bool(formData.get("active")),
+  };
+  if (id) await prisma.package.update({ where: { id }, data });
+  else await prisma.package.create({ data });
+  revalidatePath("/admin/paket");
+  redirect("/admin/paket");
+}
+
 export async function saveSettings(formData: FormData) {
   await ensureAuth();
   const keys = ["phone", "whatsapp", "email", "brand", "seller_hero_image", "home_hero_image"];
