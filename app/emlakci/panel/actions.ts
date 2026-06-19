@@ -7,6 +7,7 @@ import { requireApprovedAgent } from "@/lib/agentAuth";
 import { slugify } from "@/lib/format";
 import { deleteUploadFiles } from "@/lib/uploads";
 import { deleteVideo } from "@/lib/videoStorage";
+import { notifyAdmins } from "@/lib/notify";
 
 function num(v: FormDataEntryValue | null): number | null {
   if (v === null || v === "") return null;
@@ -140,6 +141,12 @@ export async function submitAgentListing(formData: FormData) {
     });
   }
 
+  await notifyAdmins({
+    type: "listing_pending",
+    title: "Yeni ilan onay bekliyor",
+    body: title,
+    link: "/admin/onay",
+  });
   revalidatePath("/emlakci/panel");
   redirect("/emlakci/panel");
 }

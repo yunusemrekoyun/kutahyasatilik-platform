@@ -8,6 +8,7 @@ import { slugify } from "@/lib/format";
 import { sanitizeCmsHtml } from "@/lib/sanitize";
 import { deleteUploadFiles } from "@/lib/uploads";
 import { deleteVideo } from "@/lib/videoStorage";
+import { notifyAgent } from "@/lib/notify";
 
 async function ensureAuth() {
   const session = await getSession();
@@ -211,6 +212,12 @@ export async function approveAgent(formData: FormData) {
     where: { id },
     data: { status: "approved", approvedAt: new Date(), note: null },
   });
+  await notifyAgent(id, {
+    type: "system",
+    title: "Başvurunuz onaylandı",
+    body: "Danışman hesabınız aktif. Giriş yapıp ilan ekleyebilirsiniz.",
+    link: "/emlakci/panel",
+  });
   revalidatePath("/admin/emlakcilar");
 }
 
@@ -252,8 +259,16 @@ export async function approveListing(formData: FormData) {
   const updated = await prisma.listing.update({
     where: { id },
     data: { moderationStatus: "approved", note: null },
-    select: { slug: true },
+    select: { slug: true, agentId: true, title: true },
   });
+  if (updated.agentId) {
+    await notifyAgent(updated.agentId, {
+      type: "listing_approved",
+      title: "İlanınız onaylandı",
+      body: updated.title,
+      link: "/emlakci/panel",
+    });
+  }
   revalidatePath("/admin/onay");
   revalidatePath("/admin/ilanlar");
   revalidateListingSurfaces(updated.slug);
@@ -267,8 +282,16 @@ export async function rejectListing(formData: FormData) {
   const updated = await prisma.listing.update({
     where: { id },
     data: { moderationStatus: "rejected", note },
-    select: { slug: true },
+    select: { slug: true, agentId: true, title: true },
   });
+  if (updated.agentId) {
+    await notifyAgent(updated.agentId, {
+      type: "listing_rejected",
+      title: "İlanınız reddedildi",
+      body: note ? `${updated.title} — ${note}` : updated.title,
+      link: "/emlakci/panel",
+    });
+  }
   revalidatePath("/admin/onay");
   revalidatePath("/admin/ilanlar");
   revalidateListingSurfaces(updated.slug);

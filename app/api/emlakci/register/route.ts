@@ -5,6 +5,7 @@ import { prisma } from "@/lib/prisma";
 import { slugify } from "@/lib/format";
 import { checkRate } from "@/lib/rateLimit";
 import { trPhoneSchema } from "@/lib/validation";
+import { notifyAdmins } from "@/lib/notify";
 
 const schema = z.object({
   name: z.string().min(2, "Ad soyad gerekli").max(120),
@@ -64,6 +65,13 @@ export async function POST(req: NextRequest) {
       slug,
       status: "pending",
     },
+  });
+
+  await notifyAdmins({
+    type: "agent_application",
+    title: "Yeni danışman başvurusu",
+    body: `${data.name.trim()} · ${data.phone.trim()}`,
+    link: "/admin/emlakcilar",
   });
 
   return NextResponse.json({ ok: true });

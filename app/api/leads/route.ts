@@ -3,6 +3,7 @@ import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { checkRate } from "@/lib/rateLimit";
 import { trPhoneSchema } from "@/lib/validation";
+import { notifyAdmins, notifyAgent } from "@/lib/notify";
 
 const schema = z.object({
   type: z.enum(["seller", "appointment", "expertise", "price_offer", "contact"]),
@@ -33,6 +34,14 @@ const EVENT_BY_TYPE: Record<string, string> = {
   contact: "conversion",
 };
 
+const LEAD_LABELS: Record<string, string> = {
+  seller: "Yeni satıcı talebi",
+  appointment: "Yeni randevu talebi",
+  expertise: "Yeni ekspertiz talebi",
+  price_offer: "Yeni fiyat teklifi",
+  contact: "Yeni iletişim mesajı",
+};
+
 export async function POST(req: NextRequest) {
   const limited = await checkRate(req, "leads", 8, 60_000);
   if (limited) return limited;
@@ -51,12 +60,16 @@ export async function POST(req: NextRequest) {
 
   // İlan gerçekten var mı? (yoksa ilişkiyi boş bırak)
   let listingId: string | null = null;
+  let listingAgentId: string | null = null;
+  let listingTitle: string | null = null;
   if (data.listingId) {
     const exists = await prisma.listing.findUnique({
       where: { id: data.listingId },
-      select: { id: true },
+      select: { id: true, agentId: true, title: true },
     });
     listingId = exists?.id ?? null;
+    listingAgentId = exists?.agentId ?? null;
+    listingTitle = exists?.title ?? null;
   }
 
   const lead = await prisma.lead.create({
@@ -92,6 +105,23 @@ export async function POST(req: NextRequest) {
       utmSource: data.utmSource || null,
     },
   });
+
+  // Bildirim: admin'e her zaman; talep bir emlakçının ilanına aitse ona da.
+  const label = LEAD_LABELS[data.type] || "Yeni talep";
+  await notifyAdmins({
+    type: "new_lead",
+    title: label,
+    body: `${data.name.trim()} · ${data.phone.trim()}`,
+    link: "/admin/talepler",
+  });
+  if (listingAgentId) {
+    await notifyAgent(listingAgentId, {
+      type: "new_lead",
+      title: "İlanınıza yeni talep",
+      body: listingTitle ? `${listingTitle} — ${data.name.trim()}` : data.name.trim(),
+      link: "/emlakci/panel",
+    });
+  }
 
   return NextResponse.json({ ok: true, id: lead.id });
 }
