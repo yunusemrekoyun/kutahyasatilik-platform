@@ -6,10 +6,11 @@ import { prisma } from "./prisma";
 
 const COOKIE_NAME = "ks_admin";
 
-// Üretimde AUTH_SECRET zorunludur — yoksa oturum imzaları tahmin edilebilir/forge edilebilir.
+// Üretimde AUTH_SECRET zorunludur — yoksa oturum imzaları herkese açık fallback
+// secret ile üretilir ve forge edilebilir. Boot etmeyi reddet (fail-fast).
 if (process.env.NODE_ENV === "production" && !process.env.AUTH_SECRET) {
-  console.error(
-    "🔴 GÜVENLİK: AUTH_SECRET tanımlı değil! Üretimde .env içinde en az 32 karakterlik rastgele bir AUTH_SECRET ayarlayın."
+  throw new Error(
+    "AUTH_SECRET tanımlı değil. Üretimde .env içinde en az 32 karakterlik rastgele bir AUTH_SECRET zorunludur."
   );
 }
 
