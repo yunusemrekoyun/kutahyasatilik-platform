@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { checkRate } from "@/lib/rateLimit";
-import { findApplicationByEmail, verifyOtp, activeOfferFor } from "@/lib/offerOtp";
+import { findApplicationForOffer, verifyOtp, activeOfferFor } from "@/lib/offerOtp";
 
 export const runtime = "nodejs";
 
@@ -11,10 +11,12 @@ export async function POST(req: NextRequest) {
 
   const body = await req.json().catch(() => ({}));
   const email = typeof body?.email === "string" ? body.email : "";
+  const phone4 = typeof body?.phone4 === "string" ? body.phone4 : "";
   const code = typeof body?.code === "string" ? body.code : "";
 
-  const app = await findApplicationByEmail(email);
-  if (!app) return NextResponse.json({ ok: false, error: "Başvuru bulunamadı." }, { status: 404 });
+  // Kimlik tek faktöre (e-posta+kod) inmesin: e-posta + telefon son-4 tekrar doğrulanır.
+  const app = await findApplicationForOffer(email, phone4);
+  if (!app) return NextResponse.json({ ok: false, error: "Bilgiler hatalı veya başvuru bulunamadı." }, { status: 404 });
   if (!(await verifyOtp(app.id, code))) {
     return NextResponse.json({ ok: false, error: "Kod hatalı veya süresi doldu." }, { status: 401 });
   }
