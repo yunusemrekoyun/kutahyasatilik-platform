@@ -68,19 +68,25 @@ async function allow(key: string, limit: number, windowMs: number): Promise<bool
   return memoryAllow(key, limit, windowMs);
 }
 
-// Gerçek ziyaretçi IP'si.
-// Cloudflare arkasında CF-Connecting-IP en güvenilir kaynaktır: istemci forge edemez,
-// çünkü Cloudflare bu başlığı her istekte kendisi yazar. Sonra nginx'in x-real-ip'i,
-// en son (spoof'lanabilir olduğu için son çare) x-forwarded-for'un ilk değeri.
+// Gerçek ziyaretçi IP'si — rate-limit anahtarı.
+// GÜVENLİK: İstemci-kontrollü başlıklara (cf-connecting-ip, x-forwarded-for) GÜVENİLMEZ.
+// Önde güvenilen bir proxy (Cloudflare) YOKKEN istemci bu başlıkları forge edip her isteğe
+// farklı IP yazarak rate-limit'i tamamen bypass edebilir. Bu yüzden:
+//   • Varsayılan tek güvenilir kaynak: nginx'in $remote_addr ile YAZDIĞI x-real-ip
+//     (nginx istemcinin gönderdiği değeri ezer → forge edilemez).
+//   • Cloudflare devreye alınınca TRUST_CLOUDFLARE=1 set edilir; ancak o zaman CF'in her
+//     istekte kendi yazdığı cf-connecting-ip okunur (ve nginx CF-dışı trafiği elemeli).
+// x-forwarded-for yalnızca proxy'siz lokal geliştirmede son çaredir (üretimde buraya düşülmez).
 export function getClientIp(req: Request): string {
   const h = req.headers;
-  const cf = h.get("cf-connecting-ip");
-  if (cf) return cf.trim();
-  const real = h.get("x-real-ip");
-  if (real) return real.trim();
-  const fwd = h.get("x-forwarded-for");
-  if (fwd) return fwd.split(",")[0].trim();
-  return "unknown";
+  if (process.env.TRUST_CLOUDFLARE === "1") {
+    const cf = h.get("cf-connecting-ip")?.trim();
+    if (cf) return cf;
+  }
+  const real = h.get("x-real-ip")?.trim();
+  if (real) return real;
+  const fwd = h.get("x-forwarded-for")?.split(",")[0]?.trim();
+  return fwd || "noip";
 }
 
 // Limit aşıldıysa standart 429 yanıtı üretir; aksi halde null döner.
@@ -99,4 +105,16 @@ export async function checkRate(
     );
   }
   return null;
+}
+
+// IP yerine verilen bir anahtara (örn. başvuru id'si) göre rate-limit.
+// IP'den BAĞIMSIZ olduğu için forge edilemez; OTP üretimi gibi kaynak-başına limitlerde kullan.
+// Limit aşılmadıysa true, aşıldıysa false döner.
+export async function checkRateByKey(
+  key: string,
+  name: string,
+  limit: number,
+  windowMs: number
+): Promise<boolean> {
+  return allow(`rl:${name}:${key}`, limit, windowMs);
 }

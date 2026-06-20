@@ -6,16 +6,11 @@ import { prisma } from "@/lib/prisma";
 export const dynamic = "force-dynamic";
 
 export async function GET() {
+  // İç durum (db/saat) sızdırmadan yalnız sağlık sinyali döner; monitoring 200/503 ile izler.
   try {
     await prisma.$queryRaw`SELECT 1`;
-    return NextResponse.json(
-      { status: "ok", db: "ok", time: new Date().toISOString() },
-      { headers: { "Cache-Control": "no-store" } }
-    );
+    return NextResponse.json({ status: "ok" }, { headers: { "Cache-Control": "no-store" } });
   } catch {
-    return NextResponse.json(
-      { status: "error", db: "down", time: new Date().toISOString() },
-      { status: 503, headers: { "Cache-Control": "no-store" } }
-    );
+    return NextResponse.json({ status: "error" }, { status: 503, headers: { "Cache-Control": "no-store" } });
   }
 }
