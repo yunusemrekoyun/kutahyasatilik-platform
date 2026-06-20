@@ -52,7 +52,7 @@ export default function OfferView() {
     e.preventDefault();
     setLoading(true); setError("");
     try {
-      const d = await postJson("/api/emlakci/teklif/view", { email, code });
+      const d = await postJson("/api/emlakci/teklif/view", { email, phone4, code });
       if (!d.ok) throw new Error(d.error || "Doğrulanamadı");
       setOffer(d.offer);
       setPhase(d.offer?.accepted ? "done" : "offer");
@@ -66,7 +66,7 @@ export default function OfferView() {
   async function accept() {
     setLoading(true); setError("");
     try {
-      const d = await postJson("/api/emlakci/teklif/accept", { email, code });
+      const d = await postJson("/api/emlakci/teklif/accept", { email, phone4, code });
       if (!d.ok) throw new Error(d.error || "Kabul edilemedi");
       setPhase("done");
     } catch (err) {
