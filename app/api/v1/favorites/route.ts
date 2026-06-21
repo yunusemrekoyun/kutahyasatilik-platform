@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { checkRate } from "@/lib/rateLimit";
 import { resolveApiSession } from "@/lib/apiAuth";
+import { requestOrigin } from "@/lib/apiMedia";
 import { favoriteCards, addFavoriteBySlug, removeFavoriteBySlug } from "@/lib/favorites";
 
 export const runtime = "nodejs";
@@ -27,7 +28,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ ok: true, authed: false, items: [] });
   }
   try {
-    const origin = req.nextUrl.origin;
+    const origin = requestOrigin(req);
     const cards = await favoriteCards(session.id);
     const items = cards.map((c) => ({ ...c, coverImage: absolutize(c.coverImage, origin) }));
     return NextResponse.json({ ok: true, authed: true, items });
