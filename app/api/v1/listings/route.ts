@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getListingsPaged, type ListingFilter } from "@/lib/listings";
+import { absolutizeUrl } from "@/lib/apiMedia";
 
 // Mobil ilan listesi — lib/listings.getListingsPaged üzerine ince JSON sarmal.
 // Web SSR ile AYNI veri/filtre mantığını kullanır (onaylı + aktif ilanlar).
@@ -14,15 +15,6 @@ function bool(v: string | null): boolean | undefined {
 }
 function str(v: string | null): string | undefined {
   return v && v.trim() ? v.trim() : undefined;
-}
-
-// Göreli görsel yollarını (/uploads/...) mobil için mutlak URL'e çevirir.
-// Üretimde NEXT_PUBLIC_MEDIA_URL (public origin), yoksa istek origin'i (lokalde LAN IP).
-function absolutize(path: string | null, origin: string): string | null {
-  if (!path) return null;
-  if (/^https?:\/\//i.test(path)) return path;
-  const base = (process.env.NEXT_PUBLIC_MEDIA_URL?.trim() || origin).replace(/\/+$/, "");
-  return base + (path.startsWith("/") ? path : "/" + path);
 }
 
 export async function GET(req: NextRequest) {
@@ -50,10 +42,9 @@ export async function GET(req: NextRequest) {
 
   try {
     const result = await getListingsPaged(filter, page, perPage);
-    const origin = req.nextUrl.origin;
     const items = result.items.map((it) => ({
       ...it,
-      coverImage: absolutize(it.coverImage ?? null, origin),
+      coverImage: absolutizeUrl(it.coverImage ?? null, req),
     }));
     return NextResponse.json({ ok: true, ...result, items });
   } catch {

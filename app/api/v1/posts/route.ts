@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { requestOrigin } from "@/lib/apiMedia";
 
 export const dynamic = "force-dynamic";
 
@@ -27,7 +28,7 @@ export async function GET(req: NextRequest) {
         createdAt: true,
       },
     });
-    const origin = req.nextUrl.origin;
+    const origin = requestOrigin(req);
     const items = rows.map((p) => ({ ...p, coverImage: absolutize(p.coverImage, origin) }));
     return NextResponse.json({ ok: true, items });
   } catch {

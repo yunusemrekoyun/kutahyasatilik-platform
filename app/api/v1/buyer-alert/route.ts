@@ -6,6 +6,7 @@ import { checkRate } from "@/lib/rateLimit";
 import { trPhoneSchema } from "@/lib/validation";
 import { notifyAdmins } from "@/lib/notify";
 import { resolveApiSession } from "@/lib/apiAuth";
+import { requestOrigin } from "@/lib/apiMedia";
 
 // Mobil alıcı talebi — web /api/buyer-alert ile aynı; girişli kullanıcıda Bearer'dan userId
 // bağlanır (kayıtlı aramalarda görünür). Anında eşleşen ilanları döner.
@@ -81,7 +82,7 @@ export async function POST(req: NextRequest) {
     link: "/admin/alici-talepleri",
   });
 
-  const origin = req.nextUrl.origin;
+  const origin = requestOrigin(req);
   const matches = await findListingsForAlert(criteria, 12);
   const items = matches.map((m) => ({
     slug: m.slug,
