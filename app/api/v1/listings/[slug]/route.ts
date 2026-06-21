@@ -32,6 +32,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ slug
   return NextResponse.json({
     ok: true,
     listing: {
+      id: l.id,
       slug: l.slug,
       title: l.title,
       description: l.description,
