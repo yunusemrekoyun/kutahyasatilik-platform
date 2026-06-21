@@ -1,0 +1,103 @@
+import { NextRequest, NextResponse } from "next/server";
+import { z } from "zod";
+import { prisma } from "@/lib/prisma";
+import { findListingsForAlert } from "@/lib/matching";
+import { checkRate } from "@/lib/rateLimit";
+import { trPhoneSchema } from "@/lib/validation";
+import { notifyAdmins } from "@/lib/notify";
+import { resolveApiSession } from "@/lib/apiAuth";
+
+// Mobil alıcı talebi — web /api/buyer-alert ile aynı; girişli kullanıcıda Bearer'dan userId
+// bağlanır (kayıtlı aramalarda görünür). Anında eşleşen ilanları döner.
+
+const schema = z.object({
+  name: z.string().min(2, "Ad soyad gerekli").max(120),
+  phone: trPhoneSchema,
+  email: z.string().email().optional().or(z.literal("")),
+  propertyType: z.string().max(40).optional().or(z.literal("")),
+  listingType: z.string().max(20).optional().or(z.literal("")),
+  district: z.string().max(60).optional().or(z.literal("")),
+  minPrice: z.coerce.number().int().nonnegative().optional(),
+  maxPrice: z.coerce.number().int().nonnegative().optional(),
+  minArea: z.coerce.number().int().nonnegative().optional(),
+  rooms: z.string().max(20).optional().or(z.literal("")),
+  note: z.string().max(1000).optional(),
+});
+
+function absolutize(path: string | null, origin: string): string | null {
+  if (!path) return null;
+  if (/^https?:\/\//i.test(path)) return path;
+  const base = (process.env.NEXT_PUBLIC_MEDIA_URL?.trim() || origin).replace(/\/+$/, "");
+  return base + (path.startsWith("/") ? path : "/" + path);
+}
+
+export async function POST(req: NextRequest) {
+  const limited = await checkRate(req, "buyer-alert", 8, 60_000);
+  if (limited) return limited;
+
+  let data: z.infer<typeof schema>;
+  try {
+    data = schema.parse(await req.json());
+  } catch (err) {
+    if (err instanceof z.ZodError) {
+      return NextResponse.json({ ok: false, error: err.issues[0]?.message || "Form hatalı" }, { status: 400 });
+    }
+    return NextResponse.json({ ok: false, error: "Geçersiz istek" }, { status: 400 });
+  }
+
+  const criteria = {
+    propertyType: data.propertyType || null,
+    listingType: data.listingType || "sale",
+    district: data.district || null,
+    minPrice: data.minPrice || null,
+    maxPrice: data.maxPrice || null,
+    minArea: data.minArea || null,
+    rooms: data.rooms || null,
+  };
+
+  const session = await resolveApiSession(req);
+  const userId = session?.role === "user" ? session.id : null;
+
+  const alert = await prisma.buyerAlert.create({
+    data: {
+      name: data.name.trim(),
+      phone: data.phone.trim(),
+      email: data.email || null,
+      note: data.note || null,
+      status: "active",
+      userId,
+      ...criteria,
+    },
+  });
+
+  await prisma.analyticsEvent
+    .create({ data: { type: "conversion", district: data.district || null } })
+    .catch(() => {});
+
+  await notifyAdmins({
+    type: "new_alert",
+    title: "Yeni alıcı talebi",
+    body: `${data.name.trim()} · ${data.phone.trim()}`,
+    link: "/admin/alici-talepleri",
+  });
+
+  const origin = req.nextUrl.origin;
+  const matches = await findListingsForAlert(criteria, 12);
+  const items = matches.map((m) => ({
+    slug: m.slug,
+    title: m.title,
+    price: m.price,
+    currency: m.currency,
+    propertyType: m.propertyType,
+    district: m.district,
+    neighborhood: m.neighborhood,
+    rooms: m.rooms,
+    areaGross: m.areaGross,
+    status: m.status,
+    featured: m.featured,
+    verified: m.verified,
+    coverImage: absolutize(m.images[0]?.url ?? null, origin),
+  }));
+
+  return NextResponse.json({ ok: true, id: alert.id, matches: items });
+}
