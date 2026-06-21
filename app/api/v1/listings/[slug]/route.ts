@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { parseJsonArray } from "@/lib/format";
+import { requestOrigin } from "@/lib/apiMedia";
 
 // Mobil ilan detayı — web detay sayfasıyla (app/(site)/ilan/[slug]) aynı veri kaynağı.
 // Onaylı + pasif olmayan ilan; görseller mobil için mutlak URL'e çevrilir.
@@ -27,7 +28,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ slug
     return NextResponse.json({ ok: false, error: "İlan bulunamadı" }, { status: 404 });
   }
 
-  const origin = req.nextUrl.origin;
+  const origin = requestOrigin(req);
 
   return NextResponse.json({
     ok: true,
