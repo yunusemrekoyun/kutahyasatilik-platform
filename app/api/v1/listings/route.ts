@@ -53,7 +53,7 @@ export async function GET(req: NextRequest) {
     const origin = req.nextUrl.origin;
     const items = result.items.map((it) => ({
       ...it,
-      coverImage: absolutize(it.coverImage, origin),
+      coverImage: absolutize(it.coverImage ?? null, origin),
     }));
     return NextResponse.json({ ok: true, ...result, items });
   } catch {
