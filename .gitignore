@@ -126,3 +126,7 @@ prisma/dev.db
 *.sql.gz
 *.dump
 DEPLOY.md
+
+# Claude sohbet kayıtları — ham log gizli veri içerir, push edilmez (özet .md takip edilir)
+docs/claude-history/*.jsonl
+/docs
