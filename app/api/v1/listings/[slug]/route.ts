@@ -20,7 +20,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ slug
     where: { slug, moderationStatus: "approved", status: { not: "passive" } },
     include: {
       images: { orderBy: { sortOrder: "asc" }, select: { url: true, alt: true } },
-      agent: { select: { name: true, title: true, agency: true } },
+      agent: { select: { name: true, title: true, agency: true, logo: true } },
     },
   });
 
@@ -71,7 +71,8 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ slug
       viewCount: l.viewCount,
       createdAt: l.createdAt,
       images: l.images.map((im) => ({ url: absolutize(im.url, origin), alt: im.alt })),
-      agent: l.agent,
+      // Emlakçı logosu mobil için mutlak URL'e çevrilir.
+      agent: l.agent ? { ...l.agent, logo: absolutize(l.agent.logo, origin) } : null,
       features: parseJsonArray(l.features),
     },
   });

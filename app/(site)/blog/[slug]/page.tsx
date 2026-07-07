@@ -9,6 +9,7 @@ import { formatDate } from "@/lib/format";
 import { SITE } from "@/lib/site";
 import TrackView from "@/components/TrackView";
 import NotFoundCTA from "@/components/NotFoundCTA";
+import { PenLine } from "lucide-react";
 
 export const revalidate = 300; // ISR: her 5 dakikada yenilenir (CDN cache + admin revalidatePath)
 
@@ -85,7 +86,7 @@ export default async function BlogPost({ params }: { params: Promise<{ slug: str
 
       <p className="text-sm font-medium text-gold-600">{formatDate(post.publishedAt ?? post.createdAt)}</p>
       <h1 className="mt-2 font-display text-3xl font-bold leading-tight text-slate-900 sm:text-4xl">{post.title}</h1>
-      {post.author && <p className="mt-2 text-sm text-slate-500">✍️ {post.author}</p>}
+      {post.author && <p className="mt-2 inline-flex items-center gap-1.5 text-sm text-slate-500"><PenLine className="h-4 w-4" />{post.author}</p>}
 
       {post.coverImage && (
         <div className="relative mt-6 aspect-[16/9] overflow-hidden rounded-2xl bg-slate-100 ring-1 ring-slate-200">

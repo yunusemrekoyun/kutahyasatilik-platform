@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { CheckCircle2, Lock } from "lucide-react";
 import { useUtm } from "@/lib/useUtm";
-import { trackConversion } from "@/lib/track";
+import { trackAdsConversion } from "@/lib/track";
 import { isValidTrPhone, TR_PHONE_ERROR } from "@/lib/validation";
 
 type LeadType = "appointment" | "expertise" | "price_offer" | "contact";
@@ -81,7 +81,7 @@ export default function LeadForm({
       });
       const data = await res.json();
       if (!res.ok || !data.ok) throw new Error(data.error || "Gönderilemedi");
-      trackConversion({ type, listingId, district });
+      trackAdsConversion({ type, listingId, district });
       setStatus("ok");
       onDone?.();
     } catch (err) {

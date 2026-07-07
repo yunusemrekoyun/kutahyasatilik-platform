@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { CheckCircle2, ArrowRight } from "lucide-react";
 import { isValidTrPhone, TR_PHONE_ERROR } from "@/lib/validation";
 
 export default function AgentRegisterForm() {
@@ -43,7 +44,9 @@ export default function AgentRegisterForm() {
   if (status === "ok") {
     return (
       <div className="rounded-2xl bg-white p-8 text-center shadow-xl ring-1 ring-slate-200">
-        <div className="text-5xl">✅</div>
+        <div className="flex justify-center">
+          <CheckCircle2 className="h-12 w-12 text-green-600" />
+        </div>
         <h3 className="mt-3 text-2xl font-bold text-slate-900">Başvurunuz alındı!</h3>
         <p className="mt-2 text-slate-600">
           Danışman başvurunuz yönetim ekibimize iletildi. Değerlendirme sonrası size bir
@@ -52,9 +55,10 @@ export default function AgentRegisterForm() {
         </p>
         <Link
           href="/"
-          className="mt-5 inline-block rounded-xl bg-brand-700 px-5 py-3 font-bold text-white hover:bg-brand-800"
+          className="mt-5 inline-flex items-center gap-1 rounded-xl bg-brand-700 px-5 py-3 font-bold text-white hover:bg-brand-800"
         >
-          Ana sayfaya dön →
+          Ana sayfaya dön
+          <ArrowRight className="h-4 w-4" />
         </Link>
       </div>
     );
@@ -86,13 +90,20 @@ export default function AgentRegisterForm() {
       <button
         type="submit"
         disabled={status === "loading"}
-        className="w-full rounded-xl bg-gold-500 px-4 py-3.5 text-base font-bold text-brand-950 hover:bg-gold-400 disabled:opacity-60 transition shadow-md"
+        className="flex w-full items-center justify-center gap-1 rounded-xl bg-gold-500 px-4 py-3.5 text-base font-bold text-brand-950 hover:bg-gold-400 disabled:opacity-60 transition shadow-md"
       >
-        {status === "loading" ? "Gönderiliyor..." : "Danışman Başvurusu Gönder →"}
+        {status === "loading" ? (
+          "Gönderiliyor..."
+        ) : (
+          <>
+            Danışman Başvurusu Gönder
+            <ArrowRight className="h-4 w-4" />
+          </>
+        )}
       </button>
       <p className="text-center text-xs text-slate-500">
         Başvurunuz admin onayından sonra aktifleşir. Zaten hesabınız var mı?{" "}
-        <Link href="/emlakci/giris" className="font-semibold text-brand-700 hover:underline">
+        <Link href="/giris" className="font-semibold text-brand-700 hover:underline">
           Giriş yapın
         </Link>
       </p>

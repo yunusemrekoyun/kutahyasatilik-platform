@@ -4,6 +4,7 @@ import { useEffect } from "react";
 import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
+import { Star, MapPin, ArrowRight } from "lucide-react";
 import { KUTAHYA_CENTER, PROPERTY_TYPE_LABELS } from "@/lib/constants";
 import { formatPrice } from "@/lib/format";
 import { thumbUrl } from "@/lib/media";
@@ -87,14 +88,14 @@ export default function MapInner({
                   <div className="ks-pop-img">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img src={thumbUrl(p.coverImage) || PLACEHOLDER} alt={p.title} />
-                    {p.featured && <span className="ks-pop-badge">★ Öne Çıkan</span>}
+                    {p.featured && <span className="ks-pop-badge inline-flex items-center gap-1"><Star className="h-3 w-3 fill-current" /> Öne Çıkan</span>}
                   </div>
                   <div className="ks-pop-body">
                     <p className="ks-pop-price">{formatPrice(p.price, p.currency)}</p>
                     <p className="ks-pop-title">{p.title}</p>
                     {specs && <p className="ks-pop-specs">{specs}</p>}
-                    <p className="ks-pop-loc">📍 {loc}</p>
-                    <span className="ks-pop-cta">İlanı Gör →</span>
+                    <p className="ks-pop-loc inline-flex items-center gap-1"><MapPin className="h-3.5 w-3.5 shrink-0" /> {loc}</p>
+                    <span className="ks-pop-cta inline-flex items-center gap-1">İlanı Gör <ArrowRight className="h-3.5 w-3.5 align-middle" /></span>
                   </div>
                 </a>
               </Popup>

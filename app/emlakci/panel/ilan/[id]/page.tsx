@@ -15,7 +15,7 @@ export default async function EditAgentListing({
 }) {
   const { id } = await params;
   const session = await getAgentSession();
-  if (!session) redirect("/emlakci/giris");
+  if (!session) redirect("/giris");
 
   const listing = await prisma.listing.findUnique({
     where: { id },

@@ -1,11 +1,12 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { MapPin, BadgeCheck, Check } from "lucide-react";
+import { MapPin, BadgeCheck, Check, ArrowRight } from "lucide-react";
 import type { Metadata } from "next";
 import { prisma } from "@/lib/prisma";
 import { buildAnalysis } from "@/lib/analysis";
 import { formatPrice, formatDate, parseJsonArray } from "@/lib/format";
 import { PROPERTY_TYPE_LABELS } from "@/lib/constants";
+import { mediaUrl } from "@/lib/media";
 import { SITE } from "@/lib/site";
 import Gallery from "@/components/Gallery";
 import ContactButtons from "@/components/ContactButtons";
@@ -37,10 +38,10 @@ export async function generateStaticParams() {
 
 async function getListing(slug: string) {
   return prisma.listing.findFirst({
-    where: { slug, moderationStatus: "approved" },
+    where: { slug, moderationStatus: "approved", status: { not: "passive" } },
     include: {
       images: { orderBy: { sortOrder: "asc" } },
-      agent: { select: { name: true, title: true, agency: true } },
+      agent: { select: { name: true, title: true, agency: true, logo: true } },
       priceHistory: { orderBy: { createdAt: "asc" } },
     },
   });
@@ -321,9 +322,18 @@ export default async function ListingPage({
               <div className="rounded-2xl bg-white p-5 ring-1 ring-slate-200">
                 <p className="text-xs font-medium uppercase tracking-wider text-slate-400">İlan Danışmanı</p>
                 <div className="mt-3 flex items-center gap-3">
-                  <span className="grid h-12 w-12 shrink-0 place-items-center rounded-full bg-brand-800 text-lg font-bold text-gold-300">
-                    {listing.agent.name.slice(0, 1).toUpperCase()}
-                  </span>
+                  {listing.agent.logo ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={mediaUrl(listing.agent.logo)}
+                      alt={listing.agent.name}
+                      className="h-12 w-12 shrink-0 rounded-full object-cover"
+                    />
+                  ) : (
+                    <span className="grid h-12 w-12 shrink-0 place-items-center rounded-full bg-brand-800 text-lg font-bold text-gold-300">
+                      {listing.agent.name.slice(0, 1).toUpperCase()}
+                    </span>
+                  )}
                   <div className="min-w-0">
                     <p className="truncate font-bold text-slate-900">{listing.agent.name}</p>
                     <p className="truncate text-sm text-slate-500">
@@ -339,7 +349,7 @@ export default async function ListingPage({
             )}
             <div className="rounded-2xl bg-brand-50 p-5 ring-1 ring-brand-100 text-center">
               <p className="text-sm font-semibold text-brand-900">Bu mülke benzer fırsatlar mı arıyorsunuz?</p>
-              <Link href="/ilanlar" className="mt-2 inline-block text-sm font-bold text-brand-700 hover:underline">Tüm ilanları gör →</Link>
+              <Link href="/ilanlar" className="mt-2 inline-flex items-center gap-1 text-sm font-bold text-brand-700 hover:underline">Tüm ilanları gör <ArrowRight className="h-4 w-4" /></Link>
             </div>
           </div>
         </aside>

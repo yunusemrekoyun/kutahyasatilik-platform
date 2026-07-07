@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { resolveApiAdmin } from "@/lib/apiAdmin";
-import { slugify } from "@/lib/format";
+import { slugify, parseJsonArray } from "@/lib/format";
 import { notifyAgent, notifyUser } from "@/lib/notify";
 
 export const runtime = "nodejs";
@@ -52,6 +52,14 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
           price, district: opp.district || "Merkez", areaGross: opp.areaGross, rooms: opp.rooms,
         },
       });
+      // Kaynak satıcı talebindeki (Lead) fotoğrafları ilana taşı — yoksa ilan görselsiz doğar → placeholder.
+      if (opp.leadId) {
+        const lead = await tx.lead.findUnique({ where: { id: opp.leadId }, select: { photos: true } });
+        const urls = parseJsonArray(lead?.photos).filter((u) => typeof u === "string" && u.length > 0);
+        if (urls.length) {
+          await tx.listingImage.createMany({ data: urls.map((url, i) => ({ listingId: listing.id, url, sortOrder: i })) });
+        }
+      }
       if (price > 0) await tx.priceHistory.create({ data: { listingId: listing.id, price } });
       await tx.portfolioOpportunity.update({ where: { id: opportunityId }, data: { status: "listed", listingId: listing.id } });
       return listing;

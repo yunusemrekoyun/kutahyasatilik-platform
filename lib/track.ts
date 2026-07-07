@@ -48,8 +48,10 @@ export function track(payload: TrackPayload) {
 }
 
 // Google Ads dönüşüm + olay
-export function trackConversion(payload: TrackPayload) {
-  track({ ...payload, type: payload.type });
+// Yalnız Google Ads/Analytics'e dönüşüm gönderir; kendi DB'mize YAZMAZ.
+// Form dönüşümlerinde (satıcı/talep/değerleme) AnalyticsEvent'i SUNUCU /api/leads yazar;
+// istemci de yazarsa aynı dönüşüm İKİ kez sayılır. Bu yüzden formlar bunu kullanmalı.
+export function trackAdsConversion(payload: TrackPayload) {
   try {
     if (window.gtag) {
       window.gtag("event", payload.type, {
@@ -61,4 +63,11 @@ export function trackConversion(payload: TrackPayload) {
   } catch {
     /* yut */
   }
+}
+
+// DB event'i + Google Ads. Sunucuda loglanMAYAN olaylar (telefon/whatsapp tıklaması) için;
+// bunların tek kaydı istemci olduğundan /api/track'e yazması gerekir.
+export function trackConversion(payload: TrackPayload) {
+  track({ ...payload, type: payload.type });
+  trackAdsConversion(payload);
 }

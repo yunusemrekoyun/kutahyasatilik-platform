@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { getSession } from "@/lib/auth";
-import { slugify } from "@/lib/format";
+import { slugify, parseJsonArray } from "@/lib/format";
 import { sanitizeCmsHtml } from "@/lib/sanitize";
 import { deleteUploadFiles } from "@/lib/uploads";
 import { deleteVideo } from "@/lib/videoStorage";
@@ -21,7 +21,8 @@ async function ensureAuth() {
 function num(v: FormDataEntryValue | null): number | null {
   if (v === null || v === "") return null;
   const n = Number(String(v).replace(/[^\d.-]/g, ""));
-  return Number.isFinite(n) ? n : null;
+  // PostgreSQL Int (32-bit) taşmasını önle: aralık dışı → null (P2020 ValueOutOfRange crash).
+  return Number.isFinite(n) && Math.abs(n) <= 2_147_483_647 ? n : null;
 }
 function str(v: FormDataEntryValue | null): string | null {
   const s = v === null ? "" : String(v).trim();
@@ -535,7 +536,8 @@ export async function promoteLeadToOpportunity(formData: FormData) {
   const lead = await prisma.lead.findUnique({ where: { id: leadId } });
   if (!lead) throw new Error("Talep bulunamadı");
   const rawPrice = lead.estimatedPrice ? Number(lead.estimatedPrice.replace(/[^\d]/g, "")) : NaN;
-  const price = Number.isFinite(rawPrice) && rawPrice > 0 ? rawPrice : null;
+  // PG Int taşmasını önle: 2.1 milyarı aşan (ör. hatalı/çok haneli fiyat) → null.
+  const price = Number.isFinite(rawPrice) && rawPrice > 0 && rawPrice <= 2_147_483_647 ? rawPrice : null;
   const title = `${lead.propertyType || "Mülk"}${lead.district ? ` · ${lead.district}` : ""} — ${lead.name}`;
   await prisma.portfolioOpportunity.create({
     data: {
@@ -605,6 +607,14 @@ export async function selectWinningBid(formData: FormData) {
         rooms: opp.rooms,
       },
     });
+    // Kaynak satıcı talebindeki (Lead) fotoğrafları ilana taşı — yoksa ilan görselsiz doğar → placeholder.
+    if (opp.leadId) {
+      const lead = await tx.lead.findUnique({ where: { id: opp.leadId }, select: { photos: true } });
+      const urls = parseJsonArray(lead?.photos).filter((u) => typeof u === "string" && u.length > 0);
+      if (urls.length) {
+        await tx.listingImage.createMany({ data: urls.map((url, i) => ({ listingId: listing.id, url, sortOrder: i })) });
+      }
+    }
     // Sahte 0₺ PriceHistory yazma (fiyat-grafiğini kirletir); yalnız gerçek fiyatta.
     if (price > 0) await tx.priceHistory.create({ data: { listingId: listing.id, price } });
     await tx.portfolioOpportunity.update({ where: { id: opportunityId }, data: { status: "listed", listingId: listing.id } });

@@ -17,6 +17,8 @@ const schema = z.object({
   estimatedPrice: z.string().max(60).optional(),
   preferredDate: z.string().max(60).optional(),
   photos: z.array(z.string()).max(15).optional(),
+  lat: z.number().optional(),
+  lng: z.number().optional(),
   listingId: z.string().max(40).optional(),
   // takip
   utmSource: z.string().max(120).optional(),
@@ -85,6 +87,8 @@ export async function POST(req: NextRequest) {
       estimatedPrice: data.estimatedPrice || null,
       preferredDate: data.preferredDate || null,
       photos: data.photos && data.photos.length ? JSON.stringify(data.photos) : null,
+      lat: data.lat ?? null,
+      lng: data.lng ?? null,
       listingId,
       utmSource: data.utmSource || null,
       utmMedium: data.utmMedium || null,

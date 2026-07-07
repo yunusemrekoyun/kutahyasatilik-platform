@@ -42,10 +42,20 @@ export async function GET(req: NextRequest) {
 
   try {
     const result = await getListingsPaged(filter, page, perPage);
-    const items = result.items.map((it) => ({
-      ...it,
-      coverImage: absolutizeUrl(it.coverImage ?? null, req),
-    }));
+    const items = result.items.map((it) => {
+      const agentLogo = absolutizeUrl(it.agentLogo ?? null, req);
+      return {
+        ...it,
+        coverImage: absolutizeUrl(it.coverImage ?? null, req),
+        // Emlakçı logosu da mutlak URL'e çevrilir (kart verisinde göreli /uploads/... gelir).
+        agentLogo,
+        // Detay ucuyla tutarlı emlakçı nesnesi. Not: title kart seviyesinde seçilmediği için
+        // listede null döner; tam başlık için ilan detay ucu (/[slug]) kullanılır.
+        agent: it.agentName || agentLogo
+          ? { name: it.agentName ?? null, title: null, logo: agentLogo }
+          : null,
+      };
+    });
     return NextResponse.json({ ok: true, ...result, items });
   } catch {
     return NextResponse.json({ ok: false, error: "İlanlar alınamadı" }, { status: 500 });

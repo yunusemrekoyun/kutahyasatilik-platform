@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
 import { LogIn } from "lucide-react";
-import UserLoginForm from "@/components/user/UserLoginForm";
+import LoginForm from "@/components/LoginForm";
 
 export const metadata: Metadata = {
   title: "Giriş Yap",
@@ -9,7 +9,8 @@ export const metadata: Metadata = {
   robots: { index: false, follow: true },
 };
 
-export default function UserLoginPage() {
+// Birleşik giriş: kullanıcı, danışman ve yönetici tek sayfadan (rolü sunucu algılar).
+export default function LoginPage() {
   return (
     <div className="mx-auto grid max-w-md px-4 py-16">
       <div className="rounded-3xl bg-white p-8 shadow-xl ring-1 ring-slate-200">
@@ -18,11 +19,11 @@ export default function UserLoginPage() {
             <LogIn className="h-6 w-6" />
           </span>
           <h1 className="mt-4 text-xl font-bold text-slate-900">Giriş Yap</h1>
-          <p className="text-sm text-slate-500">Favoriler, kayıtlı aramalar ve bildirimler için.</p>
+          <p className="text-sm text-slate-500">Hesabınıza giriş yapın.</p>
         </div>
         <div className="mt-6">
           <Suspense fallback={<div className="h-64" />}>
-            <UserLoginForm />
+            <LoginForm />
           </Suspense>
         </div>
       </div>

@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Handshake, CheckCircle2, Info } from "lucide-react";
 import AgentRegisterForm from "@/components/agent/AgentRegisterForm";
 
 export const metadata: Metadata = {
@@ -13,7 +14,7 @@ export default function AgentRegisterPage() {
       <div className="grid items-start gap-10 lg:grid-cols-2">
         <div>
           <span className="inline-flex items-center gap-2 rounded-full bg-brand-50 px-4 py-1.5 text-sm font-medium text-brand-700 ring-1 ring-brand-100">
-            🤝 Danışman Ağı
+            <Handshake className="h-4 w-4" /> Danışman Ağı
           </span>
           <h1 className="mt-4 text-3xl font-black text-slate-900 sm:text-4xl">
             Kütahya&apos;nın Dijital Emlak Ağına Katılın
@@ -24,13 +25,13 @@ export default function AgentRegisterPage() {
             panelinizden ilan ekleyebilirsiniz.
           </p>
           <ul className="mt-6 space-y-3 text-slate-700">
-            <li className="flex gap-3"><span>✅</span> Kendi panelinizden ilan ekleyin ve yönetin</li>
-            <li className="flex gap-3"><span>✅</span> İlanlarınızda isim &amp; unvan etiketiniz görünür</li>
-            <li className="flex gap-3"><span>✅</span> Google&apos;da reklamlı geniş erişim</li>
-            <li className="flex gap-3"><span>✅</span> Yatırım analizi ve değerleme araçları</li>
+            <li className="flex gap-3"><CheckCircle2 className="h-5 w-5 shrink-0 text-green-600" /> Kendi panelinizden ilan ekleyin ve yönetin</li>
+            <li className="flex gap-3"><CheckCircle2 className="h-5 w-5 shrink-0 text-green-600" /> İlanlarınızda isim &amp; unvan etiketiniz görünür</li>
+            <li className="flex gap-3"><CheckCircle2 className="h-5 w-5 shrink-0 text-green-600" /> Google&apos;da reklamlı geniş erişim</li>
+            <li className="flex gap-3"><CheckCircle2 className="h-5 w-5 shrink-0 text-green-600" /> Yatırım analizi ve değerleme araçları</li>
           </ul>
-          <div className="mt-6 rounded-xl bg-amber-50 p-4 text-sm text-amber-800 ring-1 ring-amber-100">
-            ℹ️ Kalite ve güven için her başvuru ve her ilan yönetim onayından geçer.
+          <div className="mt-6 flex items-start gap-2 rounded-xl bg-amber-50 p-4 text-sm text-amber-800 ring-1 ring-amber-100">
+            <Info className="mt-0.5 h-4 w-4 shrink-0 text-amber-600" /> Kalite ve güven için her başvuru ve her ilan yönetim onayından geçer.
           </div>
         </div>
 

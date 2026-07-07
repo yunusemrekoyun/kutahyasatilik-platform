@@ -16,7 +16,7 @@ export async function GET(req: NextRequest) {
   if (!a.ok) return NextResponse.json({ ok: false, error: a.error }, { status: a.status });
   const p = await prisma.agent.findUnique({
     where: { id: a.agent.id },
-    select: { name: true, phone: true, title: true, agency: true, email: true, slug: true },
+    select: { name: true, phone: true, title: true, agency: true, email: true, slug: true, logo: true },
   });
   return NextResponse.json({ ok: true, profile: p });
 }
@@ -33,6 +33,8 @@ export async function PUT(req: NextRequest) {
       phone: str(body.phone),
       title: str(body.title),
       agency: str(body.agency),
+      // logo yalnızca istemci açıkça gönderirse güncellenir (aksi halde mevcut logo korunur).
+      ...("logo" in body ? { logo: str(body.logo) } : {}),
     },
   });
   return NextResponse.json({ ok: true });

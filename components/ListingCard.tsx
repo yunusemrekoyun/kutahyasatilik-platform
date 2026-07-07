@@ -3,7 +3,7 @@ import Image from "next/image";
 import { MapPin, BedDouble, Maximize, Star, ArrowRight } from "lucide-react";
 import { formatPrice } from "@/lib/format";
 import { PROPERTY_TYPE_LABELS } from "@/lib/constants";
-import { thumbUrl } from "@/lib/media";
+import { thumbUrl, mediaUrl } from "@/lib/media";
 import type { Badge } from "@/lib/badges";
 import CardActions from "./CardActions";
 
@@ -23,6 +23,7 @@ export type ListingCardData = {
   coverImage?: string | null;
   badges?: Badge[];
   agentName?: string | null;
+  agentLogo?: string | null;
 };
 
 export default function ListingCard({ listing }: { listing: ListingCardData }) {
@@ -88,6 +89,24 @@ export default function ListingCard({ listing }: { listing: ListingCardData }) {
             <MapPin className="h-[18px] w-[18px] text-slate-400" /> {listing.district}
           </span>
         </div>
+
+        {listing.agentName && (
+          <div className="mt-3 flex items-center gap-2">
+            {listing.agentLogo ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={mediaUrl(listing.agentLogo)}
+                alt={listing.agentName}
+                className="h-7 w-7 shrink-0 rounded-full object-cover"
+              />
+            ) : (
+              <span className="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-brand-50 text-xs font-bold text-brand-700">
+                {listing.agentName.charAt(0).toUpperCase()}
+              </span>
+            )}
+            <span className="truncate text-xs font-semibold text-slate-600">{listing.agentName}</span>
+          </div>
+        )}
 
         <div className="mt-auto flex items-center justify-between gap-2 border-t border-slate-100 pt-4">
           <span className="rounded-lg bg-gold-100 px-3 py-1.5 text-[18px] font-bold tabular-nums text-gold-900">

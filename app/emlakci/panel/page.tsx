@@ -1,10 +1,12 @@
 import Link from "next/link";
 import Image from "next/image";
+import { Mail } from "lucide-react";
 import { getAgentSession } from "@/lib/agentAuth";
 import { prisma } from "@/lib/prisma";
 import { formatPrice } from "@/lib/format";
 import { PROPERTY_TYPE_LABELS, MODERATION_STATUS_LABELS } from "@/lib/constants";
 import { deleteAgentListing, updateAgentProfile } from "./actions";
+import AgentLogoUpload from "@/components/agent/AgentLogoUpload";
 
 export const dynamic = "force-dynamic";
 
@@ -41,7 +43,7 @@ export default async function AgentDashboard() {
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <h1 className="text-2xl font-extrabold text-slate-900">
-            Hoş geldiniz, {agent.name} 👋
+            Hoş geldiniz, {agent.name}
           </h1>
           <p className="text-sm text-slate-500">
             {agent.title || "Gayrimenkul Danışmanı"}
@@ -91,7 +93,7 @@ export default async function AgentDashboard() {
                   <th className="p-3">Tür</th>
                   <th className="p-3">Fiyat</th>
                   <th className="p-3">Onay Durumu</th>
-                  <th className="p-3 text-center">📬</th>
+                  <th className="p-3 text-center"><Mail className="inline-block h-4 w-4 text-slate-500" /></th>
                   <th className="p-3 text-right">İşlem</th>
                 </tr>
               </thead>
@@ -152,6 +154,10 @@ export default async function AgentDashboard() {
         <h2 className="text-lg font-bold text-slate-900">Danışman Profilim</h2>
         <p className="text-sm text-slate-500">İlanlarınızda görünen isim ve unvan bilgileri.</p>
         <form action={updateAgentProfile} className="mt-3 rounded-2xl bg-white p-6 ring-1 ring-slate-200">
+          <div className="mb-5">
+            <span className="mb-2 block text-sm font-medium text-slate-700">Logo / Avatar</span>
+            <AgentLogoUpload initialLogo={agent.logo} />
+          </div>
           <div className="grid gap-4 sm:grid-cols-2">
             <label className="block">
               <span className="mb-1 block text-sm font-medium text-slate-700">Ad Soyad</span>

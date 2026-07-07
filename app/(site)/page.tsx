@@ -16,12 +16,6 @@ import HomeJsonLd from "@/components/HomeJsonLd";
 
 export const revalidate = 300; // ISR: her 5 dakikada yenilenir (CDN cache + admin revalidatePath)
 
-const TESTIMONIALS = [
-  { name: "Ahmet Y.", role: "Daire Sahibi · Merkez", text: "Dairemi 3 hafta içinde, beklediğim fiyata sattılar. Süreç boyunca her adımda bilgilendirildim. Çok profesyonel bir ekip.", stars: 5 },
-  { name: "Selin K.", role: "Yatırımcı · Tavşanlı", text: "Yatırımlık arsa ararken bölge analizleri çok işime yaradı. Doğru lokasyonu seçmemde gerçekten yardımcı oldular.", stars: 5 },
-  { name: "Mehmet D.", role: "Alıcı · Simav", text: "WhatsApp'tan yazdım, yarım saat içinde aradılar ve ertesi gün mülkü gezdik. Hız ve ilgi mükemmeldi.", stars: 5 },
-];
-
 async function getHomeTexts() {
   const keys = [
     "home_hero_badge", "home_hero_title", "home_hero_highlight",
@@ -48,7 +42,7 @@ export default async function Home() {
       .catch(() => []),
   ]);
 
-  const testimonials = dbTestimonials.length > 0 ? dbTestimonials : TESTIMONIALS;
+  const testimonials = dbTestimonials; // yayınlı yorum yoksa bölüm gizlenir (sahte yorum yok)
 
   const t = (k: string, fallback: string) => texts.get(k) || fallback;
   const heroBadge = t("home_hero_badge", SITE.brand);
@@ -235,7 +229,8 @@ export default async function Home() {
         </div>
       </section>
 
-      {/* MÜŞTERİ YORUMLARI */}
+      {/* MÜŞTERİ YORUMLARI — yalnız yayınlı yorum varsa */}
+      {testimonials.length > 0 && (
       <section className="mx-auto max-w-7xl px-4 py-16">
         <h2 className="font-display text-2xl font-bold text-brand-900 sm:text-3xl">Müşterilerimiz Ne Diyor?</h2>
         <div className="mt-8 grid gap-5 md:grid-cols-3">
@@ -255,6 +250,7 @@ export default async function Home() {
           ))}
         </div>
       </section>
+      )}
 
       {/* İLÇELER */}
       <section className="mx-auto max-w-7xl px-4">

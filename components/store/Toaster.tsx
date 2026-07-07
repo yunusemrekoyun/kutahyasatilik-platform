@@ -1,5 +1,6 @@
 "use client";
 
+import { AlertTriangle, Info, Check } from "lucide-react";
 import { useStore } from "./StoreProvider";
 
 export default function Toaster() {
@@ -14,7 +15,15 @@ export default function Toaster() {
             t.type === "error" ? "bg-red-600" : t.type === "info" ? "bg-slate-800" : "bg-brand-700"
           }`}
         >
-          <span>{t.type === "error" ? "⚠️" : t.type === "info" ? "ℹ️" : "✓"}</span>
+          <span>
+            {t.type === "error" ? (
+              <AlertTriangle className="h-4 w-4" />
+            ) : t.type === "info" ? (
+              <Info className="h-4 w-4" />
+            ) : (
+              <Check className="h-4 w-4" />
+            )}
+          </span>
           {t.message}
         </div>
       ))}

@@ -1,3 +1,4 @@
+import { Info } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { saveSettings } from "../actions";
 import { SITE } from "@/lib/site";
@@ -59,7 +60,7 @@ export default async function SettingsPage() {
       </form>
 
       <div className="mt-6 rounded-2xl bg-amber-50 p-5 text-sm text-amber-800 ring-1 ring-amber-200">
-        <p className="font-semibold">ℹ️ Not</p>
+        <p className="flex items-center gap-1.5 font-semibold"><Info className="h-4 w-4" />Not</p>
         <p className="mt-1">
           Telefon ve WhatsApp&apos;ın sitenin tüm butonlarında etkin olması için bu değerleri
           <code className="mx-1 rounded bg-amber-100 px-1">.env</code> dosyasındaki

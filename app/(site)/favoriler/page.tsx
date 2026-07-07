@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { Heart } from "lucide-react";
 import { useStore } from "@/components/store/StoreProvider";
 import ListingCard from "@/components/ListingCard";
 
@@ -19,7 +20,7 @@ export default function FavoritesPage() {
         </div>
       ) : favorites.length === 0 ? (
         <div className="mt-8 rounded-2xl bg-white p-12 text-center ring-1 ring-slate-200">
-          <div className="text-5xl">♡</div>
+          <Heart className="mx-auto h-12 w-12 text-slate-300" />
           <h2 className="mt-4 text-lg font-bold text-slate-800">Henüz favori ilanınız yok</h2>
           <p className="mt-1 text-slate-500">İlanlardaki kalp ikonuna dokunarak beğendiklerinizi buraya ekleyin.</p>
           <Link href="/ilanlar" className="mt-6 inline-block rounded-xl bg-brand-700 px-6 py-3 font-bold text-white hover:bg-brand-800">

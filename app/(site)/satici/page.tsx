@@ -7,9 +7,9 @@ import { prisma } from "@/lib/prisma";
 export const revalidate = 300; // ISR: admin görsel/ayar değişince revalidatePath ile tazelenir
 
 export const metadata: Metadata = {
-  title: "Mülkünüzü Satın - Ücretsiz Değerleme",
+  title: "Mülkünüzü Satın - İlan Talebi Oluşturun",
   description:
-    "Kütahya'da daire, arsa, villa veya tarlanızı mı satmak istiyorsunuz? Ücretsiz değerleme için formu doldurun, uzman ekibimiz sizi arasın.",
+    "Kütahya'da daire, arsa, villa veya tarlanızı mı satmak istiyorsunuz? İlan talebinizi oluşturun, uzman ekibimiz mülkünüzü değerlendirip sizinle iletişime geçsin.",
 };
 
 async function getHeroImage(): Promise<string | null> {
@@ -58,10 +58,23 @@ export default async function SellerPage() {
         <div className="grid items-start gap-8 lg:grid-cols-12">
           <div className="rounded-2xl bg-white p-6 shadow-card ring-1 ring-slate-200 sm:p-8 lg:col-span-8">
             <div className="border-b border-slate-100 pb-5">
-              <h2 className="font-display text-2xl font-bold text-brand-900">Satış Başvurusu</h2>
+              <h2 className="font-display text-2xl font-bold text-brand-900">İlan Talebi Oluştur</h2>
               <p className="mt-1.5 text-slate-500">
                 Gayrimenkulünüz hakkında bilgileri girin, uzmanlarımız en kısa sürede sizinle iletişime geçsin.
               </p>
+              <ol className="mt-4 grid gap-2.5 sm:grid-cols-2">
+                {[
+                  "İlan talebini oluştur (formu doldur)",
+                  "Uzman ekibimiz mülkünü değerlendirir ve seni arar",
+                  "Sana en uygun danışman atanır",
+                  "İlanın yayına alınır",
+                ].map((step, i) => (
+                  <li key={i} className="flex items-start gap-2.5 text-sm text-slate-600">
+                    <span className="grid h-6 w-6 shrink-0 place-items-center rounded-full bg-brand-50 text-xs font-bold text-brand-700">{i + 1}</span>
+                    <span className="pt-0.5">{step}</span>
+                  </li>
+                ))}
+              </ol>
             </div>
             <div className="mt-6">
               <SellerForm />

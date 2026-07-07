@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Check } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { formatDate } from "@/lib/format";
 import { deletePage } from "../actions";
@@ -45,7 +46,7 @@ export default async function AdminPages() {
                     {p.status === "published" ? "Yayında" : "Taslak"}
                   </span>
                 </td>
-                <td className="p-3 text-slate-600">{p.showInMenu ? "✓" : "—"}</td>
+                <td className="p-3 text-slate-600">{p.showInMenu ? <Check className="h-4 w-4" /> : "—"}</td>
                 <td className="p-3 text-slate-600">{formatDate(p.updatedAt)}</td>
                 <td className="p-3">
                   <div className="flex items-center justify-end gap-2">

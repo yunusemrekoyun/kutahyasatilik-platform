@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { BarChart3 } from "lucide-react";
+import { BarChart3, ArrowRight } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { formatNumber } from "@/lib/format";
 import TrackView from "@/components/TrackView";
@@ -121,7 +121,7 @@ export default async function RegionAnalysis() {
                     <td className="p-3 text-right text-slate-700">{d.avgPriceDaire != null ? `${formatNumber(d.avgPriceDaire)} ₺` : "—"}</td>
                     <td className="p-3 text-center text-slate-600">{d.count}</td>
                     <td className="p-3 text-right">
-                      <Link href={`/ilanlar?ilce=${encodeURIComponent(d.name)}`} className="text-xs font-semibold text-brand-700 hover:underline">İlanlar →</Link>
+                      <Link href={`/ilanlar?ilce=${encodeURIComponent(d.name)}`} className="inline-flex items-center gap-1 text-xs font-semibold text-brand-700 hover:underline">İlanlar <ArrowRight className="h-4 w-4" /></Link>
                     </td>
                   </tr>
                 ))}

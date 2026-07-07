@@ -8,7 +8,8 @@ export const dynamic = "force-dynamic";
 function num(v: unknown): number | null {
   if (v === null || v === undefined || v === "") return null;
   const n = Number(String(v).replace(/[^\d.-]/g, ""));
-  return Number.isFinite(n) ? n : null;
+  // PostgreSQL Int (32-bit) taşmasını önle: aralık dışı → null (P2020 ValueOutOfRange crash).
+  return Number.isFinite(n) && Math.abs(n) <= 2_147_483_647 ? n : null;
 }
 function str(v: unknown): string | null {
   const s = v === null || v === undefined ? "" : String(v).trim();
