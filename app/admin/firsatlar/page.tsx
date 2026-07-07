@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Star, ArrowRight } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { createOpportunity, selectWinningBid, closeOpportunity } from "@/app/admin/actions";
 import { formatPrice } from "@/lib/format";
@@ -97,7 +98,7 @@ export default async function AdminFirsatlarPage() {
                       {o.bids.map((b, idx) => (
                         <li key={b.id} className="flex flex-wrap items-center justify-between gap-2 rounded-lg bg-slate-50 px-3 py-2 text-sm">
                           <span className="flex items-center gap-2">
-                            {idx === 0 && canSelect && <span className="text-amber-500">★</span>}
+                            {idx === 0 && canSelect && <Star className="h-4 w-4 fill-current text-amber-500" />}
                             <span className="font-medium text-slate-800">{b.agent?.name ?? "—"}</span>
                             <span className="rounded bg-white px-2 py-0.5 text-xs font-semibold text-brand-700 ring-1 ring-slate-200">%{b.commissionPct.toFixed(1)} komisyon</span>
                             {b.status === "won" && <span className="text-xs font-semibold text-green-600">Kazandı</span>}
@@ -118,8 +119,8 @@ export default async function AdminFirsatlarPage() {
 
                 <div className="mt-3 flex items-center gap-4">
                   {o.listingId && (
-                    <Link href={`/admin/ilanlar/${o.listingId}`} className="text-sm font-medium text-brand-700 hover:underline">
-                      Oluşan ilanı düzenle →
+                    <Link href={`/admin/ilanlar/${o.listingId}`} className="inline-flex items-center gap-1 text-sm font-medium text-brand-700 hover:underline">
+                      Oluşan ilanı düzenle <ArrowRight className="h-4 w-4" />
                     </Link>
                   )}
                   {canSelect && (

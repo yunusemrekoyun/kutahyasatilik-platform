@@ -168,7 +168,7 @@ export default function VideoUploadField({
             >
               <UploadCloud className="h-4 w-4" /> Video Yükle
             </button>
-            <span className="text-xs text-slate-400">MP4/MOV · en fazla 1GB · yüksek çözünürlük otomatik 1080p'ye küçültülür</span>
+            <span className="text-xs text-slate-400">MP4/MOV · en fazla 1GB · yüksek çözünürlük otomatik 1080p&apos;ye küçültülür</span>
           </div>
           <input ref={fileRef} type="file" accept="video/*" className="hidden" onChange={onPick} />
         </div>
@@ -189,7 +189,9 @@ export default function VideoUploadField({
                 <p className="text-xs text-slate-500">
                   {task.phase === "uploading" && `Yükleniyor… %${task.progress}`}
                   {task.phase === "processing" && "İşleniyor (transcode)…"}
-                  {task.phase === "done" && "Hazır ✓"}
+                  {task.phase === "done" && (
+                    <span className="inline-flex items-center gap-1">Hazır <Check className="h-3.5 w-3.5 text-green-600" /></span>
+                  )}
                   {task.phase === "error" && (task.error || "Hata")}
                 </p>
               </div>

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { ArrowLeft } from "lucide-react";
 import { getAgentSession } from "@/lib/agentAuth";
 import { prisma } from "@/lib/prisma";
 import { formatPrice } from "@/lib/format";
@@ -39,7 +40,7 @@ export default async function AgentOpportunitiesPage() {
           <h1 className="text-2xl font-extrabold text-slate-900">Portföy Fırsatları</h1>
           <p className="text-sm text-slate-500">Komisyon teklifinizi verin. En uygun teklif kazanır; kazanırsanız ilan size atanır.</p>
         </div>
-        <Link href="/emlakci/panel" className="text-sm text-brand-700 hover:underline">← Panel</Link>
+        <Link href="/emlakci/panel" className="inline-flex items-center gap-1 text-sm text-brand-700 hover:underline"><ArrowLeft className="h-4 w-4" />Panel</Link>
       </div>
 
       {opps.length === 0 ? (

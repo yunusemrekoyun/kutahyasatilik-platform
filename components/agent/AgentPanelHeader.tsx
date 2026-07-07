@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { User, LogOut } from "lucide-react";
 import NotificationBell from "@/components/NotificationBell";
 
 export default function AgentPanelHeader({ name }: { name: string }) {
@@ -9,7 +10,7 @@ export default function AgentPanelHeader({ name }: { name: string }) {
 
   async function logout() {
     await fetch("/api/emlakci/logout", { method: "POST" });
-    router.push("/emlakci/giris");
+    router.push("/giris");
     router.refresh();
   }
 
@@ -27,15 +28,19 @@ export default function AgentPanelHeader({ name }: { name: string }) {
         </Link>
         <div className="flex items-center gap-3">
           <NotificationBell />
-          <span className="hidden text-sm text-slate-600 sm:inline">👤 {name}</span>
+          <span className="hidden items-center gap-1.5 text-sm text-slate-600 sm:inline-flex">
+            <User className="h-4 w-4" />
+            {name}
+          </span>
           <Link href="/" className="hidden text-sm text-brand-700 hover:underline sm:inline">
             Siteye dön
           </Link>
           <button
             onClick={logout}
-            className="rounded-lg px-3 py-1.5 text-sm font-medium text-red-600 hover:bg-red-50"
+            className="inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-medium text-red-600 hover:bg-red-50"
           >
-            🚪 Çıkış
+            <LogOut className="h-4 w-4" />
+            Çıkış
           </button>
         </div>
       </div>

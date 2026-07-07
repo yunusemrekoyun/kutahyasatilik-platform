@@ -8,14 +8,13 @@ const inputCls =
   "h-12 w-full rounded-[10px] border border-slate-300 bg-white px-3.5 text-base text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/30";
 const labelCls = "mb-1.5 block text-sm font-semibold text-slate-700";
 
-// Açık-yönlendirme koruması: yalnız site-içi yollar. Tek '/' ile başlamalı; '//' veya
-// '/\\' (tarayıcının harici host'a çözdüğü) reddedilir.
-function safeNext(raw: string | null): string {
-  if (raw && /^\/[^/\\]/.test(raw)) return raw;
-  return "/hesabim";
+// Açık-yönlendirme koruması: yalnız site-içi yollar (tek '/' ile başlamalı).
+function safeNext(raw: string | null): string | null {
+  return raw && /^\/[^/\\]/.test(raw) ? raw : null;
 }
 
-export default function UserLoginForm() {
+// Birleşik giriş formu: kullanıcı / danışman / yönetici tek formdan. Rolü sunucu algılar.
+export default function LoginForm() {
   const params = useSearchParams();
   const next = safeNext(params.get("next"));
   const [status, setStatus] = useState<"idle" | "loading">("idle");
@@ -27,15 +26,15 @@ export default function UserLoginForm() {
     setError("");
     const fd = new FormData(e.currentTarget);
     try {
-      const res = await fetch("/api/user/login", {
+      const res = await fetch("/api/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: fd.get("email"), password: fd.get("password") }),
+        body: JSON.stringify({ email: fd.get("email"), password: fd.get("password"), next }),
       });
       const data = await res.json();
       if (!res.ok || !data.ok) throw new Error(data.error || "Giriş başarısız");
-      // Tam sayfa yükleme: StoreProvider remount olur, localStorage favorileri hesaba birleşir.
-      window.location.assign(next);
+      // Tam sayfa yükleme: StoreProvider remount (localStorage favori merge) + panele temiz geçiş.
+      window.location.assign(data.redirect || "/hesabim");
     } catch (err) {
       setStatus("idle");
       setError(err instanceof Error ? err.message : "Bir hata oluştu");
@@ -45,12 +44,12 @@ export default function UserLoginForm() {
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div>
-        <label htmlFor="u-email" className={labelCls}>E-posta</label>
-        <input id="u-email" name="email" type="email" required autoComplete="email" placeholder="ornek@eposta.com" className={inputCls} />
+        <label htmlFor="login-email" className={labelCls}>E-posta</label>
+        <input id="login-email" name="email" type="email" required autoComplete="email" placeholder="ornek@eposta.com" className={inputCls} />
       </div>
       <div>
-        <label htmlFor="u-password" className={labelCls}>Şifre</label>
-        <input id="u-password" name="password" type="password" required autoComplete="current-password" placeholder="••••••••" className={inputCls} />
+        <label htmlFor="login-password" className={labelCls}>Şifre</label>
+        <input id="login-password" name="password" type="password" required autoComplete="current-password" placeholder="••••••••" className={inputCls} />
       </div>
       {error && <p className="rounded-[10px] bg-red-50 px-3.5 py-2.5 text-sm font-medium text-red-700 ring-1 ring-red-200">{error}</p>}
       <button
@@ -60,7 +59,7 @@ export default function UserLoginForm() {
       >
         {status === "loading" ? "Giriş yapılıyor..." : "Giriş Yap"}
       </button>
-      <p className="text-center text-sm text-slate-500">
+      <p className="pt-1 text-center text-sm text-slate-500">
         Hesabın yok mu?{" "}
         <Link href="/kayit" className="font-semibold text-brand-700 hover:underline">Kayıt ol</Link>
       </p>

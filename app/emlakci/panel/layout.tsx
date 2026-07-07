@@ -11,14 +11,14 @@ export default async function AgentPanelLayout({
   children: React.ReactNode;
 }) {
   const session = await getAgentSession();
-  if (!session) redirect("/emlakci/giris");
+  if (!session) redirect("/giris");
 
   const agent = await prisma.agent.findUnique({
     where: { id: session.agentId },
     select: { status: true, name: true },
   });
 
-  if (!agent) redirect("/emlakci/giris");
+  if (!agent) redirect("/giris");
 
   // Oturum açıkken admin tarafından askıya alınmış/reddedilmiş olabilir.
   if (agent.status !== "approved") {

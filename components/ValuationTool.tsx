@@ -3,7 +3,7 @@
 import { useMemo, useState } from "react";
 import { BarChart3, Tag, CheckCircle2, Lock } from "lucide-react";
 import { useUtm } from "@/lib/useUtm";
-import { trackConversion } from "@/lib/track";
+import { trackAdsConversion } from "@/lib/track";
 import { DISTRICTS, PROPERTY_TYPES } from "@/lib/constants";
 import { formatPrice } from "@/lib/format";
 import { estimateValue } from "@/lib/valuation";
@@ -71,7 +71,7 @@ export default function ValuationTool({
       });
       const data = await res.json();
       if (!res.ok || !data.ok) throw new Error(data.error || "Gönderilemedi");
-      trackConversion({ type: "expertise", district });
+      trackAdsConversion({ type: "expertise", district });
       setStatus("ok");
     } catch (err) {
       setStatus("error");

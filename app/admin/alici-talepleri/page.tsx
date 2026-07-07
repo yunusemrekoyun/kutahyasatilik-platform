@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Target, ArrowRight } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { formatDate, formatNumber } from "@/lib/format";
 import { PROPERTY_TYPE_LABELS } from "@/lib/constants";
@@ -77,7 +78,7 @@ export default async function AdminBuyerAlerts({
                   </span>
                 </div>
                 <p className="mt-1 text-sm text-slate-600">{a.phone}{a.email ? ` · ${a.email}` : ""}</p>
-                <p className="mt-1 text-sm font-medium text-brand-700">🎯 {criteriaText(a)}</p>
+                <p className="mt-1 flex items-center gap-1.5 text-sm font-medium text-brand-700"><Target className="h-4 w-4 shrink-0" />{criteriaText(a)}</p>
                 {a.note && <p className="mt-1 text-sm text-slate-500">“{a.note}”</p>}
                 <p className="mt-1 text-xs text-slate-400">{formatDate(a.createdAt)}</p>
               </div>
@@ -87,8 +88,8 @@ export default async function AdminBuyerAlerts({
                   {counts[i]} uygun ilan
                 </span>
                 {counts[i] > 0 && a.district && (
-                  <Link href={`/ilanlar?ilce=${encodeURIComponent(a.district)}`} target="_blank" className="text-xs font-semibold text-brand-700 hover:underline">
-                    Uygun ilanları gör →
+                  <Link href={`/ilanlar?ilce=${encodeURIComponent(a.district)}`} target="_blank" className="inline-flex items-center gap-1 text-xs font-semibold text-brand-700 hover:underline">
+                    Uygun ilanları gör <ArrowRight className="h-4 w-4" />
                   </Link>
                 )}
               </div>

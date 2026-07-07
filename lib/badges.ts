@@ -40,7 +40,7 @@ export function computeBadges(input: BadgeInput): Badge[] {
   }
   if (belowPct >= DEAL_THRESHOLD) {
     badges.push({
-      icon: "💎",
+      icon: "gem",
       text: `Bölge ort. %${Math.round(belowPct * 100)} altında`,
       tone: "deal",
     });
@@ -49,7 +49,7 @@ export function computeBadges(input: BadgeInput): Badge[] {
   // 2) İlgi rozeti — son 7 günde gerçekten çok görüntülendiyse
   if (input.recentViews && input.recentViews >= HOT_THRESHOLD) {
     badges.push({
-      icon: "🔥",
+      icon: "flame",
       text: `Bu hafta ${input.recentViews} kişi inceledi`,
       tone: "hot",
     });
@@ -60,7 +60,7 @@ export function computeBadges(input: BadgeInput): Badge[] {
     typeof input.createdAt === "string" ? new Date(input.createdAt) : input.createdAt;
   const ageDays = (Date.now() - created.getTime()) / 86_400_000;
   if (ageDays >= 0 && ageDays <= NEW_MAX_DAYS) {
-    badges.push({ icon: "🆕", text: "Yeni", tone: "new" });
+    badges.push({ icon: "sparkles", text: "Yeni", tone: "new" });
   }
 
   return badges;

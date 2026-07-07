@@ -12,7 +12,8 @@ import { notifyAdmins } from "@/lib/notify";
 function num(v: FormDataEntryValue | null): number | null {
   if (v === null || v === "") return null;
   const n = Number(String(v).replace(/[^\d.-]/g, ""));
-  return Number.isFinite(n) ? n : null;
+  // PostgreSQL Int (32-bit) taşmasını önle: aralık dışı → null (P2020 ValueOutOfRange crash).
+  return Number.isFinite(n) && Math.abs(n) <= 2_147_483_647 ? n : null;
 }
 function str(v: FormDataEntryValue | null): string | null {
   const s = v === null ? "" : String(v).trim();
@@ -59,16 +60,20 @@ export async function submitAgentListing(formData: FormData) {
     }
   }
 
-  // Düzenleme ise: yalnızca kendi ilanı
+  // Düzenleme ise: yalnızca kendi ilanı (+ mevcut slug'ı al)
+  let existingSlug: string | null = null;
   if (id) {
     const owned = await prisma.listing.findUnique({
       where: { id },
-      select: { agentId: true },
+      select: { agentId: true, slug: true },
     });
     if (!owned || owned.agentId !== agent.id) throw new Error("Yetkisiz");
+    existingSlug = owned.slug;
   }
 
-  let slug = str(formData.get("slug")) || slugify(title);
+  // Slug: düzenlemede mevcut slug KORUNUR (kalıcı link/SEO kırılmasın; admin formu da korur).
+  // Yeni ilanda başlıktan üretilir.
+  let slug = existingSlug || str(formData.get("slug")) || slugify(title);
   const existing = await prisma.listing.findUnique({ where: { slug } });
   if (existing && existing.id !== id) {
     slug = `${slug}-${Date.now().toString(36).slice(-4)}`;
@@ -223,6 +228,7 @@ export async function updateAgentProfile(formData: FormData) {
       phone: str(formData.get("phone")),
       title: str(formData.get("title")),
       agency: str(formData.get("agency")),
+      logo: str(formData.get("logo")),
     },
   });
   revalidatePath("/emlakci/panel");

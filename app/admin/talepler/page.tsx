@@ -115,8 +115,14 @@ export default async function AdminLeads({
                 {l.district && <p><span className="text-slate-400">İlçe:</span> {l.district}</p>}
                 {l.neighborhood && <p><span className="text-slate-400">Mahalle:</span> {l.neighborhood}</p>}
                 {l.propertyType && <p><span className="text-slate-400">Mülk:</span> {l.propertyType}</p>}
-                {l.estimatedPrice && <p><span className="text-slate-400">Tahmini Fiyat:</span> {l.estimatedPrice}</p>}
+                {l.estimatedPrice && <p><span className="text-slate-400">İstenen Fiyat:</span> {l.estimatedPrice}</p>}
                 {l.preferredDate && <p><span className="text-slate-400">Tercih:</span> {l.preferredDate}</p>}
+                {l.lat != null && l.lng != null && (
+                  <p>
+                    <span className="text-slate-400">Konum:</span>{" "}
+                    <a href={`https://www.google.com/maps?q=${l.lat},${l.lng}`} target="_blank" rel="noopener noreferrer" className="text-brand-700 hover:underline">Haritada gör</a>
+                  </p>
+                )}
                 {l.utmSource && <p><span className="text-slate-400">Kaynak:</span> {l.utmSource}</p>}
                 {l.listing && (
                   <p className="lg:col-span-3">

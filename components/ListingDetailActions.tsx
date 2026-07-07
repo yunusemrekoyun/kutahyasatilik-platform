@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+import { Heart, ArrowLeftRight } from "lucide-react";
 import { useStore, type ListingSnapshot } from "@/components/store/StoreProvider";
 
 // Hem favori/karşılaştır butonlarını gösterir hem de "son görüntülenenler"e ekler.
@@ -23,7 +24,11 @@ export default function ListingDetailActions({ listing }: { listing: ListingSnap
           fav ? "border-red-200 bg-red-50 text-red-600" : "border-slate-200 bg-white text-slate-700 hover:border-red-200 hover:text-red-600"
         }`}
       >
-        {fav ? "♥ Favoride" : "♡ Favori"}
+        {fav ? (
+          <><Heart className="h-4 w-4 fill-current" /> Favoride</>
+        ) : (
+          <><Heart className="h-4 w-4" /> Favori</>
+        )}
       </button>
       <button
         onClick={() => toggleCompare(listing)}
@@ -31,7 +36,7 @@ export default function ListingDetailActions({ listing }: { listing: ListingSnap
           cmp ? "border-brand-200 bg-brand-50 text-brand-700" : "border-slate-200 bg-white text-slate-700 hover:border-brand-200 hover:text-brand-700"
         }`}
       >
-        ⇄ {cmp ? "Eklendi" : "Karşılaştır"}
+        <ArrowLeftRight className="h-4 w-4" /> {cmp ? "Eklendi" : "Karşılaştır"}
       </button>
     </div>
   );

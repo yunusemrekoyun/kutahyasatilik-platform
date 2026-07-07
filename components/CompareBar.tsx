@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { ArrowRight } from "lucide-react";
 import { useStore } from "./store/StoreProvider";
 
 export default function CompareBar() {
@@ -26,9 +27,9 @@ export default function CompareBar() {
           </button>
           <Link
             href="/karsilastir"
-            className="rounded-lg bg-gold-500 px-4 py-2 text-xs font-bold text-brand-950 hover:bg-gold-400"
+            className="inline-flex items-center gap-1 rounded-lg bg-gold-500 px-4 py-2 text-xs font-bold text-brand-950 hover:bg-gold-400"
           >
-            Karşılaştır ({compare.length}) →
+            Karşılaştır ({compare.length}) <ArrowRight className="h-4 w-4" />
           </Link>
         </div>
       </div>

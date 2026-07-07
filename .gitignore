@@ -38,6 +38,9 @@ yarn-error.log*
 !.env.example
 *.key
 *.pem
+
+# Local-only docker port override (kardeş projelerle port çakışmasını önler)
+docker-compose.override.yml
 *.p12
 *.pfx
 *.cert
@@ -130,3 +133,4 @@ DEPLOY.md
 # Claude sohbet kayıtları — ham log gizli veri içerir, push edilmez (özet .md takip edilir)
 docs/claude-history/*.jsonl
 /docs
+/Kutahyasatilik İlan

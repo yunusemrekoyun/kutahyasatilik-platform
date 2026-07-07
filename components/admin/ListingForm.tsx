@@ -7,6 +7,7 @@ import { saveListing } from "@/app/admin/actions";
 import { DISTRICTS, PROPERTY_TYPES } from "@/lib/constants";
 import VideoUploadField from "@/components/admin/VideoUploadField";
 import LocationPicker from "@/components/LocationPicker";
+import { ArrowLeft, ArrowRight, Trash2, Star, Check } from "lucide-react";
 
 type ListingData = {
   id?: string;
@@ -167,9 +168,9 @@ export default function ListingForm({ listing }: { listing?: ListingData }) {
               <Image src={url} alt="" fill sizes="120px" className="object-cover" />
               {i === 0 && <span className="absolute left-1 top-1 rounded bg-brand-700 px-1.5 py-0.5 text-[10px] font-bold text-white">Kapak</span>}
               <div className="absolute inset-x-0 bottom-0 flex justify-between bg-black/50 p-1 opacity-0 transition group-hover:opacity-100">
-                <button type="button" onClick={() => move(url, -1)} className="text-white text-xs px-1">◀</button>
-                <button type="button" onClick={() => removeImage(url)} className="text-red-300 text-xs px-1">🗑</button>
-                <button type="button" onClick={() => move(url, 1)} className="text-white text-xs px-1">▶</button>
+                <button type="button" onClick={() => move(url, -1)} className="text-white text-xs px-1"><ArrowLeft className="h-4 w-4" /></button>
+                <button type="button" onClick={() => removeImage(url)} className="text-red-300 text-xs px-1"><Trash2 className="h-4 w-4" /></button>
+                <button type="button" onClick={() => move(url, 1)} className="text-white text-xs px-1"><ArrowRight className="h-4 w-4" /></button>
               </div>
             </div>
           ))}
@@ -220,8 +221,8 @@ export default function ListingForm({ listing }: { listing?: ListingData }) {
             { name: "inSite", label: "Site İçinde", val: listing?.inSite },
             { name: "balcony", label: "Balkon", val: listing?.balcony },
             { name: "parking", label: "Otopark", val: listing?.parking },
-            { name: "featured", label: "⭐ Öne Çıkar", val: listing?.featured },
-            { name: "verified", label: "✓ Doğrulanmış (tapu/ekspertiz)", val: listing?.verified },
+            { name: "featured", label: <span className="inline-flex items-center gap-1.5"><Star className="h-4 w-4 fill-current text-amber-500" /> Öne Çıkar</span>, val: listing?.featured },
+            { name: "verified", label: <span className="inline-flex items-center gap-1.5"><Check className="h-4 w-4 text-green-600" /> Doğrulanmış (tapu/ekspertiz)</span>, val: listing?.verified },
           ].map((c) => (
             <label key={c.name} className="flex items-center gap-2 text-sm text-slate-700">
               <input type="checkbox" name={c.name} defaultChecked={c.val} className="h-4 w-4 rounded border-slate-300" />

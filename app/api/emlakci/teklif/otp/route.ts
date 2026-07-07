@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { checkRate, checkRateByKey } from "@/lib/rateLimit";
-import { findApplicationForOffer, issueOtp, activeOfferFor } from "@/lib/offerOtp";
+import { findApplicationForOffer, issueOtp, currentOfferFor } from "@/lib/offerOtp";
 import { sendEmail, notificationEmail, emailEnabled } from "@/lib/email";
 
 export const runtime = "nodejs";
@@ -22,7 +22,8 @@ export async function POST(req: NextRequest) {
 
   const app = await findApplicationForOffer(email, phone4);
   if (!app) return generic;
-  const offer = await activeOfferFor(app.id);
+  // Aktif VEYA kabul edilmiş teklif → kabul sonrası da kod gidebilsin (emlakçı tekrar görüntüleyebilsin).
+  const offer = await currentOfferFor(app.id);
   if (!offer) return generic;
 
   // Başvuru BAŞINA OTP üretim sınırı (IP'den bağımsız → forge ile aşılamaz). Brute-force için

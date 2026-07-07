@@ -56,10 +56,20 @@ export async function verifyOtp(applicationId: string, code: string): Promise<bo
   return true;
 }
 
-// Başvurunun son AKTİF teklifi (emlakçı yalnız son sürümü görür).
+// Başvurunun son AKTİF teklifi (yalnız aktif teklif KABUL edilebilir).
 export async function activeOfferFor(applicationId: string) {
   return prisma.offer.findFirst({
     where: { applicationId, status: "active" },
+    orderBy: { version: "desc" },
+  });
+}
+
+// Emlakçının GÖRÜNTÜLEYEBİLECEĞİ güncel teklif: son aktif VEYA kabul edilmiş sürüm.
+// (activeOfferFor yalnız 'active' döndürdüğünden, kabul sonrası teklif "kaybolup"
+// emlakçı kabul ettiği teklifi tekrar göremiyordu — çıkmaz. Bu onu kapsar.)
+export async function currentOfferFor(applicationId: string) {
+  return prisma.offer.findFirst({
+    where: { applicationId, status: { in: ["active", "accepted"] } },
     orderBy: { version: "desc" },
   });
 }

@@ -102,7 +102,7 @@ export default async function Footer() {
           <div className="flex flex-wrap items-center justify-center gap-4">
             <Link href="/kvkk" className="hover:text-slate-300">KVKK</Link>
             <Link href="/iletisim" className="hover:text-slate-300">İletişim</Link>
-            <Link href="/emlakci/giris" className="hover:text-slate-300">Danışman Girişi</Link>
+            <Link href="/giris" className="hover:text-slate-300">Giriş</Link>
             <Link href="/admin" className="hover:text-slate-300">Yönetim</Link>
             <span className="hidden text-slate-700 sm:inline">|</span>
             <a

@@ -67,7 +67,7 @@ export default function AdminNav({
 
   async function logout() {
     await fetch("/api/admin/logout", { method: "POST" });
-    router.push("/admin/login");
+    router.push("/giris");
     router.refresh();
   }
 

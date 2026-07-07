@@ -32,6 +32,7 @@ model Agent {
   phone        String?
   title        String? // unvan: "Gayrimenkul Danışmanı"
   agency       String? // bağlı olduğu ofis / marka adı
+  logo         String? // emlakçının kendi logosu/avatarı (yüklenen görsel URL'i)
   slug         String    @unique
   status       String    @default("pending") // pending | approved | rejected | suspended
   note         String? // admin notu (red/askı sebebi)
@@ -213,6 +214,8 @@ model Lead {
   propertyType   String?
   estimatedPrice String?
   photos         String? // JSON array (string)
+  lat            Float? // satıcının haritada işaretlediği konum
+  lng            Float?
 
   preferredDate String? // randevu için
 

@@ -20,7 +20,7 @@ const cardSelect = {
   verified: true,
   createdAt: true,
   images: { select: { url: true }, orderBy: { sortOrder: "asc" as const }, take: 1 },
-  agent: { select: { name: true, title: true } },
+  agent: { select: { name: true, title: true, logo: true } },
 };
 
 type RawCard = {
@@ -39,7 +39,7 @@ type RawCard = {
   verified: boolean;
   createdAt: Date;
   images: { url: string }[];
-  agent: { name: string; title: string | null } | null;
+  agent: { name: string; title: string | null; logo: string | null } | null;
 };
 
 // Son 7 günde ilan başına görüntülenme — TÜM ilanlar için tek, cache'li sorgu.
@@ -95,6 +95,7 @@ async function decorate(rows: RawCard[]): Promise<ListingCardData[]> {
       coverImage: l.images[0]?.url ?? null,
       badges,
       agentName: l.agent?.name ?? null,
+      agentLogo: l.agent?.logo ?? null,
     };
   });
 }

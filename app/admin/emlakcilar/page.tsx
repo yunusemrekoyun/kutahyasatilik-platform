@@ -1,3 +1,4 @@
+import { Check } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { formatDate } from "@/lib/format";
 import { AGENT_STATUS_LABELS } from "@/lib/constants";
@@ -51,8 +52,8 @@ export default async function AdminAgents() {
                   <div className="flex flex-col items-end gap-2">
                     <form action={approveAgent}>
                       <input type="hidden" name="id" value={a.id} />
-                      <button className="rounded-lg bg-green-600 px-4 py-2 text-sm font-bold text-white hover:bg-green-700">
-                        ✓ Onayla
+                      <button className="inline-flex items-center gap-1.5 rounded-lg bg-green-600 px-4 py-2 text-sm font-bold text-white hover:bg-green-700">
+                        <Check className="h-4 w-4" /> Onayla
                       </button>
                     </form>
                     <form action={rejectAgent} className="flex items-center gap-1.5">

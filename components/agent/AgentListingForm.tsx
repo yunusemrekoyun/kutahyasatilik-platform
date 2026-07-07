@@ -7,6 +7,7 @@ import { submitAgentListing } from "@/app/emlakci/panel/actions";
 import { DISTRICTS, PROPERTY_TYPES } from "@/lib/constants";
 import LocationPicker from "@/components/LocationPicker";
 import VideoUploadField from "@/components/admin/VideoUploadField";
+import { Info, ArrowLeft, ArrowRight, Trash2 } from "lucide-react";
 
 type ListingData = {
   id?: string;
@@ -100,8 +101,9 @@ export default function AgentListingForm({ listing }: { listing?: ListingData })
       {listing?.id && <input type="hidden" name="id" value={listing.id} />}
       <input type="hidden" name="imagesJson" value={JSON.stringify(images)} />
 
-      <div className="rounded-xl bg-amber-50 p-4 text-sm text-amber-800 ring-1 ring-amber-100">
-        ℹ️ Eklediğiniz/güncellediğiniz ilan, yayına alınmadan önce yönetim onayından geçer.
+      <div className="flex items-start gap-2 rounded-xl bg-amber-50 p-4 text-sm text-amber-800 ring-1 ring-amber-100">
+        <Info className="mt-0.5 h-4 w-4 shrink-0" />
+        <span>Eklediğiniz/güncellediğiniz ilan, yayına alınmadan önce yönetim onayından geçer.</span>
       </div>
 
       {/* Temel bilgiler */}
@@ -171,9 +173,9 @@ export default function AgentListingForm({ listing }: { listing?: ListingData })
               <Image src={url} alt="" fill sizes="120px" className="object-cover" />
               {i === 0 && <span className="absolute left-1 top-1 rounded bg-brand-700 px-1.5 py-0.5 text-[10px] font-bold text-white">Kapak</span>}
               <div className="absolute inset-x-0 bottom-0 flex justify-between bg-black/50 p-1 opacity-0 transition group-hover:opacity-100">
-                <button type="button" onClick={() => move(url, -1)} className="px-1 text-xs text-white">◀</button>
-                <button type="button" onClick={() => removeImage(url)} className="px-1 text-xs text-red-300">🗑</button>
-                <button type="button" onClick={() => move(url, 1)} className="px-1 text-xs text-white">▶</button>
+                <button type="button" onClick={() => move(url, -1)} className="px-1 text-white"><ArrowLeft className="h-4 w-4" /></button>
+                <button type="button" onClick={() => removeImage(url)} className="px-1 text-red-300"><Trash2 className="h-4 w-4" /></button>
+                <button type="button" onClick={() => move(url, 1)} className="px-1 text-white"><ArrowRight className="h-4 w-4" /></button>
               </div>
             </div>
           ))}

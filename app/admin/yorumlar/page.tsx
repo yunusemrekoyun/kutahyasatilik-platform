@@ -30,7 +30,7 @@ export default async function AdminTestimonials() {
           <label className="flex items-center gap-2 text-sm text-slate-700">
             Yıldız
             <select name="stars" defaultValue="5" className="rounded-lg border border-slate-300 px-2 py-1.5 text-sm">
-              {[5, 4, 3, 2, 1].map((s) => <option key={s} value={s}>{s} ★</option>)}
+              {[5, 4, 3, 2, 1].map((s) => <option key={s} value={s}>{s} Yıldız</option>)}
             </select>
           </label>
           <label className="flex items-center gap-2 text-sm text-slate-700">
@@ -64,7 +64,7 @@ export default async function AdminTestimonials() {
               <label className="flex items-center gap-2 text-sm text-slate-700">
                 Yıldız
                 <select name="stars" defaultValue={String(t.stars)} className="rounded-lg border border-slate-300 px-2 py-1.5 text-sm">
-                  {[5, 4, 3, 2, 1].map((s) => <option key={s} value={s}>{s} ★</option>)}
+                  {[5, 4, 3, 2, 1].map((s) => <option key={s} value={s}>{s} Yıldız</option>)}
                 </select>
               </label>
               <label className="flex items-center gap-2 text-sm text-slate-700">

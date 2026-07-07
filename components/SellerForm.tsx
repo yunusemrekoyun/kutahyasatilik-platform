@@ -3,9 +3,10 @@
 import { useState } from "react";
 import { CheckCircle2, Lock } from "lucide-react";
 import { useUtm } from "@/lib/useUtm";
-import { trackConversion } from "@/lib/track";
+import { trackAdsConversion } from "@/lib/track";
 import { isValidTrPhone, TR_PHONE_ERROR } from "@/lib/validation";
 import { DISTRICTS, PROPERTY_TYPES } from "@/lib/constants";
+import LocationPicker from "@/components/LocationPicker";
 
 export default function SellerForm() {
   const utm = useUtm();
@@ -18,8 +19,15 @@ export default function SellerForm() {
     const fd = new FormData();
     files.slice(0, 6).forEach((f) => fd.append("files", f));
     const res = await fetch("/api/upload/seller", { method: "POST", body: fd });
-    const data = await res.json();
-    if (!res.ok || !data.ok) return [];
+    const data = await res.json().catch(() => null);
+    // Fotoğraf seçildiği hâlde yükleme başarısızsa SESSİZCE geçme — kullanıcı
+    // fotoğrafın gittiğini sanıp gönderemesin (sessiz veri kaybı). Hata fırlat.
+    if (!res.ok || !data?.ok || !Array.isArray(data.urls) || data.urls.length === 0) {
+      throw new Error(
+        (data && data.error) ||
+          "Fotoğraflar yüklenemedi. Bağlantınızı kontrol edip tekrar deneyin ya da fotoğrafları çıkarıp öyle gönderin."
+      );
+    }
     return data.urls as string[];
   }
 
@@ -39,6 +47,10 @@ export default function SellerForm() {
         photos = await uploadPhotos();
       }
       setStatus("loading");
+      const latVal = fd.get("lat");
+      const lngVal = fd.get("lng");
+      const lat = latVal ? Number(latVal) : undefined;
+      const lng = lngVal ? Number(lngVal) : undefined;
       const payload = {
         type: "seller",
         name: String(fd.get("name") || ""),
@@ -49,6 +61,7 @@ export default function SellerForm() {
         estimatedPrice: String(fd.get("estimatedPrice") || ""),
         message: String(fd.get("message") || ""),
         photos,
+        ...(Number.isFinite(lat) && Number.isFinite(lng) ? { lat, lng } : {}),
         ...utm,
       };
       const res = await fetch("/api/leads", {
@@ -58,7 +71,7 @@ export default function SellerForm() {
       });
       const data = await res.json();
       if (!res.ok || !data.ok) throw new Error(data.error || "Gönderilemedi");
-      trackConversion({ type: "seller_lead", district: payload.district });
+      trackAdsConversion({ type: "seller_lead", district: payload.district });
       setStatus("ok");
     } catch (err) {
       setStatus("error");
@@ -123,13 +136,18 @@ export default function SellerForm() {
           </select>
         </div>
         <div>
-          <label htmlFor="sf-price" className={labelCls}>Tahmini Fiyat</label>
+          <label htmlFor="sf-price" className={labelCls}>Mülk için istenilen fiyat</label>
           <input id="sf-price" name="estimatedPrice" inputMode="numeric" placeholder="Örn. 2.500.000 ₺" className={inputCls} />
         </div>
       </div>
       <div>
         <label htmlFor="sf-message" className={labelCls}>Eklemek istedikleriniz</label>
         <textarea id="sf-message" name="message" rows={3} placeholder="m², oda sayısı, bina durumu gibi detaylar..." className={`${inputCls} h-auto py-3 leading-relaxed`} />
+      </div>
+
+      <div>
+        <span className={labelCls}>Konum <span className="font-normal text-slate-400">(opsiyonel — mülkün yerini haritada işaretleyin)</span></span>
+        <LocationPicker latName="lat" lngName="lng" />
       </div>
 
       <div>
@@ -159,7 +177,7 @@ export default function SellerForm() {
           ? "Fotoğraflar yükleniyor..."
           : status === "loading"
           ? "Gönderiliyor..."
-          : "Ücretsiz Değerleme Talep Et"}
+          : "İlan Talebi Oluştur"}
       </button>
       <p className="flex items-center justify-center gap-1.5 text-center text-[13px] text-slate-500">
         <Lock className="h-3.5 w-3.5" /> Bilgileriniz KVKK kapsamında korunur. Spam göndermiyoruz.

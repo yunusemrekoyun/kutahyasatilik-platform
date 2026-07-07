@@ -30,7 +30,28 @@ export async function proxy(req: NextRequest) {
     }
     return NextResponse.next();
   }
-  if (pathname === "/giris" || pathname === "/kayit") {
+  if (pathname === "/giris") {
+    // Açık-yönlendirme koruması: next yalnız site-içi tek '/' ile başlayan yol olabilir.
+    const rawNext = req.nextUrl.searchParams.get("next");
+    const next = rawNext && /^\/[^/\\]/.test(rawNext) ? rawNext : null;
+    const isAdmin = await hasValidToken(req, "ks_admin", "adminId");
+    const isAgent = await hasValidToken(req, "ks_agent", "agentId");
+    const isUser = await hasValidToken(req, "ks_user", "userId");
+    if (next) {
+      // Hedefe erişimi olan oturum varsa oraya gönder; YOKSA login formunu göster —
+      // böylece başka rolle girişken de o role (ör. kullanıcıyken admin'e) giriş yapılabilir.
+      if (next.startsWith("/admin")) { if (isAdmin) return NextResponse.redirect(new URL(next, req.url)); }
+      else if (next.startsWith("/emlakci")) { if (isAgent) return NextResponse.redirect(new URL(next, req.url)); }
+      else if (isUser) return NextResponse.redirect(new URL(next, req.url));
+      return NextResponse.next();
+    }
+    // next yok: zaten girişliyse ilgili panele gönder (admin → emlakçı → kullanıcı).
+    if (isAdmin) return NextResponse.redirect(new URL("/admin", req.url));
+    if (isAgent) return NextResponse.redirect(new URL("/emlakci/panel", req.url));
+    if (isUser) return NextResponse.redirect(new URL("/hesabim", req.url));
+    return NextResponse.next();
+  }
+  if (pathname === "/kayit") {
     if (await hasValidToken(req, "ks_user", "userId")) {
       return NextResponse.redirect(new URL("/hesabim", req.url));
     }
@@ -40,7 +61,7 @@ export async function proxy(req: NextRequest) {
   // --- Emlakçı paneli (ks_agent) ---
   if (pathname.startsWith("/emlakci/panel")) {
     if (!(await hasValidToken(req, "ks_agent", "agentId"))) {
-      const url = new URL("/emlakci/giris", req.url);
+      const url = new URL("/giris", req.url);
       url.searchParams.set("next", pathname);
       return NextResponse.redirect(url);
     }
@@ -62,7 +83,9 @@ export async function proxy(req: NextRequest) {
   }
   if (pathname === "/admin" || pathname.startsWith("/admin/")) {
     if (!(await hasValidToken(req, "ks_admin", "adminId"))) {
-      return NextResponse.redirect(new URL("/admin/login", req.url));
+      const url = new URL("/giris", req.url);
+      url.searchParams.set("next", pathname);
+      return NextResponse.redirect(url);
     }
     return NextResponse.next();
   }

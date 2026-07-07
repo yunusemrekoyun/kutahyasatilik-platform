@@ -4,6 +4,7 @@ import Image from "next/image";
 import { prisma } from "@/lib/prisma";
 import { formatDate } from "@/lib/format";
 import TrackView from "@/components/TrackView";
+import { Heart, PenLine, ArrowRight } from "lucide-react";
 
 export const revalidate = 300; // ISR: her 5 dakikada yenilenir (CDN cache + admin revalidatePath)
 
@@ -24,7 +25,7 @@ export default async function BlogList() {
       <TrackView />
       <div className="text-center">
         <span className="inline-flex items-center gap-2 rounded-full bg-brand-50 px-4 py-1.5 text-sm font-medium text-brand-700 ring-1 ring-brand-100">
-          💙 Müşterilerimizi Önemsiyoruz
+          <Heart className="h-4 w-4 text-brand-600" /> Müşterilerimizi Önemsiyoruz
         </span>
         <h1 className="mt-4 font-display text-3xl font-bold text-brand-900 sm:text-4xl">
           Doğru Gayrimenkul Rehberi
@@ -52,14 +53,14 @@ export default async function BlogList() {
                 {p.coverImage ? (
                   <Image src={p.coverImage} alt={p.title} fill sizes="(max-width:768px) 100vw, 33vw" className="object-cover transition duration-500 group-hover:scale-105" />
                 ) : (
-                  <div className="grid h-full place-items-center text-4xl text-slate-300">✍️</div>
+                  <div className="grid h-full place-items-center text-slate-300"><PenLine className="h-10 w-10" /></div>
                 )}
               </div>
               <div className="p-5">
                 <p className="text-xs font-medium text-gold-600">{formatDate(p.publishedAt ?? p.createdAt)}</p>
                 <h2 className="mt-1.5 line-clamp-2 font-display text-lg font-bold text-slate-900 group-hover:text-brand-700">{p.title}</h2>
                 {p.excerpt && <p className="mt-2 line-clamp-3 text-sm text-slate-600">{p.excerpt}</p>}
-                <span className="mt-3 inline-block text-sm font-semibold text-brand-700">Devamını oku →</span>
+                <span className="mt-3 inline-flex items-center gap-1 text-sm font-semibold text-brand-700">Devamını oku <ArrowRight className="h-4 w-4" /></span>
               </div>
             </Link>
           ))}
