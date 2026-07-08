@@ -25,7 +25,7 @@ export async function GET(req: NextRequest) {
       { value: "daire", label: "Daire" },
       { value: "villa", label: "Villa" },
       { value: "mustakil", label: "Müstakil Ev" },
-      { value: "isyeri", label: "İş Yeri" },
+      { value: "isyeri", label: "İşyeri / Dükkan" },
       { value: "arsa", label: "Arsa" },
       { value: "tarla", label: "Tarla" },
     ],
