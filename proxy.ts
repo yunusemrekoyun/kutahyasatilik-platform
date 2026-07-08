@@ -52,9 +52,10 @@ export async function proxy(req: NextRequest) {
     return NextResponse.next();
   }
   if (pathname === "/kayit") {
-    if (await hasValidToken(req, "ks_user", "userId")) {
-      return NextResponse.redirect(new URL("/hesabim", req.url));
-    }
+    // Oturumlu her rol uygun panele gider (admin/agent ikinci bir tüketici hesabı açamasın).
+    if (await hasValidToken(req, "ks_admin", "adminId")) return NextResponse.redirect(new URL("/admin", req.url));
+    if (await hasValidToken(req, "ks_agent", "agentId")) return NextResponse.redirect(new URL("/emlakci/panel", req.url));
+    if (await hasValidToken(req, "ks_user", "userId")) return NextResponse.redirect(new URL("/hesabim", req.url));
     return NextResponse.next();
   }
 

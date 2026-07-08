@@ -5,7 +5,7 @@ import LoginForm from "@/components/LoginForm";
 
 export const metadata: Metadata = {
   title: "Giriş Yap",
-  description: "Kütahya Satılık hesabınıza giriş yapın; favorilerinize ve kayıtlı aramalarınıza erişin.",
+  description: "Kütahya Satılık hesabınıza giriş yapın.",
   robots: { index: false, follow: true },
 };
 
