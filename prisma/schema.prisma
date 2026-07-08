@@ -412,8 +412,26 @@ model User {
   verifiedAt   DateTime? // e-posta doğrulama (ileride OTP/link ile)
   createdAt    DateTime  @default(now())
 
-  favorites Favorite[]
-  alerts    BuyerAlert[]
+  favorites   Favorite[]
+  alerts      BuyerAlert[]
+  resetTokens PasswordResetToken[]
+}
+
+// ---------------------------------------------------------------------------
+// Şifre sıfırlama token'ı — "şifremi unuttum" → e-posta linki. Token yüksek-entropi
+// rastgeledir; DB'de YALNIZ SHA-256 hash saklanır (link/DB ele geçse bile token okunamaz).
+// Tek kullanımlık (usedAt) + süreli (expiresAt).
+// ---------------------------------------------------------------------------
+model PasswordResetToken {
+  id        String    @id @default(cuid())
+  userId    String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tokenHash String    @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  @@index([userId])
 }
 
 // ---------------------------------------------------------------------------
