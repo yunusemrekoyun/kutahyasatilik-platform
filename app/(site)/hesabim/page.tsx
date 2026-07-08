@@ -1,11 +1,13 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { Heart, Mail, Phone, User as UserIcon } from "lucide-react";
+import { Heart, Mail, User as UserIcon } from "lucide-react";
 import { getUserSession } from "@/lib/userAuth";
 import { prisma } from "@/lib/prisma";
 import LogoutButton from "@/components/user/LogoutButton";
 import SavedSearches from "@/components/user/SavedSearches";
+import ProfileForm from "@/components/user/ProfileForm";
+import ChangePasswordForm from "@/components/user/ChangePasswordForm";
 
 export const metadata: Metadata = {
   title: "Hesabım",
@@ -37,18 +39,25 @@ export default async function AccountPage() {
         </div>
       </div>
 
+      {/* Profil bilgileri — ad/telefon düzenlenebilir; e-posta değiştirilemez */}
       <div className="mt-8 rounded-2xl bg-white p-6 ring-1 ring-slate-200">
-        <h2 className="font-bold text-slate-900">Hesap Bilgileri</h2>
-        <dl className="mt-4 space-y-3 text-sm">
-          <div className="flex items-center gap-2 text-slate-700">
-            <Mail className="h-4 w-4 text-slate-400" /> {user?.email ?? session.email}
-          </div>
-          {user?.phone && (
-            <div className="flex items-center gap-2 text-slate-700">
-              <Phone className="h-4 w-4 text-slate-400" /> {user.phone}
-            </div>
-          )}
-        </dl>
+        <h2 className="font-bold text-slate-900">Profil Bilgileri</h2>
+        <p className="mt-1 inline-flex items-center gap-2 text-sm text-slate-500">
+          <Mail className="h-4 w-4 text-slate-400" /> {user?.email ?? session.email}
+          <span className="text-slate-300">·</span> e-posta değiştirilemez
+        </p>
+        <div className="mt-4">
+          <ProfileForm defaultName={name} defaultPhone={user?.phone ?? ""} />
+        </div>
+      </div>
+
+      {/* Şifre değiştir */}
+      <div className="mt-4 rounded-2xl bg-white p-6 ring-1 ring-slate-200">
+        <h2 className="font-bold text-slate-900">Şifre Değiştir</h2>
+        <p className="mt-1 text-sm text-slate-500">Güvenliğiniz için düzenli olarak güçlü bir şifre belirleyin.</p>
+        <div className="mt-4">
+          <ChangePasswordForm />
+        </div>
       </div>
 
       <Link href="/favoriler" className="mt-4 flex items-center gap-3 rounded-2xl bg-white p-5 ring-1 ring-slate-200 transition hover:ring-brand-300">

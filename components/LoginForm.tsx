@@ -50,6 +50,9 @@ export default function LoginForm() {
       <div>
         <label htmlFor="login-password" className={labelCls}>Şifre</label>
         <input id="login-password" name="password" type="password" required autoComplete="current-password" placeholder="••••••••" className={inputCls} />
+        <div className="mt-1.5 text-right">
+          <Link href="/sifremi-unuttum" className="text-sm text-slate-500 hover:text-brand-700 hover:underline">Şifremi unuttum?</Link>
+        </div>
       </div>
       {error && <p className="rounded-[10px] bg-red-50 px-3.5 py-2.5 text-sm font-medium text-red-700 ring-1 ring-red-200">{error}</p>}
       <button
