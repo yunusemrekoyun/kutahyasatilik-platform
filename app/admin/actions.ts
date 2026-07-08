@@ -671,7 +671,7 @@ export async function deleteAdRequest(formData: FormData) {
 
 export async function saveSettings(formData: FormData) {
   await ensureAuth();
-  const keys = ["phone", "whatsapp", "email", "brand", "seller_hero_image", "home_hero_image"];
+  const keys = ["phone", "whatsapp", "email", "address", "brand", "seller_hero_image", "home_hero_image"];
   for (const key of keys) {
     const value = String(formData.get(key) || "");
     await prisma.setting.upsert({
@@ -681,8 +681,8 @@ export async function saveSettings(formData: FormData) {
     });
   }
   revalidatePath("/admin/ayarlar");
-  revalidatePath("/satici");
-  revalidatePath("/");
+  // İletişim bilgisi Header/Footer (layout) + tüm sayfalarda görünür → tüm site ağacını tazele.
+  revalidatePath("/", "layout");
 }
 
 // --- Blog yazıları ---
@@ -936,4 +936,82 @@ export async function saveHomeTexts(formData: FormData) {
   }
   revalidatePath("/admin/ana-sayfa");
   revalidatePath("/");
+}
+
+// --- İlçe verisi (bölge analizi) ---
+
+// Çok satırlı textarea metnini satırlara böler, boşları atar; JSON array string döner (boşsa null).
+function jsonLines(v: FormDataEntryValue | null): string | null {
+  const lines = String(v ?? "")
+    .split("\n")
+    .map((s) => s.trim())
+    .filter(Boolean);
+  return lines.length ? JSON.stringify(lines) : null;
+}
+
+export async function saveDistrict(formData: FormData) {
+  await ensureAuth();
+  const id = str(formData.get("id"));
+  const name = String(formData.get("name") || "").trim();
+  if (!name) throw new Error("İlçe adı zorunludur");
+
+  let slug = str(formData.get("slug")) || slugify(name);
+  // Benzersizlik: aynı ad/slug varsa (name/slug @unique) ham P2002 yerine anlaşılır davran.
+  const slugTaken = await prisma.district.findUnique({ where: { slug }, select: { id: true } });
+  if (slugTaken && slugTaken.id !== id) slug = `${slug}-${Date.now().toString(36).slice(-4)}`;
+  const nameTaken = await prisma.district.findFirst({ where: { name, ...(id ? { id: { not: id } } : {}) }, select: { id: true } });
+  if (nameTaken) throw new Error(`"${name}" ilçesi zaten kayıtlı.`);
+
+  const data = {
+    name,
+    slug,
+    lat: num(formData.get("lat")),
+    lng: num(formData.get("lng")),
+    investmentScore: num(formData.get("investmentScore")),
+    valueGrowth3yPct: num(formData.get("valueGrowth3yPct")),
+    valueGrowth5yPct: num(formData.get("valueGrowth5yPct")),
+    avgPriceDaire: num(formData.get("avgPriceDaire")),
+    avgPriceArsaM2: num(formData.get("avgPriceArsaM2")),
+    description: str(formData.get("description")),
+    transportNote: str(formData.get("transportNote")),
+    nearbySchools: jsonLines(formData.get("nearbySchools")),
+    nearbyHospitals: jsonLines(formData.get("nearbyHospitals")),
+    sortOrder: num(formData.get("sortOrder")) ?? 0,
+  };
+
+  if (id) {
+    await prisma.district.update({ where: { id }, data });
+  } else {
+    await prisma.district.create({ data });
+  }
+
+  revalidatePath("/admin/ilceler");
+  revalidatePath("/ilan/[slug]", "page"); // ilçe verisi ilan detay analizini besler
+  revalidatePath("/bolge-analizi");
+  redirect("/admin/ilceler");
+}
+
+export async function deleteDistrict(formData: FormData) {
+  await ensureAuth();
+  const id = String(formData.get("id") || "");
+  if (id) {
+    await prisma.district.delete({ where: { id } });
+    revalidatePath("/admin/ilceler");
+    revalidatePath("/bolge-analizi");
+    revalidatePath("/ilan/[slug]", "page");
+  }
+}
+
+// Global toggle: checkbox işaretliyse "1" (göster, varsayılan) değilse "0" (gizle).
+export async function setAnalysisScores(formData: FormData) {
+  await ensureAuth();
+  const value = bool(formData.get("show")) ? "1" : "0";
+  await prisma.setting.upsert({
+    where: { key: "analysis_scores" },
+    update: { value },
+    create: { key: "analysis_scores", value },
+  });
+  revalidatePath("/admin/ilceler");
+  revalidatePath("/ilan/[slug]", "page"); // toggle ilan detay analiz skorlarını etkiler
+  revalidatePath("/bolge-analizi");
 }
