@@ -7,8 +7,15 @@ import { trackAdsConversion } from "@/lib/track";
 import { isValidTrPhone, TR_PHONE_ERROR } from "@/lib/validation";
 import { DISTRICTS, PROPERTY_TYPES } from "@/lib/constants";
 import LocationPicker from "@/components/LocationPicker";
+import LoginRequiredNotice from "@/components/LoginRequiredNotice";
 
-export default function SellerForm() {
+export default function SellerForm({
+  isLoggedIn = true,
+  defaultName = "",
+}: {
+  isLoggedIn?: boolean;
+  defaultName?: string;
+}) {
   const utm = useUtm();
   const [status, setStatus] = useState<"idle" | "uploading" | "loading" | "ok" | "error">("idle");
   const [error, setError] = useState("");
@@ -79,6 +86,11 @@ export default function SellerForm() {
     }
   }
 
+  // Talep bırakmak için giriş zorunlu.
+  if (!isLoggedIn) {
+    return <LoginRequiredNotice text="Mülk satış talebi için giriş yapın" />;
+  }
+
   if (status === "ok") {
     return (
       <div className="rounded-xl bg-white p-8 text-center ring-1 ring-slate-200">
@@ -87,8 +99,8 @@ export default function SellerForm() {
         </span>
         <h3 className="mt-4 font-display text-2xl font-bold text-slate-900">Talebiniz alındı</h3>
         <p className="mt-2 leading-relaxed text-slate-600">
-          Mülkünüz için en kısa sürede sizinle iletişime geçeceğiz. Doğru fiyatlandırma
-          ve hızlı satış için ekibimiz sizi arayacak.
+          Mülkünüz için en geç 1 iş günü içinde sizinle iletişime geçeceğiz. Sürecini
+          &ldquo;Hesabım → Taleplerim&rdquo; sayfasından takip edebilirsiniz.
         </p>
       </div>
     );
@@ -103,7 +115,7 @@ export default function SellerForm() {
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div>
           <label htmlFor="sf-name" className={labelCls}>Ad Soyad <span className="text-red-500">*</span></label>
-          <input id="sf-name" name="name" required placeholder="Adınız ve soyadınız" className={inputCls} />
+          <input id="sf-name" name="name" required defaultValue={defaultName} placeholder="Adınız ve soyadınız" className={inputCls} />
         </div>
         <div>
           <label htmlFor="sf-phone" className={labelCls}>Telefon <span className="text-red-500">*</span></label>

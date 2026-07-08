@@ -233,3 +233,19 @@ export async function updateAgentProfile(formData: FormData) {
   });
   revalidatePath("/emlakci/panel");
 }
+
+// Emlakçı, YALNIZ kendi ilanına gelen talebin durumunu 4 aşamada ilerletir.
+export async function updateAgentLeadStatus(formData: FormData) {
+  const agent = await requireApprovedAgent();
+  const id = String(formData.get("id") || "");
+  const status = String(formData.get("status") || "");
+  const allowed = ["received", "reviewing", "contacted", "resolved"];
+  if (!id || !allowed.includes(status)) return;
+  const lead = await prisma.lead.findUnique({
+    where: { id },
+    select: { listing: { select: { agentId: true } } },
+  });
+  if (!lead || lead.listing?.agentId !== agent.id) return; // sahiplik kontrolü
+  await prisma.lead.update({ where: { id }, data: { status } });
+  revalidatePath("/emlakci/panel/talepler");
+}

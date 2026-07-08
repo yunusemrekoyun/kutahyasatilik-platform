@@ -4,10 +4,13 @@ import { redirect } from "next/navigation";
 import { Heart, Mail, User as UserIcon } from "lucide-react";
 import { getUserSession } from "@/lib/userAuth";
 import { prisma } from "@/lib/prisma";
+import { LEAD_TYPE_LABELS, PROPERTY_TYPE_LABELS } from "@/lib/constants";
+import { formatDate } from "@/lib/format";
 import LogoutButton from "@/components/user/LogoutButton";
 import SavedSearches from "@/components/user/SavedSearches";
 import ProfileForm from "@/components/user/ProfileForm";
 import ChangePasswordForm from "@/components/user/ChangePasswordForm";
+import RequestStatusStepper from "@/components/RequestStatusStepper";
 
 export const metadata: Metadata = {
   title: "Hesabım",
@@ -20,10 +23,17 @@ export default async function AccountPage() {
   const session = await getUserSession();
   if (!session) redirect("/giris?next=/hesabim");
 
-  const user = await prisma.user.findUnique({
-    where: { id: session.userId },
-    select: { name: true, email: true, phone: true, createdAt: true },
-  });
+  const [user, leads] = await Promise.all([
+    prisma.user.findUnique({
+      where: { id: session.userId },
+      select: { name: true, email: true, phone: true, createdAt: true },
+    }),
+    prisma.lead.findMany({
+      where: { userId: session.userId },
+      orderBy: { createdAt: "desc" },
+      include: { listing: { select: { slug: true, title: true } } },
+    }),
+  ]);
 
   const name = user?.name ?? session.name;
 
@@ -37,6 +47,39 @@ export default async function AccountPage() {
           <h1 className="text-2xl font-bold text-slate-900">Merhaba, {name}</h1>
           <p className="text-sm text-slate-500">Hesap bilgileriniz ve hızlı erişim.</p>
         </div>
+      </div>
+
+      {/* Taleplerim — süreç takibi */}
+      <div className="mt-8">
+        <h2 className="text-lg font-bold text-slate-900">Taleplerim</h2>
+        <p className="text-sm text-slate-500">Bıraktığınız taleplerin süreç durumunu buradan izleyebilirsiniz.</p>
+        {leads.length === 0 ? (
+          <div className="mt-3 rounded-2xl bg-white p-6 text-center text-sm text-slate-400 ring-1 ring-slate-200">
+            Henüz talebiniz yok. Bir ilanda &quot;Randevu / Bilgi Al&quot; ya da &quot;Mülkünü Sat&quot; ile talep bırakabilirsiniz.
+          </div>
+        ) : (
+          <div className="mt-3 space-y-3">
+            {leads.map((l) => (
+              <div key={l.id} className="rounded-2xl bg-white p-5 ring-1 ring-slate-200">
+                <div className="flex flex-wrap items-start justify-between gap-2">
+                  <div>
+                    <p className="font-semibold text-slate-900">{LEAD_TYPE_LABELS[l.type] || "Talep"}</p>
+                    {l.listing ? (
+                      <Link href={`/ilan/${l.listing.slug}`} className="text-sm text-brand-700 hover:underline">{l.listing.title}</Link>
+                    ) : l.district ? (
+                      <p className="text-sm text-slate-500">{l.district}{l.propertyType ? ` · ${PROPERTY_TYPE_LABELS[l.propertyType] || l.propertyType}` : ""}</p>
+                    ) : null}
+                  </div>
+                  <span className="shrink-0 text-xs text-slate-400">{formatDate(l.createdAt)}</span>
+                </div>
+                {l.message && <p className="mt-2 line-clamp-2 text-sm text-slate-600">{l.message}</p>}
+                <div className="mt-4 border-t border-slate-100 pt-4">
+                  <RequestStatusStepper status={l.status} />
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Profil bilgileri — ad/telefon düzenlenebilir; e-posta değiştirilemez */}

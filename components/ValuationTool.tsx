@@ -8,6 +8,7 @@ import { DISTRICTS, PROPERTY_TYPES } from "@/lib/constants";
 import { formatPrice } from "@/lib/format";
 import { estimateValue } from "@/lib/valuation";
 import type { DistrictStat } from "@/lib/districtStats";
+import LoginRequiredNotice from "@/components/LoginRequiredNotice";
 
 const ROOM_OPTIONS = ["1+0", "1+1", "2+1", "3+1", "4+1", "4+2", "5+1"];
 const LAND_TYPES = new Set(["arsa", "tarla"]);
@@ -15,8 +16,12 @@ const FALLBACK_DISTRICT = "Merkez";
 
 export default function ValuationTool({
   stats,
+  isLoggedIn = true,
+  defaultName = "",
 }: {
   stats: Record<string, DistrictStat>;
+  isLoggedIn?: boolean;
+  defaultName?: string;
 }) {
   const utm = useUtm();
 
@@ -26,7 +31,7 @@ export default function ValuationTool({
   const [rooms, setRooms] = useState("3+1");
 
   const [showLead, setShowLead] = useState(false);
-  const [name, setName] = useState("");
+  const [name, setName] = useState(defaultName);
   const [phone, setPhone] = useState("");
   const [status, setStatus] = useState<"idle" | "loading" | "ok" | "error">("idle");
   const [error, setError] = useState("");
@@ -213,6 +218,10 @@ export default function ValuationTool({
                 >
                   Ücretsiz Detaylı Ekspertiz İste
                 </button>
+              ) : !isLoggedIn ? (
+                <div className="mt-6">
+                  <LoginRequiredNotice text="Ekspertiz talebi için giriş yapın" />
+                </div>
               ) : (
                 <form onSubmit={handleLead} className="mt-6 space-y-3">
                   <div>

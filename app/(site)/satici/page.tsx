@@ -3,6 +3,7 @@ import { BadgeCheck, Zap, Users } from "lucide-react";
 import SellerForm from "@/components/SellerForm";
 import TrackView from "@/components/TrackView";
 import { prisma } from "@/lib/prisma";
+import { getUserSession } from "@/lib/userAuth";
 
 export const revalidate = 300; // ISR: admin görsel/ayar değişince revalidatePath ile tazelenir
 
@@ -28,7 +29,7 @@ const TRUST = [
 ];
 
 export default async function SellerPage() {
-  const heroImage = await getHeroImage();
+  const [heroImage, session] = await Promise.all([getHeroImage(), getUserSession()]);
 
   return (
     <div>
@@ -77,7 +78,7 @@ export default async function SellerPage() {
               </ol>
             </div>
             <div className="mt-6">
-              <SellerForm />
+              <SellerForm isLoggedIn={!!session} defaultName={session?.name ?? ""} />
             </div>
           </div>
 

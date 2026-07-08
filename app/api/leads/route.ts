@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { checkRate } from "@/lib/rateLimit";
 import { trPhoneSchema } from "@/lib/validation";
 import { notifyAdmins, notifyAgent } from "@/lib/notify";
+import { getUserSession } from "@/lib/userAuth";
 
 const schema = z.object({
   type: z.enum(["seller", "appointment", "expertise", "price_offer", "contact"]),
@@ -47,6 +48,16 @@ const LEAD_LABELS: Record<string, string> = {
 export async function POST(req: NextRequest) {
   const limited = await checkRate(req, "leads", 8, 60_000);
   if (limited) return limited;
+
+  // Talep bırakmak için giriş zorunlu — böylece talep hesaba bağlanır ve kullanıcı süreci takip edebilir.
+  const session = await getUserSession();
+  if (!session) {
+    return NextResponse.json(
+      { ok: false, error: "Talep bırakmak için giriş yapmalısınız.", needAuth: true },
+      { status: 401 }
+    );
+  }
+
   let data;
   try {
     data = schema.parse(await req.json());
@@ -77,6 +88,7 @@ export async function POST(req: NextRequest) {
   const lead = await prisma.lead.create({
     data: {
       type: data.type,
+      userId: session.userId,
       name: data.name.trim(),
       phone: data.phone.trim(),
       email: data.email || null,

@@ -10,6 +10,7 @@ import { mediaUrl } from "@/lib/media";
 import { SITE } from "@/lib/site";
 import Gallery from "@/components/Gallery";
 import ContactButtons from "@/components/ContactButtons";
+import { getUserSession } from "@/lib/userAuth";
 import AnalysisSection from "@/components/AnalysisSection";
 import ListingMedia from "@/components/ListingMedia";
 import PriceHistoryCard from "@/components/PriceHistoryCard";
@@ -98,6 +99,7 @@ export default async function ListingPage({
 
   // Bölge analizi skorlarını göster/gizle (Setting: analysis_scores; "0" ise gizli, varsayılan göster)
   const scoresSetting = await prisma.setting.findUnique({ where: { key: "analysis_scores" } });
+  const session = await getUserSession();
   const showScores = scoresSetting?.value !== "0";
 
   // Benzer ilanlar
@@ -341,7 +343,7 @@ export default async function ListingPage({
                 <>
                   <p className="mt-3 text-sm text-slate-500">İletişime geçin, hemen yanıt verelim.</p>
                   <div className="mt-4">
-                    <ContactButtons listingId={listing.id} listingTitle={listing.title} district={listing.district} />
+                    <ContactButtons listingId={listing.id} listingTitle={listing.title} district={listing.district} isLoggedIn={!!session} defaultName={session?.name ?? ""} />
                   </div>
                 </>
               )}

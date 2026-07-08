@@ -14,11 +14,15 @@ export default function ContactButtons({
   listingTitle,
   district,
   layout = "grid",
+  isLoggedIn = true,
+  defaultName = "",
 }: {
   listingId: string;
   listingTitle: string;
   district?: string;
   layout?: "grid" | "stack";
+  isLoggedIn?: boolean;
+  defaultName?: string;
 }) {
   const [modal, setModal] = useState<ModalType>(null);
   const c = useSiteContact();
@@ -102,6 +106,8 @@ export default function ContactButtons({
               listingTitle={listingTitle}
               district={district}
               compact
+              isLoggedIn={isLoggedIn}
+              defaultName={defaultName}
             />
           </div>
         </div>
