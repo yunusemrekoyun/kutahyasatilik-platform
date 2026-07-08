@@ -3,7 +3,7 @@ import Image from "next/image";
 import { PlusCircle, Search, Eye, Inbox, Star, ExternalLink, Pencil, Trash2 } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { formatPrice } from "@/lib/format";
-import { PROPERTY_TYPE_LABELS, LISTING_STATUS_LABELS } from "@/lib/constants";
+import { PROPERTY_TYPE_LABELS, LISTING_STATUS_LABELS, MODERATION_STATUS_LABELS } from "@/lib/constants";
 import { deleteListing } from "../actions";
 import { PageHeader, StatusBadge, adminCard, adminBtnPrimary, adminInput } from "@/components/admin/ui";
 
@@ -97,10 +97,18 @@ export default async function AdminListings({
                   <td className="p-3 text-slate-600">{l.district}</td>
                   <td className="p-3 font-semibold text-slate-800 whitespace-nowrap">{formatPrice(l.price, l.currency)}</td>
                   <td className="p-3">
-                    <span className="inline-flex items-center gap-1.5">
-                      <StatusBadge tone={STATUS_TONE[l.status] || "neutral"}>{LISTING_STATUS_LABELS[l.status]}</StatusBadge>
-                      {l.featured && <Star className="h-4 w-4 fill-gold-400 text-gold-400" />}
-                    </span>
+                    <div className="flex flex-col items-start gap-1">
+                      <span className="inline-flex items-center gap-1.5">
+                        <StatusBadge tone={STATUS_TONE[l.status] || "neutral"}>{LISTING_STATUS_LABELS[l.status]}</StatusBadge>
+                        {l.featured && <Star className="h-4 w-4 fill-gold-400 text-gold-400" />}
+                      </span>
+                      {/* Onay durumu: yalnız yayında DEĞİLse göster (onay bekleyen/reddedilen 'Aktif' sanılmasın) */}
+                      {l.moderationStatus !== "approved" && (
+                        <span className={`rounded-md px-2 py-0.5 text-[11px] font-semibold ring-1 ${l.moderationStatus === "rejected" ? "bg-red-50 text-red-700 ring-red-200" : "bg-amber-50 text-amber-700 ring-amber-200"}`}>
+                          {MODERATION_STATUS_LABELS[l.moderationStatus] || l.moderationStatus}
+                        </span>
+                      )}
+                    </div>
                   </td>
                   <td className="p-3 text-center tabular-nums text-slate-600">{l.viewCount}</td>
                   <td className="p-3 text-center tabular-nums text-slate-600">{l._count.leads}</td>

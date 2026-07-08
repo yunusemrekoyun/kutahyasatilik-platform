@@ -136,7 +136,7 @@ export default async function AdminBasvurularPage() {
                         <input name="password" type="text" minLength={6} required placeholder="Geçici parola (min 6)" className="flex-1 rounded-lg border border-slate-300 px-2.5 py-2 text-sm" />
                         <button type="submit" className="rounded-lg bg-green-600 px-3 py-2 text-sm font-semibold text-white hover:bg-green-700">Aktive Et</button>
                       </div>
-                      <p className="text-[11px] text-slate-400">Parolayı danışmana iletin. (Teklif/OTP/ödeme adımları bir sonraki sürümde araya girecek.)</p>
+                      <p className="text-[11px] text-slate-400">Parolayı danışmana güvenli şekilde iletin. Teklif/OTP/ödeme adımları yukarıdaki &ldquo;Teklif Oluştur&rdquo; akışında yönetilir.</p>
                     </form>
                   </div>
                 )}
