@@ -7,7 +7,7 @@ import "server-only";
 const RESEND_ENDPOINT = "https://api.resend.com/emails";
 
 export function emailEnabled(): boolean {
-  return Boolean(process.env.RESEND_API_KEY && process.env.EMAIL_FROM);
+  return Boolean(process.env.EMAIL_FROM && (process.env.SMTP_HOST || process.env.RESEND_API_KEY));
 }
 
 // Alıcı bazında kaba saatlik üst sınır — IP-rotasyonlu lead spam'inin admin kutusunu
@@ -38,6 +38,27 @@ export async function sendEmail({
 }): Promise<void> {
   if (!emailEnabled() || !to) return;
   if (!underEmailCap(to)) return;
+  const from = process.env.EMAIL_FROM as string;
+
+  // SMTP (nodemailer) — SMTP_HOST varsa öncelikli. Local: Mailpit; canlı: Gmail app password vb.
+  if (process.env.SMTP_HOST) {
+    try {
+      const nodemailer = (await import("nodemailer")).default;
+      const port = Number(process.env.SMTP_PORT) || 587;
+      const transport = nodemailer.createTransport({
+        host: process.env.SMTP_HOST,
+        port,
+        secure: process.env.SMTP_SECURE === "true" || port === 465,
+        auth: process.env.SMTP_USER ? { user: process.env.SMTP_USER, pass: process.env.SMTP_PASS } : undefined,
+      });
+      await transport.sendMail({ from, to, subject, html });
+    } catch (e) {
+      console.warn(`[email][smtp] gönderilemedi (${to}): ${(e as Error).message}`);
+    }
+    return;
+  }
+
+  // Resend (REST) — SMTP yoksa.
   try {
     const res = await fetch(RESEND_ENDPOINT, {
       method: "POST",
@@ -45,7 +66,7 @@ export async function sendEmail({
         Authorization: `Bearer ${process.env.RESEND_API_KEY}`,
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ from: process.env.EMAIL_FROM, to, subject, html }),
+      body: JSON.stringify({ from, to, subject, html }),
     });
     if (!res.ok) console.warn(`[email] Resend yanıtı ${res.status} (alıcı: ${to})`);
   } catch {
@@ -63,7 +84,7 @@ function escapeHtml(s: string): string {
 }
 
 // Bildirim e-postası için basit markalı şablon (lacivert + altın).
-export function notificationEmail(opts: { title: string; body?: string | null; link?: string | null }): string {
+export function notificationEmail(opts: { title: string; body?: string | null; link?: string | null; ctaLabel?: string }): string {
   const site = process.env.NEXT_PUBLIC_SITE_URL || "https://kutahyasatilik.com";
   const rawHref = opts.link ? (opts.link.startsWith("http") ? opts.link : `${site}${opts.link}`) : site;
   // Yalnız http(s)'e izin ver (javascript: vb. değil) ve attribute için escape et.
@@ -78,7 +99,7 @@ export function notificationEmail(opts: { title: string; body?: string | null; l
     <div style="padding:24px">
       <h2 style="margin:0 0 12px;color:#0F172A;font-size:18px">${title}</h2>
       ${body}
-      <a href="${href}" style="display:inline-block;background:#1E3A6B;color:#fff;text-decoration:none;border-radius:10px;padding:11px 18px;font-weight:600;font-size:14px">Görüntüle</a>
+      <a href="${href}" style="display:inline-block;background:#1E3A6B;color:#fff;text-decoration:none;border-radius:10px;padding:11px 18px;font-weight:600;font-size:14px">${escapeHtml(opts.ctaLabel || "Görüntüle")}</a>
       <p style="margin:22px 0 0;color:#94A3B8;font-size:12px">Bu otomatik bir bildirimdir · KütahyaSatılık</p>
     </div>
   </div>
