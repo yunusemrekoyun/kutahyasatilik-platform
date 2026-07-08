@@ -143,7 +143,7 @@ export function buildWhere(filter: ListingFilter) {
     };
   }
 
-  if (filter.zoning) where.zoningStatus = { contains: filter.zoning };
+  if (filter.zoning) where.zoningStatus = { contains: filter.zoning, mode: "insensitive" };
 
   // Olanak filtreleri (sadece işaretliyse uygulanır)
   if (filter.furnished) where.furnished = true;
@@ -153,12 +153,17 @@ export function buildWhere(filter: ListingFilter) {
   if (filter.verified) where.verified = true;
 
   if (filter.q) {
-    where.OR = [
-      { title: { contains: filter.q } },
-      { description: { contains: filter.q } },
-      { neighborhood: { contains: filter.q } },
-      { address: { contains: filter.q } },
+    const q = filter.q.trim();
+    const or: Record<string, unknown>[] = [
+      { title: { contains: q, mode: "insensitive" } },
+      { description: { contains: q, mode: "insensitive" } },
+      { neighborhood: { contains: q, mode: "insensitive" } },
+      { address: { contains: q, mode: "insensitive" } },
     ];
+    // İlan no ile arama: detay sayfası id'nin son 6 hanesini "İlan No" olarak gösteriyor.
+    // Kısa alfanümerik girişte id sonuna göre de eşleştir (id küçük harf cuid).
+    if (/^[a-z0-9]{4,12}$/i.test(q)) or.push({ id: { endsWith: q.toLowerCase() } });
+    where.OR = or;
   }
   return where;
 }

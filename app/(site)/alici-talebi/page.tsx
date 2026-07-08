@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import { BellRing } from "lucide-react";
 import BuyerAlertForm from "@/components/BuyerAlertForm";
 import TrackView from "@/components/TrackView";
@@ -32,7 +33,9 @@ export default function BuyerAlertPage() {
 
       <section className="mx-auto max-w-3xl px-4 py-10">
         <div className="rounded-2xl bg-white p-6 shadow-card ring-1 ring-slate-200 sm:p-8">
-          <BuyerAlertForm />
+          <Suspense fallback={<div className="h-96" />}>
+            <BuyerAlertForm />
+          </Suspense>
         </div>
       </section>
     </div>

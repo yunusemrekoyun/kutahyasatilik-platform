@@ -96,6 +96,10 @@ export default async function ListingPage({
   const analysis = buildAnalysis(listing, district);
   const features = parseJsonArray(listing.features);
 
+  // Bölge analizi skorlarını göster/gizle (Setting: analysis_scores; "0" ise gizli, varsayılan göster)
+  const scoresSetting = await prisma.setting.findUnique({ where: { key: "analysis_scores" } });
+  const showScores = scoresSetting?.value !== "0";
+
   // Benzer ilanlar
   const similarRaw = await prisma.listing.findMany({
     where: {
@@ -127,20 +131,40 @@ export default async function ListingPage({
       : [];
 
   const isLand = listing.propertyType === "arsa" || listing.propertyType === "tarla";
+  const isCommercial = listing.propertyType === "isyeri";
+  const isResidential = !isLand && !isCommercial;
+  const isSold = listing.status === "sold";
 
-  const keyMetrics: { label: string; value: string }[] = isLand
+  // Brüt=Net olduğunda "125 / 125" yerine tek değer göster (gereksiz tekrar olmasın).
+  const areaLabel = listing.areaGross
+    ? listing.areaNet && listing.areaNet !== listing.areaGross
+      ? `${listing.areaGross} / ${listing.areaNet} m²`
+      : `${listing.areaGross} m²`
+    : null;
+
+  // Künye kartları — türe göre anlamlı alanlar. Boş (—) kartlar aşağıda filtrelenir,
+  // böylece işyeri ilanında "Oda Sayısı: —" gibi anlamsız kartlar görünmez.
+  const keyMetrics: { label: string; value: string }[] = (isLand
     ? [
         { label: "Alan", value: listing.areaGross ? `${listing.areaGross} m²` : "—" },
         { label: "İmar Durumu", value: listing.zoningStatus || "—" },
         { label: "Ada / Parsel", value: listing.adaNo || listing.parselNo ? `${listing.adaNo || "-"} / ${listing.parselNo || "-"}` : "—" },
         { label: "Tapu Durumu", value: listing.deedStatus || "—" },
       ]
+    : isCommercial
+    ? [
+        { label: "Alan", value: areaLabel || "—" },
+        { label: "Bulunduğu Kat", value: listing.floor != null ? `${listing.floor}${listing.totalFloors ? ` / ${listing.totalFloors}` : ""}` : "—" },
+        { label: "İmar Durumu", value: listing.zoningStatus || "—" },
+        { label: "Isıtma", value: listing.heating || "—" },
+      ]
     : [
         { label: "Oda Sayısı", value: listing.rooms || "—" },
         { label: "Brüt / Net m²", value: listing.areaGross ? `${listing.areaGross}${listing.areaNet ? ` / ${listing.areaNet}` : ""}` : "—" },
         { label: "Bina Yaşı", value: listing.buildingAge != null ? String(listing.buildingAge) : "—" },
         { label: "Bulunduğu Kat", value: listing.floor != null ? `${listing.floor}${listing.totalFloors ? ` / ${listing.totalFloors}` : ""}` : "—" },
-      ];
+      ]
+  ).filter((m) => m.value && m.value !== "—");
 
   const snapshot = {
     slug: listing.slug, title: listing.title, price: listing.price, currency: listing.currency,
@@ -175,7 +199,7 @@ export default async function ListingPage({
   return (
     <div className="mx-auto max-w-7xl px-4 py-6 pb-36 lg:pb-6">
       <TrackView listingId={listing.id} district={listing.district} />
-      <MobileContactBar listingId={listing.id} listingTitle={listing.title} district={listing.district} />
+      {!isSold && <MobileContactBar listingId={listing.id} listingTitle={listing.title} district={listing.district} />}
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
 
       {/* Breadcrumb */}
@@ -196,9 +220,11 @@ export default async function ListingPage({
             <div className="flex flex-col justify-between gap-4 border-b border-slate-100 pb-5 md:flex-row md:items-start">
               <div>
                 <div className="flex flex-wrap items-center gap-2">
-                  {!isLand && (
+                  {isSold ? (
+                    <span className="rounded-md bg-red-600 px-2.5 py-1 text-xs font-semibold text-white">Satıldı</span>
+                  ) : !isLand ? (
                     <span className="rounded-md bg-brand-700 px-2.5 py-1 text-xs font-semibold text-white">Satılık</span>
-                  )}
+                  ) : null}
                   <span className="inline-block rounded-md bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-600">
                     {PROPERTY_TYPE_LABELS[listing.propertyType] || listing.propertyType}
                   </span>
@@ -237,8 +263,8 @@ export default async function ListingPage({
                 <DetailRow label="Mülk Türü" value={PROPERTY_TYPE_LABELS[listing.propertyType]} />
                 <DetailRow label="İlçe" value={listing.district} />
                 <DetailRow label="Mahalle" value={listing.neighborhood} />
-                {!isLand && <DetailRow label="Oda Sayısı" value={listing.rooms} />}
-                {!isLand && <DetailRow label="Brüt / Net m²" value={listing.areaGross ? `${listing.areaGross}${listing.areaNet ? ` / ${listing.areaNet}` : ""} m²` : null} />}
+                {isResidential && <DetailRow label="Oda Sayısı" value={listing.rooms} />}
+                {!isLand && <DetailRow label="Brüt / Net m²" value={areaLabel} />}
                 {isLand && <DetailRow label="Alan" value={listing.areaGross ? `${listing.areaGross} m²` : null} />}
                 {!isLand && <DetailRow label="Bulunduğu Kat" value={listing.floor} />}
                 {!isLand && <DetailRow label="Kat Sayısı" value={listing.totalFloors} />}
@@ -246,11 +272,11 @@ export default async function ListingPage({
               <div>
                 {!isLand && <DetailRow label="Bina Yaşı" value={listing.buildingAge} />}
                 {!isLand && <DetailRow label="Isıtma" value={listing.heating} />}
-                {isLand && <DetailRow label="İmar Durumu" value={listing.zoningStatus} />}
+                {(isLand || isCommercial) && <DetailRow label="İmar Durumu" value={listing.zoningStatus} />}
                 {isLand && <DetailRow label="Tapu Durumu" value={listing.deedStatus} />}
                 {isLand && <DetailRow label="Ada / Parsel" value={listing.adaNo || listing.parselNo ? `${listing.adaNo || "-"} / ${listing.parselNo || "-"}` : null} />}
                 {isLand && <DetailRow label="KAKS / Emsal" value={listing.kaks} />}
-                {!isLand && <DetailRow label="Eşyalı" value={listing.furnished ? "Evet" : "Hayır"} />}
+                {isResidential && <DetailRow label="Eşyalı" value={listing.furnished ? "Evet" : "Hayır"} />}
                 {!isLand && <DetailRow label="Otopark" value={listing.parking ? "Var" : "Yok"} />}
                 <DetailRow label="İlan Tarihi" value={formatDate(listing.createdAt)} />
               </div>
@@ -286,7 +312,7 @@ export default async function ListingPage({
           />
 
           {/* AI ANALİZ */}
-          <AnalysisSection analysis={analysis} />
+          <AnalysisSection analysis={analysis} showScores={showScores} />
 
           {/* HARİTA */}
           {mapPoints.length > 0 && (
@@ -303,12 +329,22 @@ export default async function ListingPage({
         {/* SAĞ: iletişim (sticky) */}
         <aside className="lg:col-span-1">
           <div className="sticky top-20 space-y-4">
-            <div className="rounded-2xl bg-white p-6 ring-1 ring-slate-200 shadow-prestige">
-              <span className="inline-block rounded-lg bg-gold-100 px-4 py-2 text-2xl font-bold tabular-nums text-gold-900">{formatPrice(listing.price, listing.currency)}</span>
-              <p className="mt-3 text-sm text-slate-500">İletişime geçin, hemen yanıt verelim.</p>
-              <div className="mt-4">
-                <ContactButtons listingId={listing.id} listingTitle={listing.title} district={listing.district} />
-              </div>
+            <div id="ilan-iletisim" className="scroll-mt-24 rounded-2xl bg-white p-6 ring-1 ring-slate-200 shadow-prestige">
+              <span className={`inline-block rounded-lg px-4 py-2 text-2xl font-bold tabular-nums ${isSold ? "bg-slate-100 text-slate-500 line-through" : "bg-gold-100 text-gold-900"}`}>{formatPrice(listing.price, listing.currency)}</span>
+              {isSold ? (
+                <div className="mt-4 rounded-xl bg-red-50 p-4 ring-1 ring-red-100">
+                  <p className="text-sm font-semibold text-red-800">Bu ilan satılmıştır.</p>
+                  <p className="mt-1 text-sm text-red-700">Benzer fırsatlar için tüm ilanlarımıza göz atabilirsiniz.</p>
+                  <Link href="/ilanlar" className="mt-3 inline-flex items-center gap-1 text-sm font-bold text-brand-700 hover:underline">Benzer ilanları gör <ArrowRight className="h-4 w-4" /></Link>
+                </div>
+              ) : (
+                <>
+                  <p className="mt-3 text-sm text-slate-500">İletişime geçin, hemen yanıt verelim.</p>
+                  <div className="mt-4">
+                    <ContactButtons listingId={listing.id} listingTitle={listing.title} district={listing.district} />
+                  </div>
+                </>
+              )}
               <div className="mt-4 border-t border-slate-100 pt-4">
                 <ListingDetailActions listing={snapshot} />
               </div>

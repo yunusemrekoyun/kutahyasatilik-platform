@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { CheckCircle2, Lock } from "lucide-react";
 import { useUtm } from "@/lib/useUtm";
 import { isValidTrPhone, TR_PHONE_ERROR } from "@/lib/validation";
@@ -9,6 +10,8 @@ import ListingCard, { type ListingCardData } from "./ListingCard";
 
 export default function BuyerAlertForm() {
   const utm = useUtm();
+  const sp = useSearchParams(); // /ilanlar filtresinden taşınan kriterler (propertyType, district, ...)
+  const prefilled = ["propertyType", "district", "minPrice", "maxPrice", "minArea", "rooms"].some((k) => sp.get(k));
   const [status, setStatus] = useState<"idle" | "loading" | "ok" | "error">("idle");
   const [error, setError] = useState("");
   const [matches, setMatches] = useState<ListingCardData[]>([]);
@@ -85,6 +88,11 @@ export default function BuyerAlertForm() {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
+      {prefilled && (
+        <p className="rounded-[10px] bg-brand-50 px-3.5 py-2.5 text-sm text-brand-800 ring-1 ring-brand-100">
+          Arama kriterleriniz forma taşındı. Ad ve telefonunuzu ekleyip kaydedin; uygun ilan geldiğinde haber verelim.
+        </p>
+      )}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div>
           <label htmlFor="ba-name" className={labelCls}>Ad Soyad <span className="text-red-500">*</span></label>
@@ -103,7 +111,7 @@ export default function BuyerAlertForm() {
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div>
           <label htmlFor="ba-type" className={labelCls}>Mülk Türü</label>
-          <select id="ba-type" name="propertyType" defaultValue="" className={inputCls}>
+          <select id="ba-type" name="propertyType" defaultValue={sp.get("propertyType") || ""} className={inputCls}>
             <option value="">Farketmez</option>
             {PROPERTY_TYPES.map((p) => (
               <option key={p.value} value={p.value}>{p.label}</option>
@@ -112,7 +120,7 @@ export default function BuyerAlertForm() {
         </div>
         <div>
           <label htmlFor="ba-district" className={labelCls}>İlçe</label>
-          <select id="ba-district" name="district" defaultValue="" className={inputCls}>
+          <select id="ba-district" name="district" defaultValue={sp.get("district") || ""} className={inputCls}>
             <option value="">Farketmez</option>
             {DISTRICTS.map((d) => (
               <option key={d.slug} value={d.name}>{d.name}</option>
@@ -124,22 +132,22 @@ export default function BuyerAlertForm() {
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
         <div>
           <label htmlFor="ba-min" className={labelCls}>Min. Fiyat</label>
-          <input id="ba-min" name="minPrice" type="number" min={0} inputMode="numeric" placeholder="₺" className={inputCls} />
+          <input id="ba-min" name="minPrice" type="number" min={0} inputMode="numeric" placeholder="₺" defaultValue={sp.get("minPrice") || ""} className={inputCls} />
         </div>
         <div>
           <label htmlFor="ba-max" className={labelCls}>Maks. Fiyat</label>
-          <input id="ba-max" name="maxPrice" type="number" min={0} inputMode="numeric" placeholder="₺" className={inputCls} />
+          <input id="ba-max" name="maxPrice" type="number" min={0} inputMode="numeric" placeholder="₺" defaultValue={sp.get("maxPrice") || ""} className={inputCls} />
         </div>
         <div>
           <label htmlFor="ba-area" className={labelCls}>Min. m²</label>
-          <input id="ba-area" name="minArea" type="number" min={0} inputMode="numeric" placeholder="m²" className={inputCls} />
+          <input id="ba-area" name="minArea" type="number" min={0} inputMode="numeric" placeholder="m²" defaultValue={sp.get("minArea") || ""} className={inputCls} />
         </div>
       </div>
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div>
           <label htmlFor="ba-rooms" className={labelCls}>Oda Sayısı</label>
-          <input id="ba-rooms" name="rooms" placeholder="Örn. 3+1 (opsiyonel)" className={inputCls} />
+          <input id="ba-rooms" name="rooms" placeholder="Örn. 3+1 (opsiyonel)" defaultValue={sp.get("rooms") || ""} className={inputCls} />
         </div>
         <div>
           <label htmlFor="ba-note" className={labelCls}>Eklemek istedikleriniz</label>

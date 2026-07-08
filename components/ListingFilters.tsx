@@ -2,7 +2,7 @@
 
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
-import { X, SlidersHorizontal, Search, Check } from "lucide-react";
+import { X, SlidersHorizontal, Search, Check, BellRing } from "lucide-react";
 import { DISTRICTS, PROPERTY_TYPES, PROPERTY_TYPE_LABELS } from "@/lib/constants";
 import { formatNumber } from "@/lib/format";
 
@@ -45,6 +45,22 @@ export default function ListingFilters() {
       p.delete("minAlan");
       p.delete("maxAlan");
     });
+  }
+  // Aktif filtreleri alıcı-talebi (kayıtlı arama) formuna taşı — kullanıcı kriterleri
+  // yeniden girmesin; giriş yapmışsa talep otomatik hesabına bağlanır.
+  function saveSearch() {
+    const map: [string, string][] = [
+      ["tur", "propertyType"], ["ilce", "district"],
+      ["min", "minPrice"], ["max", "maxPrice"],
+      ["minAlan", "minArea"], ["oda", "rooms"],
+    ];
+    const p = new URLSearchParams();
+    for (const [from, to] of map) {
+      const v = sp.get(from);
+      if (v) p.set(to, v);
+    }
+    const qs = p.toString();
+    router.push(`/alici-talebi${qs ? `?${qs}` : ""}`);
   }
 
   function chipLabel(key: string, val: string): string | null {
@@ -99,8 +115,9 @@ export default function ListingFilters() {
           <input
             key={sp.get("q") || "q-empty"}
             defaultValue={sp.get("q") || ""}
+            onBlur={(e) => update("q", e.target.value)}
             onKeyDown={(e) => { if (e.key === "Enter") update("q", (e.target as HTMLInputElement).value); }}
-            placeholder="Kelime, mahalle, adres..."
+            placeholder="İlan no, kelime, mahalle..."
             aria-label="Arama"
             className={`${fieldCls} pl-9`}
           />
@@ -223,6 +240,14 @@ export default function ListingFilters() {
           </div>
         )}
       </div>
+
+      {/* Bu aramayı kaydet → alıcı talebi (kriterler taşınır, uygun ilan gelince haber) */}
+      <button
+        onClick={saveSearch}
+        className="mt-5 flex w-full items-center justify-center gap-2 rounded-lg border border-brand-200 bg-brand-50 px-4 py-3 text-sm font-semibold text-brand-700 transition hover:bg-brand-100"
+      >
+        <BellRing className="h-4 w-4" /> Bu aramayı kaydet, uygun ilan gelince haber ver
+      </button>
 
       {/* Mobil: sonuçları gör (sheet'i kapatır; filtreler zaten anında uygulanır) */}
       <div className="mt-6 lg:hidden">
