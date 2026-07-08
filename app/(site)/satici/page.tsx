@@ -22,7 +22,7 @@ async function getHeroImage(): Promise<string | null> {
 }
 
 const TRUST = [
-  { Icon: BadgeCheck, title: "Ücretsiz Ekspertiz", text: "Bölge uzmanlarımız tarafından mülkünüzün güncel piyasa değeri profesyonelce belirlenir." },
+  { Icon: BadgeCheck, title: "Doğru Fiyatlandırma", text: "Bölge uzmanlarımız mülkünüzün güncel piyasa değerini profesyonelce belirleyip doğru fiyatla listeler." },
   { Icon: Zap, title: "Hızlı Satış", text: "Doğru fiyatlandırma ve etkili pazarlama stratejileri ile satış süreciniz hızlandırılır." },
   { Icon: Users, title: "Geniş Alıcı Ağı", text: "Portföyümüzdeki binlerce aktif yatırımcı ve nitelikli alıcıya doğrudan ulaşım sunuyoruz." },
 ];

@@ -98,7 +98,7 @@ export default function LeadForm({
         </span>
         <h3 className="mt-3 font-display text-lg font-bold text-green-800">Talebiniz alındı</h3>
         <p className="mt-1 text-sm text-green-700">
-          En kısa sürede sizi arayacağız. İlginiz için teşekkürler.
+          Talebiniz danışmanımıza iletildi; en geç 1 iş günü içinde size dönüş yapacağız. İlginiz için teşekkürler.
         </p>
       </div>
     );

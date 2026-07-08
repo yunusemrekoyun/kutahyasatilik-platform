@@ -1,12 +1,13 @@
 import Link from "next/link";
 import {
-  Building2, LandPlot, Home as HomeIcon, Trees, LineChart, Headset, ShieldCheck,
+  Building2, LandPlot, Home as HomeIcon, Trees, Store, LineChart, Headset, ShieldCheck,
   CheckCircle2, Star, BarChart3, ArrowRight, Phone,
 } from "lucide-react";
 import { getFeaturedListings, getMapPoints } from "@/lib/listings";
 import { prisma } from "@/lib/prisma";
 import { DISTRICTS, LANDING_PAGES } from "@/lib/constants";
 import { SITE, telLink } from "@/lib/site";
+import { getSiteContact } from "@/lib/contact";
 import ListingCard from "@/components/ListingCard";
 import HomeSearch from "@/components/HomeSearch";
 import ListingsMap from "@/components/ListingsMap";
@@ -31,7 +32,7 @@ async function getHomeTexts() {
 }
 
 export default async function Home() {
-  const [featured, points, totalActive, totalSold, texts, dbTestimonials] = await Promise.all([
+  const [featured, points, totalActive, totalSold, texts, dbTestimonials, contact] = await Promise.all([
     getFeaturedListings(6),
     getMapPoints(),
     prisma.listing.count({ where: { status: "active" } }),
@@ -40,6 +41,7 @@ export default async function Home() {
     prisma.testimonial
       .findMany({ where: { published: true }, orderBy: [{ sortOrder: "asc" }, { createdAt: "desc" }] })
       .catch(() => []),
+    getSiteContact(),
   ]);
 
   const testimonials = dbTestimonials; // yayınlı yorum yoksa bölüm gizlenir (sahte yorum yok)
@@ -95,9 +97,11 @@ export default async function Home() {
                 <BarChart3 className="h-4 w-4" /> Evimin değeri ne kadar?
               </Link>
               <span className="inline-flex items-center gap-1.5"><CheckCircle2 className="h-4 w-4 text-green-600" /> Komisyonlu güvenli satış</span>
-              <a href={telLink()} className="inline-flex items-center gap-1.5 font-medium text-brand-700 hover:text-brand-800">
-                <Phone className="h-4 w-4" /> {SITE.phone}
-              </a>
+              {contact.phoneRaw && (
+                <a href={telLink(contact.phoneRaw)} className="inline-flex items-center gap-1.5 font-medium text-brand-700 hover:text-brand-800">
+                  <Phone className="h-4 w-4" /> {contact.phone}
+                </a>
+              )}
             </div>
           </div>
         </div>
@@ -124,12 +128,13 @@ export default async function Home() {
       <section className="mx-auto max-w-7xl px-4 py-14">
         <h2 className="font-display text-2xl font-bold text-brand-900 sm:text-3xl">Ne Arıyorsunuz?</h2>
         <p className="mt-1.5 text-slate-500">Mülk türüne göre Kütahya portföyünü keşfedin.</p>
-        <div className="mt-7 grid grid-cols-2 gap-4 lg:grid-cols-4">
+        <div className="mt-7 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
           {LANDING_PAGES.map((c) => {
             const Icon =
               c.propertyType === "daire" ? Building2 :
               c.propertyType === "arsa" ? LandPlot :
-              c.propertyType === "villa" ? HomeIcon : Trees;
+              c.propertyType === "villa" ? HomeIcon :
+              c.propertyType === "isyeri" ? Store : Trees;
             return (
               <Link
                 key={c.slug}
@@ -185,7 +190,7 @@ export default async function Home() {
               href="/satici"
               className="mt-8 inline-flex items-center justify-center rounded-lg bg-white px-8 py-4 font-semibold text-brand-800 transition-colors hover:bg-brand-50"
             >
-              Ücretsiz Değerleme Al
+              Ücretsiz İlan Talebi Oluştur
             </Link>
           </div>
         </div>
@@ -214,7 +219,7 @@ export default async function Home() {
           <div className="grid gap-10 md:grid-cols-3">
             {[
               { Icon: LineChart, title: "Veri Destekli Bölge Analizi", text: "Her ilanda bölge analizi, yatırım puanı ve gelişim potansiyeli otomatik sunulur." },
-              { Icon: Headset, title: "Dakikalar İçinde İletişim", text: "Telefon, WhatsApp, randevu ve ekspertiz talebiyle saniyeler içinde bize ulaşın." },
+              { Icon: Headset, title: "Hızlı Dönüş", text: "Randevu, ekspertiz ve fiyat teklifi talebinizi bırakın; danışmanımız en kısa sürede size dönsün." },
               { Icon: ShieldCheck, title: "Güvenli & Şeffaf Satış", text: "Tüm satış sürecini şeffaf ve güvenli şekilde sizin için yönetiyoruz." },
             ].map((f) => (
               <div key={f.title} className="flex flex-col items-center text-center">
