@@ -1,6 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
-import { MapPin, BedDouble, Maximize, Star, ArrowRight } from "lucide-react";
+import { MapPin, BedDouble, Maximize, Star, ArrowRight, Gem, Flame, Sparkles } from "lucide-react";
 import { formatPrice } from "@/lib/format";
 import { PROPERTY_TYPE_LABELS } from "@/lib/constants";
 import { thumbUrl, mediaUrl } from "@/lib/media";
@@ -27,7 +27,7 @@ export type ListingCardData = {
 };
 
 export default function ListingCard({ listing }: { listing: ListingCardData }) {
-  const cover = thumbUrl(listing.coverImage) || "https://picsum.photos/seed/placeholder/800/600";
+  const cover = thumbUrl(listing.coverImage) || "/placeholder-listing.webp";
   const isLand = listing.propertyType === "arsa" || listing.propertyType === "tarla";
   const isSold = listing.status === "sold";
   const location = `${listing.neighborhood ? `${listing.neighborhood}, ` : ""}${listing.district}`;
@@ -45,9 +45,9 @@ export default function ListingCard({ listing }: { listing: ListingCardData }) {
             className="object-cover transition duration-300 group-hover:scale-[1.03]"
           />
         </Link>
-        {/* Tek durum işareti: Öne çıkan (altın) > Doğrulanmış (yeşil) > Satılık (lacivert) */}
+        {/* Tek durum işareti: Satıldıda gizli (SATILDI overlay var) — yoksa Öne çıkan > Doğrulanmış > Satılık */}
         <div className="pointer-events-none absolute left-3 top-3">
-          {listing.featured ? (
+          {!isSold && (listing.featured ? (
             <span className="inline-flex items-center gap-1 rounded-md bg-gold-200 px-2.5 py-1 text-[12px] font-semibold text-gold-900 shadow-sm">
               <Star className="h-3.5 w-3.5 fill-current" /> Vitrinde
             </span>
@@ -55,11 +55,11 @@ export default function ListingCard({ listing }: { listing: ListingCardData }) {
             <span className="inline-flex items-center gap-1 rounded-md bg-green-600 px-2.5 py-1 text-[12px] font-semibold text-white shadow-sm">
               Doğrulanmış
             </span>
-          ) : !isSold ? (
+          ) : (
             <span className="rounded-md bg-brand-700 px-2.5 py-1 text-[12px] font-semibold text-white shadow-sm">
               Satılık
             </span>
-          ) : null}
+          ))}
         </div>
         {isSold && (
           <div className="absolute inset-0 grid place-items-center bg-brand-950/55">
@@ -89,6 +89,25 @@ export default function ListingCard({ listing }: { listing: ListingCardData }) {
             <MapPin className="h-[18px] w-[18px] text-slate-400" /> {listing.district}
           </span>
         </div>
+
+        {!isSold && listing.badges && listing.badges.length > 0 && (
+          <div className="mt-3 flex flex-wrap gap-1.5">
+            {listing.badges.map((b, i) => {
+              const Icon = b.tone === "deal" ? Gem : b.tone === "hot" ? Flame : Sparkles;
+              const cls =
+                b.tone === "deal"
+                  ? "bg-gold-100 text-gold-800 ring-gold-200"
+                  : b.tone === "hot"
+                  ? "bg-red-50 text-red-700 ring-red-200"
+                  : "bg-green-50 text-green-700 ring-green-200";
+              return (
+                <span key={i} className={`inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-[11px] font-semibold ring-1 ${cls}`}>
+                  <Icon className="h-3 w-3" /> {b.text}
+                </span>
+              );
+            })}
+          </div>
+        )}
 
         {listing.agentName && (
           <div className="mt-3 flex items-center gap-2">

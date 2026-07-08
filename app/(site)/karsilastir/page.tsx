@@ -58,7 +58,7 @@ export default function ComparePage() {
                 {compare.map((l) => (
                   <th key={l.slug} className="p-4 align-top">
                     <div className="relative mx-auto h-28 w-full max-w-[200px] overflow-hidden rounded-lg bg-slate-100">
-                      <Image src={l.coverImage || "https://picsum.photos/seed/x/400/300"} alt={l.title} fill sizes="200px" className="object-cover" />
+                      <Image src={l.coverImage || "/placeholder-listing.webp"} alt={l.title} fill sizes="200px" className="object-cover" />
                       <button
                         onClick={() => toggleCompare(l)}
                         className="absolute right-1 top-1 grid h-6 w-6 place-items-center rounded-full bg-white/90 text-xs text-red-600 shadow"

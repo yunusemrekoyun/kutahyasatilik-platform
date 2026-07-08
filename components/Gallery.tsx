@@ -12,7 +12,7 @@ export default function Gallery({
   images: { url: string; alt?: string | null }[];
   title: string;
 }) {
-  const imgs = images.length ? images : [{ url: "https://picsum.photos/seed/noimg/1200/800", alt: title }];
+  const imgs = images.length ? images : [{ url: "/placeholder-listing.webp", alt: title }];
   const [active, setActive] = useState(0);
   const [lightbox, setLightbox] = useState(false);
   const idx = Math.min(active, imgs.length - 1);

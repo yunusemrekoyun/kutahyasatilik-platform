@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
@@ -26,7 +26,7 @@ export type MapPoint = {
   lng: number;
 };
 
-const PLACEHOLDER = "https://picsum.photos/seed/kshome/400/260";
+const PLACEHOLDER = "/placeholder-listing.webp";
 
 function pin(featured: boolean) {
   const color = featured ? "#e6a817" : "#1557e1";
@@ -61,6 +61,32 @@ export default function MapInner({
   const c: [number, number] = center ?? [KUTAHYA_CENTER.lat, KUTAHYA_CENTER.lng];
   const z = zoom ?? KUTAHYA_CENTER.zoom;
 
+  // Aynı/çok yakın koordinata düşen ilanların pinleri üst üste binip tıklanamaz
+  // hale gelmesin diye, aynı noktadakileri küçük bir daire şeklinde yan yana dağıt.
+  const spread = useMemo(() => {
+    const groups = new Map<string, MapPoint[]>();
+    for (const p of points) {
+      const key = `${p.lat.toFixed(5)},${p.lng.toFixed(5)}`; // ~1 m çözünürlük
+      const g = groups.get(key);
+      if (g) g.push(p);
+      else groups.set(key, [p]);
+    }
+    const out: (MapPoint & { dLat: number; dLng: number })[] = [];
+    for (const g of groups.values()) {
+      if (g.length === 1) {
+        out.push({ ...g[0], dLat: g[0].lat, dLng: g[0].lng });
+        continue;
+      }
+      const R = 0.00014; // ~15 m yarıçap
+      const latAdj = Math.cos((g[0].lat * Math.PI) / 180) || 1; // boylamı enleme göre düzelt
+      g.forEach((p, i) => {
+        const a = (2 * Math.PI * i) / g.length;
+        out.push({ ...p, dLat: p.lat + R * Math.cos(a), dLng: p.lng + (R * Math.sin(a)) / latAdj });
+      });
+    }
+    return out;
+  }, [points]);
+
   return (
     <div style={{ height }} className="w-full overflow-hidden rounded-2xl ring-1 ring-slate-200">
       <MapContainer center={c} zoom={z} scrollWheelZoom className="h-full w-full">
@@ -69,7 +95,7 @@ export default function MapInner({
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
         <Recenter center={c} zoom={z} />
-        {points.map((p) => {
+        {spread.map((p) => {
           const specs = [
             p.propertyType ? PROPERTY_TYPE_LABELS[p.propertyType] || p.propertyType : null,
             p.rooms,
@@ -79,7 +105,7 @@ export default function MapInner({
           return (
             <Marker
               key={p.id}
-              position={[p.lat, p.lng]}
+              position={[p.dLat, p.dLng]}
               icon={pin(Boolean(p.featured))}
               eventHandlers={{ mouseover: (e) => e.target.openPopup() }}
             >

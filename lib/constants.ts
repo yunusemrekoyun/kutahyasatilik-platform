@@ -112,6 +112,14 @@ export const LANDING_PAGES = [
     intro:
       "Kütahya'da yüksek kazanç potansiyelli yatırımlık arsa ve tarlalar. Gelişen bölgelerde değer kazanacak fırsatları kaçırmayın.",
   },
+  {
+    slug: "kutahya-satilik-isyeri",
+    title: "Kütahya Satılık İşyeri & Dükkan",
+    propertyType: "isyeri",
+    heading: "Kütahya Satılık İşyeri & Dükkan İlanları",
+    intro:
+      "Kütahya merkez ve ilçelerinde satılık dükkan, mağaza, ofis ve ticari işyeri fırsatları. Yatırımlık ve kullanıma hazır ticari gayrimenkulleri portföyümüzde inceleyin.",
+  },
 ];
 
 export const LANDING_BY_SLUG: Record<string, (typeof LANDING_PAGES)[number]> =
