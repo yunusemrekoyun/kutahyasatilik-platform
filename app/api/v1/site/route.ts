@@ -1,21 +1,23 @@
 import { NextResponse } from "next/server";
 import { SITE } from "@/lib/site";
+import { getSiteContact } from "@/lib/contact";
 
 export const dynamic = "force-dynamic";
 
-// Mobil için public site bilgisi (iletişim ekranı vb.). Yalnız genel/iletişim alanları;
-// SITE tek kaynaktır (prod env değerleri burada yansır), mobil hardcode etmez.
+// Mobil için public site bilgisi (iletişim ekranı vb.). İletişim alanları admin > Ayarlar
+// (Setting) kaynaklıdır (getSiteContact); mobil hardcode etmez.
 export async function GET() {
+  const c = await getSiteContact();
   return NextResponse.json({
     ok: true,
     site: {
       name: SITE.name,
       brand: SITE.brand,
-      phone: SITE.phone,
-      phoneRaw: SITE.phoneRaw,
-      whatsapp: SITE.whatsapp,
-      email: SITE.email,
-      address: SITE.address,
+      phone: c.phone,
+      phoneRaw: c.phoneRaw,
+      whatsapp: c.whatsapp,
+      email: c.email,
+      address: c.address,
       url: SITE.url,
     },
   });

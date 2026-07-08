@@ -38,6 +38,10 @@ export default async function SettingsPage() {
           <input name="email" type="email" defaultValue={s.email || SITE.email} className={inputCls} />
         </label>
         <label className="block">
+          <span className="mb-1 block text-sm font-medium text-slate-700">Adres (iletişim sayfasında görünür)</span>
+          <input name="address" defaultValue={s.address || SITE.address} className={inputCls} placeholder="Kütahya Merkez, ... Cad. No:.." />
+        </label>
+        <label className="block">
           <span className="mb-1 block text-sm font-medium text-slate-700">Marka Sloganı</span>
           <input name="brand" defaultValue={s.brand || SITE.brand} className={inputCls} />
         </label>
@@ -62,11 +66,9 @@ export default async function SettingsPage() {
       <div className="mt-6 rounded-2xl bg-amber-50 p-5 text-sm text-amber-800 ring-1 ring-amber-200">
         <p className="flex items-center gap-1.5 font-semibold"><Info className="h-4 w-4" />Not</p>
         <p className="mt-1">
-          Telefon ve WhatsApp&apos;ın sitenin tüm butonlarında etkin olması için bu değerleri
-          <code className="mx-1 rounded bg-amber-100 px-1">.env</code> dosyasındaki
-          <code className="mx-1 rounded bg-amber-100 px-1">NEXT_PUBLIC_PHONE</code> ve
-          <code className="mx-1 rounded bg-amber-100 px-1">NEXT_PUBLIC_WHATSAPP</code> ile de ayarlayın
-          (statik üretimde kullanılır). Buradaki ayarlar panelde referans olarak saklanır.
+          Buraya girdiğiniz telefon, WhatsApp, e-posta ve adres <strong>sitedeki tüm butonlarda ve
+          iletişim alanlarında anında</strong> kullanılır (Kaydet&apos;e basınca). Telefon veya WhatsApp
+          boş bırakılırsa ilgili buton sitede gösterilmez — böylece hatalı/eksik numara görünmez.
         </p>
       </div>
     </div>

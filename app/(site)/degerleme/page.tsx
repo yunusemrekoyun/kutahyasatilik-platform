@@ -5,6 +5,7 @@ import TrackView from "@/components/TrackView";
 import ValuationTool from "@/components/ValuationTool";
 import { getDistrictStatsObject } from "@/lib/districtStats";
 import { SITE, telLink, whatsappLink } from "@/lib/site";
+import { getSiteContact } from "@/lib/contact";
 
 export const revalidate = 300; // ISR: her 5 dakikada yenilenir (CDN cache + admin revalidatePath)
 
@@ -16,6 +17,7 @@ export const metadata: Metadata = {
 
 export default async function ValuationPage() {
   const stats = await getDistrictStatsObject();
+  const c = await getSiteContact();
 
   return (
     <div className="bg-slate-50">
@@ -74,22 +76,26 @@ export default async function ValuationPage() {
               href="/satici"
               className="inline-flex items-center justify-center gap-2 rounded-[10px] bg-brand-700 px-5 py-3 font-semibold text-white transition hover:bg-brand-800"
             >
-              Detaylı Değerleme Formu <ArrowRight className="h-4 w-4" />
+              İlan Talebi Oluştur <ArrowRight className="h-4 w-4" />
             </Link>
-            <a
-              href={whatsappLink("Merhaba, mülkümün değerlemesi hakkında bilgi almak istiyorum.")}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center justify-center gap-2 rounded-[10px] bg-green-600 px-5 py-3 font-semibold text-white transition hover:bg-green-700"
-            >
-              <MessageCircle className="h-4 w-4" /> WhatsApp
-            </a>
-            <a
-              href={telLink()}
-              className="inline-flex items-center justify-center gap-2 rounded-[10px] border border-brand-200 bg-white px-5 py-3 font-semibold text-brand-800 transition hover:bg-brand-50"
-            >
-              <Phone className="h-4 w-4" /> {SITE.phone}
-            </a>
+            {c.whatsapp && (
+              <a
+                href={whatsappLink(c.whatsapp, "Merhaba, mülkümün değerlemesi hakkında bilgi almak istiyorum.")}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center justify-center gap-2 rounded-[10px] bg-green-600 px-5 py-3 font-semibold text-white transition hover:bg-green-700"
+              >
+                <MessageCircle className="h-4 w-4" /> WhatsApp
+              </a>
+            )}
+            {c.phoneRaw && (
+              <a
+                href={telLink(c.phoneRaw)}
+                className="inline-flex items-center justify-center gap-2 rounded-[10px] border border-brand-200 bg-white px-5 py-3 font-semibold text-brand-800 transition hover:bg-brand-50"
+              >
+                <Phone className="h-4 w-4" /> {c.phone}
+              </a>
+            )}
           </div>
         </div>
       </section>
