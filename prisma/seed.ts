@@ -191,10 +191,10 @@ async function main() {
   });
   console.log(`👤 Admin: ${email} / ${password}`);
 
-  // Settings
+  // Settings — iletişim numarası sahte SEED'lenmez (admin > Ayarlar'dan girilir; boşsa buton gizli).
   const settings: Record<string, string> = {
-    phone: "+90 532 000 00 00",
-    whatsapp: "905320000000",
+    phone: "",
+    whatsapp: "",
     email: "info@kutahyasatilik.com",
     brand: "Kütahya'nın Dijital Emlak Ofisi",
   };

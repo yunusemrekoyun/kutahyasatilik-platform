@@ -4,9 +4,12 @@ import FloatingWhatsApp from "@/components/FloatingWhatsApp";
 import CompareBar from "@/components/CompareBar";
 import MobileTabBar from "@/components/MobileTabBar";
 import PromoPopup from "@/components/PromoPopup";
+import { SiteContactProvider } from "@/components/SiteContactProvider";
+import { getSiteContact } from "@/lib/contact";
 import { prisma } from "@/lib/prisma";
 
 export default async function SiteLayout({ children }: { children: React.ReactNode }) {
+  const contact = await getSiteContact();
   let popup = null;
   try {
     popup = await prisma.popup.findFirst({
@@ -18,7 +21,7 @@ export default async function SiteLayout({ children }: { children: React.ReactNo
   }
 
   return (
-    <>
+    <SiteContactProvider contact={contact}>
       <Header />
       <main className="flex-1 pb-16 lg:pb-0">{children}</main>
       <Footer />
@@ -39,6 +42,6 @@ export default async function SiteLayout({ children }: { children: React.ReactNo
           }}
         />
       )}
-    </>
+    </SiteContactProvider>
   );
 }

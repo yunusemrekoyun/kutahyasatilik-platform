@@ -2,7 +2,8 @@
 
 import { useState } from "react";
 import { Phone, MessageCircle, CalendarDays, ClipboardCheck, Banknote, X } from "lucide-react";
-import { SITE, telLink, whatsappLink } from "@/lib/site";
+import { telLink, whatsappLink } from "@/lib/site";
+import { useSiteContact } from "./SiteContactProvider";
 import { trackConversion } from "@/lib/track";
 import LeadForm from "./LeadForm";
 
@@ -20,6 +21,7 @@ export default function ContactButtons({
   layout?: "grid" | "stack";
 }) {
   const [modal, setModal] = useState<ModalType>(null);
+  const c = useSiteContact();
 
   const waMessage = `Merhaba, "${listingTitle}" ilanı (kutahyasatilik.com) hakkında bilgi almak istiyorum.`;
 
@@ -32,22 +34,26 @@ export default function ContactButtons({
             : "flex flex-col gap-2.5"
         }
       >
-        <a
-          href={telLink()}
-          onClick={() => trackConversion({ type: "phone_click", listingId, district })}
-          className="col-span-2 inline-flex items-center justify-center gap-2 rounded-[10px] bg-brand-700 px-4 py-3.5 font-semibold text-white transition hover:bg-brand-800"
-        >
-          <Phone className="h-5 w-5" /> Telefon ile Ara
-        </a>
-        <a
-          href={whatsappLink(waMessage)}
-          target="_blank"
-          rel="noopener noreferrer"
-          onClick={() => trackConversion({ type: "whatsapp_click", listingId, district })}
-          className="col-span-2 inline-flex items-center justify-center gap-2 rounded-[10px] bg-green-600 px-4 py-3.5 font-semibold text-white transition hover:bg-green-700"
-        >
-          <MessageCircle className="h-5 w-5" /> WhatsApp&apos;tan Yaz
-        </a>
+        {c.phoneRaw && (
+          <a
+            href={telLink(c.phoneRaw)}
+            onClick={() => trackConversion({ type: "phone_click", listingId, district })}
+            className="col-span-2 inline-flex items-center justify-center gap-2 rounded-[10px] bg-brand-700 px-4 py-3.5 font-semibold text-white transition hover:bg-brand-800"
+          >
+            <Phone className="h-5 w-5" /> Telefon ile Ara
+          </a>
+        )}
+        {c.whatsapp && (
+          <a
+            href={whatsappLink(c.whatsapp, waMessage)}
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={() => trackConversion({ type: "whatsapp_click", listingId, district })}
+            className="col-span-2 inline-flex items-center justify-center gap-2 rounded-[10px] bg-green-600 px-4 py-3.5 font-semibold text-white transition hover:bg-green-700"
+          >
+            <MessageCircle className="h-5 w-5" /> WhatsApp&apos;tan Yaz
+          </a>
+        )}
         <button
           onClick={() => setModal("appointment")}
           className="inline-flex items-center justify-center gap-1.5 rounded-[10px] border border-brand-200 bg-brand-50 px-3 py-3 text-sm font-semibold text-brand-800 transition hover:bg-brand-100"
@@ -68,9 +74,11 @@ export default function ContactButtons({
         </button>
       </div>
 
-      <p className="mt-3 text-center text-xs text-slate-500">
-        Hemen arayın: <a href={telLink()} className="font-semibold text-brand-700">{SITE.phone}</a>
-      </p>
+      {c.phone && (
+        <p className="mt-3 text-center text-xs text-slate-500">
+          Hemen arayın: <a href={telLink(c.phoneRaw)} className="font-semibold text-brand-700">{c.phone}</a>
+        </p>
+      )}
 
       {modal && (
         <div

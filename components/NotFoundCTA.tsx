@@ -1,12 +1,16 @@
+"use client";
+
 import Link from "next/link";
 import { BellRing, Phone, MessageCircle } from "lucide-react";
-import { SITE, telLink, whatsappLink } from "@/lib/site";
+import { telLink, whatsappLink } from "@/lib/site";
+import { useSiteContact } from "@/components/SiteContactProvider";
 
 export default function NotFoundCTA({
   title = "Aradığınız gayrimenkulü bulamadınız mı?",
 }: {
   title?: string;
 }) {
+  const c = useSiteContact();
   return (
     <section className="rounded-2xl bg-brand-950 p-8 text-center text-white sm:p-12">
       <h2 className="font-display text-2xl font-bold sm:text-3xl">{title}</h2>
@@ -22,20 +26,24 @@ export default function NotFoundCTA({
         >
           <BellRing className="h-5 w-5" /> Talebimi Bırak, Bulun
         </Link>
-        <a
-          href={telLink()}
-          className="inline-flex w-full items-center justify-center gap-2 rounded-[10px] bg-white/10 px-6 py-3.5 font-semibold text-white ring-1 ring-white/25 transition hover:bg-white/20 sm:w-auto"
-        >
-          <Phone className="h-5 w-5" /> {SITE.phone}
-        </a>
-        <a
-          href={whatsappLink("Merhaba, aradığım kriterlerde gayrimenkul arıyorum. Yardımcı olabilir misiniz?")}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="inline-flex w-full items-center justify-center gap-2 rounded-[10px] bg-green-600 px-6 py-3.5 font-semibold text-white transition hover:bg-green-700 sm:w-auto"
-        >
-          <MessageCircle className="h-5 w-5" /> WhatsApp&apos;tan Yaz
-        </a>
+        {c.phoneRaw && (
+          <a
+            href={telLink(c.phoneRaw)}
+            className="inline-flex w-full items-center justify-center gap-2 rounded-[10px] bg-white/10 px-6 py-3.5 font-semibold text-white ring-1 ring-white/25 transition hover:bg-white/20 sm:w-auto"
+          >
+            <Phone className="h-5 w-5" /> {c.phone}
+          </a>
+        )}
+        {c.whatsapp && (
+          <a
+            href={whatsappLink(c.whatsapp, "Merhaba, aradığım kriterlerde gayrimenkul arıyorum. Yardımcı olabilir misiniz?")}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex w-full items-center justify-center gap-2 rounded-[10px] bg-green-600 px-6 py-3.5 font-semibold text-white transition hover:bg-green-700 sm:w-auto"
+          >
+            <MessageCircle className="h-5 w-5" /> WhatsApp&apos;tan Yaz
+          </a>
+        )}
       </div>
     </section>
   );

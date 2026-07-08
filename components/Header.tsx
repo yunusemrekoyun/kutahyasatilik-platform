@@ -8,6 +8,7 @@ import {
   Map, BarChart3, Calculator, UserPlus, Star,
 } from "lucide-react";
 import { SITE, telLink, whatsappLink } from "@/lib/site";
+import { useSiteContact } from "@/components/SiteContactProvider";
 import { useStore } from "@/components/store/StoreProvider";
 import NotificationBell from "@/components/NotificationBell";
 
@@ -18,6 +19,7 @@ const PROPERTY_LINKS = [
   { href: "/kutahya-satilik-arsa", label: "Satılık Arsa" },
   { href: "/kutahya-satilik-villa", label: "Villa" },
   { href: "/kutahya-yatirimlik-arsa", label: "Yatırımlık Arsa" },
+  { href: "/kutahya-satilik-isyeri", label: "İşyeri / Dükkan" },
 ];
 
 // Keşfet menüsü: harita + bölge/değerleme araçları (her biri kısa açıklamalı — ne işe yaradığı net).
@@ -38,6 +40,7 @@ export default function Header() {
   const pathname = usePathname();
   const { favorites, hydrated } = useStore();
   const favCount = hydrated ? favorites.length : 0;
+  const c = useSiteContact();
 
   // Oturum durumunu client-side al (layout statik/ISR kalsın diye sunucuda cookie okumuyoruz).
   const [account, setAccount] = useState<{ name: string } | null>(null);
@@ -74,15 +77,21 @@ export default function Header() {
             <span className="text-brand-300">Hafta içi 09:00–19:00 · Cmt 10:00–17:00</span>
           </div>
           <div className="flex items-center gap-4">
-            <a href={`mailto:${SITE.email}`} className="inline-flex items-center gap-1.5 text-brand-200 hover:text-white">
-              <Mail className="h-3.5 w-3.5" /> {SITE.email}
-            </a>
-            <a href={telLink()} className="inline-flex items-center gap-1.5 text-brand-200 hover:text-white">
-              <Phone className="h-3.5 w-3.5" /> {SITE.phone}
-            </a>
-            <a href={whatsappLink("Merhaba, gayrimenkul hakkında bilgi almak istiyorum.")} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 text-brand-200 hover:text-white">
-              <MessageCircle className="h-3.5 w-3.5" /> WhatsApp
-            </a>
+            {c.email && (
+              <a href={`mailto:${c.email}`} className="inline-flex items-center gap-1.5 text-brand-200 hover:text-white">
+                <Mail className="h-3.5 w-3.5" /> {c.email}
+              </a>
+            )}
+            {c.phoneRaw && (
+              <a href={telLink(c.phoneRaw)} className="inline-flex items-center gap-1.5 text-brand-200 hover:text-white">
+                <Phone className="h-3.5 w-3.5" /> {c.phone}
+              </a>
+            )}
+            {c.whatsapp && (
+              <a href={whatsappLink(c.whatsapp, "Merhaba, gayrimenkul hakkında bilgi almak istiyorum.")} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 text-brand-200 hover:text-white">
+                <MessageCircle className="h-3.5 w-3.5" /> WhatsApp
+              </a>
+            )}
             <span className="h-3.5 w-px bg-white/20" />
             <Link href="/emlakci/kayit" className="inline-flex items-center gap-1.5 rounded-full bg-white/10 px-3 py-1 font-semibold text-white ring-1 ring-white/25 transition hover:bg-white/20">
               <UserPlus className="h-3.5 w-3.5" /> Danışman Başvurusu
@@ -236,14 +245,20 @@ export default function Header() {
               <Link href="/emlakci/kayit" onClick={() => setOpen(false)} className="flex items-center justify-center gap-2 rounded-[10px] border border-brand-200 px-3 py-2.5 text-center text-sm font-semibold text-brand-700">
                 <UserPlus className="h-4 w-4" /> Danışman Başvurusu
               </Link>
-              <div className="grid grid-cols-2 gap-2">
-                <a href={whatsappLink("Merhaba, bilgi almak istiyorum.")} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center gap-1.5 rounded-lg bg-green-600 px-3 py-2.5 text-sm font-semibold text-white">
-                  <MessageCircle className="h-4 w-4" /> WhatsApp
-                </a>
-                <a href={telLink()} className="flex items-center justify-center gap-1.5 rounded-lg bg-brand-700 px-3 py-2.5 text-sm font-semibold text-white">
-                  <Phone className="h-4 w-4" /> Ara
-                </a>
-              </div>
+              {(c.whatsapp || c.phoneRaw) && (
+                <div className={`grid gap-2 ${c.whatsapp && c.phoneRaw ? "grid-cols-2" : "grid-cols-1"}`}>
+                  {c.whatsapp && (
+                    <a href={whatsappLink(c.whatsapp, "Merhaba, bilgi almak istiyorum.")} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center gap-1.5 rounded-lg bg-green-600 px-3 py-2.5 text-sm font-semibold text-white">
+                      <MessageCircle className="h-4 w-4" /> WhatsApp
+                    </a>
+                  )}
+                  {c.phoneRaw && (
+                    <a href={telLink(c.phoneRaw)} className="flex items-center justify-center gap-1.5 rounded-lg bg-brand-700 px-3 py-2.5 text-sm font-semibold text-white">
+                      <Phone className="h-4 w-4" /> Ara
+                    </a>
+                  )}
+                </div>
+              )}
             </div>
           </div>
         )}

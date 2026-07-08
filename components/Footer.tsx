@@ -1,10 +1,12 @@
 import Link from "next/link";
 import { Award, ShieldCheck, Zap, LineChart, Phone, MessageCircle } from "lucide-react";
 import { SITE, telLink, whatsappLink } from "@/lib/site";
+import { getSiteContact } from "@/lib/contact";
 import { DISTRICTS } from "@/lib/constants";
 import { prisma } from "@/lib/prisma";
 
 export default async function Footer() {
+  const c = await getSiteContact();
   let menuPages: { slug: string; title: string }[] = [];
   try {
     menuPages = await prisma.page.findMany({
@@ -16,13 +18,22 @@ export default async function Footer() {
     /* veritabanı hazır değilse boş geç */
   }
 
+  // "Yıl Tecrübe" ana sayfayla aynı Setting'ten (home_stat_years) — hardcode değil, admin yönetir.
+  let statYears = "15";
+  try {
+    const row = await prisma.setting.findUnique({ where: { key: "home_stat_years" } });
+    if (row?.value) statYears = row.value;
+  } catch {
+    /* db yoksa varsayılan */
+  }
+
   return (
     <footer className="mt-20 bg-brand-950 text-slate-300">
       {/* Üst güven şeridi */}
       <div className="border-b border-white/10">
         <div className="mx-auto grid max-w-7xl grid-cols-2 gap-6 px-4 py-8 sm:grid-cols-4">
           {[
-            { Icon: Award, t: "15+ Yıl Tecrübe", s: "Kütahya'da köklü emlak danışmanlığı" },
+            { Icon: Award, t: `${statYears}+ Yıl Tecrübe`, s: "Kütahya'da köklü emlak danışmanlığı" },
             { Icon: ShieldCheck, t: "Güvenli Satış", s: "Şeffaf, komisyonlu, tapuda güvence" },
             { Icon: Zap, t: "Hızlı Dönüş", s: "Taleplere aynı gün geri dönüş" },
             { Icon: LineChart, t: "Dijital Analiz", s: "Veri destekli yatırım analizi" },
@@ -44,14 +55,20 @@ export default async function Footer() {
             Kütahya<span className="text-gold-400">Satılık</span>
           </span>
           <p className="mt-4 max-w-sm text-sm leading-relaxed text-slate-400">
-            {SITE.brand}. Kütahya merkez ve tüm ilçelerinde satılık daire, arsa, villa
-            ve yatırımlık tarla portföyü. Alım, satım ve yatırım danışmanlığında
+            {SITE.brand}. Kütahya merkez ve ilçelerinde satılık konut ve ticari
+            gayrimenkul portföyü. Alım, satım ve yatırım danışmanlığında
             güvenilir çözüm ortağınız.
           </p>
-          <div className="mt-5 flex gap-2">
-            <a href={telLink()} className="inline-flex items-center gap-1.5 rounded-lg bg-white/10 px-4 py-2 text-sm font-semibold text-white hover:bg-white/20"><Phone className="h-4 w-4" /> Ara</a>
-            <a href={whatsappLink()} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 rounded-lg bg-green-600 px-4 py-2 text-sm font-semibold text-white hover:bg-green-700"><MessageCircle className="h-4 w-4" /> WhatsApp</a>
-          </div>
+          {(c.phoneRaw || c.whatsapp) && (
+            <div className="mt-5 flex gap-2">
+              {c.phoneRaw && (
+                <a href={telLink(c.phoneRaw)} className="inline-flex items-center gap-1.5 rounded-lg bg-white/10 px-4 py-2 text-sm font-semibold text-white hover:bg-white/20"><Phone className="h-4 w-4" /> Ara</a>
+              )}
+              {c.whatsapp && (
+                <a href={whatsappLink(c.whatsapp)} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 rounded-lg bg-green-600 px-4 py-2 text-sm font-semibold text-white hover:bg-green-700"><MessageCircle className="h-4 w-4" /> WhatsApp</a>
+              )}
+            </div>
+          )}
         </div>
 
         <div>
