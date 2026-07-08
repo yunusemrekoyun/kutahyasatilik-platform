@@ -16,15 +16,18 @@ export const metadata: Metadata = {
 };
 
 export default async function RegionAnalysis() {
-  const [districts, counts] = await Promise.all([
+  const [districts, counts, scoresSetting] = await Promise.all([
     prisma.district.findMany({ orderBy: { sortOrder: "asc" } }),
     prisma.listing.groupBy({
       by: ["district"],
       where: { status: "active", moderationStatus: "approved" },
       _count: { _all: true },
     }),
+    prisma.setting.findUnique({ where: { key: "analysis_scores" } }),
   ]);
 
+  // Admin "Bölge analizi puanlarını göster" toggle'ı — kapalıysa puan/artış/m² gizli.
+  const showScores = scoresSetting?.value !== "0";
   const countMap = new Map(counts.map((c) => [c.district, c._count._all]));
 
   const stats: DistrictStat[] = districts.map((d) => ({
@@ -70,6 +73,8 @@ export default async function RegionAnalysis() {
         </div>
       </section>
 
+      {/* Analiz görselleri — admin puan toggle'ı açıksa */}
+      {showScores && (<>
       {/* Isı haritası */}
       <section className="mx-auto max-w-6xl px-4 py-10">
         <div className="rounded-2xl bg-white p-5 ring-1 ring-slate-200 sm:p-7">
@@ -89,6 +94,7 @@ export default async function RegionAnalysis() {
         <p className="mt-1 mb-4 text-sm text-slate-600">İki ilçeyi yan yana karşılaştırın; her satırda avantajlı olan yeşil gösterilir.</p>
         <DistrictCompare districts={stats} />
       </section>
+      </>)}
 
       {/* Sıralı liste */}
       <section className="mx-auto max-w-6xl px-4 pb-16">
@@ -99,10 +105,12 @@ export default async function RegionAnalysis() {
               <thead>
                 <tr className="border-b border-slate-100 bg-slate-50 text-left text-xs text-slate-500">
                   <th className="p-3">İlçe</th>
+                  {showScores && (<>
                   <th className="p-3 text-right">Yatırım Puanı</th>
                   <th className="p-3 text-right">3 Yıl Artış</th>
                   <th className="p-3 text-right">Arsa m²</th>
                   <th className="p-3 text-right">Ort. Daire</th>
+                  </>)}
                   <th className="p-3 text-center">İlan</th>
                   <th className="p-3"></th>
                 </tr>
@@ -111,6 +119,7 @@ export default async function RegionAnalysis() {
                 {ranked.map((d) => (
                   <tr key={d.name} className="border-b border-slate-50 hover:bg-slate-50">
                     <td className="p-3 font-semibold text-slate-800">{d.name}</td>
+                    {showScores && (<>
                     <td className="p-3 text-right">
                       {d.investmentScore != null ? (
                         <span className="rounded-md bg-brand-50 px-2 py-0.5 font-bold text-brand-700">{d.investmentScore}/100</span>
@@ -119,6 +128,7 @@ export default async function RegionAnalysis() {
                     <td className="p-3 text-right text-green-600 font-medium">{d.valueGrowth3yPct != null ? `%${d.valueGrowth3yPct}` : "—"}</td>
                     <td className="p-3 text-right text-slate-700">{d.avgPriceArsaM2 != null ? `${formatNumber(d.avgPriceArsaM2)} ₺` : "—"}</td>
                     <td className="p-3 text-right text-slate-700">{d.avgPriceDaire != null ? `${formatNumber(d.avgPriceDaire)} ₺` : "—"}</td>
+                    </>)}
                     <td className="p-3 text-center text-slate-600">{d.count}</td>
                     <td className="p-3 text-right">
                       <Link href={`/ilanlar?ilce=${encodeURIComponent(d.name)}`} className="inline-flex items-center gap-1 text-xs font-semibold text-brand-700 hover:underline">İlanlar <ArrowRight className="h-4 w-4" /></Link>
