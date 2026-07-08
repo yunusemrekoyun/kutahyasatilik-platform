@@ -223,7 +223,11 @@ model Lead {
   listingId String?
   listing   Listing? @relation(fields: [listingId], references: [id], onDelete: SetNull)
 
-  status String @default("new") // new | contacted | closed
+  // Talep sahibi (giriş yapmış kullanıcı) — panelden süreç takibi için
+  userId String?
+  user   User?   @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  status String @default("received") // received | reviewing | contacted | resolved
 
   // Kaynak / Google Ads takibi
   utmSource   String?
@@ -233,10 +237,12 @@ model Lead {
   pagePath    String?
 
   createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([type])
   @@index([status])
   @@index([createdAt])
+  @@index([userId])
 }
 
 // ---------------------------------------------------------------------------
@@ -415,6 +421,7 @@ model User {
   favorites   Favorite[]
   alerts      BuyerAlert[]
   resetTokens PasswordResetToken[]
+  leads       Lead[]
 }
 
 // ---------------------------------------------------------------------------

@@ -4,6 +4,7 @@ import LeadForm from "@/components/LeadForm";
 import TrackView from "@/components/TrackView";
 import { SITE, telLink, whatsappLink } from "@/lib/site";
 import { getSiteContact } from "@/lib/contact";
+import { getUserSession } from "@/lib/userAuth";
 
 export const metadata: Metadata = {
   title: "İletişim",
@@ -11,7 +12,7 @@ export const metadata: Metadata = {
 };
 
 export default async function ContactPage() {
-  const c = await getSiteContact();
+  const [c, session] = await Promise.all([getSiteContact(), getUserSession()]);
   return (
     <div className="mx-auto max-w-5xl px-4 py-10">
       <TrackView />
@@ -62,7 +63,7 @@ export default async function ContactPage() {
           <h2 className="font-display text-lg font-bold text-slate-900">Bize Yazın</h2>
           <p className="mt-1 text-sm text-slate-500">Formu doldurun, en kısa sürede dönüş yapalım.</p>
           <div className="mt-4">
-            <LeadForm type="contact" />
+            <LeadForm type="contact" isLoggedIn={!!session} defaultName={session?.name ?? ""} />
           </div>
         </div>
       </div>

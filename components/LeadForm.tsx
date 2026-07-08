@@ -5,6 +5,7 @@ import { CheckCircle2, Lock } from "lucide-react";
 import { useUtm } from "@/lib/useUtm";
 import { trackAdsConversion } from "@/lib/track";
 import { isValidTrPhone, TR_PHONE_ERROR } from "@/lib/validation";
+import LoginRequiredNotice from "./LoginRequiredNotice";
 
 type LeadType = "appointment" | "expertise" | "price_offer" | "contact";
 
@@ -39,6 +40,8 @@ export default function LeadForm({
   district,
   compact = false,
   onDone,
+  isLoggedIn = true,
+  defaultName = "",
 }: {
   type: LeadType;
   listingId?: string;
@@ -46,11 +49,18 @@ export default function LeadForm({
   district?: string;
   compact?: boolean;
   onDone?: () => void;
+  isLoggedIn?: boolean;
+  defaultName?: string;
 }) {
   const utm = useUtm();
   const cfg = CONFIG[type];
   const [status, setStatus] = useState<"idle" | "loading" | "ok" | "error">("idle");
   const [error, setError] = useState("");
+
+  // Talep bırakmak için giriş zorunlu → giriş yoksa form yerine bildirim göster.
+  if (!isLoggedIn) {
+    return <LoginRequiredNotice text={`${cfg.title} için giriş yapın`} />;
+  }
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -121,7 +131,7 @@ export default function LeadForm({
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div>
           <label htmlFor="lf-name" className={labelCls}>Ad Soyad <span className="text-red-500">*</span></label>
-          <input id="lf-name" name="name" required placeholder="Adınız ve soyadınız" className={inputCls} />
+          <input id="lf-name" name="name" required defaultValue={defaultName} placeholder="Adınız ve soyadınız" className={inputCls} />
         </div>
         <div>
           <label htmlFor="lf-phone" className={labelCls}>Telefon <span className="text-red-500">*</span></label>

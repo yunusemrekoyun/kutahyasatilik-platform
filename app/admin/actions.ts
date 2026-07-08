@@ -550,7 +550,7 @@ export async function promoteLeadToOpportunity(formData: FormData) {
       biddingEndsAt: new Date(Date.now() + 7 * 24 * 3600_000),
     },
   });
-  await prisma.lead.update({ where: { id: leadId }, data: { status: "closed" } });
+  await prisma.lead.update({ where: { id: leadId }, data: { status: "resolved" } });
   revalidatePath("/admin/talepler");
   redirect("/admin/firsatlar");
 }

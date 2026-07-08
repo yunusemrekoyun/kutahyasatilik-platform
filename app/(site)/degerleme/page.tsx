@@ -6,6 +6,7 @@ import ValuationTool from "@/components/ValuationTool";
 import { getDistrictStatsObject } from "@/lib/districtStats";
 import { SITE, telLink, whatsappLink } from "@/lib/site";
 import { getSiteContact } from "@/lib/contact";
+import { getUserSession } from "@/lib/userAuth";
 
 export const revalidate = 300; // ISR: her 5 dakikada yenilenir (CDN cache + admin revalidatePath)
 
@@ -18,6 +19,7 @@ export const metadata: Metadata = {
 export default async function ValuationPage() {
   const stats = await getDistrictStatsObject();
   const c = await getSiteContact();
+  const session = await getUserSession();
 
   return (
     <div className="bg-slate-50">
@@ -42,7 +44,7 @@ export default async function ValuationPage() {
 
       {/* ARAÇ */}
       <section className="mx-auto -mt-8 max-w-5xl px-4 pb-4">
-        <ValuationTool stats={stats} />
+        <ValuationTool stats={stats} isLoggedIn={!!session} defaultName={session?.name ?? ""} />
       </section>
 
       {/* GÜVEN / SÜREÇ */}

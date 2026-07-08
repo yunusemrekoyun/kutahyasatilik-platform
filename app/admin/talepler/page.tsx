@@ -17,9 +17,13 @@ const TYPE_TABS = [
   { key: "contact", label: "İletişim" },
 ];
 
-const STATUS_TONE: Record<string, "danger" | "warning" | "success"> = {
+const STATUS_TONE: Record<string, "danger" | "warning" | "success" | "brand"> = {
+  received: "danger",
+  reviewing: "warning",
+  contacted: "brand",
+  resolved: "success",
+  // eski değerler (geriye dönük)
   new: "danger",
-  contacted: "warning",
   closed: "success",
 };
 
@@ -91,9 +95,10 @@ export default async function AdminLeads({
                   <form action={updateLeadStatus} className="flex items-center gap-1">
                     <input type="hidden" name="id" value={l.id} />
                     <select name="status" defaultValue={l.status} className="rounded-lg border border-slate-300 px-2 py-1.5 text-xs">
-                      <option value="new">Yeni</option>
-                      <option value="contacted">Arandı</option>
-                      <option value="closed">Kapandı</option>
+                      <option value="received">Alındı</option>
+                      <option value="reviewing">İnceleniyor</option>
+                      <option value="contacted">İletişim kuruldu</option>
+                      <option value="resolved">Sonuçlandı</option>
                     </select>
                     <button className="rounded-lg bg-slate-100 px-2.5 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-200">Kaydet</button>
                   </form>

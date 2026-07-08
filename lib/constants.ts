@@ -61,10 +61,16 @@ export const LEAD_TYPE_LABELS: Record<string, string> = {
   contact: "İletişim",
 };
 
+// Talep süreç aşamaları (kullanıcı + emlakçı + admin bu çizelgeyi görür)
+export const LEAD_STATUS_FLOW = ["received", "reviewing", "contacted", "resolved"] as const;
 export const LEAD_STATUS_LABELS: Record<string, string> = {
-  new: "Yeni",
-  contacted: "Arandı",
-  closed: "Kapandı",
+  received: "Alındı",
+  reviewing: "İnceleniyor",
+  contacted: "İletişim kuruldu",
+  resolved: "Sonuçlandı",
+  // Eski değerler (geriye dönük uyum)
+  new: "Alındı",
+  closed: "Sonuçlandı",
 };
 
 export const EVENT_TYPE_LABELS: Record<string, string> = {
