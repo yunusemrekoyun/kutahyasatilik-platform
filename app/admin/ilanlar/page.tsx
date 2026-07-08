@@ -1,6 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
-import { PlusCircle, Search, Eye, Inbox, Star, ExternalLink, Pencil, Trash2 } from "lucide-react";
+import { PlusCircle, Search, Eye, Heart, Inbox, Star, ExternalLink, Pencil, Trash2 } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { formatPrice } from "@/lib/format";
 import { PROPERTY_TYPE_LABELS, LISTING_STATUS_LABELS, MODERATION_STATUS_LABELS } from "@/lib/constants";
@@ -42,7 +42,7 @@ export default async function AdminListings({
     prisma.listing.findMany({
       where,
       orderBy: { createdAt: "desc" },
-      include: { images: { take: 1, orderBy: { sortOrder: "asc" } }, _count: { select: { leads: true } } },
+      include: { images: { take: 1, orderBy: { sortOrder: "asc" } }, _count: { select: { leads: true, favorites: true } } },
       take: PER_PAGE,
       skip: (page - 1) * PER_PAGE,
     }),
@@ -72,8 +72,9 @@ export default async function AdminListings({
                 <th className="p-3">İlçe</th>
                 <th className="p-3">Fiyat</th>
                 <th className="p-3">Durum</th>
-                <th className="p-3 text-center"><Eye className="mx-auto h-4 w-4" /></th>
-                <th className="p-3 text-center"><Inbox className="mx-auto h-4 w-4" /></th>
+                <th className="p-3 text-center" title="Görüntülenme"><Eye className="mx-auto h-4 w-4" /></th>
+                <th className="p-3 text-center" title="Favori"><Heart className="mx-auto h-4 w-4" /></th>
+                <th className="p-3 text-center" title="Talep"><Inbox className="mx-auto h-4 w-4" /></th>
                 <th className="p-3 text-right">İşlem</th>
               </tr>
             </thead>
@@ -111,6 +112,7 @@ export default async function AdminListings({
                     </div>
                   </td>
                   <td className="p-3 text-center tabular-nums text-slate-600">{l.viewCount}</td>
+                  <td className="p-3 text-center tabular-nums text-slate-600">{l._count.favorites}</td>
                   <td className="p-3 text-center tabular-nums text-slate-600">{l._count.leads}</td>
                   <td className="p-3">
                     <div className="flex items-center justify-end gap-1">

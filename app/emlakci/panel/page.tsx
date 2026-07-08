@@ -1,6 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
-import { Mail } from "lucide-react";
+import { Mail, Eye, Heart } from "lucide-react";
 import { getAgentSession } from "@/lib/agentAuth";
 import { prisma } from "@/lib/prisma";
 import { formatPrice } from "@/lib/format";
@@ -24,7 +24,7 @@ export default async function AgentDashboard() {
   const listings = await prisma.listing.findMany({
     where: { agentId: agent.id },
     orderBy: { createdAt: "desc" },
-    include: { images: { take: 1, orderBy: { sortOrder: "asc" } }, _count: { select: { leads: true } } },
+    include: { images: { take: 1, orderBy: { sortOrder: "asc" } }, _count: { select: { leads: true, favorites: true } } },
   });
 
   const counts = {
@@ -32,6 +32,12 @@ export default async function AgentDashboard() {
     pending: listings.filter((l) => l.moderationStatus === "pending").length,
     approved: listings.filter((l) => l.moderationStatus === "approved").length,
     rejected: listings.filter((l) => l.moderationStatus === "rejected").length,
+  };
+  // İlan bazlı etkileşim toplamları
+  const engagement = {
+    views: listings.reduce((s, l) => s + l.viewCount, 0),
+    favorites: listings.reduce((s, l) => s + l._count.favorites, 0),
+    leads: listings.reduce((s, l) => s + l._count.leads, 0),
   };
 
   const inputCls =
@@ -51,6 +57,12 @@ export default async function AgentDashboard() {
           </p>
         </div>
         <div className="flex items-center gap-2">
+          <Link
+            href="/emlakci/panel/talepler"
+            className="rounded-lg bg-white px-4 py-2.5 text-sm font-semibold text-brand-700 ring-1 ring-brand-200 hover:bg-brand-50"
+          >
+            Gelen Talepler
+          </Link>
           <Link
             href="/emlakci/panel/firsatlar"
             className="rounded-lg bg-white px-4 py-2.5 text-sm font-semibold text-brand-700 ring-1 ring-brand-200 hover:bg-brand-50"
@@ -81,6 +93,23 @@ export default async function AgentDashboard() {
         ))}
       </div>
 
+      {/* Etkileşim (tüm ilanların toplamı) */}
+      <div className="grid grid-cols-3 gap-3">
+        {[
+          { l: "Görüntülenme", v: engagement.views, Icon: Eye, c: "text-brand-700" },
+          { l: "Favori", v: engagement.favorites, Icon: Heart, c: "text-rose-600" },
+          { l: "Talep", v: engagement.leads, Icon: Mail, c: "text-green-600" },
+        ].map((s) => (
+          <div key={s.l} className="flex items-center gap-3 rounded-2xl bg-white p-4 ring-1 ring-slate-200">
+            <span className={`grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-slate-50 ${s.c}`}><s.Icon className="h-5 w-5" /></span>
+            <div>
+              <p className={`text-2xl font-black leading-none ${s.c}`}>{s.v}</p>
+              <p className="mt-1 text-xs font-medium text-slate-500">{s.l}</p>
+            </div>
+          </div>
+        ))}
+      </div>
+
       {/* İlan listesi */}
       <div>
         <h2 className="text-lg font-bold text-slate-900">İlanlarım</h2>
@@ -93,14 +122,16 @@ export default async function AgentDashboard() {
                   <th className="p-3">Tür</th>
                   <th className="p-3">Fiyat</th>
                   <th className="p-3">Onay Durumu</th>
-                  <th className="p-3 text-center"><Mail className="inline-block h-4 w-4 text-slate-500" /></th>
+                  <th className="p-3 text-center" title="Görüntülenme"><Eye className="inline-block h-4 w-4 text-slate-500" /></th>
+                  <th className="p-3 text-center" title="Favori"><Heart className="inline-block h-4 w-4 text-slate-500" /></th>
+                  <th className="p-3 text-center" title="Talep"><Mail className="inline-block h-4 w-4 text-slate-500" /></th>
                   <th className="p-3 text-right">İşlem</th>
                 </tr>
               </thead>
               <tbody>
                 {listings.length === 0 && (
                   <tr>
-                    <td colSpan={6} className="p-8 text-center text-slate-400">
+                    <td colSpan={8} className="p-8 text-center text-slate-400">
                       Henüz ilanınız yok. &quot;Yeni İlan Ekle&quot; ile başlayın.
                     </td>
                   </tr>
@@ -128,7 +159,9 @@ export default async function AgentDashboard() {
                         <p className="mt-1 max-w-[200px] text-[11px] text-red-500">Sebep: {l.note}</p>
                       )}
                     </td>
-                    <td className="p-3 text-center text-slate-600">{l._count.leads}</td>
+                    <td className="p-3 text-center tabular-nums text-slate-600">{l.viewCount}</td>
+                    <td className="p-3 text-center tabular-nums text-slate-600">{l._count.favorites}</td>
+                    <td className="p-3 text-center tabular-nums text-slate-600">{l._count.leads}</td>
                     <td className="p-3">
                       <div className="flex items-center justify-end gap-2">
                         {l.moderationStatus === "approved" && (
