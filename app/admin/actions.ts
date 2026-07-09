@@ -37,10 +37,10 @@ function revalidateListingSurfaces(slug?: string) {
   revalidatePath("/");
   revalidatePath("/ilanlar");
   revalidatePath("/harita");
-  revalidatePath("/kutahya-satilik-daire");
-  revalidatePath("/kutahya-satilik-arsa");
-  revalidatePath("/kutahya-satilik-villa");
-  revalidatePath("/kutahya-yatirimlik-arsa");
+  revalidatePath("/daire");
+  revalidatePath("/arsa");
+  revalidatePath("/villa");
+  revalidatePath("/yatirimlik-arsa");
   if (slug) revalidatePath(`/ilan/${slug}`);
 }
 

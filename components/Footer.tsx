@@ -74,10 +74,10 @@ export default async function Footer() {
         <div>
           <h4 className="text-sm font-bold uppercase tracking-wider text-gold-300">Kategoriler</h4>
           <ul className="mt-4 space-y-2.5 text-sm">
-            <li><Link href="/kutahya-satilik-daire" className="hover:text-gold-300">Satılık Daire</Link></li>
-            <li><Link href="/kutahya-satilik-arsa" className="hover:text-gold-300">Satılık Arsa</Link></li>
-            <li><Link href="/kutahya-satilik-villa" className="hover:text-gold-300">Satılık Villa</Link></li>
-            <li><Link href="/kutahya-yatirimlik-arsa" className="hover:text-gold-300">Yatırımlık Arsa</Link></li>
+            <li><Link href="/daire" className="hover:text-gold-300">Satılık Daire</Link></li>
+            <li><Link href="/arsa" className="hover:text-gold-300">Satılık Arsa</Link></li>
+            <li><Link href="/villa" className="hover:text-gold-300">Satılık Villa</Link></li>
+            <li><Link href="/yatirimlik-arsa" className="hover:text-gold-300">Yatırımlık Arsa</Link></li>
             <li><Link href="/harita" className="hover:text-gold-300">Harita ile Ara</Link></li>
             <li><Link href="/bolge-analizi" className="hover:text-gold-300">Bölge Fiyat Analizi</Link></li>
           </ul>

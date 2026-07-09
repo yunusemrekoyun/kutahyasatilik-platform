@@ -87,7 +87,7 @@ export const EVENT_TYPE_LABELS: Record<string, string> = {
 // Google Ads odaklı SEO landing sayfaları
 export const LANDING_PAGES = [
   {
-    slug: "kutahya-satilik-daire",
+    slug: "daire",
     title: "Kütahya Satılık Daire",
     propertyType: "daire",
     heading: "Kütahya Satılık Daire İlanları",
@@ -95,7 +95,7 @@ export const LANDING_PAGES = [
       "Kütahya merkez ve ilçelerinde satılık daire arıyorsanız doğru yerdesiniz. Güncel portföyümüzdeki 2+1, 3+1 ve 4+1 daireleri inceleyin, hemen iletişime geçin.",
   },
   {
-    slug: "kutahya-satilik-arsa",
+    slug: "arsa",
     title: "Kütahya Satılık Arsa",
     propertyType: "arsa",
     heading: "Kütahya Satılık Arsa İlanları",
@@ -103,7 +103,7 @@ export const LANDING_PAGES = [
       "Kütahya'da imarlı ve imara açık satılık arsalar. Konut, ticari ve yatırım amaçlı arsa seçeneklerini portföyümüzde bulabilirsiniz.",
   },
   {
-    slug: "kutahya-satilik-villa",
+    slug: "villa",
     title: "Kütahya Satılık Villa",
     propertyType: "villa",
     heading: "Kütahya Satılık Villa İlanları",
@@ -111,7 +111,7 @@ export const LANDING_PAGES = [
       "Kütahya ve çevresinde müstakil bahçeli villa ve lüks konut arayanlar için seçkin portföy. Doğayla iç içe yaşam alanlarını keşfedin.",
   },
   {
-    slug: "kutahya-yatirimlik-arsa",
+    slug: "yatirimlik-arsa",
     title: "Kütahya Yatırımlık Arsa",
     propertyType: "tarla",
     heading: "Kütahya Yatırımlık Arsa & Tarla İlanları",
@@ -119,7 +119,7 @@ export const LANDING_PAGES = [
       "Kütahya'da yüksek kazanç potansiyelli yatırımlık arsa ve tarlalar. Gelişen bölgelerde değer kazanacak fırsatları kaçırmayın.",
   },
   {
-    slug: "kutahya-satilik-isyeri",
+    slug: "isyeri",
     title: "Kütahya Satılık İşyeri & Dükkan",
     propertyType: "isyeri",
     heading: "Kütahya Satılık İşyeri & Dükkan İlanları",
