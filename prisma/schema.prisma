@@ -39,9 +39,10 @@ model Agent {
   createdAt    DateTime  @default(now())
   approvedAt   DateTime?
 
-  listings Listing[]
-  payments Payment[]
-  bids     Bid[]
+  listings      Listing[]
+  payments      Payment[]
+  bids          Bid[]
+  conversations Conversation[]
 
   @@index([status])
 }
@@ -117,11 +118,12 @@ model Listing {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  images       ListingImage[]
-  leads        Lead[]
-  events       AnalyticsEvent[]
-  priceHistory PriceHistory[]
-  favorites    Favorite[]
+  images        ListingImage[]
+  leads         Lead[]
+  events        AnalyticsEvent[]
+  priceHistory  PriceHistory[]
+  favorites     Favorite[]
+  conversations Conversation[]
 
   @@index([propertyType])
   @@index([district])
@@ -418,10 +420,11 @@ model User {
   verifiedAt   DateTime? // e-posta doğrulama (ileride OTP/link ile)
   createdAt    DateTime  @default(now())
 
-  favorites   Favorite[]
-  alerts      BuyerAlert[]
-  resetTokens PasswordResetToken[]
-  leads       Lead[]
+  favorites     Favorite[]
+  alerts        BuyerAlert[]
+  resetTokens   PasswordResetToken[]
+  leads         Lead[]
+  conversations Conversation[]
 }
 
 // ---------------------------------------------------------------------------
@@ -638,4 +641,49 @@ model AdRequest {
   createdAt DateTime @default(now())
 
   @@index([status])
+}
+
+// ---------------------------------------------------------------------------
+// Mesajlaşma — kullanıcı ↔ emlakçı, İLAN bazında. Teklif sohbet içinde balon olarak.
+// ---------------------------------------------------------------------------
+model Conversation {
+  id        String  @id @default(cuid())
+  userId    String
+  user      User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  agentId   String
+  agent     Agent   @relation(fields: [agentId], references: [id], onDelete: Cascade)
+  listingId String
+  listing   Listing @relation(fields: [listingId], references: [id], onDelete: Cascade)
+
+  messages Message[]
+
+  createdAt     DateTime  @default(now())
+  lastMessageAt DateTime  @default(now())
+  userReadAt    DateTime? // kullanıcının son okuma anı (okunmamış sayacı)
+  agentReadAt   DateTime? // emlakçının son okuma anı
+
+  @@unique([userId, listingId]) // bir kullanıcı-ilan için tek sohbet
+  @@index([agentId])
+  @@index([userId])
+  @@index([lastMessageAt])
+}
+
+model Message {
+  id             String       @id @default(cuid())
+  conversationId String
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+
+  senderRole String // "user" | "agent"
+  type       String @default("text") // "text" | "offer"
+
+  body String? // metin mesajı (type=text)
+
+  // Teklif alanları (type=offer)
+  offerAmount   Int?
+  offerCurrency String? // TRY | USD | EUR
+  offerStatus   String? // pending | accepted | rejected | countered
+
+  createdAt DateTime @default(now())
+
+  @@index([conversationId])
 }

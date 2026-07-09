@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { Heart, Mail, User as UserIcon } from "lucide-react";
+import { Heart, Mail, User as UserIcon, MessageSquare } from "lucide-react";
 import { getUserSession } from "@/lib/userAuth";
 import { prisma } from "@/lib/prisma";
 import { LEAD_TYPE_LABELS, PROPERTY_TYPE_LABELS } from "@/lib/constants";
@@ -102,6 +102,14 @@ export default async function AccountPage() {
           <ChangePasswordForm />
         </div>
       </div>
+
+      <Link href="/hesabim/mesajlar" className="mt-4 flex items-center gap-3 rounded-2xl bg-white p-5 ring-1 ring-slate-200 transition hover:ring-brand-300">
+        <span className="grid h-10 w-10 place-items-center rounded-lg bg-brand-50 text-brand-700"><MessageSquare className="h-5 w-5" /></span>
+        <div>
+          <p className="font-semibold text-slate-900">Mesajlarım</p>
+          <p className="text-xs text-slate-500">Danışmanlarla yazışmalar ve teklifler</p>
+        </div>
+      </Link>
 
       <Link href="/favoriler" className="mt-4 flex items-center gap-3 rounded-2xl bg-white p-5 ring-1 ring-slate-200 transition hover:ring-brand-300">
         <span className="grid h-10 w-10 place-items-center rounded-lg bg-rose-50 text-rose-600"><Heart className="h-5 w-5" /></span>
