@@ -58,6 +58,12 @@ export default async function AgentDashboard() {
         </div>
         <div className="flex items-center gap-2">
           <Link
+            href="/emlakci/panel/mesajlar"
+            className="rounded-lg bg-white px-4 py-2.5 text-sm font-semibold text-brand-700 ring-1 ring-brand-200 hover:bg-brand-50"
+          >
+            Mesajlar
+          </Link>
+          <Link
             href="/emlakci/panel/talepler"
             className="rounded-lg bg-white px-4 py-2.5 text-sm font-semibold text-brand-700 ring-1 ring-brand-200 hover:bg-brand-50"
           >

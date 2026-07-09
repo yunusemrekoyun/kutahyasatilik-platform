@@ -10,6 +10,7 @@ import { mediaUrl } from "@/lib/media";
 import { SITE } from "@/lib/site";
 import Gallery from "@/components/Gallery";
 import ContactButtons from "@/components/ContactButtons";
+import StartConversation from "@/components/messaging/StartConversation";
 import { getUserSession } from "@/lib/userAuth";
 import AnalysisSection from "@/components/AnalysisSection";
 import ListingMedia from "@/components/ListingMedia";
@@ -344,6 +345,9 @@ export default async function ListingPage({
                   <p className="mt-3 text-sm text-slate-500">İletişime geçin, hemen yanıt verelim.</p>
                   <div className="mt-4">
                     <ContactButtons listingId={listing.id} listingTitle={listing.title} district={listing.district} isLoggedIn={!!session} defaultName={session?.name ?? ""} />
+                  </div>
+                  <div className="mt-2">
+                    <StartConversation listingId={listing.id} isLoggedIn={!!session} hasAgent={!!listing.agent} />
                   </div>
                 </>
               )}
