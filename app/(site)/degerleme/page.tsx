@@ -39,6 +39,10 @@ export default async function ValuationPage() {
             tahmini değer aralığını <strong>saniyeler içinde</strong> öğrenin. Kayıt
             gerektirmez, tamamen ücretsizdir.
           </p>
+          <p className="mx-auto mt-3 max-w-2xl text-sm text-brand-200/90">
+            Bu bir <strong>ön-değerleme aracıdır</strong>; ilan vermez. Mülkünüzü satışa vermek için{" "}
+            <Link href="/satici" className="font-semibold text-gold-300 underline underline-offset-2">İlan Talebi oluşturun</Link>.
+          </p>
         </div>
       </section>
 

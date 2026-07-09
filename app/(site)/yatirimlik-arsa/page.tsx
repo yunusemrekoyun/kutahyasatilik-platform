@@ -2,14 +2,14 @@ import type { Metadata } from "next";
 import { LANDING_BY_SLUG } from "@/lib/constants";
 import LandingPageView from "@/components/LandingPageView";
 
-const L = LANDING_BY_SLUG["kutahya-satilik-arsa"];
+const L = LANDING_BY_SLUG["yatirimlik-arsa"];
 
 export const revalidate = 300; // ISR: her 5 dakikada yenilenir (CDN cache + admin revalidatePath)
 
 export const metadata: Metadata = {
   title: L.title,
   description: L.intro,
-  alternates: { canonical: "/kutahya-satilik-arsa" },
+  alternates: { canonical: "/yatirimlik-arsa" },
 };
 
 export default function Page() {

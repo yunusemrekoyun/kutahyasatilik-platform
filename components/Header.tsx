@@ -15,11 +15,11 @@ import NotificationBell from "@/components/NotificationBell";
 // İlan tipleri (İlanlar menüsü)
 const PROPERTY_LINKS = [
   { href: "/ilanlar", label: "Tüm İlanlar" },
-  { href: "/kutahya-satilik-daire", label: "Satılık Daire" },
-  { href: "/kutahya-satilik-arsa", label: "Satılık Arsa" },
-  { href: "/kutahya-satilik-villa", label: "Villa" },
-  { href: "/kutahya-yatirimlik-arsa", label: "Yatırımlık Arsa" },
-  { href: "/kutahya-satilik-isyeri", label: "İşyeri / Dükkan" },
+  { href: "/daire", label: "Satılık Daire" },
+  { href: "/arsa", label: "Satılık Arsa" },
+  { href: "/villa", label: "Villa" },
+  { href: "/yatirimlik-arsa", label: "Yatırımlık Arsa" },
+  { href: "/isyeri", label: "İşyeri / Dükkan" },
 ];
 
 // Keşfet menüsü: harita + bölge/değerleme araçları (her biri kısa açıklamalı — ne işe yaradığı net).
