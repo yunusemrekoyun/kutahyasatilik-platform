@@ -5,7 +5,9 @@
 
 */
 -- AlterTable
-ALTER TABLE "Lead" ADD COLUMN     "updatedAt" TIMESTAMP(3) NOT NULL,
+-- updatedAt: mevcut satırlar için CURRENT_TIMESTAMP → boş OLMAYAN Lead tablosunda da güvenli deploy.
+-- Uygulama katmanı @updatedAt ile yönetir; DB default'u yalnızca geçiş içindir.
+ALTER TABLE "Lead" ADD COLUMN     "updatedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 ADD COLUMN     "userId" TEXT,
 ALTER COLUMN "status" SET DEFAULT 'received';
 
