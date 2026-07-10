@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { resolveApiAgent } from "@/lib/apiAgent";
+import { absolutizeUrl } from "@/lib/apiMedia";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -18,7 +19,8 @@ export async function GET(req: NextRequest) {
     where: { id: a.agent.id },
     select: { name: true, phone: true, title: true, agency: true, email: true, slug: true, logo: true },
   });
-  return NextResponse.json({ ok: true, profile: p });
+  // Logo mobil önizleme için mutlaklaştırılır (görsel gelsin).
+  return NextResponse.json({ ok: true, profile: p ? { ...p, logo: absolutizeUrl(p.logo, req) } : p });
 }
 
 export async function PUT(req: NextRequest) {

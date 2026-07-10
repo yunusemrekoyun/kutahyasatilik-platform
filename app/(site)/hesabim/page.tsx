@@ -73,6 +73,9 @@ export default async function AccountPage() {
                   <span className="shrink-0 text-xs text-slate-400">{formatDate(l.createdAt)}</span>
                 </div>
                 {l.message && <p className="mt-2 line-clamp-2 text-sm text-slate-600">{l.message}</p>}
+                {l.preferredDate && (
+                  <p className="mt-1 text-sm text-slate-500">Tercih edilen tarih: {l.preferredDate}</p>
+                )}
                 <div className="mt-4 border-t border-slate-100 pt-4">
                   <RequestStatusStepper status={l.status} />
                 </div>

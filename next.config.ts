@@ -65,6 +65,17 @@ const nextConfig: NextConfig = {
     "/api/upload": ["./node_modules/@img/**", "./node_modules/sharp/**"],
     "/api/upload/seller": ["./node_modules/@img/**", "./node_modules/sharp/**"],
   },
+  // Eski (v1) landing URL'leri kısa sluglara 301 — canlıda paylaşılmış/indexlenmiş
+  // linkler kırılmasın, SEO değeri yeni adrese aksın.
+  async redirects() {
+    return [
+      { source: "/kutahya-satilik-daire", destination: "/daire", permanent: true },
+      { source: "/kutahya-satilik-arsa", destination: "/arsa", permanent: true },
+      { source: "/kutahya-satilik-villa", destination: "/villa", permanent: true },
+      { source: "/kutahya-yatirimlik-arsa", destination: "/yatirimlik-arsa", permanent: true },
+      { source: "/kutahya-satilik-isyeri", destination: "/isyeri", permanent: true },
+    ];
+  },
   async headers() {
     return [
       {

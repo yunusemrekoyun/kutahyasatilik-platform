@@ -8,6 +8,7 @@ import type { Badge } from "@/lib/badges";
 import CardActions from "./CardActions";
 
 export type ListingCardData = {
+  id?: string; // mobil istemci mesaj başlatmak için kullanır (POST /api/v1/messages listingId)
   slug: string;
   title: string;
   price: number;

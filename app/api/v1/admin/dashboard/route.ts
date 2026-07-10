@@ -25,7 +25,7 @@ export async function GET(req: NextRequest) {
   ] = await Promise.all([
     getAnalyticsStats().catch(() => null),
     prisma.lead.count(),
-    prisma.lead.count({ where: { status: "new" } }),
+    prisma.lead.count({ where: { status: { in: ["received", "new"] } } }),
     prisma.listing.count({ where: { status: "active" } }),
     prisma.listing.count({ where: { status: "sold" } }),
     prisma.listing.count({ where: { moderationStatus: "pending" } }),

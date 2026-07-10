@@ -16,7 +16,8 @@ export async function GET(req: NextRequest) {
   try {
     const [total, fresh, ...perType] = await Promise.all([
       prisma.lead.count({ where: owner }),
-      prisma.lead.count({ where: { ...owner, status: "new" } }),
+      // "yeni/işlenmemiş" = ilk aşama (received); eski "new" satırları da dahil.
+      prisma.lead.count({ where: { ...owner, status: { in: ["received", "new"] } } }),
       ...TYPES.map((t) => prisma.lead.count({ where: { ...owner, type: t } })),
     ]);
     const byType: Record<string, number> = {};

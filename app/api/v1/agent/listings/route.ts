@@ -27,8 +27,9 @@ export async function GET(req: NextRequest) {
         select: {
           id: true, slug: true, title: true, price: true, currency: true, district: true,
           propertyType: true, listingType: true, status: true, moderationStatus: true, note: true, createdAt: true,
+          viewCount: true,
           images: { select: { url: true }, orderBy: { sortOrder: "asc" }, take: 1 },
-          _count: { select: { leads: true } },
+          _count: { select: { leads: true, favorites: true } },
         },
       }),
       prisma.listing.count({ where: { agentId: a.agent.id, ...(statusFilter ? { status: statusFilter } : {}) } }),
@@ -46,7 +47,8 @@ export async function GET(req: NextRequest) {
       district: l.district, propertyType: l.propertyType, listingType: l.listingType,
       status: l.status, moderationStatus: l.moderationStatus, note: l.note,
       coverImage: absolutizeUrl(l.images[0]?.url ?? null, req),
-      leadsCount: l._count.leads, createdAt: l.createdAt,
+      leadsCount: l._count.leads, favoritesCount: l._count.favorites, viewCount: l.viewCount,
+      createdAt: l.createdAt,
     }));
     return NextResponse.json({ ok: true, items, total, page, perPage, counts });
   } catch {

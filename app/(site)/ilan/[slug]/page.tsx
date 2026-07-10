@@ -56,7 +56,9 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { slug } = await params;
   const listing = await getListing(slug);
-  if (!listing) return { title: "İlan bulunamadı" };
+  // notFound(): status gerçekten 404 olsun. Metadata'da erken dönersek gövde
+  // streaming'e girer ve HTTP 200 + soft-404 oluşur (SEO için zararlı).
+  if (!listing) notFound();
   const title = listing.metaTitle || listing.title;
   const description =
     listing.metaDescription || listing.description.slice(0, 155);

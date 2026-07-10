@@ -51,6 +51,7 @@ export async function findListingsForAlert(alert: AlertCriteria, take = 12) {
       propertyType: true, district: true, neighborhood: true, rooms: true,
       areaGross: true, status: true, featured: true, verified: true,
       images: { select: { url: true }, orderBy: { sortOrder: "asc" as const }, take: 1 },
+      agent: { select: { name: true } },
     },
   });
 }

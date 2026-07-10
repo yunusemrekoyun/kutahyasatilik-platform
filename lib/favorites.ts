@@ -5,6 +5,7 @@ import { prisma } from "./prisma";
 // GET dönüşü ListingCardData ile uyumlu (favoriler sayfası ListingCard render eder).
 
 const CARD_SELECT = {
+  id: true,
   slug: true,
   title: true,
   price: true,
@@ -18,6 +19,7 @@ const CARD_SELECT = {
   featured: true,
   verified: true,
   images: { select: { url: true }, orderBy: { sortOrder: "asc" as const }, take: 1 },
+  agent: { select: { name: true } },
 } as const;
 
 export async function favoriteCards(userId: string) {
@@ -27,8 +29,8 @@ export async function favoriteCards(userId: string) {
     select: { listing: { select: CARD_SELECT } },
   });
   return favs.map((f) => {
-    const { images, ...rest } = f.listing;
-    return { ...rest, coverImage: images[0]?.url ?? null };
+    const { images, agent, ...rest } = f.listing;
+    return { ...rest, coverImage: images[0]?.url ?? null, agentName: agent?.name ?? null };
   });
 }
 

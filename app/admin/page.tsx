@@ -17,7 +17,7 @@ export default async function AdminDashboard() {
     await Promise.all([
       getAnalyticsStats(),
       prisma.lead.count(),
-      prisma.lead.count({ where: { status: "new" } }),
+      prisma.lead.count({ where: { status: { in: ["received", "new"] } } }),
       prisma.listing.count({ where: { status: "active" } }),
       prisma.listing.count({ where: { status: "sold" } }),
       prisma.listing.findMany({

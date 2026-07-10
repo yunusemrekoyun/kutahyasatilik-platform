@@ -1,9 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { resolveApiAdmin } from "@/lib/apiAdmin";
+import { LEAD_STATUS_FLOW } from "@/lib/constants";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
+
+// 4-aşama akış (web ile parite). Eski istemci new/closed gönderse de normalize edilir.
+const LEGACY_STATUS: Record<string, string> = { new: "received", closed: "resolved" };
 
 // Lead durum güncelle.
 export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
@@ -11,8 +15,9 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
   if (!a.ok) return NextResponse.json({ ok: false, error: a.error }, { status: a.status });
   const { id } = await params;
   const body = (await req.json().catch(() => null)) as Record<string, unknown> | null;
-  const status = String(body?.status ?? "");
-  if (!["new", "contacted", "closed"].includes(status)) {
+  const raw = String(body?.status ?? "");
+  const status = LEGACY_STATUS[raw] ?? raw;
+  if (!LEAD_STATUS_FLOW.includes(status as (typeof LEAD_STATUS_FLOW)[number])) {
     return NextResponse.json({ ok: false, error: "Geçersiz durum" }, { status: 400 });
   }
   await prisma.lead.update({ where: { id }, data: { status } });
@@ -49,6 +54,6 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
       biddingEndsAt: new Date(Date.now() + 7 * 24 * 3600_000),
     },
   });
-  await prisma.lead.update({ where: { id }, data: { status: "closed" } });
+  await prisma.lead.update({ where: { id }, data: { status: "resolved" } });
   return NextResponse.json({ ok: true, opportunityId: opp.id });
 }
