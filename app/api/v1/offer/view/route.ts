@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { checkRate } from "@/lib/rateLimit";
-import { findApplicationForOffer, verifyOtp, activeOfferFor } from "@/lib/offerOtp";
+import { findApplicationForOffer, verifyOtp, currentOfferFor } from "@/lib/offerOtp";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -21,8 +21,9 @@ export async function POST(req: NextRequest) {
   if (!(await verifyOtp(app.id, code))) {
     return NextResponse.json({ ok: false, error: "Kod hatalı veya süresi doldu." }, { status: 401 });
   }
-  const offer = await activeOfferFor(app.id);
-  if (!offer) return NextResponse.json({ ok: false, error: "Aktif teklif yok." }, { status: 404 });
+  // currentOfferFor: kabul edilmiş teklif de görüntülenebilsin (web cookie ucu ile parite).
+  const offer = await currentOfferFor(app.id);
+  if (!offer) return NextResponse.json({ ok: false, error: "Teklif bulunamadı." }, { status: 404 });
 
   await prisma.offer.update({
     where: { id: offer.id },

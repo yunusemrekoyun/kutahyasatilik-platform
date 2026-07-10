@@ -28,6 +28,10 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ slug
     return NextResponse.json({ ok: false, error: "İlan bulunamadı" }, { status: 404 });
   }
 
+  // Görüntülenme sayacını artır (web server-component paritesi) — fire-and-forget.
+  // Emlakçı metriği mobil trafiği de saysın.
+  prisma.listing.update({ where: { id: l.id }, data: { viewCount: { increment: 1 } } }).catch(() => {});
+
   const origin = requestOrigin(req);
 
   return NextResponse.json({
@@ -68,7 +72,8 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ slug
       virtualTourUrl: l.virtualTourUrl,
       featured: l.featured,
       verified: l.verified,
-      viewCount: l.viewCount,
+      // increment fire-and-forget çalıştığı için okunan değer 1 geride kalır; +1 ile telafi.
+      viewCount: l.viewCount + 1,
       createdAt: l.createdAt,
       images: l.images.map((im) => ({ url: absolutize(im.url, origin), alt: im.alt })),
       // Emlakçı logosu mobil için mutlak URL'e çevrilir.

@@ -85,6 +85,7 @@ export async function POST(req: NextRequest) {
   const origin = requestOrigin(req);
   const matches = await findListingsForAlert(criteria, 12);
   const items = matches.map((m) => ({
+    id: m.id,
     slug: m.slug,
     title: m.title,
     price: m.price,
@@ -98,6 +99,7 @@ export async function POST(req: NextRequest) {
     featured: m.featured,
     verified: m.verified,
     coverImage: absolutize(m.images[0]?.url ?? null, origin),
+    agentName: m.agent?.name ?? null,
   }));
 
   return NextResponse.json({ ok: true, id: alert.id, matches: items });

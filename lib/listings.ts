@@ -80,6 +80,7 @@ async function decorate(rows: RawCard[]): Promise<ListingCardData[]> {
       avgPriceArsaM2: stat?.avgPriceArsaM2 ?? null,
     });
     return {
+      id: l.id,
       slug: l.slug,
       title: l.title,
       price: l.price,

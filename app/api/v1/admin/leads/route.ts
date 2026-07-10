@@ -20,7 +20,7 @@ export async function GET(req: NextRequest) {
     select: {
       id: true, type: true, name: true, phone: true, email: true, message: true, status: true,
       district: true, neighborhood: true, propertyType: true, estimatedPrice: true, preferredDate: true,
-      photos: true, createdAt: true,
+      photos: true, lat: true, lng: true, createdAt: true,
       listing: { select: { id: true, title: true, slug: true } },
     },
   });

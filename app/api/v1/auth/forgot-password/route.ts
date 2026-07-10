@@ -6,10 +6,11 @@ import { checkRate } from "@/lib/rateLimit";
 import { sendEmail, notificationEmail, emailEnabled } from "@/lib/email";
 
 export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
 
-// "Şifremi unuttum": e-posta al → tek kullanımlık token üret → DB'de SHA-256 hash sakla →
-// e-posta ile /sifre-sifirla?token=... linki gönder. GÜVENLİK: enumeration önlemek için
-// e-posta kayıtlı olsun olmasın TEK TİP yanıt (link yalnız gerçek kullanıcıya gider).
+// Mobil "Şifremi unuttum" — web /api/user/forgot-password birebir port. PUBLIC.
+// E-posta al → tek kullanımlık token (SHA-256 hash DB'de) → e-posta ile WEB reset linki gönder.
+// Sıfırlama WEB sayfasında tamamlanır (/sifre-sifirla?token=...). Enumeration önlemek için tek tip yanıt.
 
 const schema = z.object({ email: z.string().email("Geçerli bir e-posta girin").max(160) });
 const TTL_MS = 60 * 60 * 1000; // 1 saat
@@ -36,9 +37,8 @@ export async function POST(req: NextRequest) {
   });
   if (!user) return generic;
 
-  // Tek aktif link: eski token'ları temizle.
   await prisma.passwordResetToken.deleteMany({ where: { userId: user.id } });
-  const token = crypto.randomBytes(32).toString("hex"); // 64 hex, yüksek entropi
+  const token = crypto.randomBytes(32).toString("hex");
   const tokenHash = crypto.createHash("sha256").update(token).digest("hex");
   await prisma.passwordResetToken.create({
     data: { userId: user.id, tokenHash, expiresAt: new Date(Date.now() + TTL_MS) },
@@ -50,16 +50,13 @@ export async function POST(req: NextRequest) {
       ? process.env.NEXT_PUBLIC_SITE_URL || "https://kutahyasatilik.com"
       : req.nextUrl.origin;
   const path = `/sifre-sifirla?token=${token}`;
-  // E-posta kapalıyken kullanıcıya "gönderildi" desek de SESSİZ kalmayalım:
-  // dev'de linki logla (akış test edilsin), canlıda yapılandırma eksikliğini HATA olarak logla.
   if (!emailEnabled()) {
     if (process.env.NODE_ENV === "production") {
       console.error(
-        `[sifre-sifirla] E-POSTA YAPILANDIRILMAMIŞ — ${user.email} için sıfırlama bağlantısı GÖNDERİLEMEDİ. ` +
-          `EMAIL_FROM + (SMTP_HOST veya RESEND_API_KEY) ayarlayın.`
+        `[sifre-sifirla][v1] E-POSTA YAPILANDIRILMAMIŞ — ${user.email} için sıfırlama bağlantısı GÖNDERİLEMEDİ.`
       );
     } else {
-      console.log(`[sifre-sifirla][dev] ${user.email}: ${site}${path}`);
+      console.log(`[sifre-sifirla][v1][dev] ${user.email}: ${site}${path}`);
     }
   }
   await sendEmail({

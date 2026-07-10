@@ -28,6 +28,10 @@ function str(v: unknown): string | null {
 function bool(v: unknown): boolean {
   return v === true || v === "on" || v === "true" || v === "1";
 }
+// Gövdede anahtar VAR MI? — yoksa alanı hiç yazmayıp mevcut değeri KORURUZ (twin kayması kalkanı).
+function has(body: Body, key: string): boolean {
+  return Object.prototype.hasOwnProperty.call(body, key);
+}
 // Mobil mutlak url göndermiş olabilir → DB'de web ile aynı GÖRELİ yol saklansın.
 function toRelative(u: string): string {
   if (/^https?:\/\//i.test(u)) {
@@ -47,6 +51,17 @@ export async function upsertAgentListing(
   id: string | null,
   body: Body,
 ): Promise<{ id: string; slug: string }> {
+  // Sahiplik kontrolü EN ÖNCE — başkasının/olmayan ilan için alan validasyonuna
+  // girmeden 403 dönsün (400 "alan zorunlu" bilgi sızdırır/yanıltır).
+  // Düzenlemede mevcut slug da buradan alınır ve KORUNUR (web panel ile aynı:
+  // başlık değişse bile yayınlanmış /ilan/<slug> linki kırılmaz).
+  let existingSlug: string | null = null;
+  if (id) {
+    const owned = await prisma.listing.findUnique({ where: { id }, select: { agentId: true, slug: true } });
+    if (!owned || owned.agentId !== agentId) throw new AgentListingError(403, "Yetkisiz");
+    existingSlug = owned.slug;
+  }
+
   const title = String(body.title || "").trim();
   const price = num(body.price) ?? 0;
   if (!title || price <= 0) throw new AgentListingError(400, "Başlık ve fiyat zorunludur");
@@ -75,13 +90,7 @@ export async function upsertAgentListing(
     }
   }
 
-  // Düzenleme: yalnız kendi ilanı.
-  if (id) {
-    const owned = await prisma.listing.findUnique({ where: { id }, select: { agentId: true } });
-    if (!owned || owned.agentId !== agentId) throw new AgentListingError(403, "Yetkisiz");
-  }
-
-  let slug = str(body.slug) || slugify(title);
+  let slug = existingSlug || str(body.slug) || slugify(title);
   const collide = await prisma.listing.findUnique({ where: { slug } });
   if (collide && collide.id !== id) slug = `${slug}-${Date.now().toString(36).slice(-4)}`;
 
@@ -109,8 +118,9 @@ export async function upsertAgentListing(
     district: String(body.district || "Merkez"),
     neighborhood: str(body.neighborhood),
     address: str(body.address),
-    lat: num(body.lat),
-    lng: num(body.lng),
+    // Harita konumu: gövdede yoksa DOKUNMA (eski istemci/twin göndermezse null'lamasın).
+    ...(has(body, "lat") ? { lat: num(body.lat) } : {}),
+    ...(has(body, "lng") ? { lng: num(body.lng) } : {}),
     areaGross: num(body.areaGross),
     areaNet: num(body.areaNet),
     rooms: str(body.rooms),
@@ -127,9 +137,10 @@ export async function upsertAgentListing(
     adaNo: str(body.adaNo),
     parselNo: str(body.parselNo),
     kaks: str(body.kaks),
-    videoUrl: str(body.videoUrl),
-    droneUrl: str(body.droneUrl),
-    virtualTourUrl: str(body.virtualTourUrl),
+    // Medya linkleri: gövdede yoksa DOKUNMA (video/drone/sanal-tur silinmesin).
+    ...(has(body, "videoUrl") ? { videoUrl: str(body.videoUrl) } : {}),
+    ...(has(body, "droneUrl") ? { droneUrl: str(body.droneUrl) } : {}),
+    ...(has(body, "virtualTourUrl") ? { virtualTourUrl: str(body.virtualTourUrl) } : {}),
     features: features.length ? JSON.stringify(features) : null,
     moderationStatus: "pending", // her kayıt/güncelleme yeniden admin onayına düşer
     agentId,
@@ -148,7 +159,10 @@ export async function upsertAgentListing(
     await prisma.listingImage.deleteMany({ where: { listingId: id } });
     const removed = (existing?.images ?? []).map((i) => i.url).filter((u) => !imageUrls.includes(u));
     await deleteUploadFiles(removed);
-    if (existing?.videoUrl && existing.videoUrl !== data.videoUrl) await deleteVideo(existing.videoUrl);
+    // Yalnız videoUrl gövdede VARSA ve gerçekten değiştiyse eski videoyu sil (anahtar yoksa koru).
+    if (has(body, "videoUrl") && existing?.videoUrl && existing.videoUrl !== str(body.videoUrl)) {
+      await deleteVideo(existing.videoUrl);
+    }
   } else {
     const created = await prisma.listing.create({ data });
     listingId = created.id;

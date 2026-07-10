@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { checkRate, checkRateByKey } from "@/lib/rateLimit";
-import { findApplicationForOffer, issueOtp, activeOfferFor } from "@/lib/offerOtp";
+import { findApplicationForOffer, issueOtp, currentOfferFor } from "@/lib/offerOtp";
 import { sendEmail, notificationEmail, emailEnabled } from "@/lib/email";
 
 export const runtime = "nodejs";
@@ -24,7 +24,8 @@ export async function POST(req: NextRequest) {
 
   const app = await findApplicationForOffer(email, phone4);
   if (!app) return generic;
-  const offer = await activeOfferFor(app.id);
+  // currentOfferFor: kabul sonrası da OTP alınabilsin (web cookie ucu ile parite).
+  const offer = await currentOfferFor(app.id);
   if (!offer) return generic;
 
   const allowed = await checkRateByKey(app.id, "offer-otp-app", 5, 60 * 60_000);
