@@ -7,6 +7,7 @@ import { useUtm } from "@/lib/useUtm";
 import { isValidTrPhone, TR_PHONE_ERROR } from "@/lib/validation";
 import { DISTRICTS, PROPERTY_TYPES } from "@/lib/constants";
 import ListingCard, { type ListingCardData } from "./ListingCard";
+import ThousandsInput from "@/components/ThousandsInput";
 
 export default function BuyerAlertForm() {
   const utm = useUtm();
@@ -132,11 +133,11 @@ export default function BuyerAlertForm() {
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
         <div>
           <label htmlFor="ba-min" className={labelCls}>Min. Fiyat</label>
-          <input id="ba-min" name="minPrice" type="number" min={0} inputMode="numeric" placeholder="₺" defaultValue={sp.get("minPrice") || ""} className={inputCls} />
+          <ThousandsInput id="ba-min" name="minPrice" placeholder="₺" defaultValue={sp.get("minPrice") || ""} className={inputCls} />
         </div>
         <div>
           <label htmlFor="ba-max" className={labelCls}>Maks. Fiyat</label>
-          <input id="ba-max" name="maxPrice" type="number" min={0} inputMode="numeric" placeholder="₺" defaultValue={sp.get("maxPrice") || ""} className={inputCls} />
+          <ThousandsInput id="ba-max" name="maxPrice" placeholder="₺" defaultValue={sp.get("maxPrice") || ""} className={inputCls} />
         </div>
         <div>
           <label htmlFor="ba-area" className={labelCls}>Min. m²</label>

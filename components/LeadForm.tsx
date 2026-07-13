@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { CheckCircle2, Lock } from "lucide-react";
 import { useUtm } from "@/lib/useUtm";
 import { trackAdsConversion } from "@/lib/track";
@@ -56,6 +56,26 @@ export default function LeadForm({
   const cfg = CONFIG[type];
   const [status, setStatus] = useState<"idle" | "loading" | "ok" | "error">("idle");
   const [error, setError] = useState("");
+
+  // Ön-doldurma: ad/telefon/e-posta oturumdan gelir (İlan sayfası statik/ISR olduğundan
+  // sunucudan geçirilemez; client açılışta /api/user/me'den çeker). Kullanıcı yazdıysa ezilmez.
+  const [name, setName] = useState(defaultName);
+  const [phone, setPhone] = useState("");
+  const [email, setEmail] = useState("");
+  useEffect(() => {
+    if (!isLoggedIn) return;
+    let active = true;
+    fetch("/api/user/me")
+      .then((r) => r.json())
+      .then((d) => {
+        if (!active || !d?.user) return;
+        setName((v) => v || d.user.name || "");
+        setPhone((v) => v || d.user.phone || "");
+        setEmail((v) => v || d.user.email || "");
+      })
+      .catch(() => {});
+    return () => { active = false; };
+  }, [isLoggedIn]);
 
   // Talep bırakmak için giriş zorunlu → giriş yoksa form yerine bildirim göster.
   if (!isLoggedIn) {
@@ -131,16 +151,16 @@ export default function LeadForm({
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div>
           <label htmlFor="lf-name" className={labelCls}>Ad Soyad <span className="text-red-500">*</span></label>
-          <input id="lf-name" name="name" required defaultValue={defaultName} placeholder="Adınız ve soyadınız" className={inputCls} />
+          <input id="lf-name" name="name" required value={name} onChange={(e) => setName(e.target.value)} placeholder="Adınız ve soyadınız" className={inputCls} />
         </div>
         <div>
           <label htmlFor="lf-phone" className={labelCls}>Telefon <span className="text-red-500">*</span></label>
-          <input id="lf-phone" name="phone" required type="tel" inputMode="tel" placeholder="05__ ___ __ __" className={inputCls} />
+          <input id="lf-phone" name="phone" required type="tel" inputMode="tel" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="05__ ___ __ __" className={inputCls} />
         </div>
       </div>
       <div>
         <label htmlFor="lf-email" className={labelCls}>E-posta <span className="font-normal text-slate-400">(opsiyonel)</span></label>
-        <input id="lf-email" name="email" type="email" placeholder="ornek@eposta.com" className={inputCls} />
+        <input id="lf-email" name="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="ornek@eposta.com" className={inputCls} />
       </div>
       {cfg.showDate && (
         <div>

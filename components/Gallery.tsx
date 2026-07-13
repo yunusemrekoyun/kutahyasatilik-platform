@@ -42,8 +42,48 @@ export default function Gallery({
 
   return (
     <div>
-      {/* Bento galeri */}
-      <div className="grid h-[320px] grid-cols-1 gap-2 overflow-hidden rounded-xl sm:h-[420px] md:h-[500px] md:grid-cols-4 md:grid-rows-3">
+      {/* Mobil: kaydırmalı galeri — TÜM fotoğraflar parmakla gezilir, kırpılmadan (contain) gösterilir */}
+      <div className="relative md:hidden">
+        <div
+          className="no-scrollbar flex h-[320px] snap-x snap-mandatory overflow-x-auto rounded-xl bg-brand-950"
+          onScroll={(e) => {
+            const el = e.currentTarget;
+            const i = Math.min(Math.round(el.scrollLeft / el.clientWidth), imgs.length - 1);
+            if (i !== idx && i >= 0) setActive(i);
+          }}
+        >
+          {imgs.map((img, i) => (
+            <button
+              key={i}
+              onClick={() => openAt(i)}
+              className="relative h-full w-full shrink-0 snap-center"
+              aria-label={`Fotoğraf ${i + 1} — büyütmek için dokun`}
+            >
+              <Image
+                src={mediaUrl(img.url)}
+                alt={img.alt || `${title} ${i + 1}`}
+                fill
+                sizes="100vw"
+                className="object-contain"
+                priority={i === 0}
+              />
+            </button>
+          ))}
+        </div>
+        <span className="pointer-events-none absolute right-3 top-3 rounded-lg bg-brand-950/70 px-2.5 py-1 text-xs font-medium text-white backdrop-blur">
+          {idx + 1} / {imgs.length}
+        </span>
+        {imgs.length > 1 && (
+          <div className="pointer-events-none absolute bottom-3 left-1/2 flex -translate-x-1/2 gap-1.5">
+            {imgs.slice(0, 8).map((_, i) => (
+              <span key={i} className={`h-1.5 rounded-full transition-all ${i === Math.min(idx, 7) ? "w-4 bg-white" : "w-1.5 bg-white/60"}`} />
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Masaüstü: bento galeri */}
+      <div className="hidden gap-2 overflow-hidden rounded-xl md:grid md:h-[500px] md:grid-cols-4 md:grid-rows-3">
         <button
           onClick={() => openAt(0)}
           className="group relative h-full w-full overflow-hidden bg-slate-100 md:col-span-3 md:row-span-3"

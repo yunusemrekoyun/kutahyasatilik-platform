@@ -7,6 +7,7 @@ import { saveListing } from "@/app/admin/actions";
 import { DISTRICTS, PROPERTY_TYPES } from "@/lib/constants";
 import VideoUploadField from "@/components/admin/VideoUploadField";
 import LocationPicker from "@/components/LocationPicker";
+import ThousandsInput from "@/components/ThousandsInput";
 import { ArrowLeft, ArrowRight, Trash2, Star, Check } from "lucide-react";
 
 type ListingData = {
@@ -125,7 +126,7 @@ export default function ListingForm({ listing }: { listing?: ListingData }) {
               </select>
             </Field>
             <Field label="Fiyat (₺) *">
-              <input name="price" required type="number" defaultValue={listing?.price} className={inputCls} />
+              <ThousandsInput name="price" required defaultValue={listing?.price} placeholder="Örn. 2.500.000" className={inputCls} />
             </Field>
             <Field label="Para Birimi">
               <select name="currency" defaultValue={listing?.currency || "TRY"} className={inputCls}>

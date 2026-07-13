@@ -166,3 +166,7 @@ body {
   content: attr(data-placeholder);
   color: #94a3b8; float: left; height: 0; pointer-events: none;
 }
+
+/* Yatay taşma sigortası: mutlak konumlu dekorlar/geniş öğeler hiçbir tarayıcıda
+   sayfayı yana kaydırmasın (clip: scroll alanı yaratmadan keser). */
+html, body { overflow-x: clip; }
