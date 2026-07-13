@@ -234,7 +234,7 @@ export default function MessagesClient({ basePath }: { basePath: string }) {
             <div className="border-t border-slate-100 p-3">
               {offerMode ? (
                 <div className="flex items-center gap-2">
-                  <input value={offerAmount} onChange={(e) => setOfferAmount(e.target.value.replace(/[^\d]/g, ""))} inputMode="numeric" placeholder="Teklif tutarı (₺)" className="h-11 flex-1 rounded-lg border border-slate-300 px-3 text-sm outline-none focus:border-brand-500" />
+                  <input value={offerAmount ? Number(offerAmount).toLocaleString("tr-TR") : ""} onChange={(e) => setOfferAmount(e.target.value.replace(/[^\d]/g, "").slice(0, 12))} inputMode="numeric" placeholder="Teklif tutarı (₺)" className="h-11 flex-1 rounded-lg border border-slate-300 px-3 text-sm outline-none focus:border-brand-500" />
                   <button onClick={send} disabled={busy || !offerAmount} className="rounded-lg bg-gold-500 px-4 py-2.5 text-sm font-semibold text-gold-950 disabled:opacity-50">Teklif Ver</button>
                   <button onClick={() => setOfferMode(false)} className="text-slate-400"><X className="h-5 w-5" /></button>
                 </div>

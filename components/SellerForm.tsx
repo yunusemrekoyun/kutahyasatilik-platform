@@ -8,6 +8,7 @@ import { isValidTrPhone, TR_PHONE_ERROR } from "@/lib/validation";
 import { DISTRICTS, PROPERTY_TYPES } from "@/lib/constants";
 import LocationPicker from "@/components/LocationPicker";
 import LoginRequiredNotice from "@/components/LoginRequiredNotice";
+import ThousandsInput from "@/components/ThousandsInput";
 
 export default function SellerForm({
   isLoggedIn = true,
@@ -149,7 +150,8 @@ export default function SellerForm({
         </div>
         <div>
           <label htmlFor="sf-price" className={labelCls}>Mülk için istenilen fiyat</label>
-          <input id="sf-price" name="estimatedPrice" inputMode="numeric" placeholder="Örn. 2.500.000 ₺" className={inputCls} />
+          {/* submitFormatted: serbest-metin alan — "2.500.000" olarak saklanır, her yerde okunaklı görünür */}
+          <ThousandsInput id="sf-price" name="estimatedPrice" submitFormatted placeholder="Örn. 2.500.000" className={inputCls} />
         </div>
       </div>
       <div>

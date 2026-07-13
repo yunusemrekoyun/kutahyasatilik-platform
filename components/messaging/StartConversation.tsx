@@ -79,7 +79,7 @@ export default function StartConversation({
                 {mode === "text" ? (
                   <textarea value={text} onChange={(e) => setText(e.target.value)} rows={3} placeholder="Mesajınız..." className="w-full rounded-lg border border-slate-300 p-3 text-sm outline-none transition focus:border-brand-500" />
                 ) : (
-                  <input value={offer} onChange={(e) => setOffer(e.target.value.replace(/[^\d]/g, ""))} inputMode="numeric" placeholder="Teklif tutarı (₺)" className="h-12 w-full rounded-lg border border-slate-300 px-3 text-sm outline-none transition focus:border-brand-500" />
+                  <input value={offer ? Number(offer).toLocaleString("tr-TR") : ""} onChange={(e) => setOffer(e.target.value.replace(/[^\d]/g, "").slice(0, 12))} inputMode="numeric" placeholder="Teklif tutarı (₺)" className="h-12 w-full rounded-lg border border-slate-300 px-3 text-sm outline-none transition focus:border-brand-500" />
                 )}
                 {status === "error" && <p className="mt-2 text-sm font-medium text-red-600">{error}</p>}
                 <button onClick={submit} disabled={status === "loading"} className="mt-3 inline-flex w-full items-center justify-center gap-2 rounded-lg bg-brand-700 px-4 py-3 text-sm font-semibold text-white transition hover:bg-brand-800 disabled:opacity-60">

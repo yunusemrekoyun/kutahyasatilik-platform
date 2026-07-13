@@ -7,6 +7,7 @@ import { submitAgentListing } from "@/app/emlakci/panel/actions";
 import { DISTRICTS, PROPERTY_TYPES } from "@/lib/constants";
 import LocationPicker from "@/components/LocationPicker";
 import VideoUploadField from "@/components/admin/VideoUploadField";
+import ThousandsInput from "@/components/ThousandsInput";
 import { Info, ArrowLeft, ArrowRight, Trash2 } from "lucide-react";
 
 type ListingData = {
@@ -129,7 +130,7 @@ export default function AgentListingForm({ listing }: { listing?: ListingData })
               </select>
             </Field>
             <Field label="Fiyat (₺) *">
-              <input name="price" required type="number" defaultValue={listing?.price} className={inputCls} />
+              <ThousandsInput name="price" required defaultValue={listing?.price} placeholder="Örn. 2.500.000" className={inputCls} />
             </Field>
             <Field label="Para Birimi">
               <select name="currency" defaultValue={listing?.currency || "TRY"} className={inputCls}>

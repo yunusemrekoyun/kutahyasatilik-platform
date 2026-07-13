@@ -5,6 +5,7 @@ import { useState } from "react";
 import { X, SlidersHorizontal, Search, Check, BellRing } from "lucide-react";
 import { DISTRICTS, PROPERTY_TYPES, PROPERTY_TYPE_LABELS } from "@/lib/constants";
 import { formatNumber } from "@/lib/format";
+import ThousandsInput from "@/components/ThousandsInput";
 
 const ROOMS = ["1+0", "1+1", "2+1", "3+1", "4+1", "4+2", "5+1"];
 
@@ -158,9 +159,9 @@ export default function ListingFilters() {
         <div className={sectionCls}>
           <h3 className={headCls}>Fiyat Aralığı (₺)</h3>
           <div className="flex items-center gap-2">
-            <input key={sp.get("min") || "min"} defaultValue={sp.get("min") || ""} onBlur={(e) => update("min", e.target.value)} onKeyDown={(e) => { if (e.key === "Enter") update("min", (e.target as HTMLInputElement).value); }} type="number" min={0} inputMode="numeric" placeholder="Min" className={fieldCls} />
+            <ThousandsInput key={sp.get("min") || "min"} defaultValue={sp.get("min") || ""} onCommit={(raw) => update("min", raw)} placeholder="Min" className={fieldCls} />
             <span className="text-slate-400">–</span>
-            <input key={sp.get("max") || "max"} defaultValue={sp.get("max") || ""} onBlur={(e) => update("max", e.target.value)} onKeyDown={(e) => { if (e.key === "Enter") update("max", (e.target as HTMLInputElement).value); }} type="number" min={0} inputMode="numeric" placeholder="Max" className={fieldCls} />
+            <ThousandsInput key={sp.get("max") || "max"} defaultValue={sp.get("max") || ""} onCommit={(raw) => update("max", raw)} placeholder="Max" className={fieldCls} />
           </div>
         </div>
 
