@@ -19,11 +19,13 @@ const AGENT_STATUS_MESSAGE: Record<string, string> = {
 const schema = z.object({
   email: z.string().email("Geçerli bir e-posta girin").max(160),
   password: z.string().min(1, "Şifre gerekli").max(100),
-  next: z.string().max(512).optional(),
+  // nullish: istemci ?next yokken null gönderebiliyor — optional() null'ı reddedip
+  // girişi tamamen kilitliyordu ("expected string, received null").
+  next: z.string().max(512).nullish(),
 });
 
 // Açık-yönlendirme koruması: yalnız site-içi, tek '/' ile başlayan yol. '//' veya '/\' reddedilir.
-function safePath(raw?: string): string | null {
+function safePath(raw?: string | null): string | null {
   return raw && /^\/[^/\\]/.test(raw) ? raw : null;
 }
 

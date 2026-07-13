@@ -192,6 +192,14 @@ export default function Header() {
                 )}
               </Link>
               {account && <NotificationBell />}
+              {/* Mobil: hesap her zaman üst barda görünür (ikon) — menüye gömülü değil */}
+              <Link
+                href={account ? "/hesabim" : "/giris"}
+                aria-label={account ? "Hesabım" : "Giriş yap"}
+                className="grid h-10 w-10 place-items-center rounded-lg text-slate-600 hover:bg-slate-100 sm:hidden"
+              >
+                <User className="h-5 w-5" />
+              </Link>
               <Link
                 href={account ? "/hesabim" : "/giris"}
                 className="hidden items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-100 sm:inline-flex"
@@ -211,10 +219,34 @@ export default function Header() {
           </div>
         </div>
 
-        {/* Mobil menü */}
+        {/* Mobil menü — sıralama: hesap → gezinme → ana eylem → iletişim */}
         {open && (
-          <div className="border-t border-slate-200 bg-white px-4 py-3 lg:hidden">
-            <nav className="flex flex-col">
+          <div className="max-h-[calc(100dvh-4rem)] overflow-y-auto border-t border-slate-200 bg-white px-4 py-3 lg:hidden">
+            {/* Hesap — en üstte, ilk görülen şey */}
+            {account ? (
+              <Link
+                href="/hesabim"
+                onClick={() => setOpen(false)}
+                className="flex items-center gap-3 rounded-xl bg-brand-50 px-3.5 py-3 ring-1 ring-brand-100"
+              >
+                <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-brand-700 text-white"><User className="h-4.5 w-4.5" /></span>
+                <span className="min-w-0">
+                  <span className="block truncate text-sm font-semibold text-brand-900">Merhaba, {firstName}</span>
+                  <span className="block text-xs text-brand-700">Hesabım · Taleplerim · Mesajlarım</span>
+                </span>
+              </Link>
+            ) : (
+              <div className="grid grid-cols-2 gap-2">
+                <Link href="/giris" onClick={() => setOpen(false)} className="flex items-center justify-center gap-1.5 rounded-[10px] bg-brand-700 px-3 py-2.5 text-sm font-semibold text-white">
+                  <User className="h-4 w-4" /> Giriş Yap
+                </Link>
+                <Link href="/kayit" onClick={() => setOpen(false)} className="flex items-center justify-center rounded-[10px] border border-brand-200 px-3 py-2.5 text-sm font-semibold text-brand-700">
+                  Kayıt Ol
+                </Link>
+              </div>
+            )}
+
+            <nav className="mt-2 flex flex-col">
               <p className="px-3 pb-1 pt-2 text-[11px] font-semibold uppercase tracking-wide text-slate-400">İlanlar</p>
               {PROPERTY_LINKS.map((n) => (
                 <Link key={n.href} href={n.href} onClick={() => setOpen(false)} className="rounded-md px-3 py-2.5 text-sm font-medium text-slate-700 hover:bg-brand-50">{n.label}</Link>
@@ -236,15 +268,16 @@ export default function Header() {
               <Link href="/favoriler" onClick={() => setOpen(false)} className="flex items-center gap-2 rounded-md px-3 py-2.5 text-sm font-medium text-slate-700 hover:bg-brand-50">
                 <Heart className="h-4 w-4" /> Favorilerim {favCount > 0 ? `(${favCount})` : ""}
               </Link>
-              <Link href={account ? "/hesabim" : "/giris"} onClick={() => setOpen(false)} className="flex items-center gap-2 rounded-md px-3 py-2.5 text-sm font-medium text-slate-700 hover:bg-brand-50">
-                <User className="h-4 w-4" /> {account ? firstName : "Giriş / Kayıt"}
-              </Link>
             </nav>
-            <div className="mt-3 space-y-2">
-              <Link href="/satici" onClick={() => setOpen(false)} className="block rounded-[10px] bg-brand-700 px-3 py-2.5 text-center text-sm font-semibold text-white">Mülkünü Sat</Link>
-              <Link href="/emlakci/kayit" onClick={() => setOpen(false)} className="flex items-center justify-center gap-2 rounded-[10px] border border-brand-200 px-3 py-2.5 text-center text-sm font-semibold text-brand-700">
-                <UserPlus className="h-4 w-4" /> Danışman Başvurusu
-              </Link>
+
+            {/* Ana eylem */}
+            <Link href="/satici" onClick={() => setOpen(false)} className="mt-3 block rounded-[10px] bg-brand-700 px-3 py-3 text-center text-sm font-semibold text-white">
+              Mülkünü Sat
+            </Link>
+
+            {/* İletişim — etiketli, düzenli blok */}
+            <div className="mt-4 border-t border-slate-100 pt-3">
+              <p className="px-3 pb-2 text-[11px] font-semibold uppercase tracking-wide text-slate-400">Bize Ulaşın</p>
               {(c.whatsapp || c.phoneRaw) && (
                 <div className={`grid gap-2 ${c.whatsapp && c.phoneRaw ? "grid-cols-2" : "grid-cols-1"}`}>
                   {c.whatsapp && (
@@ -253,12 +286,15 @@ export default function Header() {
                     </a>
                   )}
                   {c.phoneRaw && (
-                    <a href={telLink(c.phoneRaw)} className="flex items-center justify-center gap-1.5 rounded-lg bg-brand-700 px-3 py-2.5 text-sm font-semibold text-white">
-                      <Phone className="h-4 w-4" /> Ara
+                    <a href={telLink(c.phoneRaw)} className="flex items-center justify-center gap-1.5 rounded-lg border border-brand-200 px-3 py-2.5 text-sm font-semibold text-brand-700">
+                      <Phone className="h-4 w-4" /> Bizi Ara
                     </a>
                   )}
                 </div>
               )}
+              <Link href="/emlakci/kayit" onClick={() => setOpen(false)} className="mt-2 flex items-center justify-center gap-2 rounded-lg px-3 py-2.5 text-center text-sm font-medium text-slate-500 hover:text-brand-700">
+                <UserPlus className="h-4 w-4" /> Danışman olmak ister misin? Başvur
+              </Link>
             </div>
           </div>
         )}
