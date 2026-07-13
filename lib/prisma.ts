@@ -1,3 +1,4 @@
+import "@/lib/zodTr"; // yan etki: zod varsayılan hata mesajları Türkçe
 import { PrismaClient } from "@/app/generated/prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
 

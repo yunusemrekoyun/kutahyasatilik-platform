@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home, Building2, Map, Heart, Phone } from "lucide-react";
+import { Home, Building2, Map, Heart, User } from "lucide-react";
 import { useStore } from "@/components/store/StoreProvider";
 
 const TABS = [
@@ -10,7 +10,9 @@ const TABS = [
   { href: "/ilanlar", label: "İlanlar", icon: Building2 },
   { href: "/harita", label: "Harita", icon: Map },
   { href: "/favoriler", label: "Favoriler", icon: Heart, badge: true },
-  { href: "/iletisim", label: "İletişim", icon: Phone },
+  // Hesap sağ altta (kullanıcı beklentisi). Girişsizse /hesabim → /giris'e yönlendirir,
+  // giriş sonrası geri döner. İletişim: menüdeki "Bize Ulaşın" + footer.
+  { href: "/hesabim", label: "Hesabım", icon: User },
 ];
 
 export default function MobileTabBar() {

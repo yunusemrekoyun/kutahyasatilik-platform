@@ -2,6 +2,7 @@
 // REDIS_URL tanımlıysa Redis kullanır (çok-instance / restart'a dayanıklı, paylaşımlı);
 // yoksa veya Redis erişilemezse bellek-içi fallback'e düşer (tek instance için yeterli).
 
+import "@/lib/zodTr"; // yan etki: zod varsayılan hata mesajları Türkçe
 import type { Redis } from "ioredis";
 
 // --- Bellek-içi fallback (sliding window) ---

@@ -29,7 +29,8 @@ export default function LoginForm() {
       const res = await fetch("/api/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: fd.get("email"), password: fd.get("password"), next }),
+        // next yalnız doluysa gönderilir (null göndermek şemayı düşürüyordu)
+        body: JSON.stringify({ email: fd.get("email"), password: fd.get("password"), ...(next ? { next } : {}) }),
       });
       const data = await res.json();
       if (!res.ok || !data.ok) throw new Error(data.error || "Giriş başarısız");
