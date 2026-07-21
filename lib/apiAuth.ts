@@ -1,6 +1,7 @@
 import "server-only";
 import { cookies } from "next/headers";
 import { SignJWT, jwtVerify } from "jose";
+import { prisma } from "./prisma";
 
 // Mobil (/api/v1) auth yardımcıları — additive katman.
 // Mevcut cookie tabanlı oturum modüllerine (lib/auth, lib/agentAuth, lib/userAuth)
@@ -39,7 +40,15 @@ export async function signSessionToken(
   payload: Record<string, unknown>,
   expiresIn: string
 ): Promise<string> {
-  return new SignJWT(payload)
+  let authVersion = 0;
+  if (typeof payload.adminId === "string") {
+    authVersion = (await prisma.admin.findUnique({ where: { id: payload.adminId }, select: { authVersion: true } }))?.authVersion ?? 0;
+  } else if (typeof payload.agentId === "string") {
+    authVersion = (await prisma.agent.findUnique({ where: { id: payload.agentId }, select: { authVersion: true } }))?.authVersion ?? 0;
+  } else if (typeof payload.userId === "string") {
+    authVersion = (await prisma.user.findUnique({ where: { id: payload.userId }, select: { authVersion: true } }))?.authVersion ?? 0;
+  }
+  return new SignJWT({ ...payload, ver: authVersion })
     .setProtectedHeader({ alg: "HS256" })
     .setIssuedAt()
     .setExpirationTime(expiresIn)
@@ -50,23 +59,30 @@ export async function signSessionToken(
 async function sessionFromToken(token: string): Promise<ApiSession | null> {
   try {
     const { payload } = await jwtVerify(token, secret);
+    const tokenVersion = typeof payload.ver === "number" ? payload.ver : 0;
     if (typeof payload.adminId === "string" && payload.adminId) {
-      return { role: "admin", id: payload.adminId, email: String(payload.email ?? "") };
+      const admin = await prisma.admin.findUnique({ where: { id: payload.adminId }, select: { email: true, authVersion: true } });
+      if (!admin || admin.authVersion !== tokenVersion) return null;
+      return { role: "admin", id: payload.adminId, email: admin.email };
     }
     if (typeof payload.agentId === "string" && payload.agentId) {
+      const agent = await prisma.agent.findUnique({ where: { id: payload.agentId }, select: { email: true, name: true, status: true, authVersion: true } });
+      if (!agent || agent.status !== "approved" || agent.authVersion !== tokenVersion) return null;
       return {
         role: "agent",
         id: payload.agentId,
-        email: String(payload.email ?? ""),
-        name: payload.name ? String(payload.name) : undefined,
+        email: agent.email,
+        name: agent.name,
       };
     }
     if (typeof payload.userId === "string" && payload.userId) {
+      const user = await prisma.user.findUnique({ where: { id: payload.userId }, select: { email: true, name: true, authVersion: true } });
+      if (!user || user.authVersion !== tokenVersion) return null;
       return {
         role: "user",
         id: payload.userId,
-        email: String(payload.email ?? ""),
-        name: payload.name ? String(payload.name) : undefined,
+        email: user.email,
+        name: user.name,
       };
     }
     return null;

@@ -33,7 +33,8 @@ export async function verifyCredentials(email: string, password: string) {
 }
 
 export async function createSession(payload: SessionPayload) {
-  const token = await new SignJWT(payload)
+  const authVersion = (await prisma.admin.findUnique({ where: { id: payload.adminId }, select: { authVersion: true } }))?.authVersion ?? 0;
+  const token = await new SignJWT({ ...payload, ver: authVersion })
     .setProtectedHeader({ alg: "HS256" })
     .setIssuedAt()
     .setExpirationTime("7d")
@@ -64,7 +65,10 @@ export async function getSession(): Promise<SessionPayload | null> {
     // başka silonun (ör. ks_user) token'ı konsa imza geçerli olur. adminId'nin
     // varlığını şart koşarak yalnız gerçek admin token'ını kabul et.
     if (typeof payload.adminId !== "string" || !payload.adminId) return null;
-    return { adminId: payload.adminId, email: payload.email as string };
+    const tokenVersion = typeof payload.ver === "number" ? payload.ver : 0;
+    const admin = await prisma.admin.findUnique({ where: { id: payload.adminId }, select: { email: true, authVersion: true } });
+    if (!admin || admin.authVersion !== tokenVersion) return null;
+    return { adminId: payload.adminId, email: admin.email };
   } catch {
     return null;
   }

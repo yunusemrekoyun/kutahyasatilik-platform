@@ -88,14 +88,14 @@ export default function ListingFilters() {
   const activeChips = CHIP_KEYS.map((k) => ({ k, v: sp.get(k) })).filter((c) => c.v) as { k: string; v: string }[];
 
   const fieldCls =
-    "h-11 w-full rounded-lg border border-slate-300 bg-white px-3.5 text-[15px] text-slate-900 outline-none transition focus:border-brand-500 focus:ring-2 focus:ring-brand-500/30";
-  const sectionCls = "border-t border-slate-100 pt-5";
+    "h-11 w-full rounded-lg border border-stone bg-paper px-3.5 text-[15px] text-ink outline-none transition focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20";
+  const sectionCls = "border-t border-stone pt-5";
   const headCls = "mb-3 text-sm font-semibold text-slate-900";
 
   const content = (
     <>
       {/* Başlık */}
-      <div className="mb-4 flex items-center justify-between border-b border-slate-200 pb-4">
+      <div className="mb-4 flex items-center justify-between border-b border-stone pb-4">
         <h2 className="font-display text-lg font-bold text-brand-900">Filtreler</h2>
         <div className="flex items-center gap-3">
           {activeCount > 0 && (
@@ -264,7 +264,7 @@ export default function ListingFilters() {
       {/* Mobil tetikleyici */}
       <button
         onClick={() => setOpen(true)}
-        className="mb-4 flex w-full items-center justify-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-3 text-[15px] font-medium text-slate-700 lg:hidden"
+        className="mb-4 flex w-full items-center justify-center gap-2 rounded-lg border border-slate-300 bg-paper px-4 py-3 text-[15px] font-medium text-slate-700 lg:hidden"
       >
         <SlidersHorizontal className="h-5 w-5" /> Filtrele
         {activeCount > 0 && <span className="rounded-full bg-brand-600 px-2 py-0.5 text-xs font-semibold text-white">{activeCount}</span>}
@@ -275,7 +275,7 @@ export default function ListingFilters() {
 
       {/* Sidebar (masaüstü) / Sheet (mobil) */}
       <aside
-        className={`${open ? "fixed inset-y-0 right-0 z-50 w-[88%] max-w-sm overflow-y-auto" : "hidden"} bg-white p-5 lg:sticky lg:top-24 lg:z-auto lg:block lg:max-h-[calc(100vh-7rem)] lg:w-auto lg:overflow-y-auto lg:rounded-xl lg:p-5 lg:ring-1 lg:ring-slate-200`}
+        className={`${open ? "fixed inset-y-0 right-0 z-50 w-[92%] max-w-sm overflow-y-auto shadow-prestige" : "hidden"} bg-paper p-5 lg:sticky lg:top-24 lg:z-auto lg:block lg:max-h-[calc(100vh-7rem)] lg:w-auto lg:overflow-y-auto lg:border-r lg:border-stone lg:bg-transparent lg:py-0 lg:pl-0 lg:pr-6`}
       >
         {content}
       </aside>

@@ -22,15 +22,32 @@ type CreateOpts = {
 
 export async function notify(opts: CreateOpts): Promise<void> {
   try {
-    await prisma.notification.create({
-      data: {
-        recipientRole: opts.recipientRole,
-        recipientId: opts.recipientId ?? null,
-        type: opts.type,
-        title: opts.title,
-        body: opts.body ?? null,
-        link: opts.link ?? null,
-      },
+    // Bildirim ve cihaz outbox satırları tek transaction'da oluşur; worker daha sonra gönderir.
+    await prisma.$transaction(async (tx) => {
+      const notification = await tx.notification.create({
+        data: {
+          recipientRole: opts.recipientRole,
+          recipientId: opts.recipientId ?? null,
+          type: opts.type,
+          title: opts.title,
+          body: opts.body ?? null,
+          link: opts.link ?? null,
+        },
+      });
+      const tokens = await tx.pushToken.findMany({
+        where: {
+          recipientRole: opts.recipientRole,
+          ...(opts.recipientId ? { recipientId: opts.recipientId } : {}),
+          active: true,
+        },
+        select: { id: true },
+      });
+      if (tokens.length) {
+        await tx.pushDelivery.createMany({
+          data: tokens.map((token) => ({ notificationId: notification.id, pushTokenId: token.id })),
+          skipDuplicates: true,
+        });
+      }
     });
   } catch {
     // Bildirim ikincil — tablo henüz yoksa ya da hata olursa sessizce geç.
@@ -113,6 +130,24 @@ export async function listNotifications(role: NotificationRole, recipientId: str
     orderBy: { createdAt: "desc" },
     take: limit,
   });
+}
+
+export async function listNotificationsPage(
+  role: NotificationRole,
+  recipientId: string | null,
+  limit = 20,
+  cursor?: string
+) {
+  const take = Math.min(50, Math.max(1, limit));
+  const rows = await prisma.notification.findMany({
+    where: recipientWhere(role, recipientId),
+    orderBy: [{ createdAt: "desc" }, { id: "desc" }],
+    take: take + 1,
+    ...(cursor ? { cursor: { id: cursor }, skip: 1 } : {}),
+  });
+  const hasMore = rows.length > take;
+  const items = hasMore ? rows.slice(0, take) : rows;
+  return { items, nextCursor: hasMore ? items.at(-1)?.id ?? null : null };
 }
 
 export async function unreadCount(role: NotificationRole, recipientId: string | null): Promise<number> {

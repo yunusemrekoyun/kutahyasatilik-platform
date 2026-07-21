@@ -18,7 +18,7 @@ export async function GET(
 
   let size: number;
   try {
-    const info = await stat(/* turbopackIgnore: true */ filePath);
+    const info = await stat(/*turbopackIgnore: true*/ filePath);
     if (!info.isFile()) return new NextResponse("Not found", { status: 404 });
     size = info.size;
   } catch {
@@ -48,7 +48,7 @@ export async function GET(
           headers: { "Content-Range": `bytes */${size}`, "Accept-Ranges": "bytes" },
         });
       }
-      const nodeStream = createReadStream(/* turbopackIgnore: true */ filePath, { start, end });
+      const nodeStream = createReadStream(/*turbopackIgnore: true*/ filePath, { start, end });
       return new NextResponse(Readable.toWeb(nodeStream) as ReadableStream, {
         status: 206,
         headers: {
@@ -61,7 +61,7 @@ export async function GET(
   }
 
   // Range yoksa → tüm dosya, yine stream ile (büyük videoyu belleğe yığmadan)
-  const nodeStream = createReadStream(/* turbopackIgnore: true */ filePath);
+  const nodeStream = createReadStream(/*turbopackIgnore: true*/ filePath);
   return new NextResponse(Readable.toWeb(nodeStream) as ReadableStream, {
     headers: { ...baseHeaders, "Content-Length": String(size) },
   });

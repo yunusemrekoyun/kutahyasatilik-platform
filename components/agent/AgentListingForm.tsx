@@ -102,13 +102,13 @@ export default function AgentListingForm({ listing }: { listing?: ListingData })
       {listing?.id && <input type="hidden" name="id" value={listing.id} />}
       <input type="hidden" name="imagesJson" value={JSON.stringify(images)} />
 
-      <div className="flex items-start gap-2 rounded-xl bg-amber-50 p-4 text-sm text-amber-800 ring-1 ring-amber-100">
+      <div className="flex items-start gap-2 rounded-lg bg-amber-50 p-4 text-sm text-amber-800 ring-1 ring-amber-100">
         <Info className="mt-0.5 h-4 w-4 shrink-0" />
         <span>Eklediğiniz/güncellediğiniz ilan, yayına alınmadan önce yönetim onayından geçer.</span>
       </div>
 
       {/* Temel bilgiler */}
-      <section className="rounded-2xl bg-white p-6 ring-1 ring-slate-200">
+      <section className="rounded-lg bg-paper p-6 ring-1 ring-stone">
         <h2 className="font-bold text-slate-900">Temel Bilgiler</h2>
         <div className="mt-4 grid gap-4">
           <Field label="İlan Başlığı *">
@@ -165,12 +165,12 @@ export default function AgentListingForm({ listing }: { listing?: ListingData })
       </section>
 
       {/* Görseller */}
-      <section className="rounded-2xl bg-white p-6 ring-1 ring-slate-200">
+      <section className="rounded-lg bg-paper p-6 ring-1 ring-stone">
         <h2 className="font-bold text-slate-900">Görseller</h2>
         <p className="text-xs text-slate-500">İlk görsel kapak olarak kullanılır. Sıralamak için okları kullanın.</p>
         <div className="mt-4 grid grid-cols-3 gap-3 sm:grid-cols-5">
           {images.map((url, i) => (
-            <div key={url} className="group relative aspect-square overflow-hidden rounded-lg ring-1 ring-slate-200">
+            <div key={url} className="group relative aspect-square overflow-hidden rounded-lg ring-1 ring-stone">
               <Image src={url} alt="" fill sizes="120px" className="object-cover" />
               {i === 0 && <span className="absolute left-1 top-1 rounded bg-brand-700 px-1.5 py-0.5 text-[10px] font-bold text-white">Kapak</span>}
               <div className="absolute inset-x-0 bottom-0 flex justify-between bg-black/50 p-1 opacity-0 transition group-hover:opacity-100">
@@ -188,7 +188,7 @@ export default function AgentListingForm({ listing }: { listing?: ListingData })
       </section>
 
       {/* Medya: video / drone / sanal tur */}
-      <section className="rounded-2xl bg-white p-6 ring-1 ring-slate-200">
+      <section className="rounded-lg bg-paper p-6 ring-1 ring-stone">
         <h2 className="font-bold text-slate-900">Video & Sanal Tur (opsiyonel)</h2>
         <p className="text-xs text-slate-500">Tanıtım videosunu doğrudan yükleyin (önerilen) ya da YouTube/Vimeo linki yapıştırın. Sanal tur için Matterport/360 linki kullanın.</p>
         <div className="mt-4 grid gap-4">
@@ -205,7 +205,7 @@ export default function AgentListingForm({ listing }: { listing?: ListingData })
       </section>
 
       {/* Detaylar */}
-      <section className="rounded-2xl bg-white p-6 ring-1 ring-slate-200">
+      <section className="rounded-lg bg-paper p-6 ring-1 ring-stone">
         <h2 className="font-bold text-slate-900">Detaylar</h2>
         <div className="mt-4 grid grid-cols-2 gap-4 sm:grid-cols-4">
           <Field label="Brüt m² *"><input name="areaGross" type="number" required min={1} defaultValue={listing?.areaGross ?? ""} className={inputCls} /></Field>
@@ -242,7 +242,7 @@ export default function AgentListingForm({ listing }: { listing?: ListingData })
       </section>
 
       {/* Konum */}
-      <section className="rounded-2xl bg-white p-6 ring-1 ring-slate-200">
+      <section className="rounded-lg bg-paper p-6 ring-1 ring-stone">
         <h2 className="font-bold text-slate-900">Konum (opsiyonel)</h2>
         <p className="mt-1 text-xs text-slate-500">Haritada tıklayarak veya pini sürükleyerek konumu işaretleyin; ilan haritada görünür.</p>
         <div className="mt-4">

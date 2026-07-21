@@ -1,7 +1,19 @@
 import type { NextConfig } from "next";
 import path from "path";
+import { withSentryConfig } from "@sentry/nextjs";
 
 const isProd = process.env.NODE_ENV === "production";
+const mediaPatterns: NonNullable<NextConfig["images"]>["remotePatterns"] = [];
+if (process.env.NEXT_PUBLIC_MEDIA_URL) {
+  try {
+    const mediaUrl = new URL(process.env.NEXT_PUBLIC_MEDIA_URL);
+    if (mediaUrl.protocol === "https:") {
+      mediaPatterns.push({ protocol: "https", hostname: mediaUrl.hostname, pathname: "/**" });
+    }
+  } catch {
+    // Geçersiz URL build'i kırmaz; üretim kontrolü env doğrulamasında yapılır.
+  }
+}
 
 // ---------------------------------------------------------------------------
 // Content-Security-Policy
@@ -22,7 +34,7 @@ const csp = [
   `font-src 'self' data:`,
   `style-src 'self' 'unsafe-inline'`,
   `script-src 'self' 'unsafe-inline'${isProd ? "" : " 'unsafe-eval'"} https://www.googletagmanager.com https://www.googleadservices.com https://googleads.g.doubleclick.net`,
-  `connect-src 'self'${isProd ? "" : " ws: wss:"} https://www.google-analytics.com https://*.google-analytics.com https://*.analytics.google.com https://www.googletagmanager.com https://stats.g.doubleclick.net https://googleads.g.doubleclick.net https://www.googleadservices.com`,
+  `connect-src 'self'${isProd ? "" : " ws: wss:"} https://www.google-analytics.com https://*.google-analytics.com https://*.analytics.google.com https://www.googletagmanager.com https://stats.g.doubleclick.net https://googleads.g.doubleclick.net https://www.googleadservices.com https://*.ingest.sentry.io https://*.ingest.de.sentry.io`,
   `frame-src 'self' https:`,
   `media-src 'self' https:`,
   `worker-src 'self' blob:`,
@@ -45,17 +57,16 @@ const securityHeaders = [
 
 const nextConfig: NextConfig = {
   output: "standalone",
-  outputFileTracingRoot: path.join(__dirname),
   poweredByHeader: false,
   turbopack: {
     root: path.join(__dirname),
   },
   images: {
-    unoptimized: true,
     remotePatterns: [
       { protocol: "https", hostname: "picsum.photos" },
       { protocol: "https", hostname: "fastly.picsum.photos" },
       { protocol: "https", hostname: "images.unsplash.com" },
+      ...mediaPatterns,
     ],
   },
   serverExternalPackages: ["pg", "sharp", "ioredis"],
@@ -64,6 +75,16 @@ const nextConfig: NextConfig = {
   outputFileTracingIncludes: {
     "/api/upload": ["./node_modules/@img/**", "./node_modules/sharp/**"],
     "/api/upload/seller": ["./node_modules/@img/**", "./node_modules/sharp/**"],
+  },
+  outputFileTracingExcludes: {
+    "*": [
+      "./.agents/**",
+      "./docs/**",
+      "./rapor/**",
+      "./prisma/migrations/**",
+      "./public/uploads/**",
+      "./Kutahyasatilik İlan/**",
+    ],
   },
   // Eski (v1) landing URL'leri kısa sluglara 301 — canlıda paylaşılmış/indexlenmiş
   // linkler kırılmasın, SEO değeri yeni adrese aksın.
@@ -98,4 +119,15 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default nextConfig;
+export default withSentryConfig(nextConfig, {
+  org: process.env.SENTRY_ORG,
+  project: process.env.SENTRY_PROJECT,
+  authToken: process.env.SENTRY_AUTH_TOKEN,
+  silent: !process.env.CI,
+  telemetry: false,
+  sourcemaps: {
+    disable: !process.env.SENTRY_AUTH_TOKEN || !process.env.SENTRY_ORG || !process.env.SENTRY_PROJECT,
+    deleteSourcemapsAfterUpload: true,
+  },
+  webpack: { treeshake: { removeDebugLogging: true } },
+});

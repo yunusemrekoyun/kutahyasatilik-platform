@@ -15,7 +15,7 @@ export default function CompareBar() {
           <span className="hidden sm:inline text-sm font-semibold text-gold-300">Karşılaştırma:</span>
           <div className="flex gap-2 overflow-x-auto no-scrollbar">
             {compare.map((c) => (
-              <span key={c.slug} className="whitespace-nowrap rounded-full bg-white/10 px-3 py-1 text-xs">
+              <span key={c.slug} className="whitespace-nowrap rounded-full bg-paper/10 px-3 py-1 text-xs">
                 {c.title.length > 24 ? c.title.slice(0, 24) + "…" : c.title}
               </span>
             ))}
@@ -27,7 +27,7 @@ export default function CompareBar() {
           </button>
           <Link
             href="/karsilastir"
-            className="inline-flex items-center gap-1 rounded-lg bg-gold-500 px-4 py-2 text-xs font-bold text-brand-950 hover:bg-gold-400"
+            className="inline-flex items-center gap-1 rounded-lg bg-white px-4 py-2 text-xs font-bold text-brand-950 hover:bg-brand-50"
           >
             Karşılaştır ({compare.length}) <ArrowRight className="h-4 w-4" />
           </Link>

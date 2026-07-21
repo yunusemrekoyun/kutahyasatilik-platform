@@ -21,10 +21,10 @@ export default async function AdminPages() {
         </Link>
       </div>
 
-      <div className="mt-6 overflow-hidden rounded-xl bg-white ring-1 ring-slate-200">
+      <div className="mt-6 overflow-hidden rounded-lg bg-paper ring-1 ring-stone">
         <table className="w-full text-sm">
           <thead>
-            <tr className="border-b border-slate-100 bg-slate-50 text-left text-xs text-slate-500">
+            <tr className="border-b border-stone bg-canvas text-left text-xs text-slate-500">
               <th className="p-3">Başlık</th>
               <th className="p-3">Adres</th>
               <th className="p-3">Durum</th>
@@ -38,7 +38,7 @@ export default async function AdminPages() {
               <tr><td colSpan={6} className="p-8 text-center text-slate-400">Henüz sayfa yok. Hakkımızda, KVKK gibi sayfalar ekleyin.</td></tr>
             )}
             {pages.map((p) => (
-              <tr key={p.id} className="border-b border-slate-50 hover:bg-slate-50">
+              <tr key={p.id} className="border-b border-slate-50 hover:bg-canvas">
                 <td className="p-3 font-medium text-slate-800">{p.title}</td>
                 <td className="p-3 text-slate-500">/sayfa/{p.slug}</td>
                 <td className="p-3">

@@ -2,8 +2,10 @@ import { getSession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import AdminShell from "@/components/admin/AdminShell";
 import type { AdminCounts } from "@/components/admin/AdminNav";
+import type { Metadata } from "next";
 
 export const dynamic = "force-dynamic";
+export const metadata: Metadata = { robots: { index: false, follow: false } };
 
 async function getCounts(): Promise<AdminCounts> {
   try {
@@ -27,7 +29,7 @@ export default async function AdminLayout({
 
   // Oturum yoksa (login sayfası) sade göster — middleware diğer yolları zaten korur.
   if (!session) {
-    return <div className="min-h-screen bg-slate-50">{children}</div>;
+    return <div className="min-h-screen bg-canvas">{children}</div>;
   }
 
   const counts = await getCounts();

@@ -9,7 +9,7 @@ import { savePost } from "@/app/admin/actions";
 // TipTap (ProseMirror) ağır; admin form bundle'ına girmemesi için lazy-load.
 const RichEditor = dynamic(() => import("./RichEditor"), {
   ssr: false,
-  loading: () => <div className="h-[340px] animate-pulse rounded-xl bg-slate-100" />,
+  loading: () => <div className="h-[340px] animate-pulse rounded-lg bg-slate-100" />,
 });
 
 type PostData = {
@@ -27,7 +27,7 @@ type PostData = {
 };
 
 const inputCls =
-  "w-full rounded-lg border border-slate-300 bg-white px-3.5 py-2.5 text-[15px] text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/30";
+  "w-full rounded-lg border border-slate-300 bg-paper px-3.5 py-2.5 text-[15px] text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/30";
 const labelCls = "block text-sm font-medium text-slate-700 mb-1";
 
 export default function PostForm({ post }: { post?: PostData }) {
@@ -56,7 +56,7 @@ export default function PostForm({ post }: { post?: PostData }) {
       {post?.id && <input type="hidden" name="id" value={post.id} />}
       <input type="hidden" name="coverImage" value={cover} />
 
-      <section className="rounded-2xl bg-white p-6 ring-1 ring-slate-200">
+      <section className="rounded-lg bg-paper p-6 ring-1 ring-stone">
         <h2 className="font-bold text-slate-900">Yazı Bilgileri</h2>
         <div className="mt-4 grid gap-4">
           <label className="block">
@@ -94,10 +94,10 @@ export default function PostForm({ post }: { post?: PostData }) {
       </section>
 
       {/* Kapak görseli */}
-      <section className="rounded-2xl bg-white p-6 ring-1 ring-slate-200">
+      <section className="rounded-lg bg-paper p-6 ring-1 ring-stone">
         <h2 className="font-bold text-slate-900">Kapak Görseli</h2>
         <div className="mt-4 flex items-center gap-4">
-          <div className="relative h-28 w-44 shrink-0 overflow-hidden rounded-lg bg-slate-100 ring-1 ring-slate-200">
+          <div className="relative h-28 w-44 shrink-0 overflow-hidden rounded-lg bg-slate-100 ring-1 ring-stone">
             {cover && <Image src={cover} alt="" fill sizes="176px" className="object-cover" />}
           </div>
           <div>
@@ -115,13 +115,13 @@ export default function PostForm({ post }: { post?: PostData }) {
       </section>
 
       {/* İçerik (WYSIWYG) */}
-      <section className="rounded-2xl bg-white p-6 ring-1 ring-slate-200">
+      <section className="rounded-lg bg-paper p-6 ring-1 ring-stone">
         <h2 className="mb-3 font-bold text-slate-900">İçerik</h2>
         <RichEditor name="content" defaultValue={post?.content ?? ""} />
       </section>
 
       {/* SEO */}
-      <section className="rounded-2xl bg-white p-6 ring-1 ring-slate-200">
+      <section className="rounded-lg bg-paper p-6 ring-1 ring-stone">
         <h2 className="font-bold text-slate-900">SEO (opsiyonel)</h2>
         <div className="mt-4 grid gap-4">
           <label className="block">

@@ -18,7 +18,7 @@ type PopupData = {
 };
 
 const inputCls =
-  "w-full rounded-lg border border-slate-300 bg-white px-3.5 py-2.5 text-[15px] text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/30";
+  "w-full rounded-lg border border-slate-300 bg-paper px-3.5 py-2.5 text-[15px] text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/30";
 const labelCls = "block text-sm font-medium text-slate-700 mb-1";
 
 export default function PopupForm({ popup }: { popup?: PopupData }) {
@@ -47,7 +47,7 @@ export default function PopupForm({ popup }: { popup?: PopupData }) {
       {popup?.id && <input type="hidden" name="id" value={popup.id} />}
       <input type="hidden" name="imageUrl" value={image} />
 
-      <section className="rounded-2xl bg-white p-6 ring-1 ring-slate-200">
+      <section className="rounded-lg bg-paper p-6 ring-1 ring-stone">
         <h2 className="font-bold text-slate-900">Reklam İçeriği</h2>
         <div className="mt-4 grid gap-4">
           <label className="block">
@@ -63,7 +63,7 @@ export default function PopupForm({ popup }: { popup?: PopupData }) {
           <div>
             <span className={labelCls}>Görsel (opsiyonel)</span>
             <div className="mt-1 flex items-center gap-4">
-              <div className="relative h-24 w-40 shrink-0 overflow-hidden rounded-lg bg-slate-100 ring-1 ring-slate-200">
+              <div className="relative h-24 w-40 shrink-0 overflow-hidden rounded-lg bg-slate-100 ring-1 ring-stone">
                 {image && <Image src={image} alt="" fill sizes="160px" className="object-cover" />}
               </div>
               <div>
@@ -89,7 +89,7 @@ export default function PopupForm({ popup }: { popup?: PopupData }) {
         </div>
       </section>
 
-      <section className="rounded-2xl bg-white p-6 ring-1 ring-slate-200">
+      <section className="rounded-lg bg-paper p-6 ring-1 ring-stone">
         <h2 className="font-bold text-slate-900">Gösterim Ayarları</h2>
         <div className="mt-4 grid gap-4 sm:grid-cols-3">
           <label className="block">

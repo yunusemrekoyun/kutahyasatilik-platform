@@ -140,7 +140,7 @@ export default function VideoUploadField({
       <input type="hidden" name={name} value={value} />
 
       {hasLocal ? (
-        <div className="flex items-center gap-3 rounded-lg border border-slate-300 bg-slate-50 p-2.5">
+        <div className="flex items-center gap-3 rounded-lg border border-slate-300 bg-canvas p-2.5">
           <video src={value} muted playsInline className="h-14 w-24 shrink-0 rounded bg-black object-cover" />
           <div className="min-w-0 flex-1">
             <p className="flex items-center gap-1.5 text-sm font-medium text-slate-800"><Film className="h-4 w-4 text-brand-600" /> Yüklü video</p>
@@ -156,7 +156,7 @@ export default function VideoUploadField({
             value={value}
             onChange={(e) => setValue(e.target.value)}
             placeholder="https://www.youtube.com/watch?v=…  (link yapıştır)"
-            className="h-11 w-full rounded-lg border border-slate-300 bg-white px-3.5 text-[15px] text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/30"
+            className="h-11 w-full rounded-lg border border-slate-300 bg-paper px-3.5 text-[15px] text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/30"
           />
           <div className="flex items-center gap-3">
             <span className="text-xs text-slate-400">veya</span>
@@ -164,7 +164,7 @@ export default function VideoUploadField({
               type="button"
               onClick={() => fileRef.current?.click()}
               disabled={busy}
-              className="inline-flex items-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 disabled:opacity-60"
+              className="inline-flex items-center gap-2 rounded-lg border border-slate-300 bg-paper px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-canvas disabled:opacity-60"
             >
               <UploadCloud className="h-4 w-4" /> Video Yükle
             </button>
@@ -177,7 +177,7 @@ export default function VideoUploadField({
       {/* Yüzen görev kartı: sağ-alt (masaüstü) / üst (mobil) */}
       {task && (
         <div className="fixed inset-x-4 top-4 z-50 sm:inset-x-auto sm:bottom-4 sm:right-4 sm:top-auto sm:w-80">
-          <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-[0_10px_30px_-12px_rgba(15,23,42,0.3)]">
+          <div className="rounded-lg border border-stone bg-paper p-4 shadow-[0_10px_30px_-12px_rgba(15,23,42,0.3)]">
             <div className="flex items-start gap-3">
               <span className="mt-0.5 shrink-0">
                 {task.phase === "done" ? <Check className="h-5 w-5 text-green-600" />

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { parseJsonArray } from "@/lib/format";
 import { requestOrigin } from "@/lib/apiMedia";
+import { buildAnalysis } from "@/lib/analysis";
 
 // Mobil ilan detayı — web detay sayfasıyla (app/(site)/ilan/[slug]) aynı veri kaynağı.
 // Onaylı + pasif olmayan ilan; görseller mobil için mutlak URL'e çevrilir.
@@ -21,6 +22,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ slug
     include: {
       images: { orderBy: { sortOrder: "asc" }, select: { url: true, alt: true } },
       agent: { select: { name: true, title: true, agency: true, logo: true } },
+      priceHistory: { orderBy: { createdAt: "asc" }, select: { price: true, createdAt: true } },
     },
   });
 
@@ -33,6 +35,39 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ slug
   prisma.listing.update({ where: { id: l.id }, data: { viewCount: { increment: 1 } } }).catch(() => {});
 
   const origin = requestOrigin(req);
+  const [district, scoresSetting, similarRaw] = await Promise.all([
+    prisma.district.findFirst({ where: { name: l.district } }),
+    prisma.setting.findUnique({ where: { key: "analysis_scores" }, select: { value: true } }),
+    prisma.listing.findMany({
+      where: {
+        status: "active",
+        moderationStatus: "approved",
+        id: { not: l.id },
+        OR: [{ district: l.district }, { propertyType: l.propertyType }],
+      },
+      orderBy: [{ featured: "desc" }, { createdAt: "desc" }],
+      take: 3,
+      include: { images: { take: 1, orderBy: { sortOrder: "asc" }, select: { url: true } } },
+    }),
+  ]);
+  const analysis = buildAnalysis(l, district);
+  const similar = similarRaw.map((item) => ({
+    id: item.id,
+    slug: item.slug,
+    title: item.title,
+    price: item.price,
+    currency: item.currency,
+    propertyType: item.propertyType,
+    district: item.district,
+    neighborhood: item.neighborhood,
+    rooms: item.rooms,
+    areaGross: item.areaGross,
+    status: item.status,
+    featured: item.featured,
+    verified: item.verified,
+    coverImage: absolutize(item.images[0]?.url ?? null, origin),
+    agentName: null,
+  }));
 
   return NextResponse.json({
     ok: true,
@@ -79,6 +114,10 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ slug
       // Emlakçı logosu mobil için mutlak URL'e çevrilir.
       agent: l.agent ? { ...l.agent, logo: absolutize(l.agent.logo, origin) } : null,
       features: parseJsonArray(l.features),
+      priceHistory: l.priceHistory,
+      similar,
+      analysis,
+      analysisVisible: scoresSetting?.value !== "0",
     },
   });
 }

@@ -66,7 +66,7 @@ export default function SavedSearches() {
 
   if (loaded && items.length === 0) {
     return (
-      <div className="rounded-2xl bg-slate-50 p-5 ring-1 ring-slate-200">
+      <div className="rounded-lg bg-slate-50 p-5 ring-1 ring-stone">
         <p className="text-sm font-semibold text-slate-700">Kayıtlı aramalarınız</p>
         <p className="mt-1 text-xs text-slate-500">
           Henüz kayıtlı aramanız yok.{" "}
@@ -80,7 +80,7 @@ export default function SavedSearches() {
   }
 
   return (
-    <div className="rounded-2xl bg-white p-5 ring-1 ring-slate-200">
+    <div className="rounded-lg bg-paper p-5 ring-1 ring-stone">
       <p className="flex items-center gap-2 text-sm font-semibold text-slate-900">
         <Search className="h-4 w-4 text-brand-600" /> Kayıtlı aramalarım
       </p>

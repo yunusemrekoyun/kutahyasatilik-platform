@@ -100,13 +100,13 @@ export default function RichEditor({
   }, [editor]);
 
   if (!editor) {
-    return <div className="h-[340px] animate-pulse rounded-xl bg-slate-100" />;
+    return <div className="h-[340px] animate-pulse rounded-lg bg-slate-100" />;
   }
 
   return (
-    <div className="overflow-hidden rounded-xl border border-slate-300 bg-white">
+    <div className="overflow-hidden rounded-lg border border-slate-300 bg-paper">
       {/* Araç çubuğu */}
-      <div className="flex flex-wrap items-center gap-1 border-b border-slate-200 bg-slate-50 p-1.5">
+      <div className="flex flex-wrap items-center gap-1 border-b border-stone bg-canvas p-1.5">
         <Btn title="Kalın" active={editor.isActive("bold")} onClick={() => editor.chain().focus().toggleBold().run()}><Bold className="h-4 w-4" /></Btn>
         <Btn title="İtalik" active={editor.isActive("italic")} onClick={() => editor.chain().focus().toggleItalic().run()}><Italic className="h-4 w-4" /></Btn>
         <span className="mx-1 h-5 w-px bg-slate-300" />

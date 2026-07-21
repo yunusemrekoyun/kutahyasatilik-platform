@@ -55,7 +55,7 @@ export default function StartConversation({
 
       {open && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4" onClick={() => setOpen(false)}>
-          <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-prestige" onClick={(e) => e.stopPropagation()}>
+          <div className="w-full max-w-md rounded-lg bg-paper p-6 shadow-prestige" onClick={(e) => e.stopPropagation()}>
             <div className="mb-3 flex items-center justify-between">
               <h3 className="font-display text-lg font-bold text-slate-900">Danışmana Mesaj</h3>
               <button onClick={() => setOpen(false)} aria-label="Kapat"><X className="h-5 w-5 text-slate-400" /></button>
@@ -64,7 +64,7 @@ export default function StartConversation({
             {!isLoggedIn ? (
               <LoginRequiredNotice text="Mesaj / teklif göndermek için giriş yapın" />
             ) : status === "ok" ? (
-              <div className="rounded-xl bg-green-50 p-5 text-center ring-1 ring-green-200">
+              <div className="rounded-lg bg-green-50 p-5 text-center ring-1 ring-green-200">
                 <p className="text-sm font-semibold text-green-800">Mesajınız danışmana iletildi.</p>
                 <Link href="/hesabim/mesajlar" className="mt-3 inline-block rounded-lg bg-brand-700 px-4 py-2 text-sm font-semibold text-white hover:bg-brand-800">
                   Mesajlarıma Git
@@ -74,7 +74,7 @@ export default function StartConversation({
               <>
                 <div className="mb-3 flex gap-2">
                   <button onClick={() => setMode("text")} className={`flex-1 rounded-lg py-2 text-sm font-semibold ${mode === "text" ? "bg-brand-700 text-white" : "bg-slate-100 text-slate-600"}`}>Mesaj</button>
-                  <button onClick={() => setMode("offer")} className={`flex-1 rounded-lg py-2 text-sm font-semibold ${mode === "offer" ? "bg-gold-500 text-gold-950" : "bg-slate-100 text-slate-600"}`}>Teklif Ver</button>
+                  <button onClick={() => setMode("offer")} className={`flex-1 rounded-lg py-2 text-sm font-semibold ${mode === "offer" ? "bg-brand-800 text-white" : "bg-brand-50 text-muted"}`}>Teklif Ver</button>
                 </div>
                 {mode === "text" ? (
                   <textarea value={text} onChange={(e) => setText(e.target.value)} rows={3} placeholder="Mesajınız..." className="w-full rounded-lg border border-slate-300 p-3 text-sm outline-none transition focus:border-brand-500" />

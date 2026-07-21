@@ -54,7 +54,7 @@ export default async function AdminBasvurularPage() {
       </div>
 
       {apps.length === 0 ? (
-        <div className="rounded-2xl bg-white p-10 text-center text-sm text-slate-500 ring-1 ring-slate-200">
+        <div className="rounded-lg bg-paper p-10 text-center text-sm text-slate-500 ring-1 ring-stone">
           Henüz başvuru yok.
         </div>
       ) : (
@@ -62,7 +62,7 @@ export default async function AdminBasvurularPage() {
           {apps.map((a) => {
             const s = STATUS[a.status] ?? STATUS.applied;
             return (
-              <div key={a.id} className="rounded-2xl bg-white p-5 ring-1 ring-slate-200">
+              <div key={a.id} className="rounded-lg bg-paper p-5 ring-1 ring-stone">
                 <div className="flex flex-wrap items-start justify-between gap-3">
                   <div>
                     <p className="font-semibold text-slate-900">{a.name}</p>
@@ -73,7 +73,7 @@ export default async function AdminBasvurularPage() {
                   </div>
                   <span className={`shrink-0 rounded-full px-2.5 py-0.5 text-xs font-semibold ring-1 ${s.cls}`}>{s.label}</span>
                 </div>
-                {a.experience && <p className="mt-2 rounded-lg bg-slate-50 p-3 text-sm text-slate-600">{a.experience}</p>}
+                {a.experience && <p className="mt-2 rounded-lg bg-canvas p-3 text-sm text-slate-600">{a.experience}</p>}
 
                 {a.offers.length > 0 && (
                   <div className="mt-3 space-y-1.5">
@@ -109,7 +109,7 @@ export default async function AdminBasvurularPage() {
                 )}
 
                 {a.status !== "activated" && (
-                  <div className="mt-4 grid gap-3 border-t border-slate-100 pt-4 sm:grid-cols-2">
+                  <div className="mt-4 grid gap-3 border-t border-stone pt-4 sm:grid-cols-2">
                     {/* Durum / not */}
                     <form action={updateApplicationStatus} className="flex flex-col gap-2">
                       <input type="hidden" name="id" value={a.id} />

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { resolveApiSession } from "@/lib/apiAuth";
-import { listNotifications, unreadCount } from "@/lib/notify";
+import { listNotificationsPage, unreadCount } from "@/lib/notify";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -11,11 +11,16 @@ export async function GET(req: NextRequest) {
   if (!session) return NextResponse.json({ ok: false, error: "Yetkisiz" }, { status: 401 });
   try {
     const [items, unread] = await Promise.all([
-      listNotifications(session.role, session.id),
+      listNotificationsPage(
+        session.role,
+        session.id,
+        Number(req.nextUrl.searchParams.get("limit")) || 20,
+        req.nextUrl.searchParams.get("cursor") || undefined
+      ),
       unreadCount(session.role, session.id),
     ]);
-    return NextResponse.json({ ok: true, unread, items });
+    return NextResponse.json({ ok: true, unread, items: items.items, nextCursor: items.nextCursor });
   } catch {
-    return NextResponse.json({ ok: true, unread: 0, items: [] });
+    return NextResponse.json({ ok: true, unread: 0, items: [], nextCursor: null });
   }
 }

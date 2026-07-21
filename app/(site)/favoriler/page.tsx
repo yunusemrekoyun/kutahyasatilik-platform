@@ -16,14 +16,14 @@ export default function FavoritesPage() {
 
       {!hydrated ? (
         <div className="mt-8 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
-          {[1, 2, 3].map((i) => <div key={i} className="skeleton h-72 rounded-2xl" />)}
+          {[1, 2, 3].map((i) => <div key={i} className="skeleton h-72 rounded-lg" />)}
         </div>
       ) : favorites.length === 0 ? (
-        <div className="mt-8 rounded-2xl bg-white p-12 text-center ring-1 ring-slate-200">
+        <div className="mt-8 rounded-lg bg-paper p-12 text-center ring-1 ring-stone">
           <Heart className="mx-auto h-12 w-12 text-slate-300" />
           <h2 className="mt-4 text-lg font-bold text-slate-800">Henüz favori ilanınız yok</h2>
           <p className="mt-1 text-slate-500">İlanlardaki kalp ikonuna dokunarak beğendiklerinizi buraya ekleyin.</p>
-          <Link href="/ilanlar" className="mt-6 inline-block rounded-xl bg-brand-700 px-6 py-3 font-bold text-white hover:bg-brand-800">
+          <Link href="/ilanlar" className="mt-6 inline-block rounded-lg bg-brand-700 px-6 py-3 font-bold text-white hover:bg-brand-800">
             İlanları Keşfet
           </Link>
         </div>

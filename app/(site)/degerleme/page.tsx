@@ -1,12 +1,13 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { BarChart3, Zap, MapPin, Handshake, MessageCircle, Phone, ArrowRight } from "lucide-react";
+import { Zap, MapPin, Handshake, MessageCircle, Phone, ArrowRight } from "lucide-react";
 import TrackView from "@/components/TrackView";
 import ValuationTool from "@/components/ValuationTool";
 import { getDistrictStatsObject } from "@/lib/districtStats";
 import { SITE, telLink, whatsappLink } from "@/lib/site";
 import { getSiteContact } from "@/lib/contact";
 import { getUserSession } from "@/lib/userAuth";
+import { PageIntro } from "@/components/ui/Editorial";
 
 export const revalidate = 300; // ISR: her 5 dakikada yenilenir (CDN cache + admin revalidatePath)
 
@@ -14,6 +15,7 @@ export const metadata: Metadata = {
   title: "Kütahya Ev & Arsa Değerleme - Evimin Değeri Ne Kadar?",
   description:
     "Kütahya'da daire, villa, arsa veya tarlanızın tahmini değerini saniyeler içinde öğrenin. İlçe ortalamalarına dayalı ücretsiz online değerleme aracı.",
+  alternates: { canonical: "/degerleme" },
 };
 
 export default async function ValuationPage() {
@@ -22,32 +24,13 @@ export default async function ValuationPage() {
   const session = await getUserSession();
 
   return (
-    <div className="bg-slate-50">
+    <div>
       <TrackView />
 
-      {/* HERO */}
-      <section className="bg-brand-950 text-white">
-        <div className="mx-auto max-w-5xl px-4 py-12 text-center sm:py-16">
-          <span className="inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-1.5 text-sm font-medium ring-1 ring-gold-400/40">
-            <BarChart3 className="h-4 w-4 text-gold-400" /> Ücretsiz Online Değerleme
-          </span>
-          <h1 className="mt-5 font-display text-3xl font-bold leading-tight sm:text-5xl">
-            Evinizin Değeri <span className="text-gold-400">Ne Kadar?</span>
-          </h1>
-          <p className="mx-auto mt-4 max-w-2xl leading-relaxed text-brand-100">
-            İlçe, mülk türü ve büyüklüğü girin; Kütahya bölge ortalamalarına dayalı
-            tahmini değer aralığını <strong>saniyeler içinde</strong> öğrenin. Kayıt
-            gerektirmez, tamamen ücretsizdir.
-          </p>
-          <p className="mx-auto mt-3 max-w-2xl text-sm text-brand-200/90">
-            Bu bir <strong>ön-değerleme aracıdır</strong>; ilan vermez. Mülkünüzü satışa vermek için{" "}
-            <Link href="/satici" className="font-semibold text-gold-300 underline underline-offset-2">İlan Talebi oluşturun</Link>.
-          </p>
-        </div>
-      </section>
+      <PageIntro eyebrow="Bölgesel ön değerleme" title="Mülkünüzün bölgesel değer aralığını görün" intro={<>İlçe, mülk türü ve büyüklüğü girin; Kütahya bölge ortalamalarına dayalı tahmini aralığı öğrenin. Bu sonuç resmi ekspertiz değildir. Satış için <Link href="/satici" className="font-semibold text-brand-700 underline underline-offset-4">ilan talebi oluşturabilirsiniz</Link>.</>} />
 
       {/* ARAÇ */}
-      <section className="mx-auto -mt-8 max-w-5xl px-4 pb-4">
+      <section className="mx-auto max-w-5xl px-4 py-10">
         <ValuationTool stats={stats} isLoggedIn={!!session} defaultName={session?.name ?? ""} />
       </section>
 
@@ -69,7 +52,7 @@ export default async function ValuationPage() {
           ))}
         </div>
 
-        <div className="mt-10 rounded-2xl bg-brand-50 p-6 text-center ring-1 ring-brand-100 sm:p-8">
+        <div className="mt-10 rounded-lg bg-brand-50 p-6 text-center ring-1 ring-brand-100 sm:p-8">
           <h2 className="font-display text-2xl font-bold text-brand-900">
             Mülkünüzü satmaya hazır mısınız?
           </h2>
@@ -97,7 +80,7 @@ export default async function ValuationPage() {
             {c.phoneRaw && (
               <a
                 href={telLink(c.phoneRaw)}
-                className="inline-flex items-center justify-center gap-2 rounded-[10px] border border-brand-200 bg-white px-5 py-3 font-semibold text-brand-800 transition hover:bg-brand-50"
+                className="inline-flex items-center justify-center gap-2 rounded-[10px] border border-brand-200 bg-paper px-5 py-3 font-semibold text-brand-800 transition hover:bg-brand-50"
               >
                 <Phone className="h-4 w-4" /> {c.phone}
               </a>

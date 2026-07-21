@@ -8,7 +8,7 @@ import type { MapPoint } from "./MapInner";
 const MapInner = dynamic(() => import("./MapInner"), {
   ssr: false,
   loading: () => (
-    <div className="grid h-full w-full place-items-center rounded-2xl bg-slate-100 text-slate-400">
+    <div className="grid h-full w-full place-items-center rounded-lg bg-slate-100 text-slate-400">
       Harita yükleniyor...
     </div>
   ),
@@ -48,35 +48,42 @@ export default function ListingsMap({
   }, [points]);
 
   return (
-    <div>
+    <div className="relative flex min-h-0 flex-col bg-paper" style={{ height }}>
       {showFilter && (
-        <div className="mb-4 flex flex-wrap gap-2">
-          <button
-            onClick={() => setActive("")}
-            className={`rounded-full px-4 py-2 text-sm font-medium transition ${
-              !active ? "bg-brand-700 text-white" : "bg-white text-slate-700 ring-1 ring-slate-300 hover:ring-brand-300"
-            }`}
-          >
-            Tümü ({points.length})
-          </button>
-          {districtsWithCount.map((d) => (
+        <div className="flex shrink-0 items-center gap-3 overflow-x-auto border-b border-stone px-4 py-3 sm:px-5">
+          <span className="shrink-0 text-xs font-semibold uppercase tracking-[0.14em] text-muted">İlçe</span>
+          <div className="flex shrink-0 items-center gap-2">
             <button
-              key={d.slug}
-              onClick={() => setActive(d.name)}
-              className={`rounded-full px-4 py-2 text-sm font-medium transition ${
-                active === d.name ? "bg-brand-700 text-white" : "bg-white text-slate-700 ring-1 ring-slate-300 hover:ring-brand-300"
+              type="button"
+              onClick={() => setActive("")}
+              aria-pressed={!active}
+              className={`min-h-10 shrink-0 rounded-lg px-4 text-sm font-semibold transition ${
+                !active ? "bg-brand-800 text-white" : "border border-stone bg-paper text-ink hover:border-brand-300 hover:text-brand-800"
               }`}
             >
-              {d.name} ({d.count})
+              Tümü <span className="ml-1 tabular-nums opacity-70">{points.length}</span>
             </button>
-          ))}
+            {districtsWithCount.map((d) => (
+              <button
+                type="button"
+                key={d.slug}
+                onClick={() => setActive(d.name)}
+                aria-pressed={active === d.name}
+                className={`min-h-10 shrink-0 rounded-lg px-4 text-sm font-semibold transition ${
+                  active === d.name ? "bg-brand-800 text-white" : "border border-stone bg-paper text-ink hover:border-brand-300 hover:text-brand-800"
+                }`}
+              >
+                {d.name} <span className="ml-1 tabular-nums opacity-70">{d.count}</span>
+              </button>
+            ))}
+          </div>
         </div>
       )}
-      <div style={{ height }}>
+      <div className="min-h-0 flex-1">
         <MapInner points={filtered} center={center} zoom={zoom} />
       </div>
       {filtered.length === 0 && (
-        <p className="mt-3 text-center text-sm text-slate-500">
+        <p className="absolute inset-x-4 bottom-4 rounded-lg bg-paper/95 px-4 py-3 text-center text-sm text-muted shadow-lg">
           Bu bölgede haritada gösterilecek ilan bulunamadı.
         </p>
       )}

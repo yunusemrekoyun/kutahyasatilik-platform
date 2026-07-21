@@ -55,7 +55,7 @@ type ListingData = {
 };
 
 const inputCls =
-  "w-full rounded-lg border border-slate-300 bg-white px-3.5 py-2.5 text-[15px] text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/30";
+  "w-full rounded-lg border border-slate-300 bg-paper px-3.5 py-2.5 text-[15px] text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/30";
 const labelCls = "block text-sm font-medium text-slate-700 mb-1";
 
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
@@ -110,7 +110,7 @@ export default function ListingForm({ listing }: { listing?: ListingData }) {
       <input type="hidden" name="imagesJson" value={JSON.stringify(images)} />
 
       {/* Temel bilgiler */}
-      <section className="rounded-2xl bg-white p-6 ring-1 ring-slate-200">
+      <section className="rounded-lg bg-paper p-6 ring-1 ring-stone">
         <h2 className="font-bold text-slate-900">Temel Bilgiler</h2>
         <div className="mt-4 grid gap-4">
           <Field label="İlan Başlığı *">
@@ -160,12 +160,12 @@ export default function ListingForm({ listing }: { listing?: ListingData }) {
       </section>
 
       {/* Görseller */}
-      <section className="rounded-2xl bg-white p-6 ring-1 ring-slate-200">
+      <section className="rounded-lg bg-paper p-6 ring-1 ring-stone">
         <h2 className="font-bold text-slate-900">Görseller</h2>
         <p className="text-xs text-slate-500">İlk görsel kapak olarak kullanılır. Sürükle-bırak yerine okları kullanın.</p>
         <div className="mt-4 grid grid-cols-3 gap-3 sm:grid-cols-5">
           {images.map((url, i) => (
-            <div key={url} className="group relative aspect-square overflow-hidden rounded-lg ring-1 ring-slate-200">
+            <div key={url} className="group relative aspect-square overflow-hidden rounded-lg ring-1 ring-stone">
               <Image src={url} alt="" fill sizes="120px" className="object-cover" />
               {i === 0 && <span className="absolute left-1 top-1 rounded bg-brand-700 px-1.5 py-0.5 text-[10px] font-bold text-white">Kapak</span>}
               <div className="absolute inset-x-0 bottom-0 flex justify-between bg-black/50 p-1 opacity-0 transition group-hover:opacity-100">
@@ -183,7 +183,7 @@ export default function ListingForm({ listing }: { listing?: ListingData }) {
       </section>
 
       {/* Medya: video / drone / sanal tur */}
-      <section className="rounded-2xl bg-white p-6 ring-1 ring-slate-200">
+      <section className="rounded-lg bg-paper p-6 ring-1 ring-stone">
         <h2 className="font-bold text-slate-900">Video & Sanal Tur</h2>
         <p className="text-xs text-slate-500">Tanıtım videosunu doğrudan yükleyin (önerilen) ya da YouTube/Vimeo linki yapıştırın. Boş bırakılırsa ilgili bölüm gösterilmez.</p>
         <div className="mt-4 grid gap-4">
@@ -200,7 +200,7 @@ export default function ListingForm({ listing }: { listing?: ListingData }) {
       </section>
 
       {/* Konut detayları */}
-      <section className="rounded-2xl bg-white p-6 ring-1 ring-slate-200">
+      <section className="rounded-lg bg-paper p-6 ring-1 ring-stone">
         <h2 className="font-bold text-slate-900">Detaylar</h2>
         <div className="mt-4 grid grid-cols-2 gap-4 sm:grid-cols-4">
           <Field label="Brüt m² *"><input name="areaGross" type="number" required min={1} defaultValue={listing?.areaGross ?? ""} className={inputCls} /></Field>
@@ -239,7 +239,7 @@ export default function ListingForm({ listing }: { listing?: ListingData }) {
       </section>
 
       {/* Konum + AI */}
-      <section className="rounded-2xl bg-white p-6 ring-1 ring-slate-200">
+      <section className="rounded-lg bg-paper p-6 ring-1 ring-stone">
         <h2 className="font-bold text-slate-900">Konum & Yatırım Verisi</h2>
         <p className="mt-1 text-xs text-slate-500">Haritada tıklayarak veya pini sürükleyerek konumu işaretleyin; enlem/boylam otomatik dolar ve ilan haritada görünür.</p>
         <div className="mt-4">
@@ -253,7 +253,7 @@ export default function ListingForm({ listing }: { listing?: ListingData }) {
       </section>
 
       {/* SEO */}
-      <section className="rounded-2xl bg-white p-6 ring-1 ring-slate-200">
+      <section className="rounded-lg bg-paper p-6 ring-1 ring-stone">
         <h2 className="font-bold text-slate-900">SEO (opsiyonel)</h2>
         <div className="mt-4 grid gap-4">
           <Field label="Meta Başlık"><input name="metaTitle" defaultValue={listing?.metaTitle ?? ""} className={inputCls} /></Field>

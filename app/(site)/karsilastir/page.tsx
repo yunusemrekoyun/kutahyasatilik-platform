@@ -39,18 +39,18 @@ export default function ComparePage() {
       </div>
 
       {!hydrated ? (
-        <div className="skeleton mt-8 h-96 rounded-2xl" />
+        <div className="skeleton mt-8 h-96 rounded-lg" />
       ) : compare.length === 0 ? (
-        <div className="mt-8 rounded-2xl bg-white p-12 text-center ring-1 ring-slate-200">
+        <div className="mt-8 rounded-lg bg-paper p-12 text-center ring-1 ring-stone">
           <ArrowLeftRight className="mx-auto h-12 w-12 text-slate-300" />
           <h2 className="mt-4 text-lg font-bold text-slate-800">Karşılaştırma listeniz boş</h2>
           <p className="mt-1 text-slate-500">İlan kartlarındaki <ArrowLeftRight className="inline h-3.5 w-3.5 align-text-bottom" /> ikonuyla en fazla 4 ilanı yan yana karşılaştırın.</p>
-          <Link href="/ilanlar" className="mt-6 inline-block rounded-xl bg-brand-700 px-6 py-3 font-bold text-white hover:bg-brand-800">
+          <Link href="/ilanlar" className="mt-6 inline-block rounded-lg bg-brand-700 px-6 py-3 font-bold text-white hover:bg-brand-800">
             İlanları Keşfet
           </Link>
         </div>
       ) : (
-        <div className="mt-8 overflow-x-auto rounded-2xl bg-white ring-1 ring-slate-200">
+        <div className="mt-8 overflow-x-auto rounded-lg bg-paper ring-1 ring-stone">
           <table className="w-full min-w-[640px]">
             <thead>
               <tr>
@@ -61,7 +61,7 @@ export default function ComparePage() {
                       <Image src={l.coverImage || "/placeholder-listing.webp"} alt={l.title} fill sizes="200px" className="object-cover" />
                       <button
                         onClick={() => toggleCompare(l)}
-                        className="absolute right-1 top-1 grid h-6 w-6 place-items-center rounded-full bg-white/90 text-xs text-red-600 shadow"
+                        className="absolute right-1 top-1 grid h-6 w-6 place-items-center rounded-full bg-paper/90 text-xs text-red-600 shadow"
                         aria-label="Çıkar"
                       ><X className="h-3.5 w-3.5" /></button>
                     </div>

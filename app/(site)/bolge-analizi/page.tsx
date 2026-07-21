@@ -1,11 +1,12 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { BarChart3, ArrowRight } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { formatNumber } from "@/lib/format";
 import TrackView from "@/components/TrackView";
 import PriceHeatmap from "@/components/PriceHeatmap";
 import DistrictCompare, { type DistrictStat } from "@/components/DistrictCompare";
+import { PageIntro } from "@/components/ui/Editorial";
 
 export const revalidate = 300; // ISR: her 5 dakikada yenilenir (CDN cache + admin revalidatePath)
 
@@ -13,6 +14,7 @@ export const metadata: Metadata = {
   title: "Kütahya Bölge Fiyat Analizi & Isı Haritası",
   description:
     "Kütahya ilçelerinin m² fiyatları, değer artışı ve yatırım puanları. İlçe karşılaştırma aracı ve fiyat ısı haritasıyla doğru bölgeyi seçin.",
+  alternates: { canonical: "/bolge-analizi" },
 };
 
 export default async function RegionAnalysis() {
@@ -55,29 +57,16 @@ export default async function RegionAnalysis() {
   const ranked = [...stats].sort((a, b) => (b.investmentScore ?? 0) - (a.investmentScore ?? 0));
 
   return (
-    <div className="bg-slate-50">
+    <div>
       <TrackView />
 
-      <section className="bg-brand-950 text-white">
-        <div className="mx-auto max-w-6xl px-4 py-12 text-center sm:py-16">
-          <span className="inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-1.5 text-sm font-medium ring-1 ring-gold-400/40">
-            <BarChart3 className="h-4 w-4 text-gold-400" /> Yerel Piyasa Zekâsı
-          </span>
-          <h1 className="mt-5 font-display text-3xl font-bold leading-tight sm:text-4xl">
-            Kütahya Bölge <span className="text-gold-400">Fiyat Analizi</span>
-          </h1>
-          <p className="mx-auto mt-4 max-w-2xl text-brand-100">
-            İlçelerin m² fiyatlarını, değer artışını ve yatırım puanlarını karşılaştırın.
-            Doğru bölgeyi veriyle seçin.
-          </p>
-        </div>
-      </section>
+      <PageIntro eyebrow="Yerel piyasa verileri" title="Kütahya bölge fiyat analizi" intro="İlçelerin m² fiyatlarını, değer artışlarını ve yatırım puanlarını karşılaştırarak doğru bölgeyi verilerle değerlendirin." />
 
       {/* Analiz görselleri — admin puan toggle'ı açıksa */}
       {showScores && (<>
       {/* Isı haritası */}
       <section className="mx-auto max-w-6xl px-4 py-10">
-        <div className="rounded-2xl bg-white p-5 ring-1 ring-slate-200 sm:p-7">
+        <div className="rounded-lg bg-paper p-5 ring-1 ring-stone sm:p-7">
           <h2 className="font-display text-2xl font-bold text-brand-900">Fiyat Isı Haritası</h2>
           <p className="mt-1 text-sm text-slate-600">
             Arsa m² fiyatına göre renklendirilmiştir — <span className="font-semibold text-green-600">yeşil: uygun</span>, <span className="font-semibold text-red-600">kırmızı: yüksek</span>. Marker üzerine gelin.
@@ -99,7 +88,7 @@ export default async function RegionAnalysis() {
       {/* Sıralı liste */}
       <section className="mx-auto max-w-6xl px-4 pb-16">
         <h2 className="font-display text-2xl font-bold text-brand-900">Yatırım Puanına Göre İlçeler</h2>
-        <div className="mt-5 overflow-hidden rounded-2xl bg-white ring-1 ring-slate-200">
+        <div className="mt-5 overflow-hidden rounded-lg bg-paper ring-1 ring-stone">
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>

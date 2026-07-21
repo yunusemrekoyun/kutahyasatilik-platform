@@ -30,12 +30,12 @@ export default async function AdminPopups() {
 
       <div className="mt-6 space-y-3">
         {popups.length === 0 && (
-          <p className="rounded-xl bg-white p-10 text-center text-slate-400 ring-1 ring-slate-200">
+          <p className="rounded-lg bg-paper p-10 text-center text-slate-400 ring-1 ring-stone">
             Henüz reklam yok. Kampanya/duyuru pop-up&apos;ı oluşturun.
           </p>
         )}
         {popups.map((p) => (
-          <div key={p.id} className={`flex flex-wrap items-center gap-4 rounded-xl bg-white p-4 ring-1 ${p.active ? "ring-green-200" : "ring-slate-200"}`}>
+          <div key={p.id} className={`flex flex-wrap items-center gap-4 rounded-lg bg-paper p-4 ring-1 ${p.active ? "ring-green-200" : "ring-stone"}`}>
             <div className="relative h-16 w-24 shrink-0 overflow-hidden rounded-lg bg-slate-100">
               {p.imageUrl && <Image src={p.imageUrl} alt="" fill sizes="96px" className="object-cover" />}
             </div>

@@ -30,14 +30,14 @@ export default async function AgentLeads() {
       </div>
 
       {leads.length === 0 && (
-        <div className="rounded-2xl bg-white p-8 text-center text-sm text-slate-400 ring-1 ring-slate-200">
+        <div className="rounded-lg bg-paper p-8 text-center text-sm text-slate-400 ring-1 ring-stone">
           Henüz ilanlarınıza gelen bir talep yok.
         </div>
       )}
 
       <div className="space-y-3">
         {leads.map((l) => (
-          <div key={l.id} className="rounded-2xl bg-white p-5 ring-1 ring-slate-200">
+          <div key={l.id} className="rounded-lg bg-paper p-5 ring-1 ring-stone">
             <div className="flex flex-wrap items-start justify-between gap-3">
               <div>
                 <div className="flex flex-wrap items-center gap-2">
@@ -70,9 +70,9 @@ export default async function AgentLeads() {
               </form>
             </div>
 
-            {l.message && <p className="mt-3 rounded-lg bg-slate-50 p-3 text-sm text-slate-700">{l.message}</p>}
+            {l.message && <p className="mt-3 rounded-lg bg-canvas p-3 text-sm text-slate-700">{l.message}</p>}
 
-            <div className="mt-4 border-t border-slate-100 pt-4">
+            <div className="mt-4 border-t border-stone pt-4">
               <RequestStatusStepper status={l.status} />
             </div>
           </div>

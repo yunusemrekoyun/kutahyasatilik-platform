@@ -44,7 +44,7 @@ export default async function AgentOpportunitiesPage() {
       </div>
 
       {opps.length === 0 ? (
-        <div className="rounded-2xl bg-white p-10 text-center text-sm text-slate-500 ring-1 ring-slate-200">
+        <div className="rounded-lg bg-paper p-10 text-center text-sm text-slate-500 ring-1 ring-stone">
           Şu an açık portföy fırsatı yok.
         </div>
       ) : (
@@ -52,7 +52,7 @@ export default async function AgentOpportunitiesPage() {
           {opps.map((o) => {
             const myBid = o.bids[0];
             return (
-              <div key={o.id} className="rounded-2xl bg-white p-5 ring-1 ring-slate-200">
+              <div key={o.id} className="rounded-lg bg-paper p-5 ring-1 ring-stone">
                 <p className="font-semibold text-slate-900">{o.title}</p>
                 <p className="text-sm text-slate-500">
                   {[

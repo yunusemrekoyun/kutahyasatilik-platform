@@ -24,7 +24,7 @@ export default function MobileTabBar() {
     exact ? pathname === href : pathname === href || pathname.startsWith(href + "/");
 
   return (
-    <nav className="fixed inset-x-0 bottom-0 z-40 border-t border-slate-200 bg-white/95 backdrop-blur lg:hidden">
+    <nav className="fixed inset-x-0 bottom-0 z-40 border-t border-stone bg-paper/95 pb-[env(safe-area-inset-bottom)] backdrop-blur-xl lg:hidden">
       <div className="mx-auto grid max-w-md grid-cols-5">
         {TABS.map((t) => {
           const active = isActive(t.href, t.exact);
@@ -33,8 +33,8 @@ export default function MobileTabBar() {
             <Link
               key={t.href}
               href={t.href}
-              className={`relative flex flex-col items-center gap-0.5 py-2 text-[10px] font-medium transition ${
-                active ? "text-brand-700" : "text-slate-500"
+              className={`relative flex min-h-14 flex-col items-center justify-center gap-1 border-t-2 text-[10px] font-semibold transition ${
+                active ? "border-gold-700 text-brand-800" : "border-transparent text-muted"
               }`}
             >
               <span className="relative">

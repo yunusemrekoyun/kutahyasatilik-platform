@@ -35,7 +35,8 @@ export async function verifyUserCredentials(email: string, password: string) {
 }
 
 export async function createUserSession(payload: UserSession) {
-  const token = await new SignJWT(payload)
+  const authVersion = (await prisma.user.findUnique({ where: { id: payload.userId }, select: { authVersion: true } }))?.authVersion ?? 0;
+  const token = await new SignJWT({ ...payload, ver: authVersion })
     .setProtectedHeader({ alg: "HS256" })
     .setIssuedAt()
     .setExpirationTime("30d")
@@ -64,10 +65,13 @@ export async function getUserSession(): Promise<UserSession | null> {
     const { payload } = await jwtVerify(token, secret);
     // Çapraz-silo koruması (bkz. lib/auth.ts): userId yoksa kabul etme.
     if (typeof payload.userId !== "string" || !payload.userId) return null;
+    const tokenVersion = typeof payload.ver === "number" ? payload.ver : 0;
+    const user = await prisma.user.findUnique({ where: { id: payload.userId }, select: { email: true, name: true, authVersion: true } });
+    if (!user || user.authVersion !== tokenVersion) return null;
     return {
       userId: payload.userId,
-      email: payload.email as string,
-      name: payload.name as string,
+      email: user.email,
+      name: user.name,
     };
   } catch {
     return null;

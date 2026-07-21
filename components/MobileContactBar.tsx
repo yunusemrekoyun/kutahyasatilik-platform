@@ -19,7 +19,7 @@ export default function MobileContactBar({
   // Her zaman görünür: birincil eylem forma/talep alanına götürür (#ilan-iletisim).
   // Telefon/WhatsApp yalnız tanımlıysa kompakt ikon olarak eklenir (sahte link yok).
   return (
-    <div className="fixed inset-x-0 bottom-14 z-30 flex gap-2 border-t border-slate-200 bg-white/95 p-2.5 backdrop-blur lg:hidden">
+    <div className="fixed inset-x-0 bottom-[58px] z-30 flex gap-2 border-t border-stone bg-paper/95 p-2.5 backdrop-blur lg:hidden">
       <a
         href="#ilan-iletisim"
         className="flex flex-1 items-center justify-center gap-2 rounded-[10px] bg-brand-700 py-3.5 text-sm font-semibold text-white"

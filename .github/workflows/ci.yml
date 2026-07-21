@@ -1,0 +1,51 @@
+name: Web CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_DB: kutahya_test
+          POSTGRES_HOST_AUTH_METHOD: trust
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    env:
+      CI: "true"
+      DATABASE_URL: postgresql://postgres@127.0.0.1:5432/kutahya_test?sslmode=disable
+      DIRECT_URL: postgresql://postgres@127.0.0.1:5432/kutahya_test?sslmode=disable
+      NEXT_PUBLIC_SITE_URL: https://kutahyasatilik.com
+      PUSH_ENABLED: "false"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - name: Prepare ephemeral CI secrets
+        shell: bash
+        run: printf 'AUTH_SECRET=%s\n' "$(openssl rand -hex 32)" >> "$GITHUB_ENV"
+      - run: npm ci
+      - run: npx prisma migrate deploy
+      - run: npm run lint
+      - run: npm run typecheck
+      - run: npm test
+      - run: npm run audit:runtime
+      - run: npm run build
+      - run: npm run check:standalone
+      - run: npx playwright install --with-deps chromium
+      - run: npm run test:e2e

@@ -31,13 +31,13 @@ export default async function AdminReklamTalepleriPage() {
       </div>
 
       {rows.length === 0 ? (
-        <div className="rounded-2xl bg-white p-10 text-center text-sm text-slate-500 ring-1 ring-slate-200">Henüz reklam talebi yok.</div>
+        <div className="rounded-lg bg-paper p-10 text-center text-sm text-slate-500 ring-1 ring-stone">Henüz reklam talebi yok.</div>
       ) : (
         <div className="space-y-3">
           {rows.map((r) => {
             const s = STATUS[r.status] ?? STATUS.new;
             return (
-              <div key={r.id} className="rounded-2xl bg-white p-5 ring-1 ring-slate-200">
+              <div key={r.id} className="rounded-lg bg-paper p-5 ring-1 ring-stone">
                 <div className="flex flex-wrap items-start justify-between gap-3">
                   <div>
                     <p className="font-semibold text-slate-900">{r.name}{r.company ? ` · ${r.company}` : ""}</p>
@@ -45,8 +45,8 @@ export default async function AdminReklamTalepleriPage() {
                   </div>
                   <span className={`shrink-0 rounded-full px-2.5 py-0.5 text-xs font-semibold ring-1 ${s.cls}`}>{s.label}</span>
                 </div>
-                {r.message && <p className="mt-2 rounded-lg bg-slate-50 p-3 text-sm text-slate-600">{r.message}</p>}
-                <div className="mt-3 flex items-center gap-2 border-t border-slate-100 pt-3">
+                {r.message && <p className="mt-2 rounded-lg bg-canvas p-3 text-sm text-slate-600">{r.message}</p>}
+                <div className="mt-3 flex items-center gap-2 border-t border-stone pt-3">
                   <form action={updateAdRequestStatus} className="flex items-center gap-1.5">
                     <input type="hidden" name="id" value={r.id} />
                     <select name="status" defaultValue={r.status} className="rounded-md border border-slate-300 px-2 py-1 text-xs">

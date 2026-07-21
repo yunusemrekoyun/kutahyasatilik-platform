@@ -19,7 +19,7 @@ export default async function AdminTestimonials() {
       </div>
 
       {/* Yeni yorum ekle */}
-      <form action={saveTestimonial} className="rounded-xl bg-white p-6 ring-1 ring-slate-200">
+      <form action={saveTestimonial} className="rounded-lg bg-paper p-6 ring-1 ring-stone">
         <h2 className="font-bold text-slate-900">Yeni Yorum Ekle</h2>
         <div className="mt-4 grid gap-3 sm:grid-cols-2">
           <input name="name" required placeholder="Ad Soyad *" className={inputCls} />
@@ -50,10 +50,10 @@ export default async function AdminTestimonials() {
       {/* Mevcut yorumlar */}
       <div className="space-y-3">
         {items.length === 0 && (
-          <p className="rounded-xl bg-white p-8 text-center text-slate-400 ring-1 ring-slate-200">Henüz yorum yok.</p>
+          <p className="rounded-lg bg-paper p-8 text-center text-slate-400 ring-1 ring-stone">Henüz yorum yok.</p>
         )}
         {items.map((t) => (
-          <form key={t.id} action={saveTestimonial} className="rounded-xl bg-white p-5 ring-1 ring-slate-200">
+          <form key={t.id} action={saveTestimonial} className="rounded-lg bg-paper p-5 ring-1 ring-stone">
             <input type="hidden" name="id" value={t.id} />
             <div className="grid gap-3 sm:grid-cols-2">
               <input name="name" required defaultValue={t.name} className={inputCls} />

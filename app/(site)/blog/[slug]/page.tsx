@@ -89,7 +89,7 @@ export default async function BlogPost({ params }: { params: Promise<{ slug: str
       {post.author && <p className="mt-2 inline-flex items-center gap-1.5 text-sm text-slate-500"><PenLine className="h-4 w-4" />{post.author}</p>}
 
       {post.coverImage && (
-        <div className="relative mt-6 aspect-[16/9] overflow-hidden rounded-2xl bg-slate-100 ring-1 ring-slate-200">
+        <div className="relative mt-6 aspect-[16/9] overflow-hidden rounded-lg bg-slate-100 ring-1 ring-stone">
           <Image src={mediaUrl(post.coverImage)} alt={post.title} fill sizes="(max-width:768px) 100vw, 768px" className="object-cover" priority />
         </div>
       )}
@@ -113,7 +113,7 @@ export default async function BlogPost({ params }: { params: Promise<{ slug: str
           <div className="gold-divider mt-2 mb-5" />
           <div className="grid gap-4 sm:grid-cols-3">
             {related.map((r) => (
-              <Link key={r.id} href={`/blog/${r.slug}`} className="group rounded-xl bg-white p-4 ring-1 ring-slate-200 hover:ring-brand-200">
+              <Link key={r.id} href={`/blog/${r.slug}`} className="group rounded-lg bg-paper p-4 ring-1 ring-stone hover:ring-brand-200">
                 <p className="text-[11px] font-medium text-gold-600">{formatDate(r.publishedAt ?? r.createdAt)}</p>
                 <p className="mt-1 line-clamp-3 text-sm font-semibold text-slate-800 group-hover:text-brand-700">{r.title}</p>
               </Link>

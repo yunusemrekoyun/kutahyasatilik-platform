@@ -5,7 +5,7 @@ import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { requireApprovedAgent } from "@/lib/agentAuth";
 import { slugify } from "@/lib/format";
-import { deleteUploadFiles } from "@/lib/uploads";
+import { deleteUploadFiles } from "@/lib/uploadDeletion";
 import { deleteVideo } from "@/lib/videoStorage";
 import { notifyAdmins } from "@/lib/notify";
 

@@ -90,7 +90,7 @@ export default function ContactButtons({
           onClick={() => setModal(null)}
         >
           <div
-            className="max-h-[90vh] w-full max-w-md overflow-y-auto rounded-2xl bg-white p-6 shadow-prestige"
+            className="max-h-[90vh] w-full max-w-md overflow-y-auto rounded-lg bg-paper p-6 shadow-prestige"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="mb-2 flex items-start justify-between">

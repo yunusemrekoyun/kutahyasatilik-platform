@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import { BadgeCheck, Zap, Users } from "lucide-react";
 import SellerForm from "@/components/SellerForm";
 import TrackView from "@/components/TrackView";
+import { PageIntro } from "@/components/ui/Editorial";
 import { prisma } from "@/lib/prisma";
 import { getUserSession } from "@/lib/userAuth";
 
@@ -11,6 +13,7 @@ export const metadata: Metadata = {
   title: "Mülkünüzü Satın - İlan Talebi Oluşturun",
   description:
     "Kütahya'da daire, arsa, villa veya tarlanızı mı satmak istiyorsunuz? İlan talebinizi oluşturun, uzman ekibimiz mülkünüzü değerlendirip sizinle iletişime geçsin.",
+  alternates: { canonical: "/satici" },
 };
 
 async function getHeroImage(): Promise<string | null> {
@@ -35,29 +38,12 @@ export default async function SellerPage() {
     <div>
       <TrackView />
 
-      {/* HERO */}
-      <section className="relative isolate overflow-hidden bg-brand-950 text-white">
-        {heroImage && (
-          <>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={heroImage} alt="" className="absolute inset-0 -z-10 h-full w-full object-cover opacity-60" />
-            <div className="absolute inset-0 -z-10 bg-gradient-to-b from-brand-950/75 via-brand-950/50 to-brand-950/80" />
-          </>
-        )}
-        <div className="mx-auto max-w-7xl px-4 py-16 sm:py-20">
-          <h1 className="max-w-2xl font-display text-3xl font-bold leading-tight drop-shadow-sm sm:text-5xl">
-            Mülkünüzü Uzman Ellerle Satın
-          </h1>
-          <p className="mt-4 max-w-2xl text-lg leading-relaxed text-brand-100">
-            Kütahya&apos;nın en seçkin alıcı ağına ulaşın. Gayrimenkulünüzün gerçek değerini bulun ve güvenle satışa sunun.
-          </p>
-        </div>
-      </section>
+      <PageIntro eyebrow="Satış yolculuğu" title="Mülkünüzü yerel uzmanlıkla satışa hazırlayın" intro="Bölgesel ön değerleme, doğru fiyatlandırma ve şeffaf satış süreci için mülk bilgilerinizi paylaşın." visual={heroImage ? <Image src={heroImage} alt="Kütahya gayrimenkul portföyü" fill sizes="(max-width: 1024px) 100vw, 40vw" className="object-cover" /> : undefined} />
 
       {/* FORM + GÜVEN */}
       <section className="mx-auto max-w-7xl px-4 py-12">
         <div className="grid items-start gap-8 lg:grid-cols-12">
-          <div className="rounded-2xl bg-white p-6 shadow-card ring-1 ring-slate-200 sm:p-8 lg:col-span-8">
+          <div className="border border-stone bg-paper p-6 sm:p-8 lg:col-span-8">
             <div className="border-b border-slate-100 pb-5">
               <h2 className="font-display text-2xl font-bold text-brand-900">İlan Talebi Oluştur</h2>
               <p className="mt-1.5 text-slate-500">
@@ -84,7 +70,7 @@ export default async function SellerPage() {
 
           <div className="space-y-4 lg:col-span-4">
             {TRUST.map((t) => (
-              <div key={t.title} className="flex items-start gap-4 rounded-2xl bg-white p-6 ring-1 ring-slate-200">
+              <div key={t.title} className="flex items-start gap-4 rounded-lg bg-paper p-6 ring-1 ring-stone">
                 <span className="grid h-12 w-12 shrink-0 place-items-center rounded-full bg-brand-50 text-brand-700">
                   <t.Icon className="h-6 w-6" strokeWidth={1.7} />
                 </span>

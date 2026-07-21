@@ -59,7 +59,7 @@ export default async function AdminLeads({
             <Link
               key={t.key}
               href={`/admin/talepler${qs.toString() ? `?${qs}` : ""}`}
-              className={`rounded-full px-4 py-1.5 text-sm font-medium ${active ? "bg-brand-700 text-white" : "bg-white text-slate-700 ring-1 ring-slate-200 hover:ring-brand-300"}`}
+              className={`rounded-full px-4 py-1.5 text-sm font-medium ${active ? "bg-brand-700 text-white" : "bg-paper text-slate-700 ring-1 ring-stone hover:ring-brand-300"}`}
             >
               {t.label}
             </Link>
@@ -138,7 +138,7 @@ export default async function AdminLeads({
               </div>
 
               {l.message && (
-                <p className="mt-3 rounded-lg bg-slate-50 p-3 text-sm text-slate-700">{l.message}</p>
+                <p className="mt-3 rounded-lg bg-canvas p-3 text-sm text-slate-700">{l.message}</p>
               )}
 
               {photos.length > 0 && (
@@ -146,7 +146,7 @@ export default async function AdminLeads({
                   {photos.map((p, i) => (
                     <a key={i} href={p} target="_blank" rel="noopener noreferrer">
                       {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img src={p} alt="" className="h-20 w-20 rounded-lg object-cover ring-1 ring-slate-200" />
+                      <img src={p} alt="" className="h-20 w-20 rounded-lg object-cover ring-1 ring-stone" />
                     </a>
                   ))}
                 </div>

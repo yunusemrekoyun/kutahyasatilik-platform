@@ -23,7 +23,7 @@ export default function ListingSort() {
           value={sp.get("sira") || ""}
           onChange={(e) => change(e.target.value)}
           aria-label="Sıralama"
-          className="h-11 appearance-none rounded-lg border border-slate-300 bg-white py-2 pl-4 pr-10 text-[15px] font-medium text-slate-800 outline-none transition focus:border-brand-500 focus:ring-2 focus:ring-brand-500/30"
+          className="h-11 appearance-none rounded-lg border border-stone bg-paper py-2 pl-4 pr-10 text-[15px] font-medium text-ink outline-none transition focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20"
         >
           <option value="">Önerilen</option>
           <option value="price_asc">Fiyat (Artan)</option>

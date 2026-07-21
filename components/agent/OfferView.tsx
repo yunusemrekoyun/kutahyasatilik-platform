@@ -17,7 +17,7 @@ type Offer = {
 const intervalLabel = (i: string) => (i === "yearly" ? "/yıl" : i === "one_time" ? " (tek seferlik)" : "/ay");
 
 const inputCls =
-  "h-12 w-full rounded-[10px] border border-slate-300 bg-white px-3.5 text-base text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/30";
+  "h-12 w-full rounded-[10px] border border-slate-300 bg-paper px-3.5 text-base text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/30";
 const labelCls = "mb-1.5 block text-sm font-semibold text-slate-700";
 
 async function postJson(url: string, body: unknown) {
@@ -78,8 +78,8 @@ export default function OfferView() {
 
   if (phase === "done") {
     return (
-      <div className="rounded-2xl border border-green-200 bg-green-50 p-8 text-center">
-        <span className="mx-auto grid h-14 w-14 place-items-center rounded-full bg-white text-green-600 ring-1 ring-green-200">
+      <div className="rounded-lg border border-green-200 bg-green-50 p-8 text-center">
+        <span className="mx-auto grid h-14 w-14 place-items-center rounded-full bg-paper text-green-600 ring-1 ring-green-200">
           <CheckCircle2 className="h-8 w-8" />
         </span>
         <h2 className="mt-4 font-display text-xl font-bold text-green-800">Teklif kabul edildi</h2>
@@ -93,7 +93,7 @@ export default function OfferView() {
   if (phase === "offer" && offer) {
     return (
       <div className="space-y-5">
-        <div className="overflow-hidden rounded-2xl ring-1 ring-slate-200">
+        <div className="overflow-hidden rounded-lg ring-1 ring-stone">
           <div className="bg-brand-950 px-6 py-5 text-white">
             <p className="text-xs uppercase tracking-wider text-gold-300">Teklif v{offer.version}</p>
             <h2 className="mt-1 font-display text-xl font-bold">{offer.name}</h2>
@@ -102,7 +102,7 @@ export default function OfferView() {
             </p>
           </div>
           {offer.features.length > 0 && (
-            <ul className="space-y-2 bg-white px-6 py-5">
+            <ul className="space-y-2 bg-paper px-6 py-5">
               {offer.features.map((f, i) => (
                 <li key={i} className="flex items-center gap-2 text-sm text-slate-700">
                   <Check className="h-4 w-4 shrink-0 text-green-600" /> {f}
@@ -115,7 +115,7 @@ export default function OfferView() {
         <button
           onClick={accept}
           disabled={loading}
-          className="w-full rounded-[10px] bg-gold-500 px-4 py-3.5 text-base font-bold text-brand-950 transition hover:bg-gold-400 disabled:opacity-60"
+          className="w-full rounded-lg bg-brand-800 px-4 py-3.5 text-base font-bold text-white transition hover:bg-brand-900 disabled:opacity-60"
         >
           {loading ? "İşleniyor..." : "Teklifi Kabul Et"}
         </button>

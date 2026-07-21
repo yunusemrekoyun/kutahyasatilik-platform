@@ -39,7 +39,7 @@ const OFFER_STATUS: Record<string, { label: string; cls: string }> = {
   pending: { label: "Bekliyor", cls: "text-amber-700 bg-amber-50 ring-amber-200" },
   accepted: { label: "Kabul edildi", cls: "text-green-700 bg-green-50 ring-green-200" },
   rejected: { label: "Reddedildi", cls: "text-red-700 bg-red-50 ring-red-200" },
-  countered: { label: "Karşı teklif verildi", cls: "text-slate-600 bg-slate-100 ring-slate-200" },
+  countered: { label: "Karşı teklif verildi", cls: "text-slate-600 bg-slate-100 ring-stone" },
 };
 
 export default function MessagesClient({ basePath }: { basePath: string }) {
@@ -141,7 +141,7 @@ export default function MessagesClient({ basePath }: { basePath: string }) {
   return (
     <div className="grid gap-4 lg:grid-cols-[320px_1fr]">
       {/* Sohbet listesi */}
-      <div className={`${activeId ? "hidden lg:block" : "block"} rounded-2xl bg-white ring-1 ring-slate-200`}>
+      <div className={`${activeId ? "hidden lg:block" : "block"} rounded-lg bg-paper ring-1 ring-stone`}>
         <div className="border-b border-slate-100 p-4">
           <h2 className="font-bold text-slate-900">Mesajlar</h2>
         </div>
@@ -175,7 +175,7 @@ export default function MessagesClient({ basePath }: { basePath: string }) {
       </div>
 
       {/* Sohbet penceresi */}
-      <div className={`${activeId ? "block" : "hidden lg:block"} flex min-h-[60vh] flex-col rounded-2xl bg-white ring-1 ring-slate-200`}>
+      <div className={`${activeId ? "block" : "hidden lg:block"} flex min-h-[60vh] flex-col rounded-lg bg-paper ring-1 ring-stone`}>
         {!activeId || !detail ? (
           <div className="flex flex-1 flex-col items-center justify-center text-center text-slate-400">
             <MessageSquare className="h-10 w-10" />
@@ -205,7 +205,7 @@ export default function MessagesClient({ basePath }: { basePath: string }) {
                   const canRespond = !mine && m.offerStatus === "pending";
                   return (
                     <div key={m.id} className={`flex ${mine ? "justify-end" : "justify-start"}`}>
-                      <div className="max-w-[80%] rounded-2xl border border-gold-200 bg-gold-50 p-3">
+                      <div className="max-w-[80%] rounded-lg border border-gold-200 bg-gold-50 p-3">
                         <p className="flex items-center gap-1.5 text-xs font-semibold text-gold-800"><Tag className="h-3.5 w-3.5" /> Teklif</p>
                         <p className="mt-0.5 font-display text-lg font-bold text-gold-900">{formatPrice(m.offerAmount || 0, m.offerCurrency || "TRY")}</p>
                         <span className={`mt-1 inline-block rounded-md px-2 py-0.5 text-[11px] font-semibold ring-1 ${st.cls}`}>{st.label}</span>
@@ -222,7 +222,7 @@ export default function MessagesClient({ basePath }: { basePath: string }) {
                 }
                 return (
                   <div key={m.id} className={`flex ${mine ? "justify-end" : "justify-start"}`}>
-                    <div className={`max-w-[80%] whitespace-pre-line rounded-2xl px-3.5 py-2 text-sm ${mine ? "bg-brand-700 text-white" : "bg-slate-100 text-slate-800"}`}>
+                    <div className={`max-w-[80%] whitespace-pre-line rounded-lg px-3.5 py-2 text-sm ${mine ? "bg-brand-700 text-white" : "bg-slate-100 text-slate-800"}`}>
                       {m.body}
                     </div>
                   </div>
@@ -235,7 +235,7 @@ export default function MessagesClient({ basePath }: { basePath: string }) {
               {offerMode ? (
                 <div className="flex items-center gap-2">
                   <input value={offerAmount ? Number(offerAmount).toLocaleString("tr-TR") : ""} onChange={(e) => setOfferAmount(e.target.value.replace(/[^\d]/g, "").slice(0, 12))} inputMode="numeric" placeholder="Teklif tutarı (₺)" className="h-11 flex-1 rounded-lg border border-slate-300 px-3 text-sm outline-none focus:border-brand-500" />
-                  <button onClick={send} disabled={busy || !offerAmount} className="rounded-lg bg-gold-500 px-4 py-2.5 text-sm font-semibold text-gold-950 disabled:opacity-50">Teklif Ver</button>
+                  <button onClick={send} disabled={busy || !offerAmount} className="rounded-lg bg-brand-800 px-4 py-2.5 text-sm font-semibold text-white hover:bg-brand-900 disabled:opacity-50">Teklif Ver</button>
                   <button onClick={() => setOfferMode(false)} className="text-slate-400"><X className="h-5 w-5" /></button>
                 </div>
               ) : (

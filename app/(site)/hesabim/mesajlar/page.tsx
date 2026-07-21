@@ -18,7 +18,7 @@ export default async function UserMessagesPage() {
         <ArrowLeft className="h-4 w-4" /> Hesabım
       </Link>
       <h1 className="mb-4 mt-2 text-2xl font-bold text-slate-900">Mesajlarım</h1>
-      <Suspense fallback={<div className="h-96 rounded-2xl bg-white ring-1 ring-slate-200" />}>
+      <Suspense fallback={<div className="h-96 rounded-lg bg-paper ring-1 ring-stone" />}>
         <MessagesClient basePath="/hesabim/mesajlar" />
       </Suspense>
     </div>

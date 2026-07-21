@@ -94,7 +94,7 @@ export default function SellerForm({
 
   if (status === "ok") {
     return (
-      <div className="rounded-xl bg-white p-8 text-center ring-1 ring-slate-200">
+      <div className="rounded-lg bg-paper p-8 text-center ring-1 ring-stone">
         <span className="mx-auto grid h-14 w-14 place-items-center rounded-full bg-green-50 text-green-600 ring-1 ring-green-200">
           <CheckCircle2 className="h-8 w-8" />
         </span>
@@ -109,7 +109,7 @@ export default function SellerForm({
 
   const labelCls = "mb-1.5 block text-sm font-semibold text-slate-700";
   const inputCls =
-    "w-full h-12 rounded-[10px] border border-slate-300 bg-white px-3.5 text-base text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/30";
+    "w-full h-12 rounded-[10px] border border-slate-300 bg-paper px-3.5 text-base text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/30";
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">

@@ -15,7 +15,7 @@ export default function AgentPanelHeader({ name }: { name: string }) {
   }
 
   return (
-    <header className="sticky top-0 z-30 border-b border-slate-200 bg-white">
+    <header className="sticky top-0 z-30 border-b border-stone bg-paper">
       <div className="mx-auto flex max-w-5xl items-center justify-between gap-4 px-4 py-3">
         <Link href="/emlakci/panel" className="flex items-center gap-2.5">
           <span className="grid h-9 w-9 place-items-center rounded-lg bg-gradient-to-br from-brand-700 to-brand-900 text-gold-300 font-display text-lg font-bold">

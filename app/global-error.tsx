@@ -1,26 +1,18 @@
 "use client";
 
-// Kök layout hatasında devreye girer (root layout'u DEĞİŞTİRİR → Tailwind/globals
-// garanti değil, bu yüzden inline stil). Markalı minimal hata ekranı + tekrar dene.
-export default function GlobalError({ reset }: { error: Error & { digest?: string }; reset: () => void }) {
+import * as Sentry from "@sentry/nextjs";
+import { useEffect } from "react";
+
+export default function GlobalError({ error, reset }: { error: Error & { digest?: string }; reset: () => void }) {
+  useEffect(() => { Sentry.captureException(error); }, [error]);
   return (
     <html lang="tr">
-      <body style={{ margin: 0, fontFamily: "system-ui, Arial, sans-serif", background: "#0A1730", color: "#fff" }}>
-        <div style={{ minHeight: "100vh", display: "grid", placeItems: "center", padding: 24, textAlign: "center" }}>
-          <div style={{ maxWidth: 420 }}>
-            <div style={{ fontWeight: 700, fontSize: 18 }}>
-              Kütahya<span style={{ color: "#E3AC35" }}>Satılık</span>
-            </div>
-            <h1 style={{ marginTop: 16, fontSize: 24 }}>Bir şeyler ters gitti</h1>
-            <p style={{ marginTop: 8, color: "#D4E0F2" }}>Beklenmeyen bir hata oluştu. Lütfen tekrar deneyin.</p>
-            <button
-              onClick={() => reset()}
-              style={{ marginTop: 20, background: "#E3AC35", color: "#0A1730", border: 0, borderRadius: 10, padding: "11px 20px", fontWeight: 700, cursor: "pointer" }}
-            >
-              Tekrar Dene
-            </button>
-          </div>
-        </div>
+      <body className="grid min-h-screen place-items-center bg-slate-50 p-6 text-center">
+        <main>
+          <h1 className="text-2xl font-bold text-slate-900">Beklenmeyen bir hata oluştu</h1>
+          <p className="mt-2 text-slate-600">Sayfayı yeniden yükleyerek tekrar deneyebilirsiniz.</p>
+          <button type="button" onClick={reset} className="mt-5 min-h-11 rounded-lg bg-brand-700 px-5 font-semibold text-white">Tekrar dene</button>
+        </main>
       </body>
     </html>
   );

@@ -62,7 +62,7 @@ export default function PromoPopup({ popup }: { popup: PromoData }) {
       onClick={dismiss}
     >
       <div
-        className="relative w-full max-w-md overflow-hidden rounded-2xl bg-white shadow-2xl animate-fade-up"
+        className="relative w-full max-w-md overflow-hidden rounded-lg bg-paper shadow-2xl animate-fade-up"
         onClick={(e) => e.stopPropagation()}
       >
         <button
@@ -88,7 +88,7 @@ export default function PromoPopup({ popup }: { popup: PromoData }) {
               <Link
                 href={popup.linkUrl}
                 onClick={dismiss}
-                className="mt-5 inline-block rounded-xl bg-gold-500 px-6 py-3 font-bold text-brand-950 transition hover:bg-gold-400"
+                className="mt-5 inline-block rounded-lg bg-brand-800 px-6 py-3 font-bold text-white transition hover:bg-brand-900"
               >
                 {popup.linkText}
               </Link>
@@ -98,7 +98,7 @@ export default function PromoPopup({ popup }: { popup: PromoData }) {
                 target="_blank"
                 rel="noopener noreferrer"
                 onClick={dismiss}
-                className="mt-5 inline-block rounded-xl bg-gold-500 px-6 py-3 font-bold text-brand-950 transition hover:bg-gold-400"
+                className="mt-5 inline-block rounded-lg bg-brand-800 px-6 py-3 font-bold text-white transition hover:bg-brand-900"
               >
                 {popup.linkText}
               </a>
