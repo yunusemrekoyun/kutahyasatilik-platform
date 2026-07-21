@@ -1,7 +1,5 @@
-# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
-
-# dependencies
-/node_modules
+# Dependencies
+/node_modules/
 /.pnp
 .pnp.*
 .yarn/*
@@ -10,31 +8,17 @@
 !.yarn/releases
 !.yarn/versions
 
-# testing
-/coverage
-/playwright-report/
-/test-results/
-
-# next.js
+# Build and test output
 /.next/
 /out/
+/build/
+/coverage/
+/playwright-report/
+/test-results/
+*.tsbuildinfo
+next-env.d.ts
 
-# production
-/build
-
-# misc
-.DS_Store
-
-# debug and local logs
-*.log
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-.pnpm-debug.log*
-
-# ---------------------------------------------------------------------------
-# Gizli anahtarlar / ortam değişkenleri — ASLA push edilmez
-# ---------------------------------------------------------------------------
+# Local environment files
 .env
 .env.*
 *.env
@@ -44,11 +28,10 @@ yarn-error.log*
 !.env.example
 !**/.env.example
 !**/.env.*.example
+
+# Credentials and signing material
 *.key
 *.pem
-
-# Local-only docker port override (kardeş projelerle port çakışmasını önler)
-docker-compose.override.yml
 *.p12
 *.pfx
 *.jks
@@ -64,87 +47,44 @@ GoogleService-Info.plist
 .secrets/
 secrets/
 
-# ---------------------------------------------------------------------------
-# AI / kod asistanı bağlamı ve geçmişi
-# "AI kullanımı belirten" hiçbir dosya repoya / push'a gitmez
-# ---------------------------------------------------------------------------
-# Claude / Anthropic
-CLAUDE.md
-CLAUDE.local.md
-.claude/
-.claude.json
-.anthropic/
-# Genel ajan / asistan
-AGENTS.md
-.agents/
-skills-lock.json
-.codex/
+# Logs and local caches
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+.DS_Store
+/.cache/
+/tmp/
 
-# İç çalışma notları (commit edilmez)
-NOTLAR.md
-/rapor/
-.aider*
-.continue/
-# Cursor
-.cursor/
-.cursorrules
-.cursorignore
-# GitHub Copilot
-.github/copilot-instructions.md
-# Windsurf
-.windsurf/
-.windsurfrules
-# Gemini
-GEMINI.md
-.gemini/
-# Diğer asistan araçları
-.roo/
-.cline/
-.serena/
-.specstory/
-# MCP sunucu yapılandırması (token / secret taşıyabilir)
-.mcp.json
-mcp.json
-
-# ---------------------------------------------------------------------------
-# Dahili / üretilmiş denetim raporları — yayınlanmaz
-# (güvenlik bulgularını içerir, herkese açık repoya gitmemeli)
-# ---------------------------------------------------------------------------
-CANLIYA_CIKIS_RAPORU.md
-
-# local editor context
+# Editors and deployment providers
 /.idea/
 /.vscode/
+*.code-workspace
+/.vercel/
 
-# vercel
-.vercel
-
-# typescript
-*.tsbuildinfo
-next-env.d.ts
-
-# prisma üretilmiş client
-/app/generated/prisma
-
-# uploads (kullanıcı yüklemeleri)
+# Generated and runtime data
+/app/generated/prisma/
 /public/uploads/*
 !/public/uploads/.gitkeep
-
-# sqlite veritabanı
 /dev.db
 /dev.db-journal
-prisma/dev.db
+/prisma/dev.db
 *.db
 *.db-journal
 *.sqlite
 *.sqlite3
-
-# veritabanı yedekleri (tüm veriyi içerir — ASLA repoya gitmez)
-# Not: prisma migration .sql dosyaları takip edilmeli; bu yüzden geniş "*.sql" KULLANMA.
 /backups/
 *.sql.gz
 *.dump
-# Claude sohbet kayıtları — ham log gizli veri içerir, push edilmez (özet .md takip edilir)
-docs/claude-history/*.jsonl
-/docs
+
+# Local development and internal work artifacts
+/docs/
+/reports/
+/rapor/
+NOTLAR.md
+CANLIYA_CIKIS_RAPORU.md
+KURULUM_REHBERI.html
+docker-compose.yml
+docker-compose.override.yml
 /Kutahyasatilik İlan

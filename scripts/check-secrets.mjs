@@ -1,6 +1,5 @@
 import { execFileSync } from "node:child_process";
 import { readFileSync, statSync } from "node:fs";
-import path from "node:path";
 
 const trackedFiles = execFileSync("git", ["ls-files", "-z"], {
   encoding: "utf8",
