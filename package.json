@@ -10,6 +10,7 @@
     "build": "next build",
     "typecheck": "tsc --noEmit --incremental false",
     "check:standalone": "node scripts/check-standalone.mjs",
+    "check:secrets": "node scripts/check-secrets.mjs",
     "prepare:standalone": "node scripts/prepare-standalone.mjs",
     "start:standalone": "node .next/standalone/server.js",
     "audit:runtime": "npm audit --omit=dev --audit-level=high",
