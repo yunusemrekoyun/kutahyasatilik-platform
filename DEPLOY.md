@@ -69,24 +69,28 @@ npm run prepare:standalone
 
 `.env` (canlı):
 ```
-DATABASE_URL="<supabase pooled / 6543 ?pgbouncer=true>"
-DIRECT_URL="<supabase direct / 5432>"
+DATABASE_URL=""
+DIRECT_URL=""
 REDIS_URL="redis://localhost:6379"
 UPLOAD_DIR="/var/www/kutahya/uploads"     # kalıcı, nginx ile servis edilen dizin
-AUTH_SECRET="<32+ byte rastgele>"
-ADMIN_EMAIL / ADMIN_PASSWORD              # ilk admin (sonra değiştir)
+AUTH_SECRET=""
+ADMIN_EMAIL=""
+ADMIN_PASSWORD=""
 NEXT_PUBLIC_SITE_URL="https://kutahyasatilik.com"
 NEXT_PUBLIC_MEDIA_URL="https://media.kutahyasatilik.com"
 NEXT_PUBLIC_PHONE / WHATSAPP / EMAIL
 NEXT_PUBLIC_GA_ID / GTAG_ID / ADS_CONVERSION_LABEL
-CRON_SECRET="<ayrı, güçlü rastgele değer>"
+CRON_SECRET=""
 PUSH_ENABLED="false"                       # fiziksel cihaz testi sonrası true
-EXPO_ACCESS_TOKEN="<Expo erişim tokenı>"
+EXPO_ACCESS_TOKEN=""
 APPLE_TEAM_ID / IOS_BUNDLE_ID
 ANDROID_PACKAGE_NAME / ANDROID_APP_LINK_SHA256_CERT_FINGERPRINTS
 SENTRY_DSN / NEXT_PUBLIC_SENTRY_DSN          # opsiyonel
 SENTRY_ORG / SENTRY_PROJECT / SENTRY_AUTH_TOKEN  # source map yükleme, opsiyonel
 ```
+
+Boş hassas değerleri belgeye veya repoya yazmayın. Production secret deposunda üretip
+sunucunun yalnız yetkili kullanıcı tarafından okunabilen ortam dosyasına aktarın.
 
 Başlatma (standalone — `next start` DEĞİL):
 ```bash
