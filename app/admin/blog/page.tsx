@@ -22,7 +22,7 @@ export default async function AdminBlog() {
       <div className={`overflow-hidden ${adminCard}`}>
         <table className="w-full text-sm">
           <thead>
-            <tr className="border-b border-slate-200 bg-slate-50 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">
+            <tr className="border-b border-stone bg-canvas text-left text-xs font-semibold uppercase tracking-wide text-slate-500">
               <th className="p-3">Yazı</th>
               <th className="p-3">Durum</th>
               <th className="p-3">Tarih</th>
@@ -35,7 +35,7 @@ export default async function AdminBlog() {
               <tr><td colSpan={5} className="p-8 text-center text-slate-400">Henüz yazı yok. İlk blog yazınızı ekleyin.</td></tr>
             )}
             {posts.map((p) => (
-              <tr key={p.id} className="border-b border-slate-50 hover:bg-slate-50">
+              <tr key={p.id} className="border-b border-slate-50 hover:bg-canvas">
                 <td className="p-3">
                   <div className="flex items-center gap-3">
                     <div className="relative h-12 w-16 shrink-0 overflow-hidden rounded-md bg-slate-100">

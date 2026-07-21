@@ -11,9 +11,9 @@ export const metadata: Metadata = {
 export default function ForgotPasswordPage() {
   return (
     <div className="mx-auto grid max-w-md px-4 py-16">
-      <div className="rounded-3xl bg-white p-8 shadow-xl ring-1 ring-slate-200">
+      <div className="rounded-lg border border-stone bg-paper p-8">
         <div className="text-center">
-          <span className="inline-grid h-12 w-12 place-items-center rounded-xl bg-brand-700 text-white">
+          <span className="inline-grid h-12 w-12 place-items-center rounded-lg bg-brand-700 text-white">
             <KeyRound className="h-6 w-6" />
           </span>
           <h1 className="mt-4 text-xl font-bold text-slate-900">Şifremi Unuttum</h1>

@@ -21,7 +21,7 @@ export default function ListingDetailActions({ listing }: { listing: ListingSnap
       <button
         onClick={() => toggleFavorite(listing)}
         className={`flex flex-1 items-center justify-center gap-1.5 rounded-lg border px-3 py-2.5 text-sm font-semibold transition ${
-          fav ? "border-red-200 bg-red-50 text-red-600" : "border-slate-200 bg-white text-slate-700 hover:border-red-200 hover:text-red-600"
+          fav ? "border-red-200 bg-red-50 text-red-600" : "border-stone bg-paper text-slate-700 hover:border-red-200 hover:text-red-600"
         }`}
       >
         {fav ? (
@@ -33,7 +33,7 @@ export default function ListingDetailActions({ listing }: { listing: ListingSnap
       <button
         onClick={() => toggleCompare(listing)}
         className={`flex flex-1 items-center justify-center gap-1.5 rounded-lg border px-3 py-2.5 text-sm font-semibold transition ${
-          cmp ? "border-brand-200 bg-brand-50 text-brand-700" : "border-slate-200 bg-white text-slate-700 hover:border-brand-200 hover:text-brand-700"
+          cmp ? "border-brand-200 bg-brand-50 text-brand-700" : "border-stone bg-paper text-slate-700 hover:border-brand-200 hover:text-brand-700"
         }`}
       >
         <ArrowLeftRight className="h-4 w-4" /> {cmp ? "Eklendi" : "Karşılaştır"}

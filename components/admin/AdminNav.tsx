@@ -82,7 +82,7 @@ export default function AdminNav({
           {group.label && !collapsed && (
             <p className="mb-1.5 px-3 text-[11px] font-semibold uppercase tracking-wider text-slate-400">{group.label}</p>
           )}
-          {group.label && collapsed && gi > 0 && <div className="mx-3 mb-2 border-t border-slate-100" />}
+          {group.label && collapsed && gi > 0 && <div className="mx-3 mb-2 border-t border-stone" />}
           <div className="flex flex-col gap-0.5">
             {group.items.map((it) => {
               const active = isActive(it.href, it.exact);
@@ -109,7 +109,7 @@ export default function AdminNav({
                   </span>
                   {!collapsed && <span className="flex-1 truncate">{it.label}</span>}
                   {!collapsed && count > 0 && (
-                    <span className={`rounded-full px-2 py-0.5 text-[11px] font-bold tabular-nums ${active ? "bg-white/20 text-white" : "bg-red-100 text-red-700"}`}>
+                    <span className={`rounded-full px-2 py-0.5 text-[11px] font-bold tabular-nums ${active ? "bg-paper/20 text-white" : "bg-red-100 text-red-700"}`}>
                       {count}
                     </span>
                   )}

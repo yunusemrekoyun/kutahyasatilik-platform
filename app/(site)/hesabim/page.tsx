@@ -40,7 +40,7 @@ export default async function AccountPage() {
   return (
     <div className="mx-auto max-w-2xl px-4 py-12">
       <div className="flex items-center gap-3">
-        <span className="grid h-12 w-12 place-items-center rounded-xl bg-brand-700 text-white">
+        <span className="grid h-12 w-12 place-items-center rounded-lg bg-brand-700 text-white">
           <UserIcon className="h-6 w-6" />
         </span>
         <div>
@@ -54,13 +54,13 @@ export default async function AccountPage() {
         <h2 className="text-lg font-bold text-slate-900">Taleplerim</h2>
         <p className="text-sm text-slate-500">Bıraktığınız taleplerin süreç durumunu buradan izleyebilirsiniz.</p>
         {leads.length === 0 ? (
-          <div className="mt-3 rounded-2xl bg-white p-6 text-center text-sm text-slate-400 ring-1 ring-slate-200">
+          <div className="mt-3 rounded-lg bg-paper p-6 text-center text-sm text-slate-400 ring-1 ring-stone">
             Henüz talebiniz yok. Bir ilanda &quot;Randevu / Bilgi Al&quot; ya da &quot;Mülkünü Sat&quot; ile talep bırakabilirsiniz.
           </div>
         ) : (
           <div className="mt-3 space-y-3">
             {leads.map((l) => (
-              <div key={l.id} className="rounded-2xl bg-white p-5 ring-1 ring-slate-200">
+              <div key={l.id} className="rounded-lg bg-paper p-5 ring-1 ring-stone">
                 <div className="flex flex-wrap items-start justify-between gap-2">
                   <div>
                     <p className="font-semibold text-slate-900">{LEAD_TYPE_LABELS[l.type] || "Talep"}</p>
@@ -86,7 +86,7 @@ export default async function AccountPage() {
       </div>
 
       {/* Profil bilgileri — ad/telefon düzenlenebilir; e-posta değiştirilemez */}
-      <div className="mt-8 rounded-2xl bg-white p-6 ring-1 ring-slate-200">
+      <div className="mt-8 rounded-lg bg-paper p-6 ring-1 ring-stone">
         <h2 className="font-bold text-slate-900">Profil Bilgileri</h2>
         <p className="mt-1 inline-flex items-center gap-2 text-sm text-slate-500">
           <Mail className="h-4 w-4 text-slate-400" /> {user?.email ?? session.email}
@@ -98,7 +98,7 @@ export default async function AccountPage() {
       </div>
 
       {/* Şifre değiştir */}
-      <div className="mt-4 rounded-2xl bg-white p-6 ring-1 ring-slate-200">
+      <div className="mt-4 rounded-lg bg-paper p-6 ring-1 ring-stone">
         <h2 className="font-bold text-slate-900">Şifre Değiştir</h2>
         <p className="mt-1 text-sm text-slate-500">Güvenliğiniz için düzenli olarak güçlü bir şifre belirleyin.</p>
         <div className="mt-4">
@@ -106,7 +106,7 @@ export default async function AccountPage() {
         </div>
       </div>
 
-      <Link href="/hesabim/mesajlar" className="mt-4 flex items-center gap-3 rounded-2xl bg-white p-5 ring-1 ring-slate-200 transition hover:ring-brand-300">
+      <Link href="/hesabim/mesajlar" className="mt-4 flex items-center gap-3 rounded-lg bg-paper p-5 ring-1 ring-stone transition hover:ring-brand-300">
         <span className="grid h-10 w-10 place-items-center rounded-lg bg-brand-50 text-brand-700"><MessageSquare className="h-5 w-5" /></span>
         <div>
           <p className="font-semibold text-slate-900">Mesajlarım</p>
@@ -114,7 +114,7 @@ export default async function AccountPage() {
         </div>
       </Link>
 
-      <Link href="/favoriler" className="mt-4 flex items-center gap-3 rounded-2xl bg-white p-5 ring-1 ring-slate-200 transition hover:ring-brand-300">
+      <Link href="/favoriler" className="mt-4 flex items-center gap-3 rounded-lg bg-paper p-5 ring-1 ring-stone transition hover:ring-brand-300">
         <span className="grid h-10 w-10 place-items-center rounded-lg bg-rose-50 text-rose-600"><Heart className="h-5 w-5" /></span>
         <div>
           <p className="font-semibold text-slate-900">Favorilerim</p>

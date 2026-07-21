@@ -6,7 +6,7 @@ import { AlertTriangle } from "lucide-react";
 export default function SiteError({ reset }: { error: Error & { digest?: string }; reset: () => void }) {
   return (
     <div className="mx-auto max-w-md px-4 py-24 text-center">
-      <span className="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-amber-50 text-amber-600 ring-1 ring-amber-200">
+      <span className="mx-auto grid h-14 w-14 place-items-center rounded-lg bg-amber-50 text-amber-600 ring-1 ring-amber-200">
         <AlertTriangle className="h-7 w-7" />
       </span>
       <h1 className="mt-5 font-display text-2xl font-bold text-brand-900">Bir şeyler ters gitti</h1>

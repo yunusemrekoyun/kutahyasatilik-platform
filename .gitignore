@@ -12,6 +12,8 @@
 
 # testing
 /coverage
+/playwright-report/
+/test-results/
 
 # next.js
 /.next/
@@ -35,7 +37,13 @@ yarn-error.log*
 # ---------------------------------------------------------------------------
 .env
 .env.*
+*.env
+*.env.*
+**/.env
+**/.env.*
 !.env.example
+!**/.env.example
+!**/.env.*.example
 *.key
 *.pem
 
@@ -43,10 +51,18 @@ yarn-error.log*
 docker-compose.override.yml
 *.p12
 *.pfx
+*.jks
+*.keystore
+*.mobileprovision
 *.cert
 secrets.json
 credentials.json
+credentials*.json
+service-account*.json
+google-services.json
+GoogleService-Info.plist
 .secrets/
+secrets/
 
 # ---------------------------------------------------------------------------
 # AI / kod asistanı bağlamı ve geçmişi
@@ -128,8 +144,6 @@ prisma/dev.db
 /backups/
 *.sql.gz
 *.dump
-DEPLOY.md
-
 # Claude sohbet kayıtları — ham log gizli veri içerir, push edilmez (özet .md takip edilir)
 docs/claude-history/*.jsonl
 /docs

@@ -26,17 +26,24 @@
   --color-gold-800: #6f4e15;
   --color-gold-900: #5c4015;
 
+  /* Yerel editoryal yüzeyler */
+  --color-canvas: #f5f2ea;
+  --color-paper: #fffdf9;
+  --color-stone: #ddd8ce;
+  --color-ink: #172033;
+  --color-muted: #667085;
+
   --font-sans: var(--font-geist-sans), system-ui, Arial, sans-serif;
   --font-display: var(--font-display), Georgia, "Times New Roman", serif;
 
   /* Rafine yükselti — glow yerine yumuşak, laciverte çalan gölgeler */
-  --shadow-card: 0 1px 2px rgba(15, 23, 42, 0.04), 0 6px 16px -10px rgba(15, 23, 42, 0.12);
-  --shadow-prestige: 0 10px 30px -16px rgba(10, 23, 48, 0.2);
+  --shadow-card: 0 12px 32px -22px rgba(10, 23, 48, 0.28);
+  --shadow-prestige: 0 24px 64px -32px rgba(10, 23, 48, 0.35);
 }
 
 :root {
-  --background: #f6f7f9;
-  --foreground: #0f172a;
+  --background: #f5f2ea;
+  --foreground: #172033;
   /* Hareket eğrileri (emil) */
   --ease-out-quart: cubic-bezier(0.22, 1, 0.36, 1);
 }
@@ -51,6 +58,38 @@ body {
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
 }
+
+::selection { background: #d4e0f2; color: #0a1730; }
+
+:where(a, button, input, select, textarea):focus-visible {
+  outline: 2px solid #345a9a;
+  outline-offset: 3px;
+}
+
+/* Özgün, düşük kontrastlı çini-geometri dokusu. */
+.ceramic-grid {
+  background-image:
+    linear-gradient(45deg, rgba(30, 58, 107, .055) 25%, transparent 25%),
+    linear-gradient(-45deg, rgba(30, 58, 107, .055) 25%, transparent 25%),
+    linear-gradient(45deg, transparent 75%, rgba(168, 133, 29, .045) 75%),
+    linear-gradient(-45deg, transparent 75%, rgba(168, 133, 29, .045) 75%);
+  background-position: 0 0, 0 12px, 12px -12px, -12px 0;
+  background-size: 24px 24px;
+}
+
+.editorial-rule {
+  border-top: 1px solid var(--color-stone);
+}
+
+.eyebrow {
+  color: var(--color-brand-700);
+  font-size: .72rem;
+  font-weight: 700;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+}
+
+.surface-paper { background: var(--color-paper); }
 
 .font-display {
   font-family: var(--font-display);
@@ -73,10 +112,9 @@ body {
 
 /* İnce altın ayraç — düz, rafine (gradient yok) */
 .gold-divider {
-  height: 2px;
-  width: 36px;
+  height: 1px;
+  width: 48px;
   background: var(--color-gold-600);
-  border-radius: 9999px;
 }
 
 /* Animasyonlar — hafif, hızlı, ease-out (emil) */

@@ -6,6 +6,7 @@ export const metadata: Metadata = {
   title: "Danışman Başvurusu - Emlakçı Kaydı",
   description:
     "Kütahya Satılık danışman ağına katılın. Başvurunuzu yapın, onaylandıktan sonra kendi ilanlarınızı ekleyin ve geniş alıcı kitlesine ulaşın.",
+  alternates: { canonical: "/emlakci/kayit" },
 };
 
 export default function AgentRegisterPage() {
@@ -30,12 +31,12 @@ export default function AgentRegisterPage() {
             <li className="flex gap-3"><CheckCircle2 className="h-5 w-5 shrink-0 text-green-600" /> Google&apos;da reklamlı geniş erişim</li>
             <li className="flex gap-3"><CheckCircle2 className="h-5 w-5 shrink-0 text-green-600" /> Yatırım analizi ve değerleme araçları</li>
           </ul>
-          <div className="mt-6 flex items-start gap-2 rounded-xl bg-amber-50 p-4 text-sm text-amber-800 ring-1 ring-amber-100">
+          <div className="mt-6 flex items-start gap-2 rounded-lg bg-amber-50 p-4 text-sm text-amber-800 ring-1 ring-amber-100">
             <Info className="mt-0.5 h-4 w-4 shrink-0 text-amber-600" /> Kalite ve güven için her başvuru ve her ilan yönetim onayından geçer.
           </div>
         </div>
 
-        <div className="rounded-3xl bg-white p-6 shadow-xl ring-1 ring-slate-200 sm:p-7">
+        <div className="rounded-lg border border-stone bg-paper p-6 sm:p-7">
           <h2 className="text-xl font-extrabold text-slate-900">Danışman Başvuru Formu</h2>
           <p className="mt-1 text-sm text-slate-500">Bilgilerinizi girin, başvurunuzu inceleyelim.</p>
           <div className="mt-5">

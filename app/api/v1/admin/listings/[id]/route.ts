@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { resolveApiAdmin } from "@/lib/apiAdmin";
-import { deleteUploadFiles } from "@/lib/uploads";
+import { deleteUploadFiles } from "@/lib/uploadDeletion";
 import { deleteVideo } from "@/lib/videoStorage";
 
 export const runtime = "nodejs";

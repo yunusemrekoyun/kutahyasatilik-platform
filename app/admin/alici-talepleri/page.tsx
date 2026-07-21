@@ -61,14 +61,14 @@ export default async function AdminBuyerAlerts({
       </div>
 
       {total === 0 && (
-        <p className="rounded-xl bg-white p-10 text-center text-slate-400 ring-1 ring-slate-200">
+        <p className="rounded-lg bg-paper p-10 text-center text-slate-400 ring-1 ring-stone">
           Henüz alıcı talebi yok. /alici-talebi sayfasından gelen talepler burada listelenir.
         </p>
       )}
 
       <div className="space-y-3">
         {alerts.map((a, i) => (
-          <div key={a.id} className={`rounded-xl bg-white p-5 ring-1 ${counts[i] > 0 ? "ring-green-200" : "ring-slate-200"}`}>
+          <div key={a.id} className={`rounded-lg bg-paper p-5 ring-1 ${counts[i] > 0 ? "ring-green-200" : "ring-stone"}`}>
             <div className="flex flex-wrap items-start justify-between gap-4">
               <div className="min-w-0">
                 <div className="flex items-center gap-2">
@@ -84,7 +84,7 @@ export default async function AdminBuyerAlerts({
               </div>
 
               <div className="flex flex-col items-end gap-2">
-                <span className={`rounded-lg px-3 py-1.5 text-sm font-bold ${counts[i] > 0 ? "bg-green-50 text-green-700" : "bg-slate-50 text-slate-400"}`}>
+                <span className={`rounded-lg px-3 py-1.5 text-sm font-bold ${counts[i] > 0 ? "bg-green-50 text-green-700" : "bg-canvas text-slate-400"}`}>
                   {counts[i]} uygun ilan
                 </span>
                 {counts[i] > 0 && a.district && (
@@ -95,7 +95,7 @@ export default async function AdminBuyerAlerts({
               </div>
             </div>
 
-            <div className="mt-4 flex flex-wrap items-center gap-2 border-t border-slate-100 pt-4">
+            <div className="mt-4 flex flex-wrap items-center gap-2 border-t border-stone pt-4">
               <a href={`tel:${a.phone.replace(/[^\d+]/g, "")}`} className="rounded-lg bg-brand-700 px-3.5 py-2 text-sm font-semibold text-white hover:bg-brand-800">Ara</a>
               <a href={waLink(a.phone, a.name)} target="_blank" rel="noopener noreferrer" className="rounded-lg bg-green-600 px-3.5 py-2 text-sm font-semibold text-white hover:bg-green-700">WhatsApp</a>
               <form action={updateAlertStatus}>
@@ -119,10 +119,10 @@ export default async function AdminBuyerAlerts({
           <span className="text-slate-500">Sayfa {page} / {totalPages}</span>
           <div className="flex gap-2">
             {page > 1 && (
-              <Link href={`/admin/alici-talepleri?sayfa=${page - 1}`} className="rounded-lg bg-white px-3 py-1.5 font-medium text-slate-700 ring-1 ring-slate-200 hover:ring-brand-300">‹ Önceki</Link>
+              <Link href={`/admin/alici-talepleri?sayfa=${page - 1}`} className="rounded-lg bg-paper px-3 py-1.5 font-medium text-slate-700 ring-1 ring-stone hover:ring-brand-300">‹ Önceki</Link>
             )}
             {page < totalPages && (
-              <Link href={`/admin/alici-talepleri?sayfa=${page + 1}`} className="rounded-lg bg-white px-3 py-1.5 font-medium text-slate-700 ring-1 ring-slate-200 hover:ring-brand-300">Sonraki ›</Link>
+              <Link href={`/admin/alici-talepleri?sayfa=${page + 1}`} className="rounded-lg bg-paper px-3 py-1.5 font-medium text-slate-700 ring-1 ring-stone hover:ring-brand-300">Sonraki ›</Link>
             )}
           </div>
         </div>

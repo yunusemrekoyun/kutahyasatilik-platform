@@ -31,16 +31,16 @@ export default async function AdminModeration() {
       </div>
 
       {listings.length === 0 && (
-        <div className="flex items-center justify-center gap-2 rounded-xl bg-white p-10 text-center text-slate-400 ring-1 ring-slate-200">
+        <div className="flex items-center justify-center gap-2 rounded-lg bg-paper p-10 text-center text-slate-400 ring-1 ring-stone">
           <CheckCircle2 className="h-5 w-5 text-green-600" /> Onay bekleyen ilan yok.
         </div>
       )}
 
       <div className="space-y-4">
         {listings.map((l, idx) => (
-          <div key={l.id} className="overflow-hidden rounded-xl bg-white ring-1 ring-amber-200">
+          <div key={l.id} className="overflow-hidden rounded-lg bg-paper ring-1 ring-amber-200">
             <div className="flex flex-col gap-4 p-5 sm:flex-row">
-              <div className="relative h-40 w-full shrink-0 overflow-hidden rounded-xl bg-slate-100 sm:h-32 sm:w-44">
+              <div className="relative h-40 w-full shrink-0 overflow-hidden rounded-lg bg-slate-100 sm:h-32 sm:w-44">
                 {l.images[0] && (
                   <Image src={l.images[0].url} alt={l.title} fill sizes="200px" className="object-cover" />
                 )}

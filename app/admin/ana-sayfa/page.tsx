@@ -20,7 +20,7 @@ export default async function AdminHomeTexts() {
   const map = new Map(rows.map((r) => [r.key, r.value]));
 
   const inputCls =
-    "w-full rounded-lg border border-slate-300 bg-white px-3.5 py-2.5 text-[15px] text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/30";
+    "w-full rounded-lg border border-slate-300 bg-paper px-3.5 py-2.5 text-[15px] text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/30";
 
   return (
     <div>
@@ -29,7 +29,7 @@ export default async function AdminHomeTexts() {
         Ana sayfadaki başlık ve metinleri buradan düzenleyin. Boş bırakılan alanlar varsayılan metni gösterir.
       </p>
 
-      <form action={saveHomeTexts} className="mt-6 max-w-2xl space-y-4 rounded-2xl bg-white p-6 ring-1 ring-slate-200">
+      <form action={saveHomeTexts} className="mt-6 max-w-2xl space-y-4 rounded-lg bg-paper p-6 ring-1 ring-stone">
         {FIELDS.map((f) => (
           <label key={f.key} className="block">
             <span className="mb-1 block text-sm font-medium text-slate-700">{f.label}</span>

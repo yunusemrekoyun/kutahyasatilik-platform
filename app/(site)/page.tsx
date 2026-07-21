@@ -1,21 +1,22 @@
+import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
-import {
-  Building2, LandPlot, Home as HomeIcon, Trees, Store, LineChart, Headset, ShieldCheck,
-  CheckCircle2, Star, BarChart3, ArrowRight, Phone,
-} from "lucide-react";
-import { getFeaturedListings, getMapPoints } from "@/lib/listings";
-import { prisma } from "@/lib/prisma";
-import { DISTRICTS, LANDING_PAGES } from "@/lib/constants";
-import { SITE, telLink } from "@/lib/site";
-import { getSiteContact } from "@/lib/contact";
-import ListingCard from "@/components/ListingCard";
+import { ArrowRight, BarChart3, Check, MapPin, Phone } from "lucide-react";
+import HomeJsonLd from "@/components/HomeJsonLd";
 import HomeSearch from "@/components/HomeSearch";
+import ListingCard from "@/components/ListingCard";
 import ListingsMap from "@/components/ListingsMap";
 import NotFoundCTA from "@/components/NotFoundCTA";
 import TrackView from "@/components/TrackView";
-import HomeJsonLd from "@/components/HomeJsonLd";
+import { getSiteContact } from "@/lib/contact";
+import { DISTRICTS, LANDING_PAGES } from "@/lib/constants";
+import { getFeaturedListings, getMapPoints } from "@/lib/listings";
+import { mediaUrl } from "@/lib/media";
+import { prisma } from "@/lib/prisma";
+import { SITE, telLink } from "@/lib/site";
 
-export const revalidate = 300; // ISR: her 5 dakikada yenilenir (CDN cache + admin revalidatePath)
+export const revalidate = 300;
+export const metadata: Metadata = { alternates: { canonical: "/" } };
 
 async function getHomeTexts() {
   const keys = [
@@ -25,258 +26,227 @@ async function getHomeTexts() {
   ];
   try {
     const rows = await prisma.setting.findMany({ where: { key: { in: keys } } });
-    return new Map(rows.filter((r) => r.value?.trim()).map((r) => [r.key, r.value]));
+    return new Map(rows.filter((row) => row.value?.trim()).map((row) => [row.key, row.value]));
   } catch {
     return new Map<string, string>();
   }
 }
 
 export default async function Home() {
-  const [featured, points, totalActive, totalSold, texts, dbTestimonials, contact] = await Promise.all([
+  const [featured, points, totalActive, totalSold, texts, testimonials, contact] = await Promise.all([
     getFeaturedListings(6),
     getMapPoints(),
     prisma.listing.count({ where: { status: "active" } }),
     prisma.listing.count({ where: { status: "sold" } }),
     getHomeTexts(),
-    prisma.testimonial
-      .findMany({ where: { published: true }, orderBy: [{ sortOrder: "asc" }, { createdAt: "desc" }] })
-      .catch(() => []),
+    prisma.testimonial.findMany({ where: { published: true }, orderBy: [{ sortOrder: "asc" }, { createdAt: "desc" }] }).catch(() => []),
     getSiteContact(),
   ]);
 
-  const testimonials = dbTestimonials; // yayınlı yorum yoksa bölüm gizlenir (sahte yorum yok)
-
-  const t = (k: string, fallback: string) => texts.get(k) || fallback;
-  const heroBadge = t("home_hero_badge", SITE.brand);
-  const heroTitle = t("home_hero_title", "Kütahya'da Doğru Gayrimenkul,");
-  const heroHighlight = t("home_hero_highlight", "Doğru Fiyata");
+  const t = (key: string, fallback: string) => texts.get(key) || fallback;
+  const heroTitle = t("home_hero_title", "Kütahya'da doğru gayrimenkul,");
+  const heroHighlight = t("home_hero_highlight", "yerel bilgiyle");
   const heroSubtitle = t(
     "home_hero_subtitle",
-    `Merkez, Tavşanlı, Simav, Gediz, Emet ve tüm ilçelerde satılık daire, arsa, villa ve yatırımlık tarla. ${totalActive}+ güncel ilan, yapay zeka destekli bölge analizi ve dakikalar içinde iletişim.`
+    `Merkez ve tüm ilçelerde ${totalActive}+ güncel portföyü, bölgesel verileri ve yerel danışmanlığı tek yerde keşfedin.`,
   );
-  const statSales = texts.get("home_stat_sales");
+  // Only use the deliberately selected CMS visual here. Listing covers may contain
+  // agent artwork or embedded copy that does not work as a large editorial hero.
+  const heroVisual = texts.get("home_hero_image") || null;
+  const statSales = Number(texts.get("home_stat_sales") || 850);
   const statYears = texts.get("home_stat_years") || "15";
-  const whyTitle = t("home_why_title", `Neden ${SITE.name}?`);
-  const heroImage = texts.get("home_hero_image");
+  const whyTitle = t("home_why_title", "Yerel pazarı yakından tanıyoruz");
+  const categoryCoverByType = new Map<string, string>();
+  for (const listing of featured) {
+    if (listing.coverImage && !categoryCoverByType.has(listing.propertyType)) categoryCoverByType.set(listing.propertyType, listing.coverImage);
+  }
 
   return (
     <>
       <TrackView />
       <HomeJsonLd />
 
-      {/* HERO — arama odakta */}
-      <section className="relative isolate overflow-hidden bg-brand-950 text-white">
-        {heroImage ? (
-          <>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={heroImage} alt="" className="absolute inset-0 -z-10 h-full w-full object-cover opacity-55" />
-            <div className="absolute inset-0 -z-10 bg-gradient-to-b from-brand-950/70 via-brand-950/45 to-brand-950/80" />
-          </>
-        ) : (
-          <div className="absolute inset-0 -z-10 bg-gradient-to-b from-brand-900/60 to-transparent" />
-        )}
-        <div className="relative mx-auto max-w-3xl px-4 py-16 text-center sm:py-20">
-          <span className="animate-fade-up inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-1.5 text-sm font-medium ring-1 ring-gold-400/40">
-            <Star className="h-3.5 w-3.5 fill-current text-gold-400" /> {heroBadge}
-          </span>
-          <h1 className="animate-fade-up mt-5 text-balance font-display text-4xl font-bold leading-[1.08] tracking-[-0.01em] sm:text-5xl">
-            {heroTitle}
-            <span className="text-gold-400"> {heroHighlight}</span>
-          </h1>
-          <p className="animate-fade-up mx-auto mt-5 max-w-2xl text-lg leading-relaxed text-brand-100">
-            {heroSubtitle}
-          </p>
-        </div>
+      <section className="relative overflow-hidden border-b border-stone bg-canvas">
+        <div className="ceramic-grid pointer-events-none absolute inset-y-0 right-0 hidden w-1/2 opacity-55 lg:block" />
+        <div className="relative mx-auto grid max-w-7xl items-stretch px-5 sm:px-6 lg:grid-cols-12">
+          <div className="flex flex-col justify-center py-14 sm:py-20 lg:col-span-6 lg:pr-14 lg:py-24">
+            <p className="eyebrow">{t("home_hero_badge", SITE.brand)}</p>
+            <h1 className="mt-5 max-w-2xl font-display text-[42px] font-semibold leading-[1.02] tracking-[-0.035em] text-brand-950 sm:text-6xl">
+              {heroTitle} <span className="italic text-brand-600">{heroHighlight}</span>
+            </h1>
+            <p className="mt-6 max-w-xl text-base leading-7 text-muted sm:text-lg sm:leading-8">{heroSubtitle}</p>
 
-        {/* Arama — sayfanın tek en önemli öğesi */}
-        <div className="relative mx-auto -mb-10 max-w-5xl px-4 sm:-mb-12">
-          <div className="animate-fade-up rounded-2xl bg-white p-4 text-slate-900 shadow-prestige ring-1 ring-slate-200 sm:p-5">
-            <HomeSearch />
-            <div className="mt-3 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-[13px] text-slate-500">
-              <Link href="/degerleme" className="inline-flex items-center gap-1.5 font-medium text-brand-700 hover:text-brand-800">
-                <BarChart3 className="h-4 w-4" /> Evimin değeri ne kadar?
-              </Link>
-              <span className="inline-flex items-center gap-1.5"><CheckCircle2 className="h-4 w-4 text-green-600" /> Komisyonlu güvenli satış</span>
-              {contact.phoneRaw && (
-                <a href={telLink(contact.phoneRaw)} className="inline-flex items-center gap-1.5 font-medium text-brand-700 hover:text-brand-800">
-                  <Phone className="h-4 w-4" /> {contact.phone}
-                </a>
-              )}
+            <div className="mt-9 border border-stone bg-paper p-4 sm:p-5">
+              <HomeSearch />
+              <div className="mt-4 flex flex-wrap items-center gap-x-5 gap-y-2 border-t border-stone pt-4 text-xs font-semibold text-muted">
+                <Link href="/degerleme" className="inline-flex items-center gap-1.5 text-brand-700 hover:text-brand-900"><BarChart3 className="h-4 w-4" /> Bölgesel ön değerleme</Link>
+                <span className="inline-flex items-center gap-1.5"><Check className="h-4 w-4 text-green-700" /> Şeffaf satış süreci</span>
+                {contact.phoneRaw && <a href={telLink(contact.phoneRaw)} className="inline-flex items-center gap-1.5 text-brand-700 hover:text-brand-900"><Phone className="h-4 w-4" /> {contact.phone}</a>}
+              </div>
+            </div>
+          </div>
+
+          <div className="relative min-h-[390px] overflow-hidden border-x border-t border-stone bg-brand-950 lg:col-span-6 lg:min-h-[680px] lg:border-y-0 lg:border-r">
+            {heroVisual ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={mediaUrl(heroVisual)} alt="Kütahya güncel gayrimenkul portföyü" loading="eager" fetchPriority="high" className="absolute inset-0 h-full w-full object-cover" />
+            ) : (
+              <Image
+                src="/brand/kutahya-editorial-hero.webp"
+                alt="Kütahya silüeti ve çini motiflerinden editoryal illüstrasyon"
+                fill
+                sizes="(max-width: 1023px) 100vw, 50vw"
+                loading="eager"
+                fetchPriority="high"
+                className="object-cover object-center"
+              />
+            )}
+            <div className="absolute inset-0 bg-gradient-to-t from-brand-950/65 via-transparent to-transparent" />
+            <div className="absolute inset-x-0 bottom-0 p-6 text-white sm:p-8">
+              <p className="eyebrow !text-gold-300">Yerel portföy</p>
+              <p className="mt-2 max-w-md font-display text-2xl font-semibold leading-tight">Bir ilan değil, doğru bölge ve doğru karar.</p>
             </div>
           </div>
         </div>
       </section>
 
-      {/* İSTATİSTİK BANDI — ikon kutusuz, hairline ayraçlı */}
-      <section className="border-b border-slate-200 bg-white pt-16 sm:pt-20">
-        <div className="mx-auto grid max-w-5xl grid-cols-2 divide-x divide-y divide-slate-100 px-4 py-2 sm:grid-cols-4 sm:divide-y-0">
+      <section className="border-b border-stone bg-paper">
+        <div className="mx-auto grid max-w-7xl grid-cols-2 divide-x divide-y divide-stone px-5 sm:px-6 lg:grid-cols-4 lg:divide-y-0">
           {[
-            { v: `${totalActive}+`, l: "Aktif İlan" },
-            { v: `${totalSold + Number(statSales || 850)}+`, l: "Tamamlanan Satış" },
-            { v: "13", l: "İlçede Hizmet" },
-            { v: `${statYears}+`, l: "Yıl Tecrübe" },
-          ].map((s) => (
-            <div key={s.l} className="px-4 py-7 text-center">
-              <p className="font-display text-3xl font-bold tabular-nums text-brand-800 sm:text-4xl">{s.v}</p>
-              <p className="mt-1 text-sm font-medium text-slate-500">{s.l}</p>
+            [`${totalActive}+`, "Aktif ilan"],
+            [`${totalSold + statSales}+`, "Tamamlanan satış"],
+            ["13", "İlçede hizmet"],
+            [`${statYears}+`, "Yıl deneyim"],
+          ].map(([value, label]) => (
+            <div key={label} className="px-4 py-7 sm:px-8">
+              <p className="font-display text-3xl font-semibold tabular-nums text-brand-950">{value}</p>
+              <p className="mt-1 text-sm text-muted">{label}</p>
             </div>
           ))}
         </div>
       </section>
 
-      {/* KATEGORİLER */}
-      <section className="mx-auto max-w-7xl px-4 py-14">
-        <h2 className="font-display text-2xl font-bold text-brand-900 sm:text-3xl">Ne Arıyorsunuz?</h2>
-        <p className="mt-1.5 text-slate-500">Mülk türüne göre Kütahya portföyünü keşfedin.</p>
-        <div className="mt-7 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
-          {LANDING_PAGES.map((c) => {
-            const Icon =
-              c.propertyType === "daire" ? Building2 :
-              c.propertyType === "arsa" ? LandPlot :
-              c.propertyType === "villa" ? HomeIcon :
-              c.propertyType === "isyeri" ? Store : Trees;
-            return (
-              <Link
-                key={c.slug}
-                href={`/${c.slug}`}
-                className="group flex flex-col items-center justify-center gap-4 rounded-xl bg-white p-6 text-center ring-1 ring-slate-200 transition duration-300 hover:shadow-card hover:ring-brand-200"
-              >
-                <span className="grid h-16 w-16 place-items-center rounded-full bg-slate-100 text-brand-700 transition-colors group-hover:bg-brand-700 group-hover:text-white">
-                  <Icon className="h-7 w-7" strokeWidth={1.6} />
-                </span>
-                <span className="font-display text-lg font-semibold text-slate-900">{c.title}</span>
-              </Link>
-            );
-          })}
-        </div>
-      </section>
-
-      {/* ÖNE ÇIKAN İLANLAR */}
-      <section className="mx-auto max-w-7xl px-4">
-        <div className="flex items-end justify-between gap-4">
-          <div>
-            <h2 className="font-display text-2xl font-bold text-brand-900 sm:text-3xl">Öne Çıkan İlanlar</h2>
-            <p className="mt-1.5 text-slate-500">Editörün seçtiği güncel fırsatlar.</p>
+      <section className="mx-auto max-w-7xl px-5 py-16 sm:px-6 sm:py-24">
+        <div className="grid gap-10 lg:grid-cols-12">
+          <div className="lg:col-span-4">
+            <p className="eyebrow">Portföyü keşfet</p>
+            <h2 className="mt-3 font-display text-3xl font-semibold tracking-tight text-brand-950 sm:text-4xl">Aradığınız mülke doğrudan ulaşın.</h2>
+            <p className="mt-4 max-w-md leading-7 text-muted">Kütahya portföyünü mülk türüne göre ayırdık; filtre kalabalığı olmadan başlayın.</p>
           </div>
-          <Link href="/ilanlar" className="inline-flex shrink-0 items-center gap-1 text-sm font-semibold text-brand-700 hover:text-brand-800">
-            Tümünü gör <ArrowRight className="h-4 w-4" />
-          </Link>
-        </div>
-        <div className="mt-7 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
-          {featured.map((l) => (
-            <ListingCard key={l.slug} listing={l} />
-          ))}
-        </div>
-        {featured.length === 0 && (
-          <p className="rounded-xl bg-white p-8 text-center text-slate-500 ring-1 ring-slate-200">
-            Henüz ilan eklenmemiş. Yönetim panelinden ilan ekleyebilirsiniz.
-          </p>
-        )}
-      </section>
-
-      {/* MÜLKÜNÜ SAT — CTA */}
-      <section className="px-4 py-16">
-        <div className="relative mx-auto max-w-4xl overflow-hidden rounded-2xl bg-brand-950 p-10 text-center sm:p-14">
-          <div className="pointer-events-none absolute -right-20 -top-20 h-64 w-64 rounded-full bg-brand-700/40 blur-3xl" />
-          <div className="pointer-events-none absolute -bottom-20 -left-20 h-64 w-64 rounded-full bg-gold-500/20 blur-3xl" />
-          <div className="relative">
-            <h2 className="font-display text-2xl font-bold text-white sm:text-3xl">
-              Mülkünüzü satmak mı istiyorsunuz?
-            </h2>
-            <p className="mx-auto mt-4 max-w-xl leading-relaxed text-brand-100">
-              Uzman ekibimizle gayrimenkulünüzün gerçek piyasa değerini öğrenin ve güvenle satışa çıkarın.
-            </p>
-            <Link
-              href="/satici"
-              className="mt-8 inline-flex items-center justify-center rounded-lg bg-white px-8 py-4 font-semibold text-brand-800 transition-colors hover:bg-brand-50"
-            >
-              Ücretsiz İlan Talebi Oluştur
-            </Link>
+          <div className="border-t border-stone lg:col-span-8">
+            {LANDING_PAGES.map((category, index) => {
+              const categoryCover = categoryCoverByType.get(category.propertyType);
+              return (
+                <Link key={category.slug} href={`/${category.slug}`} className="group grid grid-cols-[2rem_4.5rem_1fr_auto] items-center gap-3 border-b border-stone py-3 sm:grid-cols-[2.5rem_6rem_1fr_auto] sm:gap-4 sm:py-4">
+                  <span className="font-display text-sm tabular-nums text-gold-700">0{index + 1}</span>
+                  <span className="ceramic-grid relative block aspect-[4/3] overflow-hidden border border-stone bg-brand-50">
+                    {categoryCover && (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img src={mediaUrl(categoryCover)} alt="" loading="lazy" className="absolute inset-0 h-full w-full object-cover transition duration-200 group-hover:scale-[1.03]" />
+                    )}
+                  </span>
+                  <span className="font-display text-base font-semibold text-ink group-hover:text-brand-700 sm:text-xl">{category.title}</span>
+                  <ArrowRight className="h-5 w-5 text-muted transition group-hover:translate-x-1 group-hover:text-brand-700" />
+                </Link>
+              );
+            })}
           </div>
         </div>
       </section>
 
-      {/* HARİTA */}
-      <section className="mx-auto max-w-7xl px-4 py-14">
-        <div className="rounded-2xl bg-white p-5 ring-1 ring-slate-200 sm:p-7">
-          <h2 className="font-display text-2xl font-bold text-brand-900 sm:text-3xl">Haritada Keşfedin</h2>
-          <p className="mt-1.5 text-slate-500">İlçe seçerek bölgedeki tüm ilanları harita üzerinde görüntüleyin.</p>
-          <div className="mt-6 overflow-hidden rounded-xl ring-1 ring-slate-200">
-            <ListingsMap points={points} height="480px" />
+      <section className="border-y border-stone bg-paper">
+        <div className="mx-auto max-w-7xl px-5 py-16 sm:px-6 sm:py-24">
+          <div className="flex items-end justify-between gap-5">
+            <div>
+              <p className="eyebrow">Güncel seçki</p>
+              <h2 className="mt-3 font-display text-3xl font-semibold tracking-tight text-brand-950 sm:text-4xl">Öne çıkan ilanlar</h2>
+            </div>
+            <Link href="/ilanlar" className="inline-flex shrink-0 items-center gap-2 text-sm font-semibold text-brand-700 hover:text-brand-900">Tüm portföy <ArrowRight className="h-4 w-4" /></Link>
           </div>
+          {featured.length > 0 ? (
+            <div className="mt-9 grid gap-5 sm:grid-cols-2 lg:grid-cols-12">
+              {featured.map((listing, index) => (
+                <div key={listing.slug} className={index === 0 ? "sm:col-span-2 lg:col-span-7 lg:row-span-2" : "lg:col-span-5"}>
+                  <ListingCard listing={listing} priority={index < 2} variant={index === 0 ? "editorial" : index < 3 ? "compact" : "standard"} />
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p className="mt-8 border-y border-stone py-10 text-muted">Henüz yayınlanmış ilan bulunmuyor.</p>
+          )}
         </div>
       </section>
 
-      {/* SÜREÇ / NEDEN BİZ */}
-      <section className="border-y border-slate-200 bg-white">
-        <div className="mx-auto max-w-7xl px-4 py-16 sm:py-20">
-          <div className="mx-auto mb-12 max-w-2xl text-center">
-            <h2 className="font-display text-2xl font-bold text-brand-900 sm:text-3xl">{whyTitle}</h2>
-            <p className="mt-3 leading-relaxed text-slate-600">
-              Kütahya gayrimenkul piyasasında güven, hız ve uzmanlık standartlarını belirliyoruz.
-            </p>
+      <section className="mx-auto max-w-7xl px-5 py-16 sm:px-6 sm:py-24">
+        <div className="grid overflow-hidden border-y border-stone bg-paper lg:grid-cols-12">
+          <div className="flex flex-col justify-between bg-canvas p-8 sm:p-12 lg:col-span-4 lg:border-r lg:border-stone">
+            <div>
+              <div className="mb-6 h-1 w-12 bg-gold-600" />
+              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-brand-700">Kütahya portföy haritası</p>
+              <h2 className="mt-4 max-w-sm font-sans text-3xl font-semibold leading-tight tracking-[-0.025em] text-brand-950">İlanı, bulunduğu çevreyle birlikte değerlendirin.</h2>
+              <p className="mt-5 max-w-sm leading-7 text-muted">İlçeyi seçin; güncel portföyü ve ilanların Kütahya içindeki dağılımını tek bakışta görün.</p>
+            </div>
+            <Link href="/harita" className="mt-8 inline-flex items-center gap-2 text-sm font-semibold text-brand-800 hover:text-brand-950">Tam ekran haritayı aç <ArrowRight className="h-4 w-4" /></Link>
           </div>
-          <div className="grid gap-10 md:grid-cols-3">
+          <div className="lg:col-span-8"><ListingsMap points={points} height="520px" /></div>
+        </div>
+      </section>
+
+      <section className="border-y border-stone bg-canvas">
+        <div className="mx-auto grid max-w-7xl gap-12 px-5 py-16 sm:px-6 sm:py-24 lg:grid-cols-12">
+          <div className="lg:col-span-4">
+            <p className="eyebrow">Yerel uzmanlık</p>
+            <h2 className="mt-3 font-display text-3xl font-semibold tracking-tight text-brand-950">{whyTitle}</h2>
+          </div>
+          <div className="border-t border-stone lg:col-span-8">
             {[
-              { Icon: LineChart, title: "Veri Destekli Bölge Analizi", text: "Her ilanda bölge analizi, yatırım puanı ve gelişim potansiyeli otomatik sunulur." },
-              { Icon: Headset, title: "Hızlı Dönüş", text: "Randevu, ekspertiz ve fiyat teklifi talebinizi bırakın; danışmanımız en kısa sürede size dönsün." },
-              { Icon: ShieldCheck, title: "Güvenli & Şeffaf Satış", text: "Tüm satış sürecini şeffaf ve güvenli şekilde sizin için yönetiyoruz." },
-            ].map((f) => (
-              <div key={f.title} className="flex flex-col items-center text-center">
-                <span className="mb-6 grid h-20 w-20 place-items-center rounded-full bg-brand-50 text-brand-700">
-                  <f.Icon className="h-9 w-9" strokeWidth={1.6} />
-                </span>
-                <h3 className="font-display text-xl font-semibold text-brand-900">{f.title}</h3>
-                <p className="mt-3 leading-relaxed text-slate-600">{f.text}</p>
+              ["01", "Veriyi okuyun", "İlçe fiyatları, yatırım puanı ve gelişim potansiyelini kararınıza bağlayın."],
+              ["02", "Portföyü karşılaştırın", "İlanları kaydedin, karşılaştırın ve gerçekten uygun olan seçenekleri ayırın."],
+              ["03", "Yerel ekiple ilerleyin", "Randevu, ön değerleme ve satış sürecinde doğrudan Kütahya ekibiyle iletişim kurun."],
+            ].map(([number, title, text]) => (
+              <div key={number} className="grid gap-3 border-b border-stone py-6 sm:grid-cols-[4rem_14rem_1fr] sm:items-start">
+                <span className="font-display text-gold-700">{number}</span>
+                <h3 className="font-display text-xl font-semibold text-ink">{title}</h3>
+                <p className="leading-7 text-muted">{text}</p>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* MÜŞTERİ YORUMLARI — yalnız yayınlı yorum varsa */}
       {testimonials.length > 0 && (
-      <section className="mx-auto max-w-7xl px-4 py-16">
-        <h2 className="font-display text-2xl font-bold text-brand-900 sm:text-3xl">Müşterilerimiz Ne Diyor?</h2>
-        <div className="mt-8 grid gap-5 md:grid-cols-3">
-          {testimonials.map((t, i) => (
-            <figure key={i} className="rounded-xl bg-white p-6 ring-1 ring-slate-200">
-              <div className="flex gap-0.5 text-gold-500">
-                {Array.from({ length: Math.max(1, Math.min(5, t.stars)) }).map((_, s) => (
-                  <Star key={s} className="h-4 w-4 fill-current" />
-                ))}
-              </div>
-              <blockquote className="mt-3 text-[15px] leading-relaxed text-slate-700">&ldquo;{t.text}&rdquo;</blockquote>
-              <figcaption className="mt-4 border-t border-slate-100 pt-3">
-                <p className="font-semibold text-brand-900">{t.name}</p>
-                <p className="text-[13px] text-slate-500">{t.role}</p>
-              </figcaption>
-            </figure>
-          ))}
-        </div>
-      </section>
+        <section className="mx-auto max-w-7xl px-5 py-16 sm:px-6 sm:py-24">
+          <p className="eyebrow">Deneyimler</p>
+          <div className="mt-7 grid border-y border-stone md:grid-cols-3 md:divide-x md:divide-stone">
+            {testimonials.slice(0, 3).map((testimonial) => (
+              <figure key={testimonial.id} className="border-b border-stone py-7 last:border-b-0 md:border-b-0 md:px-7 md:first:pl-0 md:last:pr-0">
+                <blockquote className="font-display text-xl leading-8 text-ink">“{testimonial.text}”</blockquote>
+                <figcaption className="mt-6 text-sm font-semibold text-brand-800">{testimonial.name}{testimonial.role ? ` · ${testimonial.role}` : ""}</figcaption>
+              </figure>
+            ))}
+          </div>
+        </section>
       )}
 
-      {/* İLÇELER */}
-      <section className="mx-auto max-w-7xl px-4">
-        <h2 className="font-display text-2xl font-bold text-brand-900 sm:text-3xl">İlçelere Göre Ara</h2>
-        <p className="mt-1.5 text-slate-500">Kütahya merkez ve tüm ilçelerde güncel ilanlar.</p>
-        <div className="mt-6 flex flex-wrap gap-2.5">
-          {DISTRICTS.map((d) => (
-            <Link
-              key={d.slug}
-              href={`/ilanlar?ilce=${encodeURIComponent(d.name)}`}
-              className="rounded-lg bg-white px-4 py-2.5 text-sm font-medium text-slate-700 ring-1 ring-slate-200 transition hover:text-brand-700 hover:ring-brand-300"
-            >
-              {d.name}
-            </Link>
-          ))}
+      <section className="bg-brand-950 text-white">
+        <div className="ceramic-grid mx-auto grid max-w-7xl gap-8 px-5 py-14 sm:px-6 sm:py-16 lg:grid-cols-12 lg:items-center">
+          <div className="lg:col-span-8">
+            <p className="eyebrow !text-gold-300">Satış yolculuğu</p>
+            <h2 className="mt-3 font-display text-3xl font-semibold sm:text-4xl">Mülkünüzün piyasadaki yerini birlikte belirleyelim.</h2>
+            <p className="mt-4 max-w-2xl leading-7 text-brand-100">Bölgesel ön değerleme, portföy hazırlığı ve şeffaf satış süreci için talebinizi bırakın.</p>
+          </div>
+          <div className="lg:col-span-4 lg:text-right">
+            <Link href="/satici" className="inline-flex min-h-12 items-center justify-center gap-2 rounded-lg bg-paper px-6 font-semibold text-brand-900 hover:bg-paper">Satış talebi oluştur <ArrowRight className="h-4 w-4" /></Link>
+          </div>
         </div>
       </section>
 
-      {/* CTA */}
-      <section className="mx-auto max-w-7xl px-4 py-16">
-        <NotFoundCTA />
+      <section className="mx-auto max-w-7xl px-5 py-14 sm:px-6">
+        <div className="flex flex-wrap gap-x-6 gap-y-3 border-y border-stone py-6">
+          <span className="eyebrow inline-flex items-center gap-2"><MapPin className="h-4 w-4" /> İlçeye göre ara</span>
+          {DISTRICTS.map((district) => <Link key={district.slug} href={`/ilanlar?ilce=${encodeURIComponent(district.name)}`} className="text-sm font-semibold text-muted hover:text-brand-800">{district.name}</Link>)}
+        </div>
+        <div className="mt-14"><NotFoundCTA /></div>
       </section>
     </>
   );

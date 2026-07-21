@@ -1,105 +1,62 @@
-# Kütahya Satılık — Dijital Emlak Ofisi
+# Kütahya Satılık — Web ve API
 
-Kütahya odaklı, **dönüşüm (lead) toplamaya** yönelik emlak portalı.
-Ziyaretçiyi telefon / WhatsApp / form ile iletişime geçirmeyi hedefler.
+Kütahya odaklı emlak portalının Next.js web arayüzü, yönetim ekranları ve mobil uygulamanın kullandığı `/api/v1` backend’i.
 
-## Özellikler
+## Kapsam
 
-- **İlan portalı**: liste, detay, filtre (ilçe / tür / oda / fiyat / arama), galeri
-- **5 iletişim butonu** (her ilanda): Telefon ile Ara, WhatsApp'tan Yaz, Randevu Talep Et, Ekspertiz İste, Fiyat Teklifi Al
-- **Satıcı formu** (ana sayfa + `/satici`): Ad Soyad, Telefon, İlçe, Mahalle, Mülk Türü, Tahmini Fiyat, **fotoğraf yükleme** → admin paneline düşer
-- **Google Ads landing sayfaları**: `/kutahya-satilik-daire`, `/kutahya-satilik-arsa`, `/kutahya-satilik-villa`, `/kutahya-yatirimlik-arsa` — her birinde "bulamadınız mı?" CTA
-- **Harita** (Leaflet + OpenStreetMap, API anahtarsız): ilçe filtreli (Merkez, Tavşanlı, Simav, Gediz, Emet...), ilanlar işaretli
-- **Yapay zeka destekli analiz** (her ilanda): bölge analizi, yatırım puanı, 3/5 yıllık değer artışı, yakındaki okul & hastaneler — ilçe verisi + şablon motoru ile
-- **Admin panel** (`/admin`):
-  - Dashboard: telefon/WhatsApp tıklama, görüntülenme, dönüşüm, en çok görüntülenen ilçeler, en çok talep alan ilanlar, **Google Ads dönüşüm kaynakları (utm/gclid)**
-  - İlan ekle/düzenle/sil (görsel yükleme, sürükle-sırala)
-  - Gelen talepler (tip & durum filtresi, tek tık ara/WhatsApp, durum: yeni/arandı/kapandı)
-  - Ayarlar (telefon, WhatsApp, marka)
-- **SEO**: dinamik metadata, OpenGraph, `sitemap.xml`, `robots.txt`, ilan başına `schema.org/RealEstateListing` JSON-LD
-- **Dönüşüm takibi**: gtag (Google Analytics + Google Ads) + kendi DB'mizde olay kaydı
+- İlan listeleme, arama, detay, galeri, harita, favori ve karşılaştırma
+- Satıcı, ekspertiz, randevu ve alıcı talep akışları
+- Bölgesel verilere dayalı ön değerleme ve veri destekli bölge analizi
+- Kullanıcı, danışman ve admin oturumları; web bildirim kutusu ve Expo push outbox’ı
+- Canonical/OG/Twitter metadata, sitemap, robots ve izin sonrası analytics
+- PostgreSQL, Redis, kalıcı medya dizini, standalone Next.js ve opsiyonel Sentry
+
+Değerleme ve bölge analizi bilgilendirme amaçlıdır; resmi ekspertiz veya yatırım tavsiyesi değildir.
 
 ## Teknoloji
 
-- Next.js 16 (App Router) · React 19 · TypeScript · Tailwind CSS v4
-- Prisma 7 + SQLite (`@prisma/adapter-better-sqlite3`) — kolayca Postgres'e geçirilebilir
-- Leaflet / react-leaflet · jose (admin oturumu) · zod (form doğrulama)
+- Next.js 16.2 · React 19.2 · TypeScript · Tailwind CSS 4
+- Prisma 7 + PostgreSQL (`@prisma/adapter-pg`)
+- Expo Push Service · Redis destekli rate limit · Sentry (opsiyonel)
 
-## Kurulum
+## Yerel kurulum
+
+Node.js 24 ve PostgreSQL 17 önerilir.
 
 ```bash
-git clone GIT_REPO_ADRESI
-cd kutahyasatilik.com
+cp .env.example .env
 npm ci
-```
-
-Proje kökünde yerel yolları kullanan bir `.env` oluşturun:
-
-```env
-DATABASE_URL="file:./dev.db"
-UPLOAD_DIR="./public/uploads"
-AUTH_SECRET="en-az-32-karakter-rastgele-bir-deger"
-ADMIN_EMAIL=""
-ADMIN_PASSWORD="guclu-bir-sifre"
-NEXT_PUBLIC_SITE_URL="http://localhost:3000"
-NEXT_PUBLIC_PHONE="+90 555 555 55 55"
-NEXT_PUBLIC_WHATSAPP="905555555555"
-NEXT_PUBLIC_EMAIL="info@example.com"
-NEXT_PUBLIC_GA_ID=""
-NEXT_PUBLIC_GTAG_ID=""
-NEXT_PUBLIC_ADS_CONVERSION_LABEL=""
-```
-
-İlk demo kurulumu:
-
-```bash
-npm run setup:demo
+npx prisma migrate deploy
 npm run dev
 ```
 
-`npm ci` sonrasında Prisma Client otomatik üretilir. `setup:demo`, SQLite dosyasını hazırlar, migration'ları uygular ve örnek veriyi yükler.
+Gerçek/canlı veri kullanılan ortamlarda seed komutlarını çalıştırmayın. Demo kurulumu yalnız boş yerel veritabanı için `npm run setup:demo` ile yapılır.
 
-Admin bilgileri `.env` içindeki `ADMIN_EMAIL` ve `ADMIN_PASSWORD` değerlerinden oluşturulur.
-Yönetim paneli: http://localhost:3000/admin
-
-Gerçek veritabanı taşındıysa `npm run setup:demo` veya `npm run seed` çalıştırmayın.
-Detaylı teslim ve taşıma adımları için kökteki `KURULUM_REHBERI.html` dosyasını tarayıcıda açın.
-
-## Üretim (VPS)
+## Kalite kapıları
 
 ```bash
-npm ci
-npx prisma migrate deploy
+npm run lint
+npm run typecheck
+npm test
+npm run audit:runtime
 npm run build
-node .next/standalone/server.js
+npm run check:standalone
+npm run test:e2e
 ```
 
-`output: "standalone"` aktiftir → `.next/standalone` klasörü tek başına çalışır.
-`DATABASE_URL` canlıda kalıcı SQLite dosyasına bakmalı; `public/uploads` klasörü de kalıcı olmalı (yüklenen fotoğraflar burada tutulur).
+Playwright ilk kullanımında Chromium kurulumu gerekir: `npx playwright install chromium`.
 
-### Önemli ortam değişkenleri (`.env`)
+## Production yayın sırası
 
-| Değişken | Açıklama |
-|---|---|
-| `DATABASE_URL` | SQLite yolu veya Postgres bağlantısı |
-| `AUTH_SECRET` | Admin oturum imzası — **üretimde mutlaka değiştirin** |
-| `NEXT_PUBLIC_PHONE` / `NEXT_PUBLIC_WHATSAPP` | Tüm butonlarda kullanılan iletişim |
-| `NEXT_PUBLIC_GA_ID` / `NEXT_PUBLIC_GTAG_ID` | Google Analytics / Ads (boşsa devre dışı) |
-| `NEXT_PUBLIC_ADS_CONVERSION_LABEL` | Google Ads dönüşüm etiketi |
+1. PostgreSQL yedeğini doğrulayın ve `npx prisma migrate deploy` çalıştırın.
+2. `PUSH_ENABLED=false` ile backend’i yayınlayın.
+3. `npm run build && npm run check:standalone` kapılarını geçirin.
+4. `npm run prepare:standalone` ile statik dosyaları, yerel yüklemeleri pakete katmadan hazırlayın.
+5. `npm run start:standalone` ile başlatın ve `/api/health` kontrolünü yapın.
+6. Fiziksel cihaz push testi sonrasında `PUSH_ENABLED=true` yapın.
 
-## Postgres'e geçiş
+`UPLOAD_DIR` deploy klasörünün dışında kalıcı bir dizin olmalı; `NEXT_PUBLIC_MEDIA_URL` bu dizini HTTPS üzerinden sunan hostu göstermelidir. Ayrıntılı VPS/Cloudflare akışı [DEPLOY.md](./DEPLOY.md) içindedir.
 
-`prisma/schema.prisma` içindeki `provider = "sqlite"` → `"postgresql"` yapın,
-`lib/prisma.ts` ve `prisma/seed.ts` içindeki adapter'ı `@prisma/adapter-pg` ile değiştirin,
-`DATABASE_URL`'i Postgres bağlantısıyla güncelleyip `npx prisma migrate dev` çalıştırın.
+## Secrets
 
-## Yapı
-
-```
-app/                 sayfalar + API rotaları (/api/leads, /api/track, /api/upload)
-  admin/             yönetim paneli (login, dashboard, ilanlar, talepler, ayarlar)
-components/          UI bileşenleri (ContactButtons, SellerForm, Map, Gallery...)
-lib/                 prisma, auth, analiz motoru, sabitler, formatlama
-prisma/              schema + seed
-public/uploads/      yüklenen görseller
-```
+`.env.example` yalnız sözleşmeyi gösterir. `DATABASE_URL`, `AUTH_SECRET`, `CRON_SECRET`, `EXPO_ACCESS_TOKEN`, Apple/Android doğrulama değerleri ve Sentry anahtarları GitHub/EAS/production secret deposunda tutulmalıdır. Sentry DSN tanımlı değilse uygulama normal çalışır; source map yükleme yalnız `SENTRY_AUTH_TOKEN`, `SENTRY_ORG` ve `SENTRY_PROJECT` birlikte varsa etkinleşir.

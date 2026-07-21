@@ -57,7 +57,7 @@ export default function SettingImageField({
       {url && (
         <div className="relative mt-2 inline-block">
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={url} alt="Önizleme" className="h-28 w-full rounded-lg object-cover ring-1 ring-slate-200 sm:w-72" />
+          <img src={url} alt="Önizleme" className="h-28 w-full rounded-lg object-cover ring-1 ring-stone sm:w-72" />
           <button
             type="button"
             onClick={() => setUrl("")}

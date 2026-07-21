@@ -21,13 +21,13 @@ export default function HomeSearch() {
     router.push(`/ilanlar${qs ? `?${qs}` : ""}`);
   }
 
-  const labelCls = "mb-2 block text-left text-sm font-semibold text-slate-600";
+  const labelCls = "mb-2 block text-left text-[11px] font-bold uppercase tracking-[0.12em] text-slate-500";
   const fieldCls =
-    "h-12 w-full rounded-lg border border-slate-300 bg-white px-3.5 text-base text-slate-900 outline-none transition focus:border-brand-500 focus:ring-2 focus:ring-brand-500/30";
+    "h-12 w-full rounded-lg border border-stone bg-paper px-3.5 text-[15px] text-ink outline-none transition focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20";
 
   return (
-    <form onSubmit={submit} className="grid grid-cols-1 gap-4 md:grid-cols-4 md:items-end md:gap-5">
-      <div>
+    <form onSubmit={submit} className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4 xl:items-end">
+      <div className="xl:col-span-1">
         <label htmlFor="hs-q" className={labelCls}>Anahtar Kelime</label>
         <div className="relative">
           <Search className="pointer-events-none absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400" />
@@ -56,7 +56,7 @@ export default function HomeSearch() {
       </div>
       <button
         type="submit"
-        className="inline-flex h-12 items-center justify-center gap-2 rounded-lg bg-brand-700 px-4 text-base font-semibold text-white transition-colors hover:bg-brand-800"
+        className="inline-flex h-12 items-center justify-center gap-2 rounded-lg bg-brand-700 px-5 text-[15px] font-semibold text-white transition-colors hover:bg-brand-800"
       >
         <Search className="h-5 w-5" /> Arama Yap
       </button>

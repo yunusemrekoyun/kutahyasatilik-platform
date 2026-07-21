@@ -3,7 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { resolveApiAgent } from "@/lib/apiAgent";
 import { absolutizeUrl } from "@/lib/apiMedia";
 import { parseJsonArray } from "@/lib/format";
-import { deleteUploadFiles } from "@/lib/uploads";
+import { deleteUploadFiles } from "@/lib/uploadDeletion";
 import { deleteVideo } from "@/lib/videoStorage";
 import { upsertAgentListing, AgentListingError } from "@/lib/apiAgentListing";
 

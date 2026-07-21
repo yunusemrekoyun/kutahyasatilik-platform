@@ -10,6 +10,7 @@ export const metadata: Metadata = {
   title: "Harita ile Kütahya'da İlan Ara",
   description:
     "Kütahya ilçelerindeki satılık daire, arsa ve villa ilanlarını harita üzerinde keşfedin. Merkez, Tavşanlı, Simav, Gediz, Emet ve diğer ilçeleri filtreleyin.",
+  alternates: { canonical: "/harita" },
 };
 
 export default async function MapPage() {
@@ -21,7 +22,7 @@ export default async function MapPage() {
       <p className="mt-1.5 text-slate-500">
         İlçe seçerek bölgedeki tüm ilanları haritada görüntüleyin ve doğrudan ilana ulaşın.
       </p>
-      <div className="mt-6 overflow-hidden rounded-xl ring-1 ring-slate-200">
+      <div className="mt-6 overflow-hidden rounded-lg ring-1 ring-stone">
         <ListingsMap points={points} height="600px" />
       </div>
       <div className="mt-12">

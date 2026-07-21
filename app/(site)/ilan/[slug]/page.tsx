@@ -202,7 +202,7 @@ export default async function ListingPage({
   };
 
   return (
-    <div className="mx-auto max-w-7xl px-4 py-6 pb-36 lg:pb-6">
+    <div className="mx-auto max-w-7xl px-5 py-8 pb-36 sm:px-6 lg:pb-10">
       <TrackView listingId={listing.id} district={listing.district} />
       {!isSold && <MobileContactBar listingId={listing.id} listingTitle={listing.title} district={listing.district} />}
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
@@ -216,13 +216,13 @@ export default async function ListingPage({
         <Link href={`/ilanlar?ilce=${encodeURIComponent(listing.district)}`} className="hover:text-brand-700">{listing.district}</Link>
       </nav>
 
-      <div className="grid gap-8 lg:grid-cols-3">
+      <div className="grid gap-10 lg:grid-cols-12">
         {/* SOL: galeri + detay */}
-        <div className="lg:col-span-2 space-y-8">
+        <div className="space-y-10 lg:col-span-8">
           <Gallery images={listing.images} title={listing.title} />
 
-          <div className="rounded-2xl bg-white p-6 ring-1 ring-slate-200">
-            <div className="flex flex-col justify-between gap-4 border-b border-slate-100 pb-5 md:flex-row md:items-start">
+          <div className="border-y border-stone bg-paper py-7 sm:px-7">
+            <div className="flex flex-col justify-between gap-5 border-b border-stone pb-6 md:flex-row md:items-start">
               <div>
                 <div className="flex flex-wrap items-center gap-2">
                   {isSold ? (
@@ -240,29 +240,29 @@ export default async function ListingPage({
                   )}
                   <span className="text-xs text-slate-400">İlan No: {listing.id.slice(-6).toUpperCase()}</span>
                 </div>
-                <h1 className="mt-2.5 font-display text-2xl font-bold leading-snug text-slate-900 sm:text-[1.75rem]">{listing.title}</h1>
+                <h1 className="mt-3 max-w-3xl font-display text-3xl font-semibold leading-tight tracking-tight text-ink sm:text-4xl">{listing.title}</h1>
                 <p className="mt-2 inline-flex items-center gap-1.5 text-slate-500">
                   <MapPin className="h-4 w-4 text-slate-400" /> {listing.neighborhood ? `${listing.neighborhood}, ` : ""}{listing.district} / Kütahya
                 </p>
               </div>
               <div className="shrink-0">
-                <span className="inline-block rounded-lg bg-gold-100 px-4 py-2 text-[28px] font-bold leading-tight tabular-nums text-gold-900">
+                <span className="inline-block text-[30px] font-bold leading-tight tabular-nums text-gold-800">
                   {formatPrice(listing.price, listing.currency)}
                 </span>
               </div>
             </div>
 
             {/* Künye — en önemli metrikler */}
-            <div className="mt-5 grid grid-cols-2 gap-3 md:grid-cols-4">
+            <div className="mt-6 grid grid-cols-2 divide-x divide-stone border-y border-stone md:grid-cols-4">
               {keyMetrics.map((m) => (
-                <div key={m.label} className="rounded-lg border border-slate-200 bg-slate-50 p-4">
+                <div key={m.label} className="px-3 py-4 sm:px-4">
                   <p className="mb-1 text-[13px] font-medium uppercase tracking-wide text-slate-500">{m.label}</p>
                   <p className="font-display text-lg font-semibold text-slate-900">{m.value}</p>
                 </div>
               ))}
             </div>
 
-            <h2 className="mt-7 border-b border-slate-100 pb-2 font-display text-xl font-bold text-slate-900">Tüm Detaylar</h2>
+            <h2 className="mt-9 border-b border-stone pb-3 font-display text-xl font-semibold text-ink">Tüm detaylar</h2>
             <div className="mt-3 grid grid-cols-1 gap-x-8 sm:grid-cols-2">
               <div>
                 <DetailRow label="Mülk Türü" value={PROPERTY_TYPE_LABELS[listing.propertyType]} />
@@ -289,7 +289,7 @@ export default async function ListingPage({
 
             {features.length > 0 && (
               <div className="mt-7">
-                <h2 className="border-b border-slate-100 pb-2 font-display text-xl font-bold text-slate-900">Özellikler</h2>
+                <h2 className="border-b border-stone pb-3 font-display text-xl font-semibold text-ink">Özellikler</h2>
                 <div className="mt-4 grid grid-cols-1 gap-x-6 gap-y-3 sm:grid-cols-2">
                   {features.map((f) => (
                     <div key={f} className="flex items-center gap-2 text-[15px] text-slate-700">
@@ -301,7 +301,7 @@ export default async function ListingPage({
             )}
 
             <div className="mt-7">
-              <h2 className="border-b border-slate-100 pb-2 font-display text-xl font-bold text-slate-900">Açıklama</h2>
+              <h2 className="border-b border-stone pb-3 font-display text-xl font-semibold text-ink">Açıklama</h2>
               <p className="mt-3 whitespace-pre-line leading-relaxed text-slate-700">{listing.description}</p>
             </div>
           </div>
@@ -316,15 +316,15 @@ export default async function ListingPage({
             virtualTourUrl={listing.virtualTourUrl}
           />
 
-          {/* AI ANALİZ */}
+          {/* VERİ DESTEKLİ BÖLGE ANALİZİ */}
           <AnalysisSection analysis={analysis} showScores={showScores} />
 
           {/* HARİTA */}
           {mapPoints.length > 0 && (
-            <div className="rounded-2xl bg-white p-6 ring-1 ring-slate-200">
+            <div className="border-y border-stone bg-paper py-6 sm:px-6">
               <h2 className="font-display text-xl font-bold text-slate-900">Konum</h2>
               <p className="mt-1 text-sm text-slate-500">{listing.district} / Kütahya</p>
-              <div className="mt-4 overflow-hidden rounded-xl ring-1 ring-slate-200">
+              <div className="mt-4 overflow-hidden border border-stone">
                 <ListingsMap points={mapPoints} height="360px" showFilter={false} />
               </div>
             </div>
@@ -332,12 +332,12 @@ export default async function ListingPage({
         </div>
 
         {/* SAĞ: iletişim (sticky) */}
-        <aside className="lg:col-span-1">
+        <aside className="lg:col-span-4">
           <div className="sticky top-20 space-y-4">
-            <div id="ilan-iletisim" className="scroll-mt-24 rounded-2xl bg-white p-6 ring-1 ring-slate-200 shadow-prestige">
-              <span className={`inline-block rounded-lg px-4 py-2 text-2xl font-bold tabular-nums ${isSold ? "bg-slate-100 text-slate-500 line-through" : "bg-gold-100 text-gold-900"}`}>{formatPrice(listing.price, listing.currency)}</span>
+            <div id="ilan-iletisim" className="scroll-mt-24 border border-stone border-t-[3px] border-t-gold-700 bg-paper p-6 shadow-card">
+              <span className={`inline-block text-2xl font-bold tabular-nums ${isSold ? "text-slate-500 line-through" : "text-gold-800"}`}>{formatPrice(listing.price, listing.currency)}</span>
               {isSold ? (
-                <div className="mt-4 rounded-xl bg-red-50 p-4 ring-1 ring-red-100">
+                <div className="mt-4 rounded-lg bg-red-50 p-4 ring-1 ring-red-100">
                   <p className="text-sm font-semibold text-red-800">Bu ilan satılmıştır.</p>
                   <p className="mt-1 text-sm text-red-700">Benzer fırsatlar için tüm ilanlarımıza göz atabilirsiniz.</p>
                   <Link href="/ilanlar" className="mt-3 inline-flex items-center gap-1 text-sm font-bold text-brand-700 hover:underline">Benzer ilanları gör <ArrowRight className="h-4 w-4" /></Link>
@@ -363,7 +363,7 @@ export default async function ListingPage({
 
             {/* Danışman etiketi */}
             {listing.agent && (
-              <div className="rounded-2xl bg-white p-5 ring-1 ring-slate-200">
+              <div className="border border-stone bg-paper p-5">
                 <p className="text-xs font-medium uppercase tracking-wider text-slate-400">İlan Danışmanı</p>
                 <div className="mt-3 flex items-center gap-3">
                   {listing.agent.logo ? (
@@ -391,7 +391,7 @@ export default async function ListingPage({
                 </p>
               </div>
             )}
-            <div className="rounded-2xl bg-brand-50 p-5 ring-1 ring-brand-100 text-center">
+            <div className="ceramic-grid border border-brand-100 bg-brand-50 p-5 text-center">
               <p className="text-sm font-semibold text-brand-900">Bu mülke benzer fırsatlar mı arıyorsunuz?</p>
               <Link href="/ilanlar" className="mt-2 inline-flex items-center gap-1 text-sm font-bold text-brand-700 hover:underline">Tüm ilanları gör <ArrowRight className="h-4 w-4" /></Link>
             </div>
@@ -402,7 +402,8 @@ export default async function ListingPage({
       {/* BENZER İLANLAR */}
       {similar.length > 0 && (
         <section className="mt-14">
-          <h2 className="font-display text-2xl font-bold text-brand-900">Benzer İlanlar</h2>
+          <p className="eyebrow">Portföyden</p>
+          <h2 className="mt-2 font-display text-3xl font-semibold text-brand-950">Benzer ilanlar</h2>
           <p className="mt-1.5 text-slate-500">Bu mülke yakın diğer seçenekler.</p>
           <div className="mt-6 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
             {similar.map((l) => (

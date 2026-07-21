@@ -88,7 +88,7 @@ export default function MapInner({
   }, [points]);
 
   return (
-    <div style={{ height }} className="w-full overflow-hidden rounded-2xl ring-1 ring-slate-200">
+    <div style={{ height }} className="h-full w-full overflow-hidden">
       <MapContainer center={c} zoom={z} scrollWheelZoom className="h-full w-full">
         <TileLayer
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'

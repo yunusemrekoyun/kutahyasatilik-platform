@@ -39,7 +39,7 @@ export default function Pagination({
   return (
     <nav className="mt-10 flex items-center justify-center gap-1.5">
       {page > 1 && (
-        <Link href={makeHref(page - 1)} className={`${btn} bg-white text-slate-700 ring-1 ring-slate-200 hover:ring-brand-300`}>‹ Önceki</Link>
+        <Link href={makeHref(page - 1)} className={`${btn} bg-paper text-slate-700 ring-1 ring-stone hover:ring-brand-300`}>‹ Önceki</Link>
       )}
       {pages.map((p, i) =>
         p === "..." ? (
@@ -48,14 +48,14 @@ export default function Pagination({
           <Link
             key={p}
             href={makeHref(p)}
-            className={`${btn} ${p === page ? "bg-brand-700 text-white" : "bg-white text-slate-700 ring-1 ring-slate-200 hover:ring-brand-300"}`}
+            className={`${btn} ${p === page ? "bg-brand-700 text-white" : "bg-paper text-slate-700 ring-1 ring-stone hover:ring-brand-300"}`}
           >
             {p}
           </Link>
         )
       )}
       {page < totalPages && (
-        <Link href={makeHref(page + 1)} className={`${btn} bg-white text-slate-700 ring-1 ring-slate-200 hover:ring-brand-300`}>Sonraki ›</Link>
+        <Link href={makeHref(page + 1)} className={`${btn} bg-paper text-slate-700 ring-1 ring-stone hover:ring-brand-300`}>Sonraki ›</Link>
       )}
     </nav>
   );

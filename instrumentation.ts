@@ -1,11 +1,8 @@
-import { z } from "zod";
+import * as Sentry from "@sentry/nextjs";
 
-// Sunucu başlarken bir kez çalışır (Next instrumentation hook).
-// Zod'un VARSAYILAN hata mesajlarını Türkçeleştirir — şemalarda özel mesaj
-// verilmeyen her doğrulama hatası kullanıcıya İngilizce ("Invalid input:
-// expected string, received null" gibi) sızmak yerine Türkçe döner.
-// Şemalardaki özel Türkçe mesajlar aynen geçerli kalır.
 export async function register() {
-  z.config(z.locales.tr());
-  console.log("[instrumentation] zod TR locale aktif");
+  if (process.env.NEXT_RUNTIME === "nodejs") await import("./sentry.server.config");
+  if (process.env.NEXT_RUNTIME === "edge") await import("./sentry.edge.config");
 }
+
+export const onRequestError = Sentry.captureRequestError;

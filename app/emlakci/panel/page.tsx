@@ -59,19 +59,19 @@ export default async function AgentDashboard() {
         <div className="flex items-center gap-2">
           <Link
             href="/emlakci/panel/mesajlar"
-            className="rounded-lg bg-white px-4 py-2.5 text-sm font-semibold text-brand-700 ring-1 ring-brand-200 hover:bg-brand-50"
+            className="rounded-lg bg-paper px-4 py-2.5 text-sm font-semibold text-brand-700 ring-1 ring-brand-200 hover:bg-brand-50"
           >
             Mesajlar
           </Link>
           <Link
             href="/emlakci/panel/talepler"
-            className="rounded-lg bg-white px-4 py-2.5 text-sm font-semibold text-brand-700 ring-1 ring-brand-200 hover:bg-brand-50"
+            className="rounded-lg bg-paper px-4 py-2.5 text-sm font-semibold text-brand-700 ring-1 ring-brand-200 hover:bg-brand-50"
           >
             Gelen Talepler
           </Link>
           <Link
             href="/emlakci/panel/firsatlar"
-            className="rounded-lg bg-white px-4 py-2.5 text-sm font-semibold text-brand-700 ring-1 ring-brand-200 hover:bg-brand-50"
+            className="rounded-lg bg-paper px-4 py-2.5 text-sm font-semibold text-brand-700 ring-1 ring-brand-200 hover:bg-brand-50"
           >
             Portföy Fırsatları
           </Link>
@@ -92,7 +92,7 @@ export default async function AgentDashboard() {
           { l: "Onay Bekleyen", v: counts.pending, c: "text-amber-600" },
           { l: "Reddedilen", v: counts.rejected, c: "text-red-600" },
         ].map((s) => (
-          <div key={s.l} className="rounded-2xl bg-white p-4 text-center ring-1 ring-slate-200">
+          <div key={s.l} className="rounded-lg bg-paper p-4 text-center ring-1 ring-stone">
             <p className={`text-3xl font-black ${s.c}`}>{s.v}</p>
             <p className="mt-1 text-xs font-medium text-slate-500">{s.l}</p>
           </div>
@@ -106,8 +106,8 @@ export default async function AgentDashboard() {
           { l: "Favori", v: engagement.favorites, Icon: Heart, c: "text-rose-600" },
           { l: "Talep", v: engagement.leads, Icon: Mail, c: "text-green-600" },
         ].map((s) => (
-          <div key={s.l} className="flex items-center gap-3 rounded-2xl bg-white p-4 ring-1 ring-slate-200">
-            <span className={`grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-slate-50 ${s.c}`}><s.Icon className="h-5 w-5" /></span>
+          <div key={s.l} className="flex items-center gap-3 rounded-lg bg-paper p-4 ring-1 ring-stone">
+            <span className={`grid h-10 w-10 shrink-0 place-items-center rounded-lg bg-canvas ${s.c}`}><s.Icon className="h-5 w-5" /></span>
             <div>
               <p className={`text-2xl font-black leading-none ${s.c}`}>{s.v}</p>
               <p className="mt-1 text-xs font-medium text-slate-500">{s.l}</p>
@@ -119,11 +119,11 @@ export default async function AgentDashboard() {
       {/* İlan listesi */}
       <div>
         <h2 className="text-lg font-bold text-slate-900">İlanlarım</h2>
-        <div className="mt-3 overflow-hidden rounded-2xl bg-white ring-1 ring-slate-200">
+        <div className="mt-3 overflow-hidden rounded-lg bg-paper ring-1 ring-stone">
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-slate-100 bg-slate-50 text-left text-xs text-slate-500">
+                <tr className="border-b border-stone bg-canvas text-left text-xs text-slate-500">
                   <th className="p-3">İlan</th>
                   <th className="p-3">Tür</th>
                   <th className="p-3">Fiyat</th>
@@ -143,7 +143,7 @@ export default async function AgentDashboard() {
                   </tr>
                 )}
                 {listings.map((l) => (
-                  <tr key={l.id} className="border-b border-slate-50 hover:bg-slate-50">
+                  <tr key={l.id} className="border-b border-slate-50 hover:bg-canvas">
                     <td className="p-3">
                       <div className="flex items-center gap-3">
                         <div className="relative h-12 w-16 shrink-0 overflow-hidden rounded-md bg-slate-100">
@@ -192,7 +192,7 @@ export default async function AgentDashboard() {
       <div>
         <h2 className="text-lg font-bold text-slate-900">Danışman Profilim</h2>
         <p className="text-sm text-slate-500">İlanlarınızda görünen isim ve unvan bilgileri.</p>
-        <form action={updateAgentProfile} className="mt-3 rounded-2xl bg-white p-6 ring-1 ring-slate-200">
+        <form action={updateAgentProfile} className="mt-3 rounded-lg bg-paper p-6 ring-1 ring-stone">
           <div className="mb-5">
             <span className="mb-2 block text-sm font-medium text-slate-700">Logo / Avatar</span>
             <AgentLogoUpload initialLogo={agent.logo} />

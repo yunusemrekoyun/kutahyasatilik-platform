@@ -5,7 +5,7 @@ const isLocalMp4 = (url?: string | null) => !!url && /^\/uploads\/videos\/[\w.-]
 
 function Frame({ src, title }: { src: string; title: string }) {
   return (
-    <div className="relative aspect-video w-full overflow-hidden rounded-xl bg-slate-900 ring-1 ring-slate-200">
+    <div className="relative aspect-video w-full overflow-hidden rounded-lg bg-slate-900 ring-1 ring-stone">
       <iframe
         src={src}
         title={title}
@@ -21,7 +21,7 @@ function Frame({ src, title }: { src: string; title: string }) {
 function LocalVideo({ src }: { src: string }) {
   const poster = src.replace(/\.mp4$/, ".jpg");
   return (
-    <div className="relative aspect-video w-full overflow-hidden rounded-xl bg-slate-900 ring-1 ring-slate-200">
+    <div className="relative aspect-video w-full overflow-hidden rounded-lg bg-slate-900 ring-1 ring-stone">
       <video controls preload="metadata" poster={poster} playsInline className="absolute inset-0 h-full w-full bg-black">
         <source src={src} type="video/mp4" />
       </video>
@@ -46,7 +46,7 @@ export default function ListingMedia({
   if (!video && !localVideo && !drone && !tour) return null;
 
   return (
-    <section className="rounded-2xl bg-white p-6 ring-1 ring-slate-200">
+    <section className="rounded-lg bg-paper p-6 ring-1 ring-stone">
       <div className="flex items-center gap-2">
         <span className="grid h-9 w-9 place-items-center rounded-lg bg-brand-100 text-brand-700">
           <Video className="h-5 w-5" />

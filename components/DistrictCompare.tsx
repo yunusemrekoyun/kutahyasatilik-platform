@@ -45,7 +45,7 @@ export default function DistrictCompare({ districts }: { districts: DistrictStat
   }
 
   return (
-    <div className="overflow-hidden rounded-2xl bg-white ring-1 ring-slate-200">
+    <div className="overflow-hidden rounded-lg bg-paper ring-1 ring-stone">
       <div className="grid grid-cols-2 gap-3 bg-slate-50 p-4">
         <select value={a} onChange={(e) => setA(e.target.value)} className={selectCls}>
           {districts.map((d) => <option key={d.name} value={d.name}>{d.name}</option>)}

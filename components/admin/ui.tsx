@@ -1,14 +1,14 @@
 import type { LucideIcon } from "lucide-react";
 
 /* Ortak sınıf sabitleri — tüm admin sayfalarında aynı dil */
-export const adminCard = "rounded-xl bg-white ring-1 ring-slate-200";
+export const adminCard = "rounded-lg bg-paper ring-1 ring-stone";
 export const adminInput =
-  "h-11 w-full rounded-lg border border-slate-300 bg-white px-3.5 text-[15px] text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/30";
+  "h-11 w-full rounded-lg border border-slate-300 bg-paper px-3.5 text-[15px] text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/30";
 export const adminLabel = "mb-1.5 block text-sm font-medium text-slate-700";
 export const adminBtnPrimary =
   "inline-flex items-center justify-center gap-2 rounded-lg bg-brand-700 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-brand-800 disabled:opacity-60";
 export const adminBtnGhost =
-  "inline-flex items-center justify-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50";
+  "inline-flex items-center justify-center gap-2 rounded-lg border border-slate-300 bg-paper px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-canvas";
 
 /* Sayfa başlığı + aksiyon alanı */
 export function PageHeader({
@@ -38,7 +38,7 @@ const TONES: Record<string, string> = {
   danger: "bg-red-50 text-red-700 ring-red-200",
   info: "bg-blue-50 text-blue-700 ring-blue-200",
   brand: "bg-brand-50 text-brand-700 ring-brand-200",
-  neutral: "bg-slate-100 text-slate-600 ring-slate-200",
+  neutral: "bg-slate-100 text-slate-600 ring-stone",
 };
 
 export function StatusBadge({

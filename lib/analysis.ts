@@ -1,7 +1,7 @@
 import { parseJsonArray } from "./format";
 
-// İlan + ilçe verisinden "yapay zeka destekli" bölge analizi üretir.
-// Şablon + ilçe istatistiği yaklaşımı: maliyetsiz, SEO dostu, deterministik.
+// İlan + ilçe verisinden veri destekli bölge özeti üretir.
+// Şablon + ilçe istatistiği yaklaşımı deterministiktir.
 
 export interface ListingForAnalysis {
   id: string;

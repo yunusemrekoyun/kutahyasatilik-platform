@@ -15,7 +15,7 @@ export default function AgentMessagesPage() {
         <h1 className="mt-2 text-2xl font-extrabold text-slate-900">Mesajlar</h1>
         <p className="text-sm text-slate-500">İlanlarınıza gelen mesajlar ve teklifler. Teklifi Kabul / Reddet / Karşı-teklif ile yanıtlayın.</p>
       </div>
-      <Suspense fallback={<div className="h-96 rounded-2xl bg-white ring-1 ring-slate-200" />}>
+      <Suspense fallback={<div className="h-96 rounded-lg bg-paper ring-1 ring-stone" />}>
         <MessagesClient basePath="/emlakci/panel/mesajlar" />
       </Suspense>
     </div>

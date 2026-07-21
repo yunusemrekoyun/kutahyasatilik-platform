@@ -43,7 +43,7 @@ export default function AgentRegisterForm() {
 
   if (status === "ok") {
     return (
-      <div className="rounded-2xl bg-white p-8 text-center shadow-xl ring-1 ring-slate-200">
+      <div className="rounded-lg border border-stone bg-paper p-8 text-center">
         <div className="flex justify-center">
           <CheckCircle2 className="h-12 w-12 text-green-600" />
         </div>
@@ -55,7 +55,7 @@ export default function AgentRegisterForm() {
         </p>
         <Link
           href="/"
-          className="mt-5 inline-flex items-center gap-1 rounded-xl bg-brand-700 px-5 py-3 font-bold text-white hover:bg-brand-800"
+          className="mt-5 inline-flex items-center gap-1 rounded-lg bg-brand-700 px-5 py-3 font-bold text-white hover:bg-brand-800"
         >
           Ana sayfaya dön
           <ArrowRight className="h-4 w-4" />
@@ -90,7 +90,7 @@ export default function AgentRegisterForm() {
       <button
         type="submit"
         disabled={status === "loading"}
-        className="flex w-full items-center justify-center gap-1 rounded-xl bg-gold-500 px-4 py-3.5 text-base font-bold text-brand-950 hover:bg-gold-400 disabled:opacity-60 transition shadow-md"
+        className="flex w-full items-center justify-center gap-1 rounded-lg bg-brand-800 px-4 py-3.5 text-base font-bold text-white transition hover:bg-brand-900 disabled:opacity-60"
       >
         {status === "loading" ? (
           "Gönderiliyor..."

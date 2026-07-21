@@ -45,7 +45,7 @@ export default function Gallery({
       {/* Mobil: kaydırmalı galeri — TÜM fotoğraflar parmakla gezilir, kırpılmadan (contain) gösterilir */}
       <div className="relative md:hidden">
         <div
-          className="no-scrollbar flex h-[320px] snap-x snap-mandatory overflow-x-auto rounded-xl bg-brand-950"
+          className="no-scrollbar flex h-[340px] snap-x snap-mandatory overflow-x-auto bg-brand-950"
           onScroll={(e) => {
             const el = e.currentTarget;
             const i = Math.min(Math.round(el.scrollLeft / el.clientWidth), imgs.length - 1);
@@ -76,14 +76,14 @@ export default function Gallery({
         {imgs.length > 1 && (
           <div className="pointer-events-none absolute bottom-3 left-1/2 flex -translate-x-1/2 gap-1.5">
             {imgs.slice(0, 8).map((_, i) => (
-              <span key={i} className={`h-1.5 rounded-full transition-all ${i === Math.min(idx, 7) ? "w-4 bg-white" : "w-1.5 bg-white/60"}`} />
+              <span key={i} className={`h-1.5 rounded-full transition-all ${i === Math.min(idx, 7) ? "w-4 bg-paper" : "w-1.5 bg-paper/60"}`} />
             ))}
           </div>
         )}
       </div>
 
       {/* Masaüstü: bento galeri */}
-      <div className="hidden gap-2 overflow-hidden rounded-xl md:grid md:h-[500px] md:grid-cols-4 md:grid-rows-3">
+      <div className="hidden gap-1.5 overflow-hidden border border-stone md:grid md:h-[540px] md:grid-cols-4 md:grid-rows-3">
         <button
           onClick={() => openAt(0)}
           className="group relative h-full w-full overflow-hidden bg-slate-100 md:col-span-3 md:row-span-3"
@@ -135,17 +135,17 @@ export default function Gallery({
         <div className="fixed inset-0 z-[90] flex flex-col bg-brand-950/95 backdrop-blur" onClick={() => setLightbox(false)}>
           <div className="flex items-center justify-between p-4 text-white">
             <span className="text-sm font-medium">{idx + 1} / {imgs.length}</span>
-            <button onClick={() => setLightbox(false)} aria-label="Kapat" className="grid h-10 w-10 place-items-center rounded-full bg-white/10 hover:bg-white/20"><X className="h-5 w-5" /></button>
+            <button onClick={() => setLightbox(false)} aria-label="Kapat" className="grid h-10 w-10 place-items-center rounded-full bg-paper/10 hover:bg-paper/20"><X className="h-5 w-5" /></button>
           </div>
           <div className="relative flex flex-1 items-center justify-center p-4" onClick={(e) => e.stopPropagation()}>
             {imgs.length > 1 && (
-              <button onClick={prev} aria-label="Önceki" className="absolute left-4 grid h-12 w-12 place-items-center rounded-full bg-white/10 text-white hover:bg-white/20"><ChevronLeft className="h-6 w-6" /></button>
+              <button onClick={prev} aria-label="Önceki" className="absolute left-4 grid h-12 w-12 place-items-center rounded-full bg-paper/10 text-white hover:bg-paper/20"><ChevronLeft className="h-6 w-6" /></button>
             )}
             <div className="relative h-full w-full max-w-5xl">
               <Image src={current.url} alt={current.alt || title} fill sizes="100vw" className="object-contain" />
             </div>
             {imgs.length > 1 && (
-              <button onClick={next} aria-label="Sonraki" className="absolute right-4 grid h-12 w-12 place-items-center rounded-full bg-white/10 text-white hover:bg-white/20"><ChevronRight className="h-6 w-6" /></button>
+              <button onClick={next} aria-label="Sonraki" className="absolute right-4 grid h-12 w-12 place-items-center rounded-full bg-paper/10 text-white hover:bg-paper/20"><ChevronRight className="h-6 w-6" /></button>
             )}
           </div>
           {imgs.length > 1 && (

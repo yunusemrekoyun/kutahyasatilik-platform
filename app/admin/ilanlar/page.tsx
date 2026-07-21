@@ -66,7 +66,7 @@ export default async function AdminListings({
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-slate-200 bg-slate-50 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">
+              <tr className="border-b border-stone bg-canvas text-left text-xs font-semibold uppercase tracking-wide text-slate-500">
                 <th className="p-3">İlan</th>
                 <th className="p-3">Tür</th>
                 <th className="p-3">İlçe</th>
@@ -83,7 +83,7 @@ export default async function AdminListings({
                 <tr><td colSpan={8} className="p-8 text-center text-slate-400">İlan bulunamadı.</td></tr>
               )}
               {listings.map((l) => (
-                <tr key={l.id} className="border-b border-slate-50 hover:bg-slate-50">
+                <tr key={l.id} className="border-b border-slate-50 hover:bg-canvas">
                   <td className="p-3">
                     <div className="flex items-center gap-3">
                       <div className="relative h-12 w-16 shrink-0 overflow-hidden rounded-md bg-slate-100">
@@ -136,10 +136,10 @@ export default async function AdminListings({
           <span className="text-slate-500">Sayfa {page} / {totalPages}</span>
           <div className="flex gap-2">
             {page > 1 && (
-              <Link href={`/admin/ilanlar?${qPrefix}sayfa=${page - 1}`} className="rounded-lg bg-white px-3 py-1.5 font-medium text-slate-700 ring-1 ring-slate-200 hover:ring-brand-300">‹ Önceki</Link>
+              <Link href={`/admin/ilanlar?${qPrefix}sayfa=${page - 1}`} className="rounded-lg bg-paper px-3 py-1.5 font-medium text-slate-700 ring-1 ring-stone hover:ring-brand-300">‹ Önceki</Link>
             )}
             {page < totalPages && (
-              <Link href={`/admin/ilanlar?${qPrefix}sayfa=${page + 1}`} className="rounded-lg bg-white px-3 py-1.5 font-medium text-slate-700 ring-1 ring-slate-200 hover:ring-brand-300">Sonraki ›</Link>
+              <Link href={`/admin/ilanlar?${qPrefix}sayfa=${page + 1}`} className="rounded-lg bg-paper px-3 py-1.5 font-medium text-slate-700 ring-1 ring-stone hover:ring-brand-300">Sonraki ›</Link>
             )}
           </div>
         </div>

@@ -13,8 +13,8 @@ export default function LoginRequiredNotice({
   const pathname = usePathname();
   const next = encodeURIComponent(pathname || "/");
   return (
-    <div className="rounded-xl border border-brand-100 bg-brand-50 p-6 text-center">
-      <span className="mx-auto grid h-11 w-11 place-items-center rounded-full bg-white text-brand-700 ring-1 ring-brand-100">
+    <div className="rounded-lg border border-brand-100 bg-brand-50 p-6 text-center">
+      <span className="mx-auto grid h-11 w-11 place-items-center rounded-full bg-paper text-brand-700 ring-1 ring-brand-100">
         <LogIn className="h-5 w-5" />
       </span>
       <p className="mt-3 text-sm font-semibold text-brand-900">{text}</p>
@@ -25,7 +25,7 @@ export default function LoginRequiredNotice({
         <Link href={`/giris?next=${next}`} className="rounded-lg bg-brand-700 px-4 py-2 text-sm font-semibold text-white transition hover:bg-brand-800">
           Giriş Yap
         </Link>
-        <Link href={`/kayit?next=${next}`} className="rounded-lg bg-white px-4 py-2 text-sm font-semibold text-brand-700 ring-1 ring-brand-200 transition hover:bg-brand-50">
+        <Link href={`/kayit?next=${next}`} className="rounded-lg bg-paper px-4 py-2 text-sm font-semibold text-brand-700 ring-1 ring-brand-200 transition hover:bg-brand-50">
           Kayıt Ol
         </Link>
       </div>

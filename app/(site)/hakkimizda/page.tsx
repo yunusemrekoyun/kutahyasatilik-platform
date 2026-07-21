@@ -3,10 +3,11 @@ import Link from "next/link";
 import { Phone } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { sanitizeCmsHtml } from "@/lib/sanitize";
-import { telLink } from "@/lib/site";
+import { SITE, telLink } from "@/lib/site";
 import { getSiteContact } from "@/lib/contact";
 import NotFoundCTA from "@/components/NotFoundCTA";
 import TrackView from "@/components/TrackView";
+import { PageIntro } from "@/components/ui/Editorial";
 
 export const revalidate = 300; // ISR: her 5 dakikada yenilenir (CDN cache + admin revalidatePath)
 
@@ -25,6 +26,7 @@ export async function generateMetadata(): Promise<Metadata> {
     description:
       page?.metaDescription ||
       "Kütahya'nın dijital emlak ofisi. Güvenilir, şeffaf ve teknoloji odaklı emlak danışmanlığı.",
+    alternates: { canonical: `${SITE.url}/hakkimizda` },
   };
 }
 
@@ -39,19 +41,7 @@ export default async function AboutPage() {
   return (
     <div>
       <TrackView />
-      {/* Hero */}
-      <section className="relative overflow-hidden bg-brand-950 text-white">
-        <div className="mx-auto max-w-4xl px-4 py-16 sm:py-20">
-          <p className="text-sm font-medium uppercase tracking-[0.2em] text-gold-400">Kurumsal</p>
-          <h1 className="mt-3 font-display text-4xl font-bold sm:text-5xl">{title}</h1>
-          <div className="mt-8 flex flex-wrap gap-3">
-            <Link href="/ilanlar" className="rounded-[10px] bg-white px-6 py-3 font-semibold text-brand-800 transition hover:bg-brand-50">Portföyü İncele</Link>
-            {c.phoneRaw && (
-              <a href={telLink(c.phoneRaw)} className="inline-flex items-center gap-2 rounded-[10px] bg-white/10 px-6 py-3 font-semibold text-white ring-1 ring-white/25 transition hover:bg-white/20"><Phone className="h-4 w-4" /> {c.phone}</a>
-            )}
-          </div>
-        </div>
-      </section>
+      <PageIntro eyebrow="Kurumsal" title={title} intro="Kütahya'nın ilçelerini, mahallelerini ve gayrimenkul dinamiklerini yakından bilen yerel bir ekibiz." actions={<><Link href="/ilanlar" className="rounded-lg bg-brand-700 px-6 py-3 font-semibold text-white hover:bg-brand-800">Portföyü incele</Link>{c.phoneRaw && <a href={telLink(c.phoneRaw)} className="inline-flex items-center gap-2 rounded-lg border border-brand-200 bg-paper px-6 py-3 font-semibold text-brand-800"><Phone className="h-4 w-4" /> {c.phone}</a>}</>} />
 
       {/* İçerik (admin'den düzenlenebilir) */}
       <section className="mx-auto max-w-3xl px-4 py-14">

@@ -16,6 +16,7 @@ export const metadata: Metadata = {
   title: "Tüm İlanlar - Kütahya Satılık Daire, Arsa, Villa",
   description:
     "Kütahya ve ilçelerinde güncel satılık daire, arsa, villa ve yatırımlık tarla ilanları. İlçe, fiyat ve mülk türüne göre filtreleyin.",
+  alternates: { canonical: "/ilanlar" },
 };
 
 const PER_PAGE = 12;
@@ -65,47 +66,48 @@ export default async function ListingsPage({
   Object.entries(sp).forEach(([k, v]) => { if (typeof v === "string") flatParams[k] = v; });
 
   return (
-    <div className="mx-auto max-w-7xl px-4 py-8">
+    <div className="mx-auto max-w-7xl px-5 py-10 sm:px-6 sm:py-14">
       <TrackView />
       <nav className="mb-2 text-sm text-slate-500">
         <Link href="/" className="hover:text-brand-700">Ana Sayfa</Link>
         <span className="mx-2 text-slate-300">/</span>
         <span className="text-slate-700">{get("ilce") ? `${get("ilce")} İlanları` : "Tüm İlanlar"}</span>
       </nav>
-      <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+      <div className="mb-8 flex flex-col gap-5 border-b border-stone pb-7 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <h1 className="font-display text-2xl font-bold text-brand-900 sm:text-3xl">
+          <p className="eyebrow">Kütahya portföyü</p>
+          <h1 className="mt-2 font-display text-4xl font-semibold tracking-tight text-brand-950 sm:text-5xl">
             {get("ilce") ? `${get("ilce")} İlanları` : "Tüm İlanlar"}
           </h1>
-          <p className="mt-1.5 text-slate-500">
+          <p className="mt-3 text-muted">
             Sizin için <strong className="font-semibold text-slate-700 tabular-nums">{total}</strong> sonuç bulundu.
           </p>
         </div>
-        <Suspense fallback={<div className="h-11 w-44 rounded-lg bg-white ring-1 ring-slate-200" />}>
+        <Suspense fallback={<div className="h-11 w-44 rounded-lg bg-paper ring-1 ring-stone" />}>
           <ListingSort />
         </Suspense>
       </div>
 
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-4">
-        <div className="lg:col-span-1">
-          <Suspense fallback={<div className="h-24 rounded-xl bg-white ring-1 ring-slate-200" />}>
+      <div className="grid grid-cols-1 gap-8 lg:grid-cols-12">
+        <div className="lg:col-span-3">
+          <Suspense fallback={<div className="h-24 rounded-lg bg-paper ring-1 ring-stone" />}>
             <ListingFilters />
           </Suspense>
         </div>
 
-        <div className="lg:col-span-3">
+        <div className="lg:col-span-9">
           {items.length > 0 ? (
             <>
               <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-3">
-                {items.map((l) => (
-                  <ListingCard key={l.slug} listing={l} />
+                {items.map((l, index) => (
+                  <ListingCard key={l.slug} listing={l} priority={index < 3} />
                 ))}
               </div>
               <Pagination page={page} totalPages={totalPages} searchParams={flatParams} />
             </>
           ) : (
-            <div className="rounded-xl bg-white p-12 text-center ring-1 ring-slate-200">
-              <span className="mx-auto grid h-14 w-14 place-items-center rounded-full bg-slate-100 text-slate-400">
+            <div className="ceramic-grid border-y border-stone bg-paper p-12 text-center">
+              <span className="mx-auto grid h-14 w-14 place-items-center rounded-lg border border-stone bg-canvas text-slate-500">
                 <SearchX className="h-7 w-7" />
               </span>
               <h2 className="mt-4 font-display text-lg font-bold text-slate-800">Bu kriterlere uygun ilan bulunamadı</h2>

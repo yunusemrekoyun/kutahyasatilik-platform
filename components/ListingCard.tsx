@@ -27,37 +27,51 @@ export type ListingCardData = {
   agentLogo?: string | null;
 };
 
-export default function ListingCard({ listing }: { listing: ListingCardData }) {
+export default function ListingCard({
+  listing,
+  priority = false,
+  variant = "standard",
+}: {
+  listing: ListingCardData;
+  priority?: boolean;
+  variant?: "editorial" | "standard" | "compact";
+}) {
   const cover = thumbUrl(listing.coverImage) || "/placeholder-listing.webp";
   const isLand = listing.propertyType === "arsa" || listing.propertyType === "tarla";
   const isSold = listing.status === "sold";
   const location = `${listing.neighborhood ? `${listing.neighborhood}, ` : ""}${listing.district}`;
 
   return (
-    <article className="group flex flex-col overflow-hidden rounded-xl bg-white ring-1 ring-slate-200 transition duration-300 hover:shadow-card hover:ring-brand-200">
-      <div className="relative aspect-[4/3] overflow-hidden bg-slate-100">
+    <article className={`group flex overflow-hidden border border-stone bg-paper transition duration-200 hover:border-brand-300 ${
+      variant === "compact" ? "flex-row" : "flex-col"
+    }`}>
+      <div className={`relative overflow-hidden bg-slate-100 ${
+        variant === "editorial" ? "aspect-[16/10]" : variant === "compact" ? "w-36 shrink-0 sm:w-44" : "aspect-[4/3]"
+      }`}>
         <CardActions listing={listing} />
-        <Link href={`/ilan/${listing.slug}`} className="block h-full w-full">
+        <Link href={`/ilan/${listing.slug}`} className="relative block h-full w-full">
           <Image
             src={cover}
             alt={listing.title}
             fill
             sizes="(max-width: 768px) 100vw, 33vw"
-            className="object-cover transition duration-300 group-hover:scale-[1.03]"
+            loading={priority ? "eager" : "lazy"}
+            fetchPriority={priority ? "high" : "auto"}
+            className="object-cover transition duration-500 group-hover:scale-[1.02]"
           />
         </Link>
         {/* Tek durum işareti: Satıldıda gizli (SATILDI overlay var) — yoksa Öne çıkan > Doğrulanmış > Satılık */}
         <div className="pointer-events-none absolute left-3 top-3">
           {!isSold && (listing.featured ? (
-            <span className="inline-flex items-center gap-1 rounded-md bg-gold-200 px-2.5 py-1 text-[12px] font-semibold text-gold-900 shadow-sm">
+            <span className="inline-flex items-center gap-1 rounded-md bg-paper/95 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wide text-gold-800">
               <Star className="h-3.5 w-3.5 fill-current" /> Vitrinde
             </span>
           ) : listing.verified ? (
-            <span className="inline-flex items-center gap-1 rounded-md bg-green-600 px-2.5 py-1 text-[12px] font-semibold text-white shadow-sm">
+            <span className="inline-flex items-center gap-1 rounded-md bg-green-700 px-2.5 py-1 text-[11px] font-semibold text-white">
               Doğrulanmış
             </span>
           ) : (
-            <span className="rounded-md bg-brand-700 px-2.5 py-1 text-[12px] font-semibold text-white shadow-sm">
+            <span className="rounded-md bg-brand-950/85 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wide text-white">
               Satılık
             </span>
           ))}
@@ -69,17 +83,17 @@ export default function ListingCard({ listing }: { listing: ListingCardData }) {
         )}
       </div>
 
-      <div className="flex flex-grow flex-col p-4">
+      <div className={`flex min-w-0 flex-grow flex-col ${variant === "editorial" ? "p-5 sm:p-6" : "p-4"}`}>
         <Link href={`/ilan/${listing.slug}`} className="block">
-          <span className="mb-1 block text-[13px] font-medium text-slate-500">
+          <span className="eyebrow mb-2 block line-clamp-1">
             {PROPERTY_TYPE_LABELS[listing.propertyType] || listing.propertyType} · {location}
           </span>
-          <h3 className="line-clamp-2 min-h-[3rem] font-display text-lg font-semibold leading-snug text-slate-900 transition-colors group-hover:text-brand-700">
+          <h3 className={`line-clamp-2 font-display font-semibold leading-snug text-ink transition-colors group-hover:text-brand-700 ${variant === "editorial" ? "text-2xl sm:text-3xl" : variant === "compact" ? "text-base" : "text-xl"}`}>
             {listing.title}
           </h3>
         </Link>
 
-        <div className="mt-3 flex items-center gap-4 text-[13px] font-medium text-slate-600">
+        <div className={`mt-3 flex flex-wrap items-center gap-x-4 gap-y-1 text-[13px] font-medium text-muted ${variant === "compact" ? "hidden sm:flex" : ""}`}>
           {!isLand && listing.rooms && (
             <span className="inline-flex items-center gap-1.5"><BedDouble className="h-[18px] w-[18px] text-slate-400" /> {listing.rooms}</span>
           )}
@@ -110,7 +124,7 @@ export default function ListingCard({ listing }: { listing: ListingCardData }) {
           </div>
         )}
 
-        {listing.agentName && (
+        {listing.agentName && variant !== "compact" && (
           <div className="mt-3 flex items-center gap-2">
             {listing.agentLogo ? (
               // eslint-disable-next-line @next/next/no-img-element
@@ -128,13 +142,13 @@ export default function ListingCard({ listing }: { listing: ListingCardData }) {
           </div>
         )}
 
-        <div className="mt-auto flex items-center justify-between gap-2 border-t border-slate-100 pt-4">
-          <span className="rounded-lg bg-gold-100 px-3 py-1.5 text-[18px] font-bold tabular-nums text-gold-900">
+        <div className="mt-auto flex items-end justify-between gap-2 border-t border-stone pt-4">
+          <span className={`${variant === "editorial" ? "text-2xl" : "text-lg"} font-bold tabular-nums text-gold-800`}>
             {formatPrice(listing.price, listing.currency)}
           </span>
           <Link
             href={`/ilan/${listing.slug}`}
-            className="inline-flex shrink-0 items-center gap-1 rounded-lg bg-brand-700 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-brand-800"
+            className={`shrink-0 items-center gap-1 text-sm font-semibold text-brand-700 transition-colors hover:text-brand-900 ${variant === "compact" ? "hidden sm:inline-flex" : "inline-flex"}`}
           >
             İncele <ArrowRight className="h-[18px] w-[18px]" />
           </Link>

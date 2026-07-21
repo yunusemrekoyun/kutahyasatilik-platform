@@ -40,9 +40,9 @@ export async function POST(req: NextRequest) {
 
   const passwordHash = await hashPassword(data.newPassword);
   await prisma.$transaction([
-    prisma.user.update({ where: { id: user.id }, data: { passwordHash } }),
+    prisma.user.update({ where: { id: user.id }, data: { passwordHash, authVersion: { increment: 1 } } }),
     prisma.passwordResetToken.deleteMany({ where: { userId: user.id } }),
   ]);
 
-  return NextResponse.json({ ok: true, message: "Şifreniz güncellendi." });
+  return NextResponse.json({ ok: true, message: "Şifreniz güncellendi. Lütfen yeniden giriş yapın.", needAuth: true });
 }

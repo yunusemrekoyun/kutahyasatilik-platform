@@ -5,7 +5,7 @@ import { formatPrice } from "@/lib/format";
 export const dynamic = "force-dynamic";
 
 const inputCls =
-  "w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none transition focus:border-brand-500 focus:ring-2 focus:ring-brand-500/30";
+  "w-full rounded-lg border border-slate-300 bg-paper px-3 py-2 text-sm text-slate-900 outline-none transition focus:border-brand-500 focus:ring-2 focus:ring-brand-500/30";
 
 const STATUS: Record<string, { label: string; cls: string }> = {
   pending: { label: "Bekliyor", cls: "bg-amber-50 text-amber-700 ring-amber-200" },
@@ -59,7 +59,7 @@ export default async function AdminTahsilatPage() {
       {/* Özet */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
         {cards.map((c) => (
-          <div key={c.st} className="rounded-2xl bg-white p-5 ring-1 ring-slate-200">
+          <div key={c.st} className="rounded-lg bg-paper p-5 ring-1 ring-stone">
             <span className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-semibold ring-1 ${STATUS[c.st].cls}`}>
               {STATUS[c.st].label}
             </span>
@@ -70,7 +70,7 @@ export default async function AdminTahsilatPage() {
       </div>
 
       {/* Yeni kayıt */}
-      <section className="mt-6 rounded-2xl bg-white p-6 ring-1 ring-slate-200">
+      <section className="mt-6 rounded-lg bg-paper p-6 ring-1 ring-stone">
         <h2 className="font-bold text-slate-900">Yeni ödeme kaydı</h2>
         {agents.length === 0 ? (
           <p className="mt-3 text-sm text-slate-500">Önce emlakçı eklenmeli.</p>
@@ -105,13 +105,13 @@ export default async function AdminTahsilatPage() {
       </section>
 
       {/* Defter */}
-      <section className="mt-6 overflow-hidden rounded-2xl bg-white ring-1 ring-slate-200">
+      <section className="mt-6 overflow-hidden rounded-lg bg-paper ring-1 ring-stone">
         {payments.length === 0 ? (
           <p className="p-6 text-center text-sm text-slate-500">Henüz ödeme kaydı yok.</p>
         ) : (
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-slate-100 text-left text-xs uppercase tracking-wide text-slate-400">
+              <tr className="border-b border-stone text-left text-xs uppercase tracking-wide text-slate-400">
                 <th className="px-4 py-3">Emlakçı</th>
                 <th className="px-4 py-3">Tutar</th>
                 <th className="px-4 py-3">Dönem</th>

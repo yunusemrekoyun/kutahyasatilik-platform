@@ -29,7 +29,7 @@ export default function AgentLogoUpload({ initialLogo }: { initialLogo?: string 
   return (
     <div className="flex items-center gap-4">
       <input type="hidden" name="logo" value={logo} />
-      <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-full ring-1 ring-slate-200">
+      <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-full ring-1 ring-stone">
         {logo ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img src={mediaUrl(logo)} alt="Logo" className="h-full w-full rounded-full object-cover" />

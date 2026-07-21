@@ -33,11 +33,11 @@ export default async function AdminAgents() {
       {/* Tüm danışmanlar (onay bekleyenler de bu tabloda; yeni başvurular Başvurular sayfasında toplanır) */}
       <section>
         <h2 className="mb-3 text-sm font-bold uppercase tracking-wide text-slate-500">Danışmanlar</h2>
-        <div className="overflow-hidden rounded-xl bg-white ring-1 ring-slate-200">
+        <div className="overflow-hidden rounded-lg bg-paper ring-1 ring-stone">
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-slate-100 bg-slate-50 text-left text-xs text-slate-500">
+                <tr className="border-b border-stone bg-canvas text-left text-xs text-slate-500">
                   <th className="p-3">Danışman</th>
                   <th className="p-3">İletişim</th>
                   <th className="p-3 text-center">İlan</th>
@@ -50,7 +50,7 @@ export default async function AdminAgents() {
                   <tr><td colSpan={5} className="p-8 text-center text-slate-400">Henüz danışman yok.</td></tr>
                 )}
                 {agents.map((a) => (
-                  <tr key={a.id} className="border-b border-slate-50 hover:bg-slate-50">
+                  <tr key={a.id} className="border-b border-slate-50 hover:bg-canvas">
                     <td className="p-3">
                       <p className="font-medium text-slate-800">{a.name}</p>
                       <p className="text-xs text-slate-500">{a.title || "Danışman"}{a.agency ? ` · ${a.agency}` : ""}</p>

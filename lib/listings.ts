@@ -188,23 +188,12 @@ export async function getListings(filter: ListingFilter = {}, take = 60): Promis
   return decorate(rows as RawCard[]);
 }
 
-// Filtresiz toplam sayım (en sık durum) cache'lenir; 52k+ satırda her istekteki
-// count(*) maliyetini kaldırır. Filtreli sorgularda sayım taze hesaplanır (index'li).
-const getCachedTotalCount = unstable_cache(
-  async (): Promise<number> =>
-    prisma.listing.count({ where: { status: { not: "passive" }, moderationStatus: "approved" } }),
-  ["listing-total-approved"],
-  { revalidate: 120 }
-);
-
 export async function getListingsPaged(
   filter: ListingFilter = {},
   page = 1,
   perPage = 12
 ): Promise<{ items: ListingCardData[]; total: number; page: number; perPage: number; totalPages: number }> {
   const where = buildWhere(filter);
-  // Ekstra filtre yoksa (yalnızca status + moderationStatus) sayım cache'li gelir.
-  const isUnfiltered = Object.keys(where).length === 2;
   const [rows, total] = await Promise.all([
     prisma.listing.findMany({
       where,
@@ -213,7 +202,9 @@ export async function getListingsPaged(
       take: perPage,
       select: cardSelect,
     }),
-    isUnfiltered ? getCachedTotalCount() : prisma.listing.count({ where }),
+    // Mobil sonsuz listede totalPages navigasyonu belirlediği için bu değer anlık olmalı.
+    // Listing tablosundaki moderationStatus+status birleşik indeksleri sayımı destekler.
+    prisma.listing.count({ where }),
   ]);
   return {
     items: await decorate(rows as RawCard[]),

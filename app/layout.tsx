@@ -1,10 +1,10 @@
 import type { Metadata, Viewport } from "next";
 import { Geist, Source_Serif_4 } from "next/font/google";
-import Script from "next/script";
 import "./globals.css";
 import { SITE } from "@/lib/site";
 import StoreProvider from "@/components/store/StoreProvider";
 import Toaster from "@/components/store/Toaster";
+import AnalyticsConsent from "@/components/AnalyticsConsent";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -41,9 +41,15 @@ export const metadata: Metadata = {
     title: `${SITE.name} | ${SITE.brand}`,
     description: SITE.description,
     url: SITE.url,
+    images: [{ url: "/opengraph-image", width: 1200, height: 630, alt: SITE.name }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: `${SITE.name} | ${SITE.brand}`,
+    description: SITE.description,
+    images: ["/opengraph-image"],
   },
   robots: { index: true, follow: true },
-  alternates: { canonical: SITE.url },
   appleWebApp: { capable: true, statusBarStyle: "black-translucent", title: SITE.name },
 };
 
@@ -60,23 +66,7 @@ export default function RootLayout({
   return (
     <html lang="tr" className={`${geistSans.variable} ${display.variable} h-full`}>
       <body className="min-h-full flex flex-col bg-[var(--background)] text-slate-900 antialiased">
-        {SITE.gtagId || SITE.gaId ? (
-          <>
-            <Script
-              src={`https://www.googletagmanager.com/gtag/js?id=${SITE.gaId || SITE.gtagId}`}
-              strategy="afterInteractive"
-            />
-            <Script id="gtag-init" strategy="afterInteractive">
-              {`
-                window.dataLayer = window.dataLayer || [];
-                function gtag(){dataLayer.push(arguments);}
-                gtag('js', new Date());
-                ${SITE.gaId ? `gtag('config', '${SITE.gaId}');` : ""}
-                ${SITE.gtagId ? `gtag('config', '${SITE.gtagId}');` : ""}
-              `}
-            </Script>
-          </>
-        ) : null}
+        <AnalyticsConsent gaId={SITE.gaId} gtagId={SITE.gtagId} />
         <StoreProvider>
           {children}
           <Toaster />

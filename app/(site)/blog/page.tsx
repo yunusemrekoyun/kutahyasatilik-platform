@@ -4,7 +4,8 @@ import Image from "next/image";
 import { prisma } from "@/lib/prisma";
 import { formatDate } from "@/lib/format";
 import TrackView from "@/components/TrackView";
-import { Heart, PenLine, ArrowRight } from "lucide-react";
+import { PenLine, ArrowRight } from "lucide-react";
+import { PageIntro } from "@/components/ui/Editorial";
 
 export const revalidate = 300; // ISR: her 5 dakikada yenilenir (CDN cache + admin revalidatePath)
 
@@ -12,6 +13,7 @@ export const metadata: Metadata = {
   title: "Gayrimenkul Rehberi - Doğru Mülk Nasıl Alınır?",
   description:
     "Doğru gayrimenkul nasıl alınır, nelere dikkat edilmeli? Kütahya'da daire, arsa ve villa alırken bilmeniz gereken her şey — uzman rehberlerimiz.",
+  alternates: { canonical: "/blog" },
 };
 
 export default async function BlogList() {
@@ -21,24 +23,12 @@ export default async function BlogList() {
   });
 
   return (
-    <div className="mx-auto max-w-6xl px-4 py-10">
+    <div>
       <TrackView />
-      <div className="text-center">
-        <span className="inline-flex items-center gap-2 rounded-full bg-brand-50 px-4 py-1.5 text-sm font-medium text-brand-700 ring-1 ring-brand-100">
-          <Heart className="h-4 w-4 text-brand-600" /> Müşterilerimizi Önemsiyoruz
-        </span>
-        <h1 className="mt-4 font-display text-3xl font-bold text-brand-900 sm:text-4xl">
-          Doğru Gayrimenkul Rehberi
-        </h1>
-        <p className="mx-auto mt-3 max-w-2xl text-slate-600">
-          Doğru gayrimenkul nasıl alınır, nelere dikkat edilmeli? Yıllara dayanan
-          deneyimimizi sizinle paylaşıyoruz; bilinçli ve güvenli kararlar verin.
-        </p>
-        <div className="gold-divider mx-auto mt-4" />
-      </div>
+      <PageIntro eyebrow="Yerel bilgi" title="Doğru Gayrimenkul Rehberi" intro="Kütahya'da alım, satım ve yatırım kararları için sahadan bilgiler, bölge analizleri ve pratik rehberler." />
 
-      {posts.length === 0 ? (
-        <p className="mt-12 rounded-2xl bg-white p-10 text-center text-slate-500 ring-1 ring-slate-200">
+      <div className="mx-auto max-w-7xl px-5 py-14 sm:px-6 sm:py-20">{posts.length === 0 ? (
+        <p className="mt-12 rounded-lg bg-paper p-10 text-center text-slate-500 ring-1 ring-stone">
           Henüz yazı yayınlanmadı. Çok yakında burada olacağız.
         </p>
       ) : (
@@ -47,7 +37,7 @@ export default async function BlogList() {
             <Link
               key={p.id}
               href={`/blog/${p.slug}`}
-              className="group overflow-hidden rounded-2xl bg-white ring-1 ring-slate-200 transition hover:shadow-prestige hover:ring-brand-200"
+              className="group overflow-hidden rounded-lg bg-paper ring-1 ring-stone transition hover:shadow-prestige hover:ring-brand-200"
             >
               <div className="relative aspect-[16/10] overflow-hidden bg-slate-100">
                 {p.coverImage ? (
@@ -65,7 +55,7 @@ export default async function BlogList() {
             </Link>
           ))}
         </div>
-      )}
+      )}</div>
     </div>
   );
 }

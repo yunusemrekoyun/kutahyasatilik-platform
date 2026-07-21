@@ -6,7 +6,7 @@ import { prisma } from "@/lib/prisma";
 import { getSession } from "@/lib/auth";
 import { slugify, parseJsonArray } from "@/lib/format";
 import { sanitizeCmsHtml } from "@/lib/sanitize";
-import { deleteUploadFiles } from "@/lib/uploads";
+import { deleteUploadFiles } from "@/lib/uploadDeletion";
 import { deleteVideo } from "@/lib/videoStorage";
 import { notifyAgent, notifyUser, notifyMatchingAlerts } from "@/lib/notify";
 import { sendEmail, notificationEmail } from "@/lib/email";

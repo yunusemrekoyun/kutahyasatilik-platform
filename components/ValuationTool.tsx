@@ -86,10 +86,10 @@ export default function ValuationTool({
 
   const labelCls = "mb-1.5 block text-sm font-semibold text-slate-700";
   const inputCls =
-    "w-full h-12 rounded-[10px] border border-slate-300 bg-white px-3.5 text-base text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/30";
+    "w-full h-12 rounded-[10px] border border-slate-300 bg-paper px-3.5 text-base text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/30";
 
   return (
-    <div className="overflow-hidden rounded-2xl bg-white shadow-prestige ring-1 ring-slate-200">
+    <div className="overflow-hidden rounded-lg bg-paper shadow-prestige ring-1 ring-stone">
       <div className="grid md:grid-cols-2">
         {/* SOL: Form */}
         <div className="p-6 sm:p-8">
@@ -169,8 +169,8 @@ export default function ValuationTool({
           </div>
 
           <p className="mt-4 text-xs leading-relaxed text-slate-400">
-            * Tahmin; ilçe ortalama m² değerleri ve mülk özelliklerine dayalı otomatik
-            bir ön değerlendirmedir. Kesin değer için ücretsiz ekspertiz talep edin.
+            * Tahmin; ilçe ortalama m² değerleri ve girilen mülk özelliklerine dayalı
+            otomatik bir ön değerlendirmedir; resmi ekspertiz değildir. Kesin değer için ücretsiz ekspertiz talep edin.
           </p>
         </div>
 
@@ -204,7 +204,7 @@ export default function ValuationTool({
               <p className="font-display text-2xl font-bold sm:text-3xl">
                 {formatPrice(result.high)}
               </p>
-              <div className="mt-4 inline-flex items-center gap-2 rounded-lg bg-white/10 px-3 py-1.5 text-sm ring-1 ring-white/20">
+              <div className="mt-4 inline-flex items-center gap-2 rounded-lg bg-paper/10 px-3 py-1.5 text-sm ring-1 ring-white/20">
                 Yaklaşık <strong>{formatPrice(result.mid)}</strong>
               </div>
               <p className="mt-3 text-xs text-brand-200">
@@ -214,7 +214,7 @@ export default function ValuationTool({
               {!showLead ? (
                 <button
                   onClick={() => setShowLead(true)}
-                  className="mt-6 w-full rounded-[10px] bg-white px-4 py-3.5 text-base font-semibold text-brand-800 transition hover:bg-brand-50"
+                  className="mt-6 w-full rounded-[10px] bg-paper px-4 py-3.5 text-base font-semibold text-brand-800 transition hover:bg-brand-50"
                 >
                   Ücretsiz Detaylı Ekspertiz İste
                 </button>
@@ -232,7 +232,7 @@ export default function ValuationTool({
                       value={name}
                       onChange={(e) => setName(e.target.value)}
                       placeholder="Adınız ve soyadınız"
-                      className="h-12 w-full rounded-[10px] border border-white/20 bg-white/10 px-3.5 text-base text-white outline-none transition placeholder:text-brand-200 focus:border-gold-400 focus:ring-2 focus:ring-gold-400/30"
+                      className="h-12 w-full rounded-[10px] border border-white/20 bg-paper/10 px-3.5 text-base text-white outline-none transition placeholder:text-brand-200 focus:border-gold-400 focus:ring-2 focus:ring-gold-400/30"
                     />
                   </div>
                   <div>
@@ -245,7 +245,7 @@ export default function ValuationTool({
                       value={phone}
                       onChange={(e) => setPhone(e.target.value)}
                       placeholder="05__ ___ __ __"
-                      className="h-12 w-full rounded-[10px] border border-white/20 bg-white/10 px-3.5 text-base text-white outline-none transition placeholder:text-brand-200 focus:border-gold-400 focus:ring-2 focus:ring-gold-400/30"
+                      className="h-12 w-full rounded-[10px] border border-white/20 bg-paper/10 px-3.5 text-base text-white outline-none transition placeholder:text-brand-200 focus:border-gold-400 focus:ring-2 focus:ring-gold-400/30"
                     />
                   </div>
                   {status === "error" && (
@@ -254,7 +254,7 @@ export default function ValuationTool({
                   <button
                     type="submit"
                     disabled={status === "loading"}
-                    className="w-full rounded-[10px] bg-white px-4 py-3.5 text-base font-semibold text-brand-800 transition hover:bg-brand-50 disabled:opacity-60"
+                    className="w-full rounded-[10px] bg-paper px-4 py-3.5 text-base font-semibold text-brand-800 transition hover:bg-brand-50 disabled:opacity-60"
                   >
                     {status === "loading" ? "Gönderiliyor..." : "Ekspertiz Talebini Gönder"}
                   </button>

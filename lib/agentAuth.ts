@@ -30,7 +30,8 @@ export async function verifyAgentCredentials(email: string, password: string) {
 }
 
 export async function createAgentSession(payload: AgentSession) {
-  const token = await new SignJWT(payload)
+  const authVersion = (await prisma.agent.findUnique({ where: { id: payload.agentId }, select: { authVersion: true } }))?.authVersion ?? 0;
+  const token = await new SignJWT({ ...payload, ver: authVersion })
     .setProtectedHeader({ alg: "HS256" })
     .setIssuedAt()
     .setExpirationTime("7d")
@@ -59,10 +60,13 @@ export async function getAgentSession(): Promise<AgentSession | null> {
     const { payload } = await jwtVerify(token, secret);
     // Çapraz-silo koruması (bkz. lib/auth.ts): agentId yoksa kabul etme.
     if (typeof payload.agentId !== "string" || !payload.agentId) return null;
+    const tokenVersion = typeof payload.ver === "number" ? payload.ver : 0;
+    const agent = await prisma.agent.findUnique({ where: { id: payload.agentId }, select: { email: true, name: true, status: true, authVersion: true } });
+    if (!agent || agent.status !== "approved" || agent.authVersion !== tokenVersion) return null;
     return {
       agentId: payload.agentId,
-      email: payload.email as string,
-      name: payload.name as string,
+      email: agent.email,
+      name: agent.name,
     };
   } catch {
     return null;
