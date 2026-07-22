@@ -9,6 +9,7 @@ import ListingSort from "@/components/ListingSort";
 import Pagination from "@/components/Pagination";
 import NotFoundCTA from "@/components/NotFoundCTA";
 import TrackView from "@/components/TrackView";
+import { getPublicListingOwner } from "@/lib/publicDirectory";
 
 export const dynamic = "force-dynamic";
 
@@ -29,6 +30,8 @@ export default async function ListingsPage({
   const sp = await searchParams;
   const get = (k: string) => (typeof sp[k] === "string" ? (sp[k] as string) : undefined);
   const page = Math.max(1, Number(get("sayfa")) || 1);
+  const agencySlug = get("ofis")?.trim().slice(0, 100);
+  const agentSlug = agencySlug ? undefined : get("danisman")?.trim().slice(0, 100);
 
   // Negatif değerleri 0'a sabitle
   const pos = (v: string | undefined) => (v ? Math.max(0, Number(v) || 0) : undefined);
@@ -40,8 +43,8 @@ export default async function ListingsPage({
   const minAlan = minAlanRaw !== undefined ? minAlanRaw * areaFactor : undefined;
   const maxAlan = maxAlanRaw !== undefined ? maxAlanRaw * areaFactor : undefined;
 
-  const { items, total, totalPages } = await getListingsPaged(
-    {
+  const [listingResult, owner] = await Promise.all([
+    getListingsPaged({
       q: get("q"),
       propertyType: get("tur"),
       district: get("ilce"),
@@ -57,10 +60,21 @@ export default async function ListingsPage({
       balcony: !!get("balkon"),
       inSite: !!get("site"),
       verified: !!get("dogrulanmis"),
-    },
-    page,
-    PER_PAGE
-  );
+      agencySlug,
+      agentSlug,
+    }, page, PER_PAGE),
+    agencySlug
+      ? getPublicListingOwner("agency", agencySlug)
+      : agentSlug
+        ? getPublicListingOwner("agent", agentSlug)
+        : Promise.resolve(null),
+  ]);
+  const { items, total, totalPages } = listingResult;
+  const pageTitle = owner
+    ? `${owner.name} Portföyü`
+    : get("ilce")
+      ? `${get("ilce")} İlanları`
+      : "Tüm İlanlar";
 
   const flatParams: Record<string, string | undefined> = {};
   Object.entries(sp).forEach(([k, v]) => { if (typeof v === "string") flatParams[k] = v; });
@@ -71,14 +85,22 @@ export default async function ListingsPage({
       <nav className="mb-2 text-sm text-slate-500">
         <Link href="/" className="hover:text-brand-700">Ana Sayfa</Link>
         <span className="mx-2 text-slate-300">/</span>
-        <span className="text-slate-700">{get("ilce") ? `${get("ilce")} İlanları` : "Tüm İlanlar"}</span>
+        <span className="text-slate-700">{pageTitle}</span>
       </nav>
       <div className="mb-8 flex flex-col gap-5 border-b border-stone pb-7 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <p className="eyebrow">Kütahya portföyü</p>
           <h1 className="mt-2 font-display text-4xl font-semibold tracking-tight text-brand-950 sm:text-5xl">
-            {get("ilce") ? `${get("ilce")} İlanları` : "Tüm İlanlar"}
+            {pageTitle}
           </h1>
+          {owner ? (
+            <Link
+              href={agencySlug ? `/emlak-ofisi/${owner.slug}` : `/danisman/${owner.slug}`}
+              className="mt-3 inline-flex text-sm font-semibold text-brand-700 hover:underline"
+            >
+              {agencySlug ? "Ofis profiline dön" : "Danışman profiline dön"}
+            </Link>
+          ) : null}
           <p className="mt-3 text-muted">
             Sizin için <strong className="font-semibold text-slate-700 tabular-nums">{total}</strong> sonuç bulundu.
           </p>

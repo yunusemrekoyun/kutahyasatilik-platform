@@ -3,7 +3,7 @@ import Image from "next/image";
 import { MapPin, BedDouble, Maximize, Star, ArrowRight, Gem, Flame, Sparkles } from "lucide-react";
 import { formatPrice } from "@/lib/format";
 import { PROPERTY_TYPE_LABELS } from "@/lib/constants";
-import { thumbUrl, mediaUrl } from "@/lib/media";
+import { publicImageUrl, thumbUrl } from "@/lib/media";
 import type { Badge } from "@/lib/badges";
 import CardActions from "./CardActions";
 
@@ -36,7 +36,9 @@ export default function ListingCard({
   priority?: boolean;
   variant?: "editorial" | "standard" | "compact";
 }) {
-  const cover = thumbUrl(listing.coverImage) || "/placeholder-listing.webp";
+  const safeCover = publicImageUrl(listing.coverImage);
+  const cover = safeCover ? thumbUrl(safeCover) : "/placeholder-listing.webp";
+  const agentLogo = publicImageUrl(listing.agentLogo);
   const isLand = listing.propertyType === "arsa" || listing.propertyType === "tarla";
   const isSold = listing.status === "sold";
   const location = `${listing.neighborhood ? `${listing.neighborhood}, ` : ""}${listing.district}`;
@@ -126,10 +128,10 @@ export default function ListingCard({
 
         {listing.agentName && variant !== "compact" && (
           <div className="mt-3 flex items-center gap-2">
-            {listing.agentLogo ? (
+            {agentLogo ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img
-                src={mediaUrl(listing.agentLogo)}
+                src={agentLogo}
                 alt={listing.agentName}
                 className="h-7 w-7 shrink-0 rounded-full object-cover"
               />

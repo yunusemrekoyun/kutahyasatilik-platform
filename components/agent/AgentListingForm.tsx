@@ -8,6 +8,7 @@ import { DISTRICTS, PROPERTY_TYPES } from "@/lib/constants";
 import LocationPicker from "@/components/LocationPicker";
 import VideoUploadField from "@/components/admin/VideoUploadField";
 import ThousandsInput from "@/components/ThousandsInput";
+import ProfessionalListingFields from "@/components/listings/ProfessionalListingFields";
 import { Info, ArrowLeft, ArrowRight, Trash2 } from "lucide-react";
 
 type ListingData = {
@@ -35,6 +36,17 @@ type ListingData = {
   inSite?: boolean;
   balcony?: boolean;
   parking?: boolean;
+  creditEligible?: string | null;
+  usageStatus?: string | null;
+  propertyCondition?: string | null;
+  bathroomCount?: number | null;
+  dues?: number | null;
+  exchangeEligible?: boolean | null;
+  deedType?: string | null;
+  occupancyPermit?: string | null;
+  validUntil?: Date | string | null;
+  locationVisibility?: string | null;
+  parcelVisibility?: boolean | null;
   deedStatus?: string | null;
   zoningStatus?: string | null;
   adaNo?: string | null;
@@ -45,6 +57,7 @@ type ListingData = {
   virtualTourUrl?: string | null;
   features?: string[];
   images?: { url: string }[];
+  amenities?: { key: string }[];
 };
 
 const inputCls =
@@ -240,6 +253,8 @@ export default function AgentListingForm({ listing }: { listing?: ListingData })
           </Field>
         </div>
       </section>
+
+      <ProfessionalListingFields values={listing} propertyType={propertyType} inputClassName={inputCls} />
 
       {/* Konum */}
       <section className="rounded-lg bg-paper p-6 ring-1 ring-stone">

@@ -6,7 +6,18 @@ export function GET() {
   const teamId = process.env.APPLE_TEAM_ID?.trim();
   const bundleId = process.env.IOS_BUNDLE_ID?.trim() || "com.kutahyasatilik.app";
   const details = teamId
-    ? [{ appID: `${teamId}.${bundleId}`, components: [{ "/": "/ilan/*" }, { "/": "/bildirimler*" }] }]
+    ? [{
+        appID: `${teamId}.${bundleId}`,
+        components: [
+          { "/": "/ilan/*" },
+          { "/": "/bildirimler*" },
+          { "/": "/emlak-ofisleri*" },
+          { "/": "/emlak-ofisi/*" },
+          { "/": "/danismanlar*" },
+          { "/": "/danisman/*" },
+          { "/": "/yerel-araclar*" },
+        ],
+      }]
     : [];
 
   return NextResponse.json(

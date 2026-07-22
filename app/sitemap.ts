@@ -2,6 +2,7 @@ import type { MetadataRoute } from "next";
 import { prisma } from "@/lib/prisma";
 import { SITE } from "@/lib/site";
 import { LANDING_PAGES } from "@/lib/constants";
+import { getPublicDirectorySlugs } from "@/lib/publicDirectory";
 
 export const dynamic = "force-dynamic";
 
@@ -20,6 +21,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${base}/bolge-analizi`, priority: 0.7, changeFrequency: "weekly" },
     { url: `${base}/alici-talebi`, priority: 0.7, changeFrequency: "monthly" },
     { url: `${base}/blog`, priority: 0.7, changeFrequency: "weekly" },
+    { url: `${base}/emlak-ofisleri`, priority: 0.7, changeFrequency: "daily" },
+    { url: `${base}/danismanlar`, priority: 0.7, changeFrequency: "daily" },
+    { url: `${base}/yerel-araclar`, priority: 0.6, changeFrequency: "monthly" },
     { url: `${base}/emlakci/kayit`, priority: 0.4, changeFrequency: "monthly" },
     { url: `${base}/hakkimizda`, priority: 0.6, changeFrequency: "monthly" },
     { url: `${base}/iletisim`, priority: 0.5, changeFrequency: "monthly" },
@@ -73,5 +77,26 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     /* veritabanı hazır değilse boş geç */
   }
 
-  return [...staticPages, ...listingPages, ...cmsPages];
+  let directoryPages: MetadataRoute.Sitemap = [];
+  try {
+    const { agencies, agents } = await getPublicDirectorySlugs();
+    directoryPages = [
+      ...agencies.map((agency) => ({
+        url: `${base}/emlak-ofisi/${agency.slug}`,
+        lastModified: agency.updatedAt,
+        priority: 0.7,
+        changeFrequency: "weekly" as const,
+      })),
+      ...agents.map((agent) => ({
+        url: `${base}/danisman/${agent.slug}`,
+        lastModified: agent.updatedAt,
+        priority: 0.6,
+        changeFrequency: "weekly" as const,
+      })),
+    ];
+  } catch {
+    /* directory migration henüz uygulanmadıysa boş geç */
+  }
+
+  return [...staticPages, ...listingPages, ...directoryPages, ...cmsPages];
 }

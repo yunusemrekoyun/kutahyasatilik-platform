@@ -6,6 +6,7 @@ import { parseJsonArray } from "@/lib/format";
 import { deleteUploadFiles } from "@/lib/uploadDeletion";
 import { deleteVideo } from "@/lib/videoStorage";
 import { upsertAgentListing, AgentListingError } from "@/lib/apiAgentListing";
+import { revalidatePath, revalidateTag } from "next/cache";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -17,7 +18,10 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
   const { id } = await params;
   const l = await prisma.listing.findUnique({
     where: { id },
-    include: { images: { select: { url: true }, orderBy: { sortOrder: "asc" } } },
+    include: {
+      images: { select: { url: true }, orderBy: { sortOrder: "asc" } },
+      amenities: { select: { key: true }, orderBy: { sortOrder: "asc" } },
+    },
   });
   if (!l || l.agentId !== a.agent.id) return NextResponse.json({ ok: false, error: "Bulunamadı" }, { status: 404 });
   return NextResponse.json({
@@ -29,10 +33,15 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
       address: l.address, lat: l.lat, lng: l.lng, areaGross: l.areaGross, areaNet: l.areaNet,
       rooms: l.rooms, floor: l.floor, totalFloors: l.totalFloors, buildingAge: l.buildingAge,
       heating: l.heating, furnished: l.furnished, inSite: l.inSite, balcony: l.balcony, parking: l.parking,
+      creditEligible: l.creditEligible, usageStatus: l.usageStatus, propertyCondition: l.propertyCondition,
+      bathroomCount: l.bathroomCount, dues: l.dues, exchangeEligible: l.exchangeEligible,
+      deedType: l.deedType, occupancyPermit: l.occupancyPermit, validUntil: l.validUntil,
       deedStatus: l.deedStatus, zoningStatus: l.zoningStatus, adaNo: l.adaNo, parselNo: l.parselNo, kaks: l.kaks,
+      locationVisibility: l.locationVisibility, parcelVisibility: l.parcelVisibility,
       videoUrl: l.videoUrl, droneUrl: l.droneUrl, virtualTourUrl: l.virtualTourUrl,
       moderationStatus: l.moderationStatus, note: l.note,
       features: parseJsonArray(l.features),
+      amenities: l.amenities.map((item) => item.key),
       images: l.images.map((im) => ({ url: absolutizeUrl(im.url, req) })),
     },
   });
@@ -46,6 +55,9 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
   if (!body) return NextResponse.json({ ok: false, error: "Geçersiz istek" }, { status: 400 });
   try {
     const r = await upsertAgentListing(a.agent.id, id, body);
+    revalidateTag("marketplace-stats", { expire: 0 });
+    revalidatePath("/emlak-ofisleri");
+    revalidatePath("/danismanlar");
     return NextResponse.json({ ok: true, ...r });
   } catch (e) {
     if (e instanceof AgentListingError) return NextResponse.json({ ok: false, error: e.message }, { status: e.status });
@@ -65,5 +77,8 @@ export async function DELETE(req: NextRequest, { params }: { params: Promise<{ i
   await prisma.listing.delete({ where: { id } });
   await deleteUploadFiles(owned.images.map((i) => i.url));
   await deleteVideo(owned.videoUrl);
+  revalidateTag("marketplace-stats", { expire: 0 });
+  revalidatePath("/emlak-ofisleri");
+  revalidatePath("/danismanlar");
   return NextResponse.json({ ok: true });
 }

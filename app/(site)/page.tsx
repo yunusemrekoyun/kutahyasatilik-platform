@@ -11,6 +11,7 @@ import TrackView from "@/components/TrackView";
 import { getSiteContact } from "@/lib/contact";
 import { DISTRICTS, LANDING_PAGES } from "@/lib/constants";
 import { getFeaturedListings, getMapPoints } from "@/lib/listings";
+import { getMarketplaceStats } from "@/lib/marketplaceStats";
 import { mediaUrl } from "@/lib/media";
 import { prisma } from "@/lib/prisma";
 import { SITE, telLink } from "@/lib/site";
@@ -21,7 +22,7 @@ export const metadata: Metadata = { alternates: { canonical: "/" } };
 async function getHomeTexts() {
   const keys = [
     "home_hero_badge", "home_hero_title", "home_hero_highlight",
-    "home_hero_subtitle", "home_stat_sales", "home_stat_years", "home_why_title",
+    "home_hero_subtitle", "home_why_title",
     "home_hero_image",
   ];
   try {
@@ -33,11 +34,10 @@ async function getHomeTexts() {
 }
 
 export default async function Home() {
-  const [featured, points, totalActive, totalSold, texts, testimonials, contact] = await Promise.all([
+  const [featured, points, marketplaceStats, texts, testimonials, contact] = await Promise.all([
     getFeaturedListings(6),
     getMapPoints(),
-    prisma.listing.count({ where: { status: "active" } }),
-    prisma.listing.count({ where: { status: "sold" } }),
+    getMarketplaceStats(),
     getHomeTexts(),
     prisma.testimonial.findMany({ where: { published: true }, orderBy: [{ sortOrder: "asc" }, { createdAt: "desc" }] }).catch(() => []),
     getSiteContact(),
@@ -48,13 +48,11 @@ export default async function Home() {
   const heroHighlight = t("home_hero_highlight", "yerel bilgiyle");
   const heroSubtitle = t(
     "home_hero_subtitle",
-    `Merkez ve tüm ilçelerde ${totalActive}+ güncel portföyü, bölgesel verileri ve yerel danışmanlığı tek yerde keşfedin.`,
+    `Merkez ve tüm ilçelerde ${marketplaceStats.activeListings} güncel ilanı, bölgesel verileri ve yerel danışmanlığı tek yerde keşfedin.`,
   );
   // Only use the deliberately selected CMS visual here. Listing covers may contain
   // agent artwork or embedded copy that does not work as a large editorial hero.
   const heroVisual = texts.get("home_hero_image") || null;
-  const statSales = Number(texts.get("home_stat_sales") || 850);
-  const statYears = texts.get("home_stat_years") || "15";
   const whyTitle = t("home_why_title", "Yerel pazarı yakından tanıyoruz");
   const categoryCoverByType = new Map<string, string>();
   for (const listing of featured) {
@@ -113,10 +111,10 @@ export default async function Home() {
       <section className="border-b border-stone bg-paper">
         <div className="mx-auto grid max-w-7xl grid-cols-2 divide-x divide-y divide-stone px-5 sm:px-6 lg:grid-cols-4 lg:divide-y-0">
           {[
-            [`${totalActive}+`, "Aktif ilan"],
-            [`${totalSold + statSales}+`, "Tamamlanan satış"],
-            ["13", "İlçede hizmet"],
-            [`${statYears}+`, "Yıl deneyim"],
+            [marketplaceStats.activeListings, "Güncel ilan"],
+            [marketplaceStats.soldListings, "Satılmış ilan"],
+            [marketplaceStats.approvedAgencies, "Onaylı emlak ofisi"],
+            [marketplaceStats.activeDistricts, "Portföylü ilçe"],
           ].map(([value, label]) => (
             <div key={label} className="px-4 py-7 sm:px-8">
               <p className="font-display text-3xl font-semibold tabular-nums text-brand-950">{value}</p>
@@ -145,7 +143,10 @@ export default async function Home() {
                       <img src={mediaUrl(categoryCover)} alt="" loading="lazy" className="absolute inset-0 h-full w-full object-cover transition duration-200 group-hover:scale-[1.03]" />
                     )}
                   </span>
-                  <span className="font-display text-base font-semibold text-ink group-hover:text-brand-700 sm:text-xl">{category.title}</span>
+                  <span>
+                    <span className="block font-display text-base font-semibold text-ink group-hover:text-brand-700 sm:text-xl">{category.title}</span>
+                    <span className="mt-1 block text-xs font-medium tabular-nums text-muted">{marketplaceStats.categoryCounts[category.propertyType] ?? 0} güncel ilan</span>
+                  </span>
                   <ArrowRight className="h-5 w-5 text-muted transition group-hover:translate-x-1 group-hover:text-brand-700" />
                 </Link>
               );

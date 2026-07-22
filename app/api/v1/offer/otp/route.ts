@@ -32,8 +32,8 @@ export async function POST(req: NextRequest) {
   if (!allowed) return generic;
 
   const code = await issueOtp(app.id);
-  if (!emailEnabled() && process.env.NODE_ENV !== "production") {
-    console.log(`[teklif-otp][dev] ${app.email}: ${code}`);
+  if (!emailEnabled()) {
+    console.error("[teklif-otp][v1] E-posta yapılandırılmamış; doğrulama kodu gönderilemedi.");
   }
   await sendEmail({
     to: app.email,

@@ -18,12 +18,17 @@ export function toVideoEmbed(url?: string | null): string | null {
   return null;
 }
 
-// Sanal tur (Matterport, Kuula, 360 sağlayıcıları) — geçerli bir http(s) linkini
-// olduğu gibi iframe'e veririz; sağlayıcılar embed'e izin verir.
+// Sanal tur (Matterport, Kuula, 360 sağlayıcıları) — yalnız kimlik bilgisi
+// içermeyen HTTPS bağlantıları iframe'e verilir.
 export function toTourEmbed(url?: string | null): string | null {
   if (!url) return null;
   const u = url.trim();
-  if (!/^https?:\/\//i.test(u)) return null;
+  try {
+    const parsed = new URL(u);
+    if (parsed.protocol !== "https:" || parsed.username || parsed.password) return null;
+  } catch {
+    return null;
+  }
   // Matterport "show?m=ID" linkini embed'e normalleştir
   const mp = u.match(/matterport\.com\/show\/?\?m=([\w-]+)/i);
   if (mp) return `https://my.matterport.com/show/?m=${mp[1]}&play=1`;
@@ -54,6 +59,13 @@ export function mediaUrl(url?: string | null): string {
   if (!url) return "";
   if (MEDIA_BASE && url.startsWith("/uploads/")) return MEDIA_BASE + url;
   return url;
+}
+
+/** Public image sources must be same-origin paths or encrypted remote URLs. */
+export function publicImageUrl(url?: string | null): string | null {
+  if (!url) return null;
+  const source = mediaUrl(url.trim());
+  return source.startsWith("/") || source.startsWith("https://") ? source : null;
 }
 
 // Liste kartı/önizleme için küçük varyant: /uploads/x.webp -> /uploads/x-thumb.webp

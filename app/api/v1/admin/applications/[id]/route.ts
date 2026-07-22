@@ -78,11 +78,36 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
       let slug = root;
       let i = 1;
       while (await prisma.agent.findUnique({ where: { slug }, select: { id: true } })) slug = `${root}-${i++}`;
+
+      let agencyId: string | null = null;
+      const applicationAgency = app.agency?.trim().replace(/\s+/g, " ") || null;
+      if (applicationAgency) {
+        let agency = await prisma.agency.findFirst({
+          where: { name: { equals: applicationAgency, mode: "insensitive" } },
+          select: { id: true },
+        });
+        if (!agency) {
+          const agencyRoot = slugify(applicationAgency) || "emlak-ofisi";
+          let agencySlug = agencyRoot;
+          let agencySuffix = 1;
+          while (await prisma.agency.findUnique({ where: { slug: agencySlug }, select: { id: true } })) {
+            agencySlug = `${agencyRoot}-${agencySuffix++}`;
+          }
+          agency = await prisma.agency.create({
+            data: { name: applicationAgency, slug: agencySlug },
+            select: { id: true },
+          });
+        }
+        agencyId = agency.id;
+      }
+
       const passwordHash = await bcrypt.hash(password, 10);
       const agent = await prisma.agent.create({
         data: {
           email, passwordHash, name: app.name, phone: app.phone,
-          title: app.title || "Gayrimenkul Danışmanı", agency: app.agency || null,
+          title: app.title || "Gayrimenkul Danışmanı",
+          agency: applicationAgency,
+          agencyId,
           slug, status: "approved", approvedAt: new Date(),
         },
       });

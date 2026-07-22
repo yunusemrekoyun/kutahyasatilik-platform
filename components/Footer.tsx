@@ -57,6 +57,9 @@ export default async function Footer() {
               <li><Link href="/alici-talebi" className="hover:text-white">Alıcı Talebi</Link></li>
               <li><Link href="/degerleme" className="hover:text-white">Ön Değerleme</Link></li>
               <li><Link href="/bolge-analizi" className="hover:text-white">Bölge Analizi</Link></li>
+              <li><Link href="/emlak-ofisleri" className="hover:text-white">Emlak Ofisleri</Link></li>
+              <li><Link href="/danismanlar" className="hover:text-white">Danışmanlar</Link></li>
+              <li><Link href="/yerel-araclar" className="hover:text-white">Resmî Yerel Araçlar</Link></li>
               <li><Link href="/emlakci/kayit" className="hover:text-white">Danışman Ol</Link></li>
             </ul>
           </div>

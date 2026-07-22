@@ -6,7 +6,7 @@ import { prisma } from "@/lib/prisma";
 import { buildAnalysis } from "@/lib/analysis";
 import { formatPrice, formatDate, parseJsonArray } from "@/lib/format";
 import { PROPERTY_TYPE_LABELS } from "@/lib/constants";
-import { mediaUrl } from "@/lib/media";
+import { publicImageUrl } from "@/lib/media";
 import { SITE } from "@/lib/site";
 import Gallery from "@/components/Gallery";
 import ContactButtons from "@/components/ContactButtons";
@@ -23,6 +23,7 @@ import ListingDetailActions from "@/components/ListingDetailActions";
 import ShareButtons from "@/components/ShareButtons";
 import MobileContactBar from "@/components/MobileContactBar";
 import RecentlyViewed from "@/components/RecentlyViewed";
+import { groupListingAmenities } from "@/lib/listingAmenities";
 
 export const revalidate = 300; // ISR: her 5 dakikada yenilenir (CDN cache + admin revalidatePath)
 
@@ -43,7 +44,20 @@ async function getListing(slug: string) {
     where: { slug, moderationStatus: "approved", status: { not: "passive" } },
     include: {
       images: { orderBy: { sortOrder: "asc" } },
-      agent: { select: { name: true, title: true, agency: true, logo: true } },
+      agent: {
+        select: {
+          name: true, title: true, agency: true, logo: true, slug: true,
+          publicProfile: true, status: true,
+          _count: { select: { listings: { where: { status: "active", moderationStatus: "approved" } } } },
+        },
+      },
+      agencyRef: {
+        select: {
+          name: true, slug: true, logo: true, status: true, published: true, verifiedAt: true,
+          _count: { select: { listings: { where: { status: "active", moderationStatus: "approved" } } } },
+        },
+      },
+      amenities: { orderBy: { sortOrder: "asc" }, select: { key: true } },
       priceHistory: { orderBy: { createdAt: "asc" } },
     },
   });
@@ -62,7 +76,7 @@ export async function generateMetadata({
   const title = listing.metaTitle || listing.title;
   const description =
     listing.metaDescription || listing.description.slice(0, 155);
-  const image = listing.images[0]?.url;
+  const image = publicImageUrl(listing.images[0]?.url);
   return {
     title,
     description,
@@ -71,6 +85,7 @@ export async function generateMetadata({
       title,
       description,
       type: "website",
+      url: `${SITE.url}/ilan/${listing.slug}`,
       images: image ? [{ url: image }] : undefined,
     },
   };
@@ -83,6 +98,18 @@ const DetailRow = ({ label, value }: { label: string; value?: string | number | 
       <span className="font-semibold text-slate-800 text-right">{value}</span>
     </div>
   );
+
+const CREDIT_LABELS: Record<string, string> = { yes: "Uygun", no: "Uygun değil", unknown: "Teyit edilmeli" };
+const USAGE_LABELS: Record<string, string> = { vacant: "Boş", tenant: "Kiracılı", owner: "Mülk sahibi kullanıyor" };
+const CONDITION_LABELS: Record<string, string> = { new: "Sıfır", resale: "İkinci el", under_construction: "Yapım aşamasında" };
+const DEED_TYPE_LABELS: Record<string, string> = {
+  kat_mulkiyeti: "Kat mülkiyeti",
+  kat_irtifaki: "Kat irtifakı",
+  arsa_tapulu: "Arsa tapulu",
+  mustakil_tapu: "Müstakil tapu",
+  hisseli_tapu: "Hisseli tapu",
+};
+const OCCUPANCY_LABELS: Record<string, string> = { available: "İskânlı", unavailable: "İskânsız", pending: "Başvuru sürecinde" };
 
 export default async function ListingPage({
   params,
@@ -99,6 +126,7 @@ export default async function ListingPage({
   const district = await prisma.district.findFirst({ where: { name: listing.district } });
   const analysis = buildAnalysis(listing, district);
   const features = parseJsonArray(listing.features);
+  const amenityGroups = groupListingAmenities(listing.amenities.map((item) => item.key));
 
   // Bölge analizi skorlarını göster/gizle (Setting: analysis_scores; "0" ise gizli, varsayılan göster)
   const scoresSetting = await prisma.setting.findUnique({ where: { key: "analysis_scores" } });
@@ -124,14 +152,20 @@ export default async function ListingPage({
     coverImage: l.images[0]?.url ?? null,
   }));
 
+  const publicCoordinates =
+    listing.locationVisibility === "hidden" || listing.lat == null || listing.lng == null
+      ? null
+      : listing.locationVisibility === "exact"
+        ? { lat: listing.lat, lng: listing.lng }
+        : { lat: Math.round(listing.lat * 100) / 100, lng: Math.round(listing.lng * 100) / 100 };
   const mapPoints =
-    listing.lat != null && listing.lng != null
+    publicCoordinates
       ? [{
           id: listing.id, slug: listing.slug, title: listing.title, price: listing.price,
           currency: listing.currency, district: listing.district, neighborhood: listing.neighborhood,
           propertyType: listing.propertyType, rooms: listing.rooms, areaGross: listing.areaGross,
           featured: listing.featured, coverImage: listing.images[0]?.url ?? null,
-          lat: listing.lat, lng: listing.lng,
+          lat: publicCoordinates.lat, lng: publicCoordinates.lng,
         }]
       : [];
 
@@ -139,6 +173,7 @@ export default async function ListingPage({
   const isCommercial = listing.propertyType === "isyeri";
   const isResidential = !isLand && !isCommercial;
   const isSold = listing.status === "sold";
+  const agentLogo = publicImageUrl(listing.agent?.logo);
 
   // Brüt=Net olduğunda "125 / 125" yerine tek değer göster (gereksiz tekrar olmasın).
   const areaLabel = listing.areaGross
@@ -153,7 +188,7 @@ export default async function ListingPage({
     ? [
         { label: "Alan", value: listing.areaGross ? `${listing.areaGross} m²` : "—" },
         { label: "İmar Durumu", value: listing.zoningStatus || "—" },
-        { label: "Ada / Parsel", value: listing.adaNo || listing.parselNo ? `${listing.adaNo || "-"} / ${listing.parselNo || "-"}` : "—" },
+        { label: "Ada / Parsel", value: listing.parcelVisibility && (listing.adaNo || listing.parselNo) ? `${listing.adaNo || "-"} / ${listing.parselNo || "-"}` : "—" },
         { label: "Tapu Durumu", value: listing.deedStatus || "—" },
       ]
     : isCommercial
@@ -205,7 +240,10 @@ export default async function ListingPage({
     <div className="mx-auto max-w-7xl px-5 py-8 pb-36 sm:px-6 lg:pb-10">
       <TrackView listingId={listing.id} district={listing.district} />
       {!isSold && <MobileContactBar listingId={listing.id} listingTitle={listing.title} district={listing.district} />}
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, "\\u003c") }}
+      />
 
       {/* Breadcrumb */}
       <nav className="mb-4 text-sm text-slate-500">
@@ -238,7 +276,7 @@ export default async function ListingPage({
                       <BadgeCheck className="h-3.5 w-3.5" /> Doğrulanmış
                     </span>
                   )}
-                  <span className="text-xs text-slate-400">İlan No: {listing.id.slice(-6).toUpperCase()}</span>
+                  <span className="text-xs text-slate-400">İlan No: {listing.referenceNo || listing.id.slice(-6).toUpperCase()}</span>
                 </div>
                 <h1 className="mt-3 max-w-3xl font-display text-3xl font-semibold leading-tight tracking-tight text-ink sm:text-4xl">{listing.title}</h1>
                 <p className="mt-2 inline-flex items-center gap-1.5 text-slate-500">
@@ -277,13 +315,22 @@ export default async function ListingPage({
               <div>
                 {!isLand && <DetailRow label="Bina Yaşı" value={listing.buildingAge} />}
                 {!isLand && <DetailRow label="Isıtma" value={listing.heating} />}
+                {!isLand && <DetailRow label="Banyo Sayısı" value={listing.bathroomCount} />}
+                {!isLand && <DetailRow label="Aidat" value={listing.dues != null ? `${listing.dues.toLocaleString("tr-TR")} ₺` : null} />}
+                <DetailRow label="Krediye Uygunluk" value={CREDIT_LABELS[listing.creditEligible || ""]} />
+                <DetailRow label="Kullanım Durumu" value={USAGE_LABELS[listing.usageStatus || ""]} />
+                <DetailRow label="Taşınmaz Durumu" value={CONDITION_LABELS[listing.propertyCondition || ""]} />
+                <DetailRow label="Tapu Tipi" value={DEED_TYPE_LABELS[listing.deedType || ""] || listing.deedType} />
+                <DetailRow label="İskân Durumu" value={OCCUPANCY_LABELS[listing.occupancyPermit || ""] || listing.occupancyPermit} />
+                <DetailRow label="Takasa Uygunluk" value={listing.exchangeEligible == null ? null : listing.exchangeEligible ? "Uygun" : "Uygun değil"} />
                 {(isLand || isCommercial) && <DetailRow label="İmar Durumu" value={listing.zoningStatus} />}
                 {isLand && <DetailRow label="Tapu Durumu" value={listing.deedStatus} />}
-                {isLand && <DetailRow label="Ada / Parsel" value={listing.adaNo || listing.parselNo ? `${listing.adaNo || "-"} / ${listing.parselNo || "-"}` : null} />}
+                {isLand && listing.parcelVisibility && <DetailRow label="Ada / Parsel" value={listing.adaNo || listing.parselNo ? `${listing.adaNo || "-"} / ${listing.parselNo || "-"}` : null} />}
                 {isLand && <DetailRow label="KAKS / Emsal" value={listing.kaks} />}
                 {isResidential && <DetailRow label="Eşyalı" value={listing.furnished ? "Evet" : "Hayır"} />}
                 {!isLand && <DetailRow label="Otopark" value={listing.parking ? "Var" : "Yok"} />}
                 <DetailRow label="İlan Tarihi" value={formatDate(listing.createdAt)} />
+                <DetailRow label="Geçerlilik Tarihi" value={listing.validUntil ? formatDate(listing.validUntil) : null} />
               </div>
             </div>
 
@@ -295,6 +342,27 @@ export default async function ListingPage({
                     <div key={f} className="flex items-center gap-2 text-[15px] text-slate-700">
                       <Check className="h-[18px] w-[18px] shrink-0 text-brand-600" strokeWidth={2.6} /> {f}
                     </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {amenityGroups.length > 0 && (
+              <div className="mt-7">
+                <h2 className="border-b border-stone pb-3 font-display text-xl font-semibold text-ink">Seçili özellikler</h2>
+                <div className="mt-5 grid gap-6 sm:grid-cols-2">
+                  {amenityGroups.map((group) => (
+                    <section key={group.key}>
+                      <h3 className="text-sm font-semibold uppercase tracking-wide text-slate-500">{group.label}</h3>
+                      <ul className="mt-3 space-y-2">
+                        {group.items.map((item) => (
+                          <li key={item.key} className="flex items-center gap-2 text-[15px] text-slate-700">
+                            <Check className="h-[18px] w-[18px] shrink-0 text-brand-600" strokeWidth={2.6} />
+                            {item.label}
+                          </li>
+                        ))}
+                      </ul>
+                    </section>
                   ))}
                 </div>
               </div>
@@ -324,6 +392,9 @@ export default async function ListingPage({
             <div className="border-y border-stone bg-paper py-6 sm:px-6">
               <h2 className="font-display text-xl font-bold text-slate-900">Konum</h2>
               <p className="mt-1 text-sm text-slate-500">{listing.district} / Kütahya</p>
+              {listing.locationVisibility === "approximate" && (
+                <p className="mt-1 text-xs text-slate-400">Mülk sahibinin gizliliği için yaklaşık konum gösterilmektedir.</p>
+              )}
               <div className="mt-4 overflow-hidden border border-stone">
                 <ListingsMap points={mapPoints} height="360px" showFilter={false} />
               </div>
@@ -366,10 +437,10 @@ export default async function ListingPage({
               <div className="border border-stone bg-paper p-5">
                 <p className="text-xs font-medium uppercase tracking-wider text-slate-400">İlan Danışmanı</p>
                 <div className="mt-3 flex items-center gap-3">
-                  {listing.agent.logo ? (
+                  {agentLogo ? (
                     // eslint-disable-next-line @next/next/no-img-element
                     <img
-                      src={mediaUrl(listing.agent.logo)}
+                      src={agentLogo}
                       alt={listing.agent.name}
                       className="h-12 w-12 shrink-0 rounded-full object-cover"
                     />
@@ -386,6 +457,16 @@ export default async function ListingPage({
                     </p>
                   </div>
                 </div>
+                {listing.agent.publicProfile && listing.agent.status === "approved" && listing.agent._count.listings > 0 && (
+                  <Link href={`/danisman/${listing.agent.slug}`} className="mt-4 inline-flex items-center gap-1 text-sm font-semibold text-brand-700 hover:underline">
+                    Danışman profilini incele <ArrowRight className="h-4 w-4" />
+                  </Link>
+                )}
+                {listing.agencyRef?.published && listing.agencyRef.status === "approved" && listing.agencyRef._count.listings > 0 && (
+                  <Link href={`/emlak-ofisi/${listing.agencyRef.slug}`} className="mt-2 block text-sm font-semibold text-brand-700 hover:underline">
+                    {listing.agencyRef.name} portföyünü gör
+                  </Link>
+                )}
                 <p className="mt-3 text-[11px] text-slate-400">
                   Bu ilan, onaylı danışmanımız tarafından yayınlanmıştır. İletişim için yukarıdaki butonları kullanın.
                 </p>

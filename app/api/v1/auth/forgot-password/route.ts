@@ -44,20 +44,9 @@ export async function POST(req: NextRequest) {
     data: { userId: user.id, tokenHash, expiresAt: new Date(Date.now() + TTL_MS) },
   });
 
-  // Dev'de link isteğin geldiği origin'i kullanır (lokal testte prod URL'e düşmesin).
-  const site =
-    process.env.NODE_ENV === "production"
-      ? process.env.NEXT_PUBLIC_SITE_URL || "https://kutahyasatilik.com"
-      : req.nextUrl.origin;
   const path = `/sifre-sifirla?token=${token}`;
   if (!emailEnabled()) {
-    if (process.env.NODE_ENV === "production") {
-      console.error(
-        `[sifre-sifirla][v1] E-POSTA YAPILANDIRILMAMIŞ — ${user.email} için sıfırlama bağlantısı GÖNDERİLEMEDİ.`
-      );
-    } else {
-      console.log(`[sifre-sifirla][v1][dev] ${user.email}: ${site}${path}`);
-    }
+    console.error("[sifre-sifirla][v1] E-posta yapılandırılmamış; bağlantı gönderilemedi.");
   }
   await sendEmail({
     to: user.email,

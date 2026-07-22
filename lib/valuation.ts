@@ -2,7 +2,7 @@ import type { DistrictStat } from "./districtStats";
 
 // "Evimin Değeri" aracının deterministik tahmin motoru.
 // İlçe ortalamalarından (avgPriceDaire / avgPriceArsaM2) bir aralık üretir.
-// Maliyetsiz, AI'sız, server/client uyumlu (Math.random yok).
+// Harici servis gerektirmeden, server/client uyumlu çalışır (Math.random yok).
 
 export interface ValuationInput {
   propertyType: string; // daire | villa | mustakil | isyeri | arsa | tarla

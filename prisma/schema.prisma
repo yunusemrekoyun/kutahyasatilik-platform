@@ -26,20 +26,29 @@ model Admin {
 // Emlakçı (danışman) — kayıt olur, admin onaylar, ilan ekleyebilir
 // ---------------------------------------------------------------------------
 model Agent {
-  id           String    @id @default(cuid())
-  email        String    @unique
-  passwordHash String
-  name         String
-  phone        String?
-  title        String? // unvan: "Gayrimenkul Danışmanı"
-  agency       String? // bağlı olduğu ofis / marka adı
-  logo         String? // emlakçının kendi logosu/avatarı (yüklenen görsel URL'i)
-  slug         String    @unique
-  status       String    @default("pending") // pending | approved | rejected | suspended
-  note         String? // admin notu (red/askı sebebi)
-  authVersion  Int       @default(0)
-  createdAt    DateTime  @default(now())
-  approvedAt   DateTime?
+  id               String    @id @default(cuid())
+  email            String    @unique
+  passwordHash     String
+  name             String
+  phone            String?
+  title            String? // unvan: "Gayrimenkul Danışmanı"
+  agency           String? // geriye uyumluluk: eski serbest metin ofis / marka adı
+  agencyId         String?
+  agencyRef        Agency?   @relation(fields: [agencyId], references: [id], onDelete: SetNull)
+  logo             String? // emlakçının kendi logosu/avatarı (yüklenen görsel URL'i)
+  slug             String    @unique
+  status           String    @default("pending") // pending | approved | rejected | suspended
+  note             String? // admin notu (red/askı sebebi)
+  bio              String?
+  experienceYears  Int?
+  specialties      String? // JSON array (string)
+  serviceDistricts String? // JSON array (string)
+  publicProfile    Boolean   @default(false)
+  showPhone        Boolean   @default(false)
+  showWhatsapp     Boolean   @default(false)
+  authVersion      Int       @default(0)
+  createdAt        DateTime  @default(now())
+  approvedAt       DateTime?
 
   listings      Listing[]
   payments      Payment[]
@@ -47,6 +56,40 @@ model Agent {
   conversations Conversation[]
 
   @@index([status])
+  @@index([agencyId])
+  @@index([publicProfile, status])
+}
+
+// ---------------------------------------------------------------------------
+// Emlak ofisi / firma — onaylı firmalar ve bağlı danışmanlar için kamu profili
+// ---------------------------------------------------------------------------
+model Agency {
+  id               String    @id @default(cuid())
+  name             String
+  slug             String    @unique
+  logo             String?
+  coverImage       String?
+  description      String?
+  phone            String?
+  whatsapp         String?
+  email            String?
+  website          String?
+  address          String?
+  serviceDistricts String? // JSON array (string)
+  status           String    @default("pending") // pending | approved | rejected | suspended
+  verifiedAt       DateTime?
+  published        Boolean   @default(false)
+  showPhone        Boolean   @default(false)
+  showWhatsapp     Boolean   @default(false)
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+  approvedAt       DateTime?
+
+  agents   Agent[]
+  listings Listing[]
+
+  @@index([status, published])
+  @@index([verifiedAt])
 }
 
 // ---------------------------------------------------------------------------
@@ -70,6 +113,15 @@ model Listing {
   agentId String?
   agent   Agent?  @relation(fields: [agentId], references: [id], onDelete: SetNull)
 
+  // İlanın kurumsal sahibi. agentId boş olsa da firma portföyü korunabilir.
+  agencyId  String?
+  agencyRef Agency? @relation(fields: [agencyId], references: [id], onDelete: SetNull)
+
+  // Kaynak sistem ve kamu referansları (CSV/API aktarımlarında tekrar önleme)
+  externalId  String?
+  importKey   String? @unique
+  referenceNo String? @unique
+
   price    Int
   currency String @default("TRY")
 
@@ -92,12 +144,27 @@ model Listing {
   balcony     Boolean @default(false)
   parking     Boolean @default(false)
 
+  // Profesyonel ilan ayrıntıları
+  creditEligible    String? // yes | no | unknown
+  usageStatus       String? // vacant | tenant | owner
+  propertyCondition String? // new | resale | under_construction
+  bathroomCount     Int?
+  dues              Int?
+  exchangeEligible  Boolean?
+  deedType          String?
+  occupancyPermit   String?
+  validUntil        DateTime?
+
   // Arsa / tarla detayları
   deedStatus   String? // tapu durumu
   zoningStatus String? // imar durumu
   adaNo        String?
   parselNo     String?
   kaks         String? // KAKS / emsal
+
+  // Hassas konum ve tapu bilgilerinin kamu görünürlüğü
+  locationVisibility String  @default("approximate") // hidden | approximate | exact
+  parcelVisibility   Boolean @default(false)
 
   // Medya (opsiyonel zengin içerik)
   videoUrl       String? // tanıtım videosu (YouTube/Vimeo)
@@ -126,19 +193,40 @@ model Listing {
   priceHistory  PriceHistory[]
   favorites     Favorite[]
   conversations Conversation[]
+  amenities     ListingAmenity[]
 
+  @@unique([agencyId, externalId])
   @@index([propertyType])
   @@index([district])
   @@index([status])
   @@index([featured])
   @@index([moderationStatus])
   @@index([agentId])
+  @@index([agencyId])
   // Kamu liste/filtre sorguları her zaman moderationStatus+status ile başlar;
   // en sık filtreler district/propertyType, varsayılan sıralama featured+createdAt.
   @@index([moderationStatus, status, district])
   @@index([moderationStatus, status, propertyType])
   @@index([featured, createdAt])
   @@index([price])
+}
+
+// ---------------------------------------------------------------------------
+// Kontrollü ilan özellikleri — eski Listing.features JSON alanı korunur.
+// Yalnız seçili özellikler satır olarak tutulur ve gruplu gösterilir.
+// ---------------------------------------------------------------------------
+model ListingAmenity {
+  id        String   @id @default(cuid())
+  listingId String
+  listing   Listing  @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  group     String
+  key       String
+  label     String
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+
+  @@unique([listingId, key])
+  @@index([listingId, group, sortOrder])
 }
 
 // ---------------------------------------------------------------------------
@@ -314,6 +402,27 @@ model District {
   nearbyHospitals String? // JSON array (string)
 
   sortOrder Int @default(0)
+}
+
+// ---------------------------------------------------------------------------
+// Resmî yerel araçlar — belediye, imar, parsel ve adres sorgu bağlantıları
+// ---------------------------------------------------------------------------
+model LocalResource {
+  id            String    @id @default(cuid())
+  title         String
+  description   String?
+  type          String // municipality | zoning | parcel | address | e_government
+  institution   String
+  district      String?
+  url           String
+  active        Boolean   @default(true)
+  sortOrder     Int       @default(0)
+  lastCheckedAt DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  @@index([active, sortOrder])
+  @@index([type, district])
 }
 
 // ---------------------------------------------------------------------------

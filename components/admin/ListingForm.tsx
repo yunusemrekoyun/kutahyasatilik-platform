@@ -8,6 +8,7 @@ import { DISTRICTS, PROPERTY_TYPES } from "@/lib/constants";
 import VideoUploadField from "@/components/admin/VideoUploadField";
 import LocationPicker from "@/components/LocationPicker";
 import ThousandsInput from "@/components/ThousandsInput";
+import ProfessionalListingFields from "@/components/listings/ProfessionalListingFields";
 import { ArrowLeft, ArrowRight, Trash2, Star, Check } from "lucide-react";
 
 type ListingData = {
@@ -18,6 +19,8 @@ type ListingData = {
   propertyType?: string;
   listingType?: string;
   status?: string;
+  agencyId?: string | null;
+  referenceNo?: string | null;
   price?: number;
   currency?: string;
   district?: string;
@@ -36,6 +39,17 @@ type ListingData = {
   inSite?: boolean;
   balcony?: boolean;
   parking?: boolean;
+  creditEligible?: string | null;
+  usageStatus?: string | null;
+  propertyCondition?: string | null;
+  bathroomCount?: number | null;
+  dues?: number | null;
+  exchangeEligible?: boolean | null;
+  deedType?: string | null;
+  occupancyPermit?: string | null;
+  validUntil?: Date | string | null;
+  locationVisibility?: string | null;
+  parcelVisibility?: boolean | null;
   deedStatus?: string | null;
   zoningStatus?: string | null;
   adaNo?: string | null;
@@ -52,6 +66,7 @@ type ListingData = {
   metaTitle?: string | null;
   metaDescription?: string | null;
   images?: { url: string }[];
+  amenities?: { key: string }[];
 };
 
 const inputCls =
@@ -67,7 +82,13 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
   );
 }
 
-export default function ListingForm({ listing }: { listing?: ListingData }) {
+export default function ListingForm({
+  listing,
+  agencies = [],
+}: {
+  listing?: ListingData;
+  agencies?: { id: string; name: string; status: string }[];
+}) {
   const [images, setImages] = useState<string[]>(listing?.images?.map((i) => i.url) ?? []);
   const [uploading, setUploading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
@@ -143,6 +164,19 @@ export default function ListingForm({ listing }: { listing?: ListingData }) {
               </select>
             </Field>
           </div>
+          <Field label="Portföy sahibi firma">
+            <select name="agencyId" defaultValue={listing?.agencyId ?? ""} className={inputCls}>
+              <option value="">Bağımsız / firma yok</option>
+              {agencies.map((agency) => (
+                <option key={agency.id} value={agency.id}>
+                  {agency.name}{agency.status !== "approved" ? " (onaysız)" : ""}
+                </option>
+              ))}
+            </select>
+          </Field>
+          <Field label="İlan referans numarası">
+            <input name="referenceNo" defaultValue={listing?.referenceNo ?? ""} placeholder="Örn. KS-2026-00125" className={inputCls} />
+          </Field>
           <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
             <Field label="İlçe *">
               <select name="district" defaultValue={listing?.district || "Merkez"} className={inputCls}>
@@ -238,7 +272,9 @@ export default function ListingForm({ listing }: { listing?: ListingData }) {
         </div>
       </section>
 
-      {/* Konum + AI */}
+      <ProfessionalListingFields values={listing} propertyType={propertyType} inputClassName={inputCls} />
+
+      {/* Konum ve yatırım verisi */}
       <section className="rounded-lg bg-paper p-6 ring-1 ring-stone">
         <h2 className="font-bold text-slate-900">Konum & Yatırım Verisi</h2>
         <p className="mt-1 text-xs text-slate-500">Haritada tıklayarak veya pini sürükleyerek konumu işaretleyin; enlem/boylam otomatik dolar ve ilan haritada görünür.</p>

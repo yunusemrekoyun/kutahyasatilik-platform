@@ -36,6 +36,8 @@ export async function GET(req: NextRequest) {
     verified: bool(sp.get("verified")),
     q: str(sp.get("q")),
     sort: str(sp.get("sort")),
+    agencySlug: str(sp.get("agencySlug")),
+    agentSlug: str(sp.get("agentSlug")),
   };
   const page = Math.max(1, num(sp.get("page")) ?? 1);
   const perPage = Math.min(50, Math.max(1, num(sp.get("perPage")) ?? 12));

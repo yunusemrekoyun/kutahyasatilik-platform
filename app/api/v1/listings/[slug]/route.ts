@@ -21,7 +21,21 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ slug
     where: { slug, moderationStatus: "approved", status: { not: "passive" } },
     include: {
       images: { orderBy: { sortOrder: "asc" }, select: { url: true, alt: true } },
-      agent: { select: { name: true, title: true, agency: true, logo: true } },
+      agent: {
+        select: {
+          name: true, title: true, agency: true, logo: true, slug: true, phone: true,
+          publicProfile: true, showPhone: true, showWhatsapp: true, status: true,
+          _count: { select: { listings: { where: { status: "active", moderationStatus: "approved" } } } },
+        },
+      },
+      agencyRef: {
+        select: {
+          name: true, slug: true, logo: true, phone: true, whatsapp: true, verifiedAt: true,
+          status: true, published: true, showPhone: true, showWhatsapp: true,
+          _count: { select: { listings: { where: { status: "active", moderationStatus: "approved" } } } },
+        },
+      },
+      amenities: { orderBy: { sortOrder: "asc" }, select: { key: true, label: true, group: true } },
       priceHistory: { orderBy: { createdAt: "asc" }, select: { price: true, createdAt: true } },
     },
   });
@@ -51,6 +65,12 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ slug
     }),
   ]);
   const analysis = buildAnalysis(l, district);
+  const publicCoordinates =
+    l.locationVisibility === "hidden" || l.lat == null || l.lng == null
+      ? { lat: null, lng: null }
+      : l.locationVisibility === "exact"
+        ? { lat: l.lat, lng: l.lng }
+        : { lat: Math.round(l.lat * 100) / 100, lng: Math.round(l.lng * 100) / 100 };
   const similar = similarRaw.map((item) => ({
     id: item.id,
     slug: item.slug,
@@ -83,9 +103,10 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ slug
       status: l.status,
       district: l.district,
       neighborhood: l.neighborhood,
-      address: l.address,
-      lat: l.lat,
-      lng: l.lng,
+      address: l.locationVisibility === "exact" ? l.address : null,
+      lat: publicCoordinates.lat,
+      lng: publicCoordinates.lng,
+      locationVisibility: l.locationVisibility,
       rooms: l.rooms,
       areaGross: l.areaGross,
       areaNet: l.areaNet,
@@ -97,10 +118,20 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ slug
       balcony: l.balcony,
       parking: l.parking,
       inSite: l.inSite,
+      creditEligible: l.creditEligible,
+      usageStatus: l.usageStatus,
+      propertyCondition: l.propertyCondition,
+      bathroomCount: l.bathroomCount,
+      dues: l.dues,
+      exchangeEligible: l.exchangeEligible,
+      deedType: l.deedType,
+      occupancyPermit: l.occupancyPermit,
+      validUntil: l.validUntil,
       deedStatus: l.deedStatus,
       zoningStatus: l.zoningStatus,
-      adaNo: l.adaNo,
-      parselNo: l.parselNo,
+      adaNo: l.parcelVisibility ? l.adaNo : null,
+      parselNo: l.parcelVisibility ? l.parselNo : null,
+      parcelVisibility: l.parcelVisibility,
       kaks: l.kaks,
       videoUrl: l.videoUrl,
       droneUrl: l.droneUrl,
@@ -112,8 +143,25 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ slug
       createdAt: l.createdAt,
       images: l.images.map((im) => ({ url: absolutize(im.url, origin), alt: im.alt })),
       // Emlakçı logosu mobil için mutlak URL'e çevrilir.
-      agent: l.agent ? { ...l.agent, logo: absolutize(l.agent.logo, origin) } : null,
+      agent: l.agent && l.agent.status === "approved" ? {
+        name: l.agent.name,
+        title: l.agent.title,
+        agency: l.agent.agency,
+        slug: l.agent.publicProfile && l.agent._count.listings > 0 ? l.agent.slug : null,
+        logo: absolutize(l.agent.logo, origin),
+        phone: l.agent.showPhone ? l.agent.phone : null,
+        whatsapp: l.agent.showWhatsapp ? l.agent.phone : null,
+      } : null,
+      agency: l.agencyRef?.published && l.agencyRef.status === "approved" && l.agencyRef._count.listings > 0 ? {
+        name: l.agencyRef.name,
+        slug: l.agencyRef.slug,
+        logo: absolutize(l.agencyRef.logo, origin),
+        verified: Boolean(l.agencyRef.verifiedAt),
+        phone: l.agencyRef.showPhone ? l.agencyRef.phone : null,
+        whatsapp: l.agencyRef.showWhatsapp ? (l.agencyRef.whatsapp || l.agencyRef.phone) : null,
+      } : null,
       features: parseJsonArray(l.features),
+      amenities: l.amenities,
       priceHistory: l.priceHistory,
       similar,
       analysis,

@@ -1,6 +1,6 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { revalidatePath, updateTag } from "next/cache";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { requireApprovedAgent } from "@/lib/agentAuth";
@@ -8,6 +8,7 @@ import { slugify } from "@/lib/format";
 import { deleteUploadFiles } from "@/lib/uploadDeletion";
 import { deleteVideo } from "@/lib/videoStorage";
 import { notifyAdmins } from "@/lib/notify";
+import { listingAmenityRows } from "@/lib/listingAmenities";
 
 function num(v: FormDataEntryValue | null): number | null {
   if (v === null || v === "") return null;
@@ -21,6 +22,21 @@ function str(v: FormDataEntryValue | null): string | null {
 }
 function bool(v: FormDataEntryValue | null): boolean {
   return v === "on" || v === "true" || v === "1";
+}
+function date(v: FormDataEntryValue | null): Date | null {
+  const value = str(v);
+  if (!value) return null;
+  const parsed = new Date(`${value}T12:00:00.000Z`);
+  return Number.isNaN(parsed.getTime()) ? null : parsed;
+}
+function jsonStringList(v: FormDataEntryValue | null): string | null {
+  const values = String(v || "")
+    .split(/[\n,]/)
+    .map((item) => item.trim())
+    .filter(Boolean)
+    .filter((item, index, all) => all.indexOf(item) === index)
+    .slice(0, 30);
+  return values.length ? JSON.stringify(values) : null;
 }
 
 // Emlakçı ilan ekler/günceller — ilan her zaman "beklemede" durumuna düşer ve
@@ -89,6 +105,9 @@ export async function submitAgentListing(formData: FormData) {
 
   const featuresRaw = String(formData.get("features") || "");
   const features = featuresRaw.split(",").map((s) => s.trim()).filter(Boolean);
+  const amenities = listingAmenityRows(
+    formData.getAll("amenities").map(String).filter(Boolean),
+  );
 
   const data = {
     title,
@@ -115,11 +134,24 @@ export async function submitAgentListing(formData: FormData) {
     inSite: bool(formData.get("inSite")),
     balcony: bool(formData.get("balcony")),
     parking: bool(formData.get("parking")),
+    creditEligible: str(formData.get("creditEligible")),
+    usageStatus: str(formData.get("usageStatus")),
+    propertyCondition: str(formData.get("propertyCondition")),
+    bathroomCount: num(formData.get("bathroomCount")),
+    dues: num(formData.get("dues")),
+    exchangeEligible: bool(formData.get("exchangeEligible")),
+    deedType: str(formData.get("deedType")),
+    occupancyPermit: str(formData.get("occupancyPermit")),
+    validUntil: date(formData.get("validUntil")),
     deedStatus: str(formData.get("deedStatus")),
     zoningStatus: str(formData.get("zoningStatus")),
     adaNo: str(formData.get("adaNo")),
     parselNo: str(formData.get("parselNo")),
     kaks: str(formData.get("kaks")),
+    locationVisibility: ["hidden", "approximate", "exact"].includes(String(formData.get("locationVisibility")))
+      ? String(formData.get("locationVisibility"))
+      : "approximate",
+    parcelVisibility: bool(formData.get("parcelVisibility")),
     videoUrl: str(formData.get("videoUrl")),
     droneUrl: str(formData.get("droneUrl")),
     virtualTourUrl: str(formData.get("virtualTourUrl")),
@@ -127,6 +159,7 @@ export async function submitAgentListing(formData: FormData) {
     // Emlakçı ilanı: her kayıt/güncellemede yeniden onaya düşer
     moderationStatus: "pending",
     agentId: agent.id,
+    agencyId: agent.agencyId,
   };
 
   let listingId: string;
@@ -162,6 +195,12 @@ export async function submitAgentListing(formData: FormData) {
       data: imageUrls.map((url, i) => ({ listingId, url, sortOrder: i })),
     });
   }
+  await prisma.listingAmenity.deleteMany({ where: { listingId } });
+  if (amenities.length) {
+    await prisma.listingAmenity.createMany({
+      data: amenities.map((amenity) => ({ ...amenity, listingId })),
+    });
+  }
 
   await notifyAdmins({
     type: "listing_pending",
@@ -170,6 +209,9 @@ export async function submitAgentListing(formData: FormData) {
     link: "/admin/onay",
   });
   revalidatePath("/emlakci/panel");
+  updateTag("marketplace-stats");
+  revalidatePath("/emlak-ofisleri");
+  revalidatePath("/danismanlar");
   redirect("/emlakci/panel");
 }
 
@@ -217,21 +259,38 @@ export async function deleteAgentListing(formData: FormData) {
   await deleteVideo(owned.videoUrl);
   revalidatePath("/emlakci/panel");
   revalidatePath("/");
+  updateTag("marketplace-stats");
+  revalidatePath("/emlak-ofisleri");
+  revalidatePath("/danismanlar");
 }
 
 export async function updateAgentProfile(formData: FormData) {
   const agent = await requireApprovedAgent();
+  const experienceYears = num(formData.get("experienceYears"));
+  const linkedAgency = agent.agencyId
+    ? await prisma.agency.findUnique({ where: { id: agent.agencyId }, select: { name: true } })
+    : null;
   await prisma.agent.update({
     where: { id: agent.id },
     data: {
       name: String(formData.get("name") || agent.name).trim(),
       phone: str(formData.get("phone")),
       title: str(formData.get("title")),
-      agency: str(formData.get("agency")),
+      // A linked firm is controlled by admin. Only independent advisers may
+      // edit the backwards-compatible free-text agency value themselves.
+      agency: agent.agencyId ? linkedAgency?.name ?? agent.agency : str(formData.get("agency")),
       logo: str(formData.get("logo")),
+      bio: str(formData.get("bio"))?.slice(0, 2000) ?? null,
+      experienceYears: experienceYears === null ? null : Math.max(0, Math.min(80, experienceYears)),
+      specialties: jsonStringList(formData.get("specialties")),
+      serviceDistricts: jsonStringList(formData.get("serviceDistricts")),
+      showPhone: bool(formData.get("showPhone")),
+      showWhatsapp: bool(formData.get("showWhatsapp")),
     },
   });
   revalidatePath("/emlakci/panel");
+  revalidatePath("/danismanlar");
+  revalidatePath(`/danisman/${agent.slug}`);
 }
 
 // Emlakçı, YALNIZ kendi ilanına gelen talebin durumunu 4 aşamada ilerletir.

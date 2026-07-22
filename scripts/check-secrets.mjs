@@ -1,9 +1,13 @@
 import { execFileSync } from "node:child_process";
 import { readFileSync, statSync } from "node:fs";
 
-const trackedFiles = execFileSync("git", ["ls-files", "-z"], {
-  encoding: "utf8",
-})
+const trackedFiles = execFileSync(
+  "git",
+  ["ls-files", "-z", "--cached", "--others", "--exclude-standard"],
+  {
+    encoding: "utf8",
+  },
+)
   .split("\0")
   .filter(Boolean);
 

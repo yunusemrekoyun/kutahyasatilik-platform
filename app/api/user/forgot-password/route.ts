@@ -44,23 +44,13 @@ export async function POST(req: NextRequest) {
     data: { userId: user.id, tokenHash, expiresAt: new Date(Date.now() + TTL_MS) },
   });
 
-  // Dev'de link isteğin geldiği origin'i kullanır (lokal testte prod URL'e düşmesin).
-  const site =
-    process.env.NODE_ENV === "production"
-      ? process.env.NEXT_PUBLIC_SITE_URL || "https://kutahyasatilik.com"
-      : req.nextUrl.origin;
   const path = `/sifre-sifirla?token=${token}`;
-  // E-posta kapalıyken kullanıcıya "gönderildi" desek de SESSİZ kalmayalım:
-  // dev'de linki logla (akış test edilsin), canlıda yapılandırma eksikliğini HATA olarak logla.
+  // Sıfırlama bağlantısı ve kullanıcı bilgisi hiçbir ortamda loglanmaz.
   if (!emailEnabled()) {
-    if (process.env.NODE_ENV === "production") {
-      console.error(
-        `[sifre-sifirla] E-POSTA YAPILANDIRILMAMIŞ — ${user.email} için sıfırlama bağlantısı GÖNDERİLEMEDİ. ` +
-          `EMAIL_FROM + (SMTP_HOST veya RESEND_API_KEY) ayarlayın.`
-      );
-    } else {
-      console.log(`[sifre-sifirla][dev] ${user.email}: ${site}${path}`);
-    }
+    console.error(
+      "[sifre-sifirla] E-posta yapılandırılmamış; bağlantı gönderilemedi. " +
+        "EMAIL_FROM ve bir e-posta sağlayıcısı yapılandırın."
+    );
   }
   await sendEmail({
     to: user.email,

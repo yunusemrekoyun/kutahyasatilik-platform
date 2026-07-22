@@ -99,7 +99,16 @@ export default function ListingFilters() {
         <h2 className="font-display text-lg font-bold text-brand-900">Filtreler</h2>
         <div className="flex items-center gap-3">
           {activeCount > 0 && (
-            <button onClick={() => router.push("/ilanlar")} className="text-sm font-medium text-slate-500 transition hover:text-brand-700">
+            <button
+              onClick={() => {
+                const owner = new URLSearchParams();
+                if (sp.get("ofis")) owner.set("ofis", sp.get("ofis")!);
+                if (sp.get("danisman")) owner.set("danisman", sp.get("danisman")!);
+                const query = owner.toString();
+                router.push(`/ilanlar${query ? `?${query}` : ""}`);
+              }}
+              className="text-sm font-medium text-slate-500 transition hover:text-brand-700"
+            >
               Temizle
             </button>
           )}

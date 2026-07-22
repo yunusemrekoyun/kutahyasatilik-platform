@@ -5,7 +5,7 @@ import { usePathname, useRouter } from "next/navigation";
 import {
   LayoutDashboard, Building2, PlusCircle, Newspaper, FileText,
   ClipboardCheck, Inbox, BellRing, Users, MessageSquare, Megaphone,
-  Home, Settings, LogOut, Package as PackageIcon, Wallet, UserPlus, Gavel, HandCoins, MapPin, type LucideIcon,
+  Home, Settings, LogOut, Package as PackageIcon, Wallet, UserPlus, Gavel, HandCoins, MapPin, Store, Landmark, type LucideIcon,
 } from "lucide-react";
 
 export type AdminCounts = {
@@ -37,6 +37,7 @@ const GROUPS: Group[] = [
       { href: "/admin/firsatlar", label: "Portföy Fırsatları", Icon: Gavel },
       { href: "/admin/basvurular", label: "Başvurular", Icon: UserPlus },
       { href: "/admin/emlakcilar", label: "Emlakçılar", Icon: Users },
+      { href: "/admin/firmalar", label: "Firmalar", Icon: Store },
       { href: "/admin/paket", label: "Paket", Icon: PackageIcon },
       { href: "/admin/tahsilat", label: "Tahsilat", Icon: Wallet },
     ],
@@ -48,6 +49,7 @@ const GROUPS: Group[] = [
       { href: "/admin/reklamlar", label: "Pop-up Reklamlar", Icon: Megaphone },
       { href: "/admin/reklam-talepleri", label: "Reklam Talepleri", Icon: HandCoins },
       { href: "/admin/ilceler", label: "İlçe Verisi", Icon: MapPin },
+      { href: "/admin/yerel-araclar", label: "Resmî Araçlar", Icon: Landmark },
       { href: "/admin/ana-sayfa", label: "Ana Sayfa Metinleri", Icon: Home },
     ],
   },
