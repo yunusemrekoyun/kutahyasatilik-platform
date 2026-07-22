@@ -19,7 +19,10 @@ export default async function EditAgentListing({
 
   const listing = await prisma.listing.findUnique({
     where: { id },
-    include: { images: { orderBy: { sortOrder: "asc" } } },
+    include: {
+      images: { orderBy: { sortOrder: "asc" } },
+      amenities: { orderBy: { sortOrder: "asc" }, select: { key: true } },
+    },
   });
 
   // Sadece kendi ilanını düzenleyebilir
@@ -50,16 +53,28 @@ export default async function EditAgentListing({
     inSite: listing.inSite,
     balcony: listing.balcony,
     parking: listing.parking,
+    creditEligible: listing.creditEligible,
+    usageStatus: listing.usageStatus,
+    propertyCondition: listing.propertyCondition,
+    bathroomCount: listing.bathroomCount,
+    dues: listing.dues,
+    exchangeEligible: listing.exchangeEligible,
+    deedType: listing.deedType,
+    occupancyPermit: listing.occupancyPermit,
+    validUntil: listing.validUntil,
     deedStatus: listing.deedStatus,
     zoningStatus: listing.zoningStatus,
     adaNo: listing.adaNo,
     parselNo: listing.parselNo,
     kaks: listing.kaks,
+    locationVisibility: listing.locationVisibility,
+    parcelVisibility: listing.parcelVisibility,
     videoUrl: listing.videoUrl,
     droneUrl: listing.droneUrl,
     virtualTourUrl: listing.virtualTourUrl,
     features: parseJsonArray(listing.features),
     images: listing.images.map((i) => ({ url: i.url })),
+    amenities: listing.amenities,
   };
 
   return (

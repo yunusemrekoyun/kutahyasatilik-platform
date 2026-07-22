@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import {
   BarChart3,
+  Building2,
   ChevronDown,
   Heart,
   Map,
@@ -31,6 +32,7 @@ const PROPERTY_LINKS = [
 const PRIMARY_LINKS = [
   { href: "/harita", label: "Harita", Icon: Map },
   { href: "/bolge-analizi", label: "Bölge Analizi", Icon: BarChart3 },
+  { href: "/emlak-ofisleri", label: "Emlak Ağı", Icon: Building2 },
   { href: "/blog", label: "Rehber" },
   { href: "/hakkimizda", label: "Hakkımızda" },
 ];
@@ -71,7 +73,7 @@ export default function Header() {
           </span>
         </Link>
 
-        <nav className="hidden h-full items-center gap-7 lg:flex" aria-label="Ana menü">
+        <nav className="hidden h-full items-center gap-4 xl:gap-7 lg:flex" aria-label="Ana menü">
           <div
             className="relative flex h-full items-center"
             onMouseEnter={() => setListingMenuOpen(true)}

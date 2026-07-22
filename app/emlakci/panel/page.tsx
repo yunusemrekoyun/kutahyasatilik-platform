@@ -3,7 +3,7 @@ import Image from "next/image";
 import { Mail, Eye, Heart } from "lucide-react";
 import { getAgentSession } from "@/lib/agentAuth";
 import { prisma } from "@/lib/prisma";
-import { formatPrice } from "@/lib/format";
+import { formatPrice, parseJsonArray } from "@/lib/format";
 import { PROPERTY_TYPE_LABELS, MODERATION_STATUS_LABELS } from "@/lib/constants";
 import { deleteAgentListing, updateAgentProfile } from "./actions";
 import AgentLogoUpload from "@/components/agent/AgentLogoUpload";
@@ -18,7 +18,10 @@ const modBadge: Record<string, string> = {
 
 export default async function AgentDashboard() {
   const session = await getAgentSession();
-  const agent = await prisma.agent.findUnique({ where: { id: session!.agentId } });
+  const agent = await prisma.agent.findUnique({
+    where: { id: session!.agentId },
+    include: { agencyRef: { select: { name: true, slug: true, published: true, status: true } } },
+  });
   if (!agent) return null;
 
   const listings = await prisma.listing.findMany({
@@ -53,7 +56,7 @@ export default async function AgentDashboard() {
           </h1>
           <p className="text-sm text-slate-500">
             {agent.title || "Gayrimenkul Danışmanı"}
-            {agent.agency ? ` · ${agent.agency}` : ""}
+            {agent.agencyRef?.name || agent.agency ? ` · ${agent.agencyRef?.name || agent.agency}` : ""}
           </p>
         </div>
         <div className="flex items-center gap-2">
@@ -74,6 +77,12 @@ export default async function AgentDashboard() {
             className="rounded-lg bg-paper px-4 py-2.5 text-sm font-semibold text-brand-700 ring-1 ring-brand-200 hover:bg-brand-50"
           >
             Portföy Fırsatları
+          </Link>
+          <Link
+            href="/emlakci/panel/ilan/ice-aktar"
+            className="rounded-lg bg-paper px-4 py-2.5 text-sm font-semibold text-brand-700 ring-1 ring-brand-200 hover:bg-brand-50"
+          >
+            CSV ile Aktar
           </Link>
           <Link
             href="/emlakci/panel/ilan/yeni"
@@ -191,7 +200,7 @@ export default async function AgentDashboard() {
       {/* Profil */}
       <div>
         <h2 className="text-lg font-bold text-slate-900">Danışman Profilim</h2>
-        <p className="text-sm text-slate-500">İlanlarınızda görünen isim ve unvan bilgileri.</p>
+        <p className="text-sm text-slate-500">Kamu dizininde ve ilanlarınızda gösterilecek profesyonel bilgileriniz.</p>
         <form action={updateAgentProfile} className="mt-3 rounded-lg bg-paper p-6 ring-1 ring-stone">
           <div className="mb-5">
             <span className="mb-2 block text-sm font-medium text-slate-700">Logo / Avatar</span>
@@ -210,10 +219,42 @@ export default async function AgentDashboard() {
               <span className="mb-1 block text-sm font-medium text-slate-700">Unvan</span>
               <input name="title" defaultValue={agent.title ?? ""} placeholder="Gayrimenkul Danışmanı" className={inputCls} />
             </label>
+            {agent.agencyRef ? (
+              <label className="block">
+                <span className="mb-1 block text-sm font-medium text-slate-700">Bağlı firma</span>
+                <input value={agent.agencyRef.name} readOnly className={`${inputCls} bg-slate-50 text-slate-500`} />
+              </label>
+            ) : (
+              <label className="block">
+                <span className="mb-1 block text-sm font-medium text-slate-700">Ofis / Marka</span>
+                <input name="agency" defaultValue={agent.agency ?? ""} className={inputCls} />
+              </label>
+            )}
             <label className="block">
-              <span className="mb-1 block text-sm font-medium text-slate-700">Ofis / Marka</span>
-              <input name="agency" defaultValue={agent.agency ?? ""} className={inputCls} />
+              <span className="mb-1 block text-sm font-medium text-slate-700">Deneyim yılı</span>
+              <input name="experienceYears" type="number" min={0} max={80} defaultValue={agent.experienceYears ?? ""} className={inputCls} />
             </label>
+            <label className="block">
+              <span className="mb-1 block text-sm font-medium text-slate-700">Uzmanlıklar</span>
+              <input name="specialties" defaultValue={parseJsonArray(agent.specialties).join(", ")} placeholder="Konut, arsa, ticari" className={inputCls} />
+            </label>
+            <label className="block sm:col-span-2">
+              <span className="mb-1 block text-sm font-medium text-slate-700">Hizmet verilen ilçeler</span>
+              <input name="serviceDistricts" defaultValue={parseJsonArray(agent.serviceDistricts).join(", ")} placeholder="Merkez, Tavşanlı, Simav" className={inputCls} />
+            </label>
+          </div>
+          <label className="mt-4 block">
+            <span className="mb-1 block text-sm font-medium text-slate-700">Kısa özgeçmiş</span>
+            <textarea name="bio" rows={5} maxLength={2000} defaultValue={agent.bio ?? ""} className={`${inputCls} h-auto py-3`} />
+          </label>
+          <div className="mt-4 rounded-lg bg-canvas p-4 text-sm text-slate-700 ring-1 ring-stone">
+            <p className="font-semibold">İletişim görünürlüğü</p>
+            <p className="mt-1 text-xs text-slate-500">Profilinizin yayına alınması yönetim onayına bağlıdır. Aşağıdaki izinleri dilediğiniz zaman kapatabilirsiniz.</p>
+            <div className="mt-3 flex flex-wrap gap-5">
+              <label className="flex min-h-11 items-center gap-2"><input type="checkbox" name="showPhone" defaultChecked={agent.showPhone} /> Telefonumu göster</label>
+              <label className="flex min-h-11 items-center gap-2"><input type="checkbox" name="showWhatsapp" defaultChecked={agent.showWhatsapp} /> WhatsApp&apos;ı göster</label>
+            </div>
+            <p className="mt-2 text-xs font-medium text-slate-600">Kamu profili: {agent.publicProfile ? "Yayına açık" : "Yönetim onayı bekliyor / kapalı"}</p>
           </div>
           <button className="mt-4 rounded-lg bg-slate-800 px-5 py-2.5 text-sm font-bold text-white hover:bg-slate-900">
             Profili Kaydet

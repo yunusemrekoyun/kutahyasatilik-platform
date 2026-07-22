@@ -56,6 +56,7 @@ npm ci
 # .env oluştur (aşağıdaki değişkenler). DİKKAT: build, generateStaticParams + ISR
 # prerender için DB'ye bağlanır → DATABASE_URL erişilebilir OLMALI (migrate'ten sonra).
 npx prisma migrate deploy        # şema + index'ler
+npm run backfill:agencies        # eski firma metinlerini idempotent biçimde ilişkilendirir
 # Demo veri İSTENMİYORSA seed çalıştırma. Sadece ilk demo için: npm run seed
 npm run build
 
@@ -63,9 +64,11 @@ npm run build
 npm run prepare:standalone
 ```
 
-> Güncelleme (yeni deploy): `git pull && npm ci && npx prisma migrate deploy && npm run build`
+> Güncelleme (yeni deploy): `git pull && npm ci && npx prisma migrate deploy && npm run backfill:agencies && npm run build`
 > + `npm run prepare:standalone` + `systemctl restart kutahya`. `uploads` UPLOAD_DIR'de (app dışında)
 > durduğu için deploy'lar arasında korunur.
+
+`backfill:agencies` yalnız `agencyId` alanı boş olan eski danışman ve ilan kayıtlarını işler. Tekrar çalıştırılması güvenlidir; yeni firma kayıtları inceleme durumunda ve kamuya kapalı oluşturulur.
 
 `.env` (canlı):
 ```

@@ -32,9 +32,8 @@ export async function POST(req: NextRequest) {
   if (!allowed) return generic; // sessizce — saldırgan ayırt edemez
 
   const code = await issueOtp(app.id);
-  if (!emailEnabled() && process.env.NODE_ENV !== "production") {
-    // Dev kolaylığı: e-posta yapılandırılmadıysa kodu sunucu log'una düşür.
-    console.log(`[teklif-otp][dev] ${app.email}: ${code}`);
+  if (!emailEnabled()) {
+    console.error("[teklif-otp] E-posta yapılandırılmamış; doğrulama kodu gönderilemedi.");
   }
   await sendEmail({
     to: app.email,

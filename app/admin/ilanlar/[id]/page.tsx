@@ -11,22 +11,29 @@ export default async function EditListingPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const listing = await prisma.listing.findUnique({
-    where: { id },
-    include: { images: { orderBy: { sortOrder: "asc" } } },
-  });
+  const [listing, agencies] = await Promise.all([
+    prisma.listing.findUnique({
+      where: { id },
+      include: {
+        images: { orderBy: { sortOrder: "asc" } },
+        amenities: { orderBy: { sortOrder: "asc" }, select: { key: true } },
+      },
+    }),
+    prisma.agency.findMany({ orderBy: { name: "asc" }, select: { id: true, name: true, status: true } }),
+  ]);
   if (!listing) notFound();
 
   const data = {
     ...listing,
     features: parseJsonArray(listing.features),
     images: listing.images.map((i) => ({ url: i.url })),
+    amenities: listing.amenities,
   };
 
   return (
     <div>
       <h1 className="mb-6 text-2xl font-extrabold text-slate-900">İlanı Düzenle</h1>
-      <ListingForm listing={data} />
+      <ListingForm listing={data} agencies={agencies} />
     </div>
   );
 }

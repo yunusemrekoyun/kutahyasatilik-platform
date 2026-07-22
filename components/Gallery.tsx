@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import Image from "next/image";
 import { ChevronLeft, ChevronRight, X, Expand, Images } from "lucide-react";
-import { mediaUrl, thumbUrl } from "@/lib/media";
+import { publicImageUrl, thumbUrl } from "@/lib/media";
 
 export default function Gallery({
   images,
@@ -12,7 +12,11 @@ export default function Gallery({
   images: { url: string; alt?: string | null }[];
   title: string;
 }) {
-  const imgs = images.length ? images : [{ url: "/placeholder-listing.webp", alt: title }];
+  const safeImages = images.flatMap((image) => {
+    const url = publicImageUrl(image.url);
+    return url ? [{ ...image, url }] : [];
+  });
+  const imgs = safeImages.length ? safeImages : [{ url: "/placeholder-listing.webp", alt: title }];
   const [active, setActive] = useState(0);
   const [lightbox, setLightbox] = useState(false);
   const idx = Math.min(active, imgs.length - 1);
@@ -60,7 +64,7 @@ export default function Gallery({
               aria-label={`Fotoğraf ${i + 1} — büyütmek için dokun`}
             >
               <Image
-                src={mediaUrl(img.url)}
+                src={img.url}
                 alt={img.alt || `${title} ${i + 1}`}
                 fill
                 sizes="100vw"
@@ -90,7 +94,7 @@ export default function Gallery({
           aria-label="Galeriyi aç"
         >
           <Image
-            src={mediaUrl(imgs[0].url)}
+            src={imgs[0].url}
             alt={imgs[0].alt || title}
             fill
             sizes="(max-width: 768px) 100vw, 66vw"

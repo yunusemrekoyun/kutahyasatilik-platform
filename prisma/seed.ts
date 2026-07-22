@@ -182,14 +182,17 @@ async function main() {
 
   // Admin
   const email = (process.env.ADMIN_EMAIL || "admin@kutahyasatilik.com").toLowerCase();
-  const password = process.env.ADMIN_PASSWORD || "admin1234";
+  const password = process.env.ADMIN_PASSWORD;
+  if (!password || password.length < 12) {
+    throw new Error("Seed için en az 12 karakterlik ADMIN_PASSWORD ortam değişkeni gereklidir.");
+  }
   const passwordHash = await bcrypt.hash(password, 10);
   await prisma.admin.upsert({
     where: { email },
     update: { passwordHash },
     create: { email, passwordHash, name: "Yönetici" },
   });
-  console.log(`👤 Admin: ${email} / ${password}`);
+  console.log(`👤 Admin hesabı hazırlandı: ${email}`);
 
   // Settings — iletişim numarası sahte SEED'lenmez (admin > Ayarlar'dan girilir; boşsa buton gizli).
   const settings: Record<string, string> = {

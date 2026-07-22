@@ -1,6 +1,6 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { revalidatePath, updateTag } from "next/cache";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { getSession } from "@/lib/auth";
@@ -11,6 +11,8 @@ import { deleteVideo } from "@/lib/videoStorage";
 import { notifyAgent, notifyUser, notifyMatchingAlerts } from "@/lib/notify";
 import { sendEmail, notificationEmail } from "@/lib/email";
 import bcrypt from "bcryptjs";
+import { listingAmenityRows } from "@/lib/listingAmenities";
+import { validateExternalHttpUrl } from "@/lib/externalUrl";
 
 async function ensureAuth() {
   const session = await getSession();
@@ -31,12 +33,56 @@ function str(v: FormDataEntryValue | null): string | null {
 function bool(v: FormDataEntryValue | null): boolean {
   return v === "on" || v === "true" || v === "1";
 }
+function date(v: FormDataEntryValue | null): Date | null {
+  const value = str(v);
+  if (!value) return null;
+  const parsed = new Date(`${value}T12:00:00.000Z`);
+  return Number.isNaN(parsed.getTime()) ? null : parsed;
+}
+
+function jsonStringList(v: FormDataEntryValue | null): string | null {
+  const values = String(v || "")
+    .split(/[\n,]/)
+    .map((item) => item.trim())
+    .filter(Boolean)
+    .filter((item, index, all) => all.indexOf(item) === index)
+    .slice(0, 30);
+  return values.length ? JSON.stringify(values) : null;
+}
+
+function safeExternalUrl(v: FormDataEntryValue | null, field: string): string | null {
+  const value = str(v);
+  if (!value) return null;
+  const parsed = validateExternalHttpUrl(value);
+  if (!parsed || !parsed.secure) throw new Error(`${field} için güvenli bir HTTPS adresi girin`);
+  return parsed.url;
+}
+
+function safeMediaUrl(v: FormDataEntryValue | null, field: string): string | null {
+  const value = str(v);
+  if (!value) return null;
+  if (value.startsWith("/uploads/")) return value;
+  return safeExternalUrl(v, field);
+}
+
+function revalidateDirectorySurfaces() {
+  updateTag("local-resources");
+  updateTag("marketplace-stats");
+  revalidatePath("/");
+  revalidatePath("/emlak-ofisleri");
+  revalidatePath("/danismanlar");
+  revalidatePath("/yerel-araclar");
+  revalidatePath("/sitemap.xml");
+}
 
 // İlan değişikliğinde etkilenen kamu (ISR) sayfalarını anında tazele.
 function revalidateListingSurfaces(slug?: string) {
+  updateTag("marketplace-stats");
   revalidatePath("/");
   revalidatePath("/ilanlar");
   revalidatePath("/harita");
+  revalidatePath("/emlak-ofisleri");
+  revalidatePath("/danismanlar");
   revalidatePath("/daire");
   revalidatePath("/arsa");
   revalidatePath("/villa");
@@ -86,6 +132,19 @@ export async function saveListing(formData: FormData) {
     .split(",")
     .map((s) => s.trim())
     .filter(Boolean);
+  const amenities = listingAmenityRows(
+    formData.getAll("amenities").map(String).filter(Boolean),
+  );
+
+  const agencyId = str(formData.get("agencyId"));
+  if (agencyId && !(await prisma.agency.findUnique({ where: { id: agencyId }, select: { id: true } }))) {
+    throw new Error("Seçilen firma bulunamadı");
+  }
+  const referenceNo = str(formData.get("referenceNo"));
+  if (referenceNo) {
+    const referenceOwner = await prisma.listing.findUnique({ where: { referenceNo }, select: { id: true } });
+    if (referenceOwner && referenceOwner.id !== id) throw new Error("Bu ilan referans numarası kullanılıyor");
+  }
 
   const data = {
     title,
@@ -94,6 +153,8 @@ export async function saveListing(formData: FormData) {
     propertyType: String(formData.get("propertyType") || "daire"),
     listingType: String(formData.get("listingType") || "sale"),
     status: String(formData.get("status") || "active"),
+    agencyId,
+    referenceNo,
     price,
     currency: String(formData.get("currency") || "TRY"),
     district: String(formData.get("district") || "Merkez"),
@@ -112,11 +173,24 @@ export async function saveListing(formData: FormData) {
     inSite: bool(formData.get("inSite")),
     balcony: bool(formData.get("balcony")),
     parking: bool(formData.get("parking")),
+    creditEligible: str(formData.get("creditEligible")),
+    usageStatus: str(formData.get("usageStatus")),
+    propertyCondition: str(formData.get("propertyCondition")),
+    bathroomCount: num(formData.get("bathroomCount")),
+    dues: num(formData.get("dues")),
+    exchangeEligible: bool(formData.get("exchangeEligible")),
+    deedType: str(formData.get("deedType")),
+    occupancyPermit: str(formData.get("occupancyPermit")),
+    validUntil: date(formData.get("validUntil")),
     deedStatus: str(formData.get("deedStatus")),
     zoningStatus: str(formData.get("zoningStatus")),
     adaNo: str(formData.get("adaNo")),
     parselNo: str(formData.get("parselNo")),
     kaks: str(formData.get("kaks")),
+    locationVisibility: ["hidden", "approximate", "exact"].includes(String(formData.get("locationVisibility")))
+      ? String(formData.get("locationVisibility"))
+      : "approximate",
+    parcelVisibility: bool(formData.get("parcelVisibility")),
     videoUrl: str(formData.get("videoUrl")),
     droneUrl: str(formData.get("droneUrl")),
     virtualTourUrl: str(formData.get("virtualTourUrl")),
@@ -171,6 +245,12 @@ export async function saveListing(formData: FormData) {
   if (imageUrls.length) {
     await prisma.listingImage.createMany({
       data: imageUrls.map((url, i) => ({ listingId, url, sortOrder: i })),
+    });
+  }
+  await prisma.listingAmenity.deleteMany({ where: { listingId } });
+  if (amenities.length) {
+    await prisma.listingAmenity.createMany({
+      data: amenities.map((amenity) => ({ ...amenity, listingId })),
     });
   }
 
@@ -260,6 +340,170 @@ export async function deleteAgent(formData: FormData) {
   // İlanların emlakçı bağı kopar (onDelete: SetNull); ilanlar admin'e devrolur.
   await prisma.agent.delete({ where: { id } });
   revalidatePath("/admin/emlakcilar");
+}
+
+// --- Kamu firma ve danışman dizini ---
+
+export async function saveAgency(formData: FormData) {
+  await ensureAuth();
+  const id = str(formData.get("id"));
+  const name = String(formData.get("name") || "").trim();
+  if (!name) throw new Error("Firma adı zorunludur");
+
+  const previous = id
+    ? await prisma.agency.findUnique({ where: { id }, select: { slug: true, approvedAt: true } })
+    : null;
+  const slug = slugify(str(formData.get("slug")) || name);
+  if (!slug) throw new Error("Geçerli bir firma adresi oluşturulamadı");
+  const slugOwner = await prisma.agency.findUnique({ where: { slug }, select: { id: true } });
+  if (slugOwner && slugOwner.id !== id) throw new Error("Bu firma adresi başka bir kayıtta kullanılıyor");
+
+  const requestedStatus = String(formData.get("status") || "pending");
+  const status = ["pending", "approved", "rejected", "suspended"].includes(requestedStatus)
+    ? requestedStatus
+    : "pending";
+  const published = status === "approved" && bool(formData.get("published"));
+  const data = {
+    name,
+    slug,
+    logo: safeMediaUrl(formData.get("logo"), "Logo"),
+    coverImage: safeMediaUrl(formData.get("coverImage"), "Kapak görseli"),
+    description: str(formData.get("description")),
+    phone: str(formData.get("phone")),
+    whatsapp: str(formData.get("whatsapp")),
+    email: str(formData.get("email")),
+    website: safeExternalUrl(formData.get("website"), "Web sitesi"),
+    address: str(formData.get("address")),
+    serviceDistricts: jsonStringList(formData.get("serviceDistricts")),
+    status,
+    published,
+    showPhone: published && bool(formData.get("showPhone")),
+    showWhatsapp: published && bool(formData.get("showWhatsapp")),
+    verifiedAt: bool(formData.get("verified")) ? new Date() : null,
+    approvedAt: status === "approved" ? (previous?.approvedAt ?? new Date()) : null,
+  };
+
+  await prisma.$transaction(async (tx) => {
+    const savedAgency = id
+      ? await tx.agency.update({ where: { id }, data, select: { id: true } })
+      : await tx.agency.create({ data, select: { id: true } });
+    // agencyId is authoritative; keep the legacy display field aligned for older
+    // clients and listing surfaces that still read Agent.agency.
+    await tx.agent.updateMany({
+      where: { agencyId: savedAgency.id },
+      data: { agency: name },
+    });
+  });
+
+  revalidatePath("/admin/firmalar");
+  if (previous?.slug) revalidatePath(`/emlak-ofisi/${previous.slug}`);
+  revalidatePath(`/emlak-ofisi/${slug}`);
+  revalidateDirectorySurfaces();
+  redirect("/admin/firmalar");
+}
+
+export async function unpublishAgency(formData: FormData) {
+  await ensureAuth();
+  const id = String(formData.get("id") || "");
+  if (!id) return;
+  const agency = await prisma.agency.update({
+    where: { id },
+    data: { published: false, showPhone: false, showWhatsapp: false },
+    select: { slug: true },
+  });
+  revalidatePath("/admin/firmalar");
+  revalidatePath(`/emlak-ofisi/${agency.slug}`);
+  revalidateDirectorySurfaces();
+}
+
+export async function updateAgentDirectoryProfile(formData: FormData) {
+  await ensureAuth();
+  const id = String(formData.get("id") || "");
+  if (!id) return;
+  const agent = await prisma.agent.findUnique({
+    where: { id },
+    select: { status: true, slug: true, agencyRef: { select: { slug: true } } },
+  });
+  if (!agent) return;
+
+  const agencyId = str(formData.get("agencyId"));
+  const agency = agencyId
+    ? await prisma.agency.findUnique({ where: { id: agencyId }, select: { id: true, name: true, slug: true } })
+    : null;
+  if (agencyId && !agency) throw new Error("Seçilen firma bulunamadı");
+
+  const publicProfile = agent.status === "approved" && bool(formData.get("publicProfile"));
+  const ownerPrefix = agency ? `agency:${agency.id}:` : `agent:${id}:`;
+  await prisma.$transaction(async (tx) => {
+    await tx.agent.update({
+      where: { id },
+      data: {
+        agencyId: agency?.id ?? null,
+        // Clear the legacy value when unassigning so older clients cannot keep
+        // showing a firm that is no longer linked to the adviser.
+        agency: agency?.name ?? null,
+        publicProfile,
+        showPhone: publicProfile && bool(formData.get("showPhone")),
+        showWhatsapp: publicProfile && bool(formData.get("showWhatsapp")),
+      },
+    });
+    // Existing portfolio ownership follows the adviser. importKey is rebuilt
+    // in the same transaction so future CSV retries remain race-safe.
+    await tx.$executeRaw`
+      UPDATE "Listing"
+         SET "agencyId" = ${agency?.id ?? null},
+             "importKey" = CASE
+               WHEN "externalId" IS NULL OR BTRIM("externalId") = '' THEN NULL
+               ELSE ${ownerPrefix} || BTRIM("externalId")
+             END
+       WHERE "agentId" = ${id}
+    `;
+  });
+  revalidatePath("/admin/emlakcilar");
+  revalidatePath(`/danisman/${agent.slug}`);
+  if (agent.agencyRef?.slug) revalidatePath(`/emlak-ofisi/${agent.agencyRef.slug}`);
+  if (agency) revalidatePath(`/emlak-ofisi/${agency.slug}`);
+  revalidateDirectorySurfaces();
+}
+
+// --- Resmî yerel bağlantılar ---
+
+export async function saveLocalResource(formData: FormData) {
+  await ensureAuth();
+  const id = str(formData.get("id"));
+  const title = String(formData.get("title") || "").trim();
+  const institution = String(formData.get("institution") || "").trim();
+  if (!title || !institution) throw new Error("Başlık ve kurum zorunludur");
+  const requestedType = String(formData.get("type") || "municipality");
+  const type = ["municipality", "zoning", "parcel", "address", "e_government"].includes(requestedType)
+    ? requestedType
+    : "municipality";
+  const data = {
+    title,
+    description: str(formData.get("description")),
+    type,
+    institution,
+    district: str(formData.get("district")),
+    url: safeExternalUrl(formData.get("url"), "Resmî bağlantı") || "",
+    active: bool(formData.get("active")),
+    sortOrder: num(formData.get("sortOrder")) ?? 0,
+    ...(bool(formData.get("checkedNow")) ? { lastCheckedAt: new Date() } : {}),
+  };
+  if (id) await prisma.localResource.update({ where: { id }, data });
+  else await prisma.localResource.create({ data });
+
+  revalidatePath("/admin/yerel-araclar");
+  revalidateDirectorySurfaces();
+  redirect("/admin/yerel-araclar");
+}
+
+export async function disableLocalResource(formData: FormData) {
+  await ensureAuth();
+  const id = String(formData.get("id") || "");
+  if (!id) return;
+  await prisma.localResource.update({ where: { id }, data: { active: false } });
+  revalidatePath("/admin/yerel-araclar");
+  revalidateDirectorySurfaces();
 }
 
 // --- İlan yayın onayı (emlakçı ilanları) ---
@@ -432,6 +676,28 @@ export async function activateApplication(formData: FormData) {
   let i = 1;
   while (await prisma.agent.findUnique({ where: { slug }, select: { id: true } })) slug = `${root}-${i++}`;
 
+  let agencyId: string | null = null;
+  const applicationAgency = app.agency?.trim().replace(/\s+/g, " ") || null;
+  if (applicationAgency) {
+    let agency = await prisma.agency.findFirst({
+      where: { name: { equals: applicationAgency, mode: "insensitive" } },
+      select: { id: true },
+    });
+    if (!agency) {
+      const agencyRoot = slugify(applicationAgency) || "emlak-ofisi";
+      let agencySlug = agencyRoot;
+      let agencySuffix = 1;
+      while (await prisma.agency.findUnique({ where: { slug: agencySlug }, select: { id: true } })) {
+        agencySlug = `${agencyRoot}-${agencySuffix++}`;
+      }
+      agency = await prisma.agency.create({
+        data: { name: applicationAgency, slug: agencySlug },
+        select: { id: true },
+      });
+    }
+    agencyId = agency.id;
+  }
+
   const passwordHash = await bcrypt.hash(password, 10);
   const agent = await prisma.agent.create({
     data: {
@@ -440,7 +706,8 @@ export async function activateApplication(formData: FormData) {
       name: app.name,
       phone: app.phone,
       title: app.title || "Gayrimenkul Danışmanı",
-      agency: app.agency || null,
+      agency: applicationAgency,
+      agencyId,
       slug,
       status: "approved",
       approvedAt: new Date(),
@@ -455,6 +722,7 @@ export async function activateApplication(formData: FormData) {
   });
   revalidatePath("/admin/basvurular");
   revalidatePath("/admin/emlakcilar");
+  revalidatePath("/admin/firmalar");
 }
 
 // Teklif oluştur (§4): paketten SNAPSHOT alır, önceki aktif teklifi supersede eder,

@@ -19,6 +19,35 @@ test("filtered listings use the list canonical and API keeps pagination contract
   expect(Array.isArray(body.items)).toBeTruthy();
 });
 
+test("marketplace directories and official local tools keep their public contracts", async ({ page, request }) => {
+  for (const path of ["/emlak-ofisleri", "/danismanlar", "/yerel-araclar"]) {
+    await page.goto(path);
+    await expect(page.locator("h1")).toBeVisible();
+    const overflow = await page.evaluate(
+      () => document.documentElement.scrollWidth - document.documentElement.clientWidth
+    );
+    expect(overflow).toBeLessThanOrEqual(1);
+  }
+
+  for (const path of ["/api/v1/agencies", "/api/v1/advisers"]) {
+    const response = await request.get(path);
+    expect(response.ok()).toBeTruthy();
+    const body = await response.json();
+    expect(body).toMatchObject({ ok: true, page: 1, perPage: 12 });
+    expect(Array.isArray(body.items)).toBeTruthy();
+  }
+
+  const resourcesResponse = await request.get("/api/v1/local-resources");
+  expect(resourcesResponse.ok()).toBeTruthy();
+  const resources = await resourcesResponse.json();
+  expect(resources).toMatchObject({ ok: true, externalLinks: true });
+  expect(Array.isArray(resources.items)).toBeTruthy();
+  for (const resource of resources.items) {
+    expect(resource.url).toMatch(/^https:\/\//);
+    expect(resource.secure).toBe(true);
+  }
+});
+
 test("app-link manifests are published and the push worker is private", async ({ request }) => {
   const aasa = await request.get("/.well-known/apple-app-site-association");
   expect(aasa.ok()).toBeTruthy();
