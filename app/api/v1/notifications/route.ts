@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import * as Sentry from "@sentry/nextjs";
 import { resolveApiSession } from "@/lib/apiAuth";
 import { listNotificationsPage, unreadCount } from "@/lib/notify";
 
@@ -20,7 +21,11 @@ export async function GET(req: NextRequest) {
       unreadCount(session.role, session.id),
     ]);
     return NextResponse.json({ ok: true, unread, items: items.items, nextCursor: items.nextCursor });
-  } catch {
-    return NextResponse.json({ ok: true, unread: 0, items: [], nextCursor: null });
+  } catch (error) {
+    Sentry.captureException(error);
+    return NextResponse.json(
+      { ok: false, error: "Bildirimler yüklenemedi" },
+      { status: 500 },
+    );
   }
 }

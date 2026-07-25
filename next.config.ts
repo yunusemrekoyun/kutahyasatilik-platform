@@ -79,11 +79,13 @@ const nextConfig: NextConfig = {
   outputFileTracingExcludes: {
     "*": [
       "./.agents/**",
+      "./.env",
+      "./.env.*",
       "./docs/**",
       "./rapor/**",
       "./prisma/migrations/**",
       "./public/uploads/**",
-      "./Kutahyasatilik İlan/**",
+      "./Kutahyasatilik *lan/**",
     ],
   },
   // Eski (v1) landing URL'leri kısa sluglara 301 — canlıda paylaşılmış/indexlenmiş

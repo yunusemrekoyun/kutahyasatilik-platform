@@ -1,15 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { jwtVerify } from "jose";
-
-const secret = new TextEncoder().encode(
-  process.env.AUTH_SECRET || "kutahya-satilik-dev-secret-change-in-production-please"
-);
+import { authSecret } from "@/lib/authSecret";
 
 async function hasValidToken(req: NextRequest, cookieName: string, idField: string): Promise<boolean> {
   const token = req.cookies.get(cookieName)?.value;
   if (!token) return false;
   try {
-    const { payload } = await jwtVerify(token, secret);
+    const { payload } = await jwtVerify(token, authSecret);
     // Çapraz-silo koruması: hepsi aynı secret ile imzalı; token'ın beklenen silonun
     // id alanını (userId/agentId/adminId) taşıdığını da doğrula (yalnız imza yetmez).
     return typeof payload[idField] === "string" && Boolean(payload[idField]);

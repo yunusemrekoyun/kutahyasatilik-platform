@@ -32,6 +32,7 @@ export default function NotificationBell() {
   const [items, setItems] = useState<Item[]>([]);
   const [unread, setUnread] = useState(0);
   const ref = useRef<HTMLDivElement>(null);
+  const triggerRef = useRef<HTMLButtonElement>(null);
 
   const load = useCallback(async () => {
     try {
@@ -62,6 +63,17 @@ export default function NotificationBell() {
     document.addEventListener("mousedown", onDown);
     return () => document.removeEventListener("mousedown", onDown);
   }, []);
+
+  useEffect(() => {
+    if (!open) return;
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key !== "Escape") return;
+      setOpen(false);
+      triggerRef.current?.focus();
+    };
+    document.addEventListener("keydown", onKeyDown);
+    return () => document.removeEventListener("keydown", onKeyDown);
+  }, [open]);
 
   async function markAll() {
     setItems((prev) => prev.map((i) => ({ ...i, isRead: true })));
@@ -94,26 +106,29 @@ export default function NotificationBell() {
   return (
     <div ref={ref} className="relative">
       <button
+        ref={triggerRef}
         type="button"
         onClick={() => setOpen((o) => !o)}
-        aria-label="Bildirimler"
-        className="relative grid h-10 w-10 place-items-center rounded-lg text-slate-600 transition hover:bg-slate-100"
+        aria-label={unread > 0 ? `Bildirimler, ${unread} okunmamış` : "Bildirimler"}
+        aria-controls="notification-panel"
+        aria-expanded={open}
+        className="relative grid h-11 w-11 place-items-center rounded-lg text-slate-600 transition hover:bg-slate-100"
       >
-        <Bell className="h-5 w-5" />
+        <Bell aria-hidden="true" className="h-5 w-5" />
         {unread > 0 && (
-          <span className="absolute -right-0.5 -top-0.5 grid h-5 min-w-5 place-items-center rounded-full bg-red-500 px-1 text-[10px] font-bold text-white">
+          <span aria-hidden="true" className="absolute -right-0.5 -top-0.5 grid h-5 min-w-5 place-items-center rounded-full bg-red-500 px-1 text-[10px] font-bold text-white">
             {unread > 9 ? "9+" : unread}
           </span>
         )}
       </button>
 
       {open && (
-        <div className="absolute right-0 z-50 mt-2 w-80 max-w-[88vw] overflow-hidden rounded-lg border border-stone bg-paper shadow-[0_12px_40px_-12px_rgba(15,23,42,0.35)]">
+        <div id="notification-panel" role="region" aria-label="Bildirim listesi" className="absolute right-0 z-50 mt-2 w-80 max-w-[88vw] overflow-hidden rounded-lg border border-stone bg-paper shadow-[0_12px_40px_-12px_rgba(15,23,42,0.35)]">
           <div className="flex items-center justify-between border-b border-slate-100 px-4 py-3">
             <b className="text-sm text-slate-900">Bildirimler</b>
             {unread > 0 && (
-              <button onClick={markAll} className="inline-flex items-center gap-1 text-xs font-medium text-brand-700 hover:underline">
-                <Check className="h-3.5 w-3.5" /> Tümünü okundu
+              <button type="button" onClick={markAll} className="inline-flex min-h-11 items-center gap-1 text-xs font-medium text-brand-700 hover:underline">
+                <Check aria-hidden="true" className="h-3.5 w-3.5" /> Tümünü okundu
               </button>
             )}
           </div>
@@ -123,11 +138,13 @@ export default function NotificationBell() {
             ) : (
               items.map((it) => (
                 <button
+                  type="button"
                   key={it.id}
                   onClick={() => openItem(it)}
+                  aria-label={`${it.title}${it.isRead ? ", okundu" : ", okunmamış"}${it.body ? `. ${it.body}` : ""}`}
                   className={`flex w-full items-start gap-2.5 border-b border-slate-50 px-4 py-3 text-left transition hover:bg-slate-50 ${it.isRead ? "opacity-60" : ""}`}
                 >
-                  <span className={`mt-1.5 h-2 w-2 shrink-0 rounded-full ${it.isRead ? "bg-slate-300" : "bg-gold-500"}`} />
+                  <span aria-hidden="true" className={`mt-1.5 h-2 w-2 shrink-0 rounded-full ${it.isRead ? "bg-slate-300" : "bg-gold-500"}`} />
                   <span className="min-w-0 flex-1">
                     <span className="block text-sm font-semibold text-slate-900">{it.title}</span>
                     {it.body && <span className="mt-0.5 block truncate text-xs text-slate-500">{it.body}</span>}

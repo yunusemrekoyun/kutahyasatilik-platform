@@ -3,21 +3,10 @@ import { cookies } from "next/headers";
 import { SignJWT, jwtVerify } from "jose";
 import bcrypt from "bcryptjs";
 import { prisma } from "./prisma";
+import { authSecret } from "./authSecret";
 
 // Emlakçı (danışman) oturumu — admin oturumundan (ks_admin) ayrı bir cookie kullanır.
 const COOKIE_NAME = "ks_agent";
-
-// Üretimde AUTH_SECRET zorunludur — yoksa oturum imzaları herkese açık fallback
-// secret ile üretilir ve forge edilebilir. Boot etmeyi reddet (fail-fast).
-if (process.env.NODE_ENV === "production" && !process.env.AUTH_SECRET) {
-  throw new Error(
-    "AUTH_SECRET tanımlı değil. Üretimde .env içinde en az 32 karakterlik rastgele bir AUTH_SECRET zorunludur."
-  );
-}
-
-const secret = new TextEncoder().encode(
-  process.env.AUTH_SECRET || "kutahya-satilik-dev-secret-change-in-production-please"
-);
 
 export type AgentSession = { agentId: string; email: string; name: string };
 
@@ -35,7 +24,7 @@ export async function createAgentSession(payload: AgentSession) {
     .setProtectedHeader({ alg: "HS256" })
     .setIssuedAt()
     .setExpirationTime("7d")
-    .sign(secret);
+    .sign(authSecret);
 
   const cookieStore = await cookies();
   cookieStore.set(COOKIE_NAME, token, {
@@ -57,7 +46,7 @@ export async function getAgentSession(): Promise<AgentSession | null> {
   const token = cookieStore.get(COOKIE_NAME)?.value;
   if (!token) return null;
   try {
-    const { payload } = await jwtVerify(token, secret);
+    const { payload } = await jwtVerify(token, authSecret);
     // Çapraz-silo koruması (bkz. lib/auth.ts): agentId yoksa kabul etme.
     if (typeof payload.agentId !== "string" || !payload.agentId) return null;
     const tokenVersion = typeof payload.ver === "number" ? payload.ver : 0;

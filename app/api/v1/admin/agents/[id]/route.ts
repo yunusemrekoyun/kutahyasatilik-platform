@@ -25,11 +25,23 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     return NextResponse.json({ ok: true });
   }
   if (action === "reject") {
-    await prisma.agent.update({ where: { id }, data: { status: "rejected", note: str(body?.note) } });
+    await prisma.$transaction([
+      prisma.agent.update({ where: { id }, data: { status: "rejected", note: str(body?.note) } }),
+      prisma.pushToken.updateMany({
+        where: { recipientRole: "agent", recipientId: id, active: true },
+        data: { active: false },
+      }),
+    ]);
     return NextResponse.json({ ok: true });
   }
   if (action === "suspend") {
-    await prisma.agent.update({ where: { id }, data: { status: "suspended" } });
+    await prisma.$transaction([
+      prisma.agent.update({ where: { id }, data: { status: "suspended" } }),
+      prisma.pushToken.updateMany({
+        where: { recipientRole: "agent", recipientId: id, active: true },
+        data: { active: false },
+      }),
+    ]);
     return NextResponse.json({ ok: true });
   }
   return NextResponse.json({ ok: false, error: "Geçersiz işlem" }, { status: 400 });
@@ -40,6 +52,12 @@ export async function DELETE(req: NextRequest, { params }: { params: Promise<{ i
   const a = await resolveApiAdmin(req);
   if (!a.ok) return NextResponse.json({ ok: false, error: a.error }, { status: a.status });
   const { id } = await params;
-  await prisma.agent.delete({ where: { id } });
+  await prisma.$transaction([
+    prisma.pushToken.updateMany({
+      where: { recipientRole: "agent", recipientId: id, active: true },
+      data: { active: false },
+    }),
+    prisma.agent.delete({ where: { id } }),
+  ]);
   return NextResponse.json({ ok: true });
 }

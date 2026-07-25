@@ -24,7 +24,7 @@ export default function MobileTabBar() {
     exact ? pathname === href : pathname === href || pathname.startsWith(href + "/");
 
   return (
-    <nav className="fixed inset-x-0 bottom-0 z-40 border-t border-stone bg-paper/95 pb-[env(safe-area-inset-bottom)] backdrop-blur-xl lg:hidden">
+    <nav aria-label="Mobil ana menü" className="fixed inset-x-0 bottom-0 z-40 border-t border-stone bg-paper/95 pb-[env(safe-area-inset-bottom)] backdrop-blur-xl lg:hidden">
       <div className="mx-auto grid max-w-md grid-cols-5">
         {TABS.map((t) => {
           const active = isActive(t.href, t.exact);
@@ -33,19 +33,21 @@ export default function MobileTabBar() {
             <Link
               key={t.href}
               href={t.href}
+              aria-current={active ? "page" : undefined}
               className={`relative flex min-h-14 flex-col items-center justify-center gap-1 border-t-2 text-[10px] font-semibold transition ${
                 active ? "border-gold-700 text-brand-800" : "border-transparent text-muted"
               }`}
             >
               <span className="relative">
-                <Icon className="h-5 w-5" strokeWidth={active ? 2.4 : 1.9} />
+                <Icon aria-hidden="true" className="h-5 w-5" strokeWidth={active ? 2.4 : 1.9} />
                 {t.badge && favCount > 0 && (
-                  <span className="absolute -right-2 -top-1.5 grid h-4 min-w-4 place-items-center rounded-full bg-gold-500 px-1 text-[9px] font-bold text-brand-950">
+                  <span aria-hidden="true" className="absolute -right-2 -top-1.5 grid h-4 min-w-4 place-items-center rounded-full bg-gold-500 px-1 text-[9px] font-bold text-brand-950">
                     {favCount}
                   </span>
                 )}
               </span>
               {t.label}
+              {t.badge && favCount > 0 && <span className="sr-only">{favCount} kayıtlı ilan</span>}
             </Link>
           );
         })}

@@ -11,6 +11,8 @@ export default defineConfig({
     timeout: 120_000,
     env: {
       ...process.env,
+      ANDROID_APP_LINK_SHA256_CERT_FINGERPRINTS: "",
+      APPLE_TEAM_ID: "",
       UPLOAD_DIR: path.join(process.cwd(), "public", "uploads"),
     },
   },

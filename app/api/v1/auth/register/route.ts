@@ -5,6 +5,7 @@ import { checkRate } from "@/lib/rateLimit";
 import { trPhoneSchema } from "@/lib/validation";
 import { hashPassword } from "@/lib/userAuth";
 import { signSessionToken } from "@/lib/apiAuth";
+import { PASSWORD_ERROR, PASSWORD_MAX_LENGTH, PASSWORD_MIN_LENGTH } from "@/lib/passwordPolicy";
 
 // Mobil kullanıcı kaydı — web /api/user/register ile aynı kurallar (ad/e-posta/telefon/şifre,
 // mükerrer e-posta 409). Kayıt sonrası otomatik giriş: cookie yerine Bearer token döner.
@@ -13,7 +14,7 @@ const schema = z.object({
   name: z.string().min(2, "Ad soyad gerekli").max(120),
   email: z.string().email("Geçerli bir e-posta girin").max(160),
   phone: trPhoneSchema,
-  password: z.string().min(6, "Şifre en az 6 karakter olmalı").max(100),
+  password: z.string().min(PASSWORD_MIN_LENGTH, PASSWORD_ERROR).max(PASSWORD_MAX_LENGTH),
 });
 
 export async function POST(req: NextRequest) {

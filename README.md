@@ -25,6 +25,7 @@ Node.js 24 ve PostgreSQL 17 önerilir.
 
 ```bash
 cp .env.example .env
+# .env içindeki AUTH_SECRET alanını `openssl rand -hex 32` çıktısıyla doldurun.
 npm ci
 npx prisma migrate deploy
 npm run dev
@@ -48,18 +49,30 @@ Playwright ilk kullanımında Chromium kurulumu gerekir: `npx playwright install
 
 ## Production yayın sırası
 
-1. PostgreSQL yedeğini doğrulayın ve `npx prisma migrate deploy` çalıştırın.
-2. `npm run backfill:agencies` ile eski danışman firma metinlerini yeni firma ilişkilerine bağlayın.
-3. `PUSH_ENABLED=false` ile backend’i yayınlayın.
-4. `npm run build && npm run check:standalone` kapılarını geçirin.
-5. `npm run prepare:standalone` ile statik dosyaları, yerel yüklemeleri pakete katmadan hazırlayın.
-6. `npm run start:standalone` ile başlatın ve `/api/health` kontrolünü yapın.
-7. Fiziksel cihaz push testi sonrasında `PUSH_ENABLED=true` yapın.
+Canlı uygulama `/var/www/kutahyasatilik.com/app` dizininde,
+`kutahyasatilik.service` ile standalone olarak `127.0.0.1:3003` üzerinde çalışır.
+Kullanıcı medyası deploy dizininin dışında,
+`/var/www/kutahyasatilik.com/uploads` altında kalıcıdır.
+
+1. Temiz `main` çalışma ağacında `git pull --ff-only origin main` çalıştırın.
+2. `npm ci`, `npx prisma migrate deploy` ve `npm run backfill:agencies` çalıştırın.
+3. `npm run build`, `npm run prepare:standalone` ve `npm run check:standalone`
+   kapılarını geçirin.
+4. Yalnız `kutahyasatilik.service` servisini restart edin.
+5. `http://127.0.0.1:3003/api/health` ve public health endpoint'ini doğrulayın.
 
 `backfill:agencies` idempotenttir ve migration sonrasında her deploy’da güvenle çalıştırılabilir. Yalnız `agencyId` değeri boş eski kayıtları bağlar; oluşturduğu firmaları otomatik olarak onaylamaz veya kamuya yayınlamaz.
 
-`UPLOAD_DIR` deploy klasörünün dışında kalıcı bir dizin olmalı; `NEXT_PUBLIC_MEDIA_URL` bu dizini HTTPS üzerinden sunan hostu göstermelidir. Ayrıntılı VPS/Cloudflare akışı [DEPLOY.md](./DEPLOY.md) içindedir.
+Production `.env` dosyası uygulama dizininde ve `0600` izniyle tutulmalıdır.
+Bekleme/test döneminde `PUSH_ENABLED=false` kalır. Production'da demo/seed veya
+veritabanı reset komutlarını çalıştırmayın. Güvenli kontroller ve rollback notları
+[DEPLOY.md](./DEPLOY.md) içindedir.
 
 ## Secrets
 
-`.env.example` yalnız sözleşmeyi gösterir. `DATABASE_URL`, `AUTH_SECRET`, `CRON_SECRET`, `EXPO_ACCESS_TOKEN`, Apple/Android doğrulama değerleri ve Sentry anahtarları GitHub/EAS/production secret deposunda tutulmalıdır. Sentry DSN tanımlı değilse uygulama normal çalışır; source map yükleme yalnız `SENTRY_AUTH_TOKEN`, `SENTRY_ORG` ve `SENTRY_PROJECT` birlikte varsa etkinleşir.
+`.env.example` yalnız sözleşmeyi gösterir. `DATABASE_URL`, `AUTH_SECRET`, `CRON_SECRET`,
+e-posta sağlayıcı kimlik bilgileri, `EXPO_ACCESS_TOKEN`, Apple/Android doğrulama
+değerleri ve Sentry anahtarları GitHub/EAS/production secret deposunda
+tutulmalıdır. Sentry DSN tanımlı değilse uygulama normal çalışır; source map
+yükleme yalnız `SENTRY_AUTH_TOKEN`, `SENTRY_ORG` ve `SENTRY_PROJECT` birlikte varsa
+etkinleşir.

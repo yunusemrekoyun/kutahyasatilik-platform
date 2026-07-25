@@ -52,8 +52,9 @@ export async function sendEmail({
         auth: process.env.SMTP_USER ? { user: process.env.SMTP_USER, pass: process.env.SMTP_PASS } : undefined,
       });
       await transport.sendMail({ from, to, subject, html });
-    } catch (e) {
-      console.warn(`[email][smtp] gönderilemedi (${to}): ${(e as Error).message}`);
+    } catch {
+      // Alıcı adresi ve sağlayıcı hata ayrıntıları production loglarına yazılmaz.
+      console.warn("[email][smtp] gönderilemedi.");
     }
     return;
   }
@@ -68,7 +69,7 @@ export async function sendEmail({
       },
       body: JSON.stringify({ from, to, subject, html }),
     });
-    if (!res.ok) console.warn(`[email] Resend yanıtı ${res.status} (alıcı: ${to})`);
+    if (!res.ok) console.warn(`[email] Resend yanıtı ${res.status}.`);
   } catch {
     // En iyi çaba — e-posta ikincildir, hata yutulur.
   }

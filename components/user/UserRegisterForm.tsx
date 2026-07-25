@@ -2,6 +2,11 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import {
+  PASSWORD_MAX_LENGTH,
+  PASSWORD_MIN_LENGTH,
+  PASSWORD_REQUIREMENT,
+} from "@/lib/passwordPolicy";
 import { isValidTrPhone, TR_PHONE_ERROR } from "@/lib/validation";
 
 const inputCls =
@@ -44,7 +49,7 @@ export default function UserRegisterForm() {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
+    <form onSubmit={handleSubmit} aria-busy={status === "loading"} aria-describedby={error ? "register-error" : undefined} className="space-y-4">
       <div>
         <label htmlFor="r-name" className={labelCls}>Ad Soyad</label>
         <input id="r-name" name="name" required autoComplete="name" placeholder="Adınız ve soyadınız" className={inputCls} />
@@ -59,9 +64,9 @@ export default function UserRegisterForm() {
       </div>
       <div>
         <label htmlFor="r-password" className={labelCls}>Şifre</label>
-        <input id="r-password" name="password" type="password" required minLength={6} autoComplete="new-password" placeholder="En az 6 karakter" className={inputCls} />
+        <input id="r-password" name="password" type="password" required minLength={PASSWORD_MIN_LENGTH} maxLength={PASSWORD_MAX_LENGTH} autoComplete="new-password" placeholder={PASSWORD_REQUIREMENT} className={inputCls} />
       </div>
-      {error && <p className="rounded-[10px] bg-red-50 px-3.5 py-2.5 text-sm font-medium text-red-700 ring-1 ring-red-200">{error}</p>}
+      {error && <p id="register-error" role="alert" className="rounded-[10px] bg-red-50 px-3.5 py-2.5 text-sm font-medium text-red-700 ring-1 ring-red-200">{error}</p>}
       <button
         type="submit"
         disabled={status === "loading"}
@@ -71,7 +76,7 @@ export default function UserRegisterForm() {
       </button>
       <p className="text-center text-sm text-slate-500">
         Zaten hesabın var mı?{" "}
-        <Link href="/giris" className="font-semibold text-brand-700 hover:underline">Giriş yap</Link>
+        <Link href="/giris" className="inline-flex min-h-11 items-center font-semibold text-brand-700 hover:underline">Giriş yap</Link>
       </p>
     </form>
   );

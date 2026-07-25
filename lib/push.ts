@@ -2,30 +2,16 @@ import "server-only";
 import { randomUUID } from "crypto";
 import { Expo, type ExpoPushMessage, type ExpoPushTicket } from "expo-server-sdk";
 import { prisma } from "./prisma";
+import {
+  buildPublicPushContent,
+  expiredPushReceiptCutoff,
+  MAX_PUSH_ATTEMPTS,
+  nextPushAttemptAt,
+  nextPushReceiptCheckAt,
+  pushFailureAction,
+} from "./pushPolicy";
 
 const expo = new Expo({ accessToken: process.env.EXPO_ACCESS_TOKEN || undefined });
-const MAX_ATTEMPTS = 5;
-
-type NotificationForPush = {
-  id: string;
-  recipientRole: string;
-  recipientId: string | null;
-  type: string;
-  title: string;
-  body: string | null;
-  link: string | null;
-};
-
-function publicPushBody(notification: NotificationForPush): string | undefined {
-  // Yönetim ve danışman bildirimlerinde PII kilit ekranına taşınmaz.
-  if (notification.recipientRole !== "user") return "Ayrıntıları görmek için uygulamayı açın.";
-  return notification.type === "new_match" ? notification.body ?? undefined : undefined;
-}
-
-function retryAt(attempts: number) {
-  const minutes = Math.min(60, 2 ** Math.max(0, attempts));
-  return new Date(Date.now() + minutes * 60_000);
-}
 
 export async function dispatchPendingPushes(): Promise<{ sent: number; retried: number; failed: number }> {
   if (process.env.PUSH_ENABLED !== "true") return { sent: 0, retried: 0, failed: 0 };
@@ -66,14 +52,17 @@ export async function dispatchPendingPushes(): Promise<{ sent: number; retried: 
   }
   if (!valid.length) return { sent: 0, retried: 0, failed: invalid.length };
 
-  const messages: ExpoPushMessage[] = valid.map((d) => ({
-    to: d.pushToken.token,
-    title: d.notification.title,
-    body: publicPushBody(d.notification),
-    sound: "default",
-    channelId: "default",
-    data: { notificationId: d.notificationId, link: d.notification.link },
-  }));
+  const messages: ExpoPushMessage[] = valid.map((d) => {
+    const publicContent = buildPublicPushContent(d.notification);
+    return {
+      to: d.pushToken.token,
+      title: publicContent.title,
+      body: publicContent.body,
+      sound: "default",
+      channelId: "default",
+      data: { notificationId: d.notificationId, link: d.notification.link },
+    };
+  });
 
   let tickets: ExpoPushTicket[];
   try {
@@ -84,12 +73,12 @@ export async function dispatchPendingPushes(): Promise<{ sent: number; retried: 
       const attempts = d.attempts + 1;
       return prisma.pushDelivery.update({
         where: { id: d.id },
-        data: attempts >= MAX_ATTEMPTS
+        data: attempts >= MAX_PUSH_ATTEMPTS
           ? { status: "failed", claimId: null, attempts, error: message }
-          : { status: "pending", claimId: null, attempts, error: message, nextAttemptAt: retryAt(attempts) },
+          : { status: "pending", claimId: null, attempts, error: message, nextAttemptAt: nextPushAttemptAt(attempts) },
       });
     }));
-    return { sent: 0, retried: valid.filter((d) => d.attempts + 1 < MAX_ATTEMPTS).length, failed: invalid.length + valid.filter((d) => d.attempts + 1 >= MAX_ATTEMPTS).length };
+    return { sent: 0, retried: valid.filter((d) => d.attempts + 1 < MAX_PUSH_ATTEMPTS).length, failed: invalid.length + valid.filter((d) => d.attempts + 1 >= MAX_PUSH_ATTEMPTS).length };
   }
 
   let sent = 0;
@@ -109,59 +98,106 @@ export async function dispatchPendingPushes(): Promise<{ sent: number; retried: 
     }
     const code = ticket?.details?.error;
     const error = ticket?.message || String(code || "Push rejected");
-    if (code === "DeviceNotRegistered") {
+    const action = pushFailureAction(code, attempts);
+    if (action === "deactivate") {
       failed++;
       await prisma.$transaction([
         prisma.pushToken.update({ where: { id: delivery.pushTokenId }, data: { active: false, lastError: error } }),
         prisma.pushDelivery.update({ where: { id: delivery.id }, data: { status: "failed", claimId: null, attempts, error } }),
       ]);
-    } else if (attempts >= MAX_ATTEMPTS) {
+    } else if (action === "fail") {
       failed++;
       await prisma.pushDelivery.update({ where: { id: delivery.id }, data: { status: "failed", claimId: null, attempts, error } });
     } else {
       retried++;
-      await prisma.pushDelivery.update({ where: { id: delivery.id }, data: { status: "pending", claimId: null, attempts, error, nextAttemptAt: retryAt(attempts) } });
+      await prisma.pushDelivery.update({ where: { id: delivery.id }, data: { status: "pending", claimId: null, attempts, error, nextAttemptAt: nextPushAttemptAt(attempts) } });
     }
   }
   return { sent, retried, failed };
 }
 
-export async function checkPushReceipts(): Promise<{ delivered: number; failed: number }> {
-  if (process.env.PUSH_ENABLED !== "true") return { delivered: 0, failed: 0 };
+export async function checkPushReceipts(): Promise<{ delivered: number; retried: number; failed: number }> {
+  if (process.env.PUSH_ENABLED !== "true") return { delivered: 0, retried: 0, failed: 0 };
+  const now = Date.now();
+  const expired = await prisma.pushDelivery.updateMany({
+    where: {
+      status: "sent",
+      ticketId: { not: null },
+      receiptCheckedAt: null,
+      sentAt: { lte: expiredPushReceiptCutoff(now) },
+    },
+    data: {
+      status: "failed",
+      receiptCheckedAt: new Date(now),
+      error: "Expo push receipt expired",
+    },
+  });
   const rows = await prisma.pushDelivery.findMany({
     where: {
       status: "sent",
       ticketId: { not: null },
       receiptCheckedAt: null,
-      sentAt: { lte: new Date(Date.now() - 15 * 60_000) },
+      sentAt: { lte: new Date(now - 15 * 60_000) },
+      nextAttemptAt: { lte: new Date(now) },
     },
+    orderBy: [
+      { nextAttemptAt: "asc" },
+      { sentAt: "asc" },
+      { id: "asc" },
+    ],
     take: 1000,
     include: { pushToken: true },
   });
-  if (!rows.length) return { delivered: 0, failed: 0 };
+  if (!rows.length) {
+    return { delivered: 0, retried: 0, failed: expired.count };
+  }
 
   const ids = rows.map((r) => r.ticketId).filter((id): id is string => !!id);
   const receipts = await expo.getPushNotificationReceiptsAsync(ids);
   let delivered = 0;
-  let failed = 0;
+  let retried = 0;
+  let failed = expired.count;
   for (const row of rows) {
     if (!row.ticketId) continue;
     const receipt = receipts[row.ticketId];
-    if (!receipt) continue;
+    if (!receipt) {
+      await prisma.pushDelivery.update({
+        where: { id: row.id },
+        data: { nextAttemptAt: nextPushReceiptCheckAt(now) },
+      });
+      continue;
+    }
     if (receipt.status === "ok") {
       delivered++;
       await prisma.pushDelivery.update({ where: { id: row.id }, data: { status: "delivered", receiptCheckedAt: new Date(), error: null } });
       continue;
     }
-    failed++;
     const code = receipt.details?.error;
     const error = receipt.message || String(code || "Push receipt failed");
+    const action = pushFailureAction(code, row.attempts);
+    if (action === "retry") {
+      retried++;
+      await prisma.pushDelivery.update({
+        where: { id: row.id },
+        data: {
+          status: "pending",
+          claimId: null,
+          ticketId: null,
+          sentAt: null,
+          receiptCheckedAt: null,
+          error,
+          nextAttemptAt: nextPushAttemptAt(row.attempts),
+        },
+      });
+      continue;
+    }
+    failed++;
     await prisma.$transaction([
       prisma.pushDelivery.update({ where: { id: row.id }, data: { status: "failed", receiptCheckedAt: new Date(), error } }),
-      ...(code === "DeviceNotRegistered"
+      ...(action === "deactivate"
         ? [prisma.pushToken.update({ where: { id: row.pushTokenId }, data: { active: false, lastError: error } })]
         : []),
     ]);
   }
-  return { delivered, failed };
+  return { delivered, retried, failed };
 }

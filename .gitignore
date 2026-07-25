@@ -32,8 +32,11 @@ next-env.d.ts
 # Credentials and signing material
 *.key
 *.pem
+*.p8
 *.p12
 *.pfx
+*.cer
+*.crt
 *.jks
 *.keystore
 *.mobileprovision
@@ -62,6 +65,17 @@ yarn-error.log*
 /.vscode/
 *.code-workspace
 /.vercel/
+/.agents/
+/.claude/
+/.codex/
+/.direnv/
+/.envrc
+/.netrc
+/.npmrc
+/.sentryclirc
+/AGENTS.md
+/CLAUDE.md
+/skills-lock.json
 
 # Generated and runtime data
 /app/generated/prisma/
@@ -88,3 +102,4 @@ KURULUM_REHBERI.html
 docker-compose.yml
 docker-compose.override.yml
 /Kutahyasatilik İlan
+/Kutahyasatilik *lan/

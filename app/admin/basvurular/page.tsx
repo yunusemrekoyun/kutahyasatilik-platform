@@ -1,6 +1,11 @@
 import { prisma } from "@/lib/prisma";
 import { updateApplicationStatus, activateApplication, createOffer } from "@/app/admin/actions";
 import { formatPrice } from "@/lib/format";
+import {
+  PASSWORD_MAX_LENGTH,
+  PASSWORD_MIN_LENGTH,
+  PASSWORD_REQUIREMENT,
+} from "@/lib/passwordPolicy";
 
 export const dynamic = "force-dynamic";
 
@@ -133,7 +138,7 @@ export default async function AdminBasvurularPage() {
                       <input type="hidden" name="id" value={a.id} />
                       <p className="text-xs font-medium text-slate-600">Hesabı aktive et (parola belirle)</p>
                       <div className="flex gap-2">
-                        <input name="password" type="text" minLength={6} required placeholder="Geçici parola (min 6)" className="flex-1 rounded-lg border border-slate-300 px-2.5 py-2 text-sm" />
+                        <input name="password" type="password" autoComplete="new-password" minLength={PASSWORD_MIN_LENGTH} maxLength={PASSWORD_MAX_LENGTH} required placeholder={`Geçici parola (${PASSWORD_REQUIREMENT})`} className="flex-1 rounded-lg border border-slate-300 px-2.5 py-2 text-sm" />
                         <button type="submit" className="rounded-lg bg-green-600 px-3 py-2 text-sm font-semibold text-white hover:bg-green-700">Aktive Et</button>
                       </div>
                       <p className="text-[11px] text-slate-400">Parolayı danışmana güvenli şekilde iletin. Teklif/OTP/ödeme adımları yukarıdaki &ldquo;Teklif Oluştur&rdquo; akışında yönetilir.</p>

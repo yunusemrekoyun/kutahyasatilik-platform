@@ -43,7 +43,7 @@ export default function LoginForm() {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
+    <form onSubmit={handleSubmit} aria-busy={status === "loading"} aria-describedby={error ? "login-error" : undefined} className="space-y-4">
       <div>
         <label htmlFor="login-email" className={labelCls}>E-posta</label>
         <input id="login-email" name="email" type="email" required autoComplete="email" placeholder="ornek@eposta.com" className={inputCls} />
@@ -52,10 +52,10 @@ export default function LoginForm() {
         <label htmlFor="login-password" className={labelCls}>Şifre</label>
         <input id="login-password" name="password" type="password" required autoComplete="current-password" placeholder="••••••••" className={inputCls} />
         <div className="mt-1.5 text-right">
-          <Link href="/sifremi-unuttum" className="text-sm text-slate-500 hover:text-brand-700 hover:underline">Şifremi unuttum?</Link>
+          <Link href="/sifremi-unuttum" className="inline-flex min-h-11 items-center text-sm text-slate-500 hover:text-brand-700 hover:underline">Şifremi unuttum?</Link>
         </div>
       </div>
-      {error && <p className="rounded-[10px] bg-red-50 px-3.5 py-2.5 text-sm font-medium text-red-700 ring-1 ring-red-200">{error}</p>}
+      {error && <p id="login-error" role="alert" className="rounded-[10px] bg-red-50 px-3.5 py-2.5 text-sm font-medium text-red-700 ring-1 ring-red-200">{error}</p>}
       <button
         type="submit"
         disabled={status === "loading"}
@@ -65,7 +65,7 @@ export default function LoginForm() {
       </button>
       <p className="pt-1 text-center text-sm text-slate-500">
         Hesabın yok mu?{" "}
-        <Link href="/kayit" className="font-semibold text-brand-700 hover:underline">Kayıt ol</Link>
+        <Link href="/kayit" className="inline-flex min-h-11 items-center font-semibold text-brand-700 hover:underline">Kayıt ol</Link>
       </p>
     </form>
   );

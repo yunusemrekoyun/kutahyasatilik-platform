@@ -33,16 +33,16 @@ export default function ShareButtons({ title }: { title: string }) {
     }
   }
 
-  const btn = "grid h-8 w-8 place-items-center rounded-full bg-slate-100 text-slate-600 hover:bg-slate-200";
+  const btn = "grid h-11 w-11 place-items-center rounded-full bg-slate-100 text-slate-600 hover:bg-slate-200";
 
   return (
     <div className="flex items-center gap-2">
       <span className="text-xs font-medium text-slate-500">Paylaş:</span>
-      <button onClick={shareWhatsApp} aria-label="WhatsApp'ta paylaş" title="WhatsApp" className="grid h-8 w-8 place-items-center rounded-full bg-green-100 text-green-700 hover:bg-green-200">
-        <MessageCircle className="h-4 w-4" />
+      <button type="button" onClick={shareWhatsApp} aria-label="WhatsApp'ta paylaş" title="WhatsApp" className="grid h-11 w-11 place-items-center rounded-full bg-green-100 text-green-700 hover:bg-green-200">
+        <MessageCircle aria-hidden="true" className="h-4 w-4" />
       </button>
-      <button onClick={copy} aria-label="Bağlantıyı kopyala" title="Bağlantıyı kopyala" className={btn}><Link2 className="h-4 w-4" /></button>
-      <button onClick={nativeShare} aria-label="Paylaş" title="Paylaş" className={btn}><Share2 className="h-4 w-4" /></button>
+      <button type="button" onClick={copy} aria-label="Bağlantıyı kopyala" title="Bağlantıyı kopyala" className={btn}><Link2 aria-hidden="true" className="h-4 w-4" /></button>
+      <button type="button" onClick={nativeShare} aria-label="Paylaş" title="Paylaş" className={btn}><Share2 aria-hidden="true" className="h-4 w-4" /></button>
     </div>
   );
 }

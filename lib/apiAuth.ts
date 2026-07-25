@@ -2,6 +2,7 @@ import "server-only";
 import { cookies } from "next/headers";
 import { SignJWT, jwtVerify } from "jose";
 import { prisma } from "./prisma";
+import { authSecret } from "./authSecret";
 
 // Mobil (/api/v1) auth yardımcıları — additive katman.
 // Mevcut cookie tabanlı oturum modüllerine (lib/auth, lib/agentAuth, lib/userAuth)
@@ -12,19 +13,6 @@ import { prisma } from "./prisma";
 // Mobil istemci token'ı Authorization: Bearer ile taşır; web ise cookie ile.
 // Çapraz-silo koruması korunur: bir token yalnız KENDİ silosunun id claim'ini
 // taşıdığı role olarak çözülür (bkz. lib/auth.ts açıklaması).
-
-// NOT: secret türetimi lib/auth.ts / lib/agentAuth.ts / lib/userAuth.ts ile AYNI
-// olmalıdır (değiştirilirse hepsi birlikte değişmeli) — yoksa token'lar karşılıklı
-// doğrulanamaz. Üretimde AUTH_SECRET zorunlu (fail-fast).
-if (process.env.NODE_ENV === "production" && !process.env.AUTH_SECRET) {
-  throw new Error(
-    "AUTH_SECRET tanımlı değil. Üretimde .env içinde en az 32 karakterlik rastgele bir AUTH_SECRET zorunludur."
-  );
-}
-
-const secret = new TextEncoder().encode(
-  process.env.AUTH_SECRET || "kutahya-satilik-dev-secret-change-in-production-please"
-);
 
 export type ApiRole = "user" | "agent" | "admin";
 
@@ -52,13 +40,13 @@ export async function signSessionToken(
     .setProtectedHeader({ alg: "HS256" })
     .setIssuedAt()
     .setExpirationTime(expiresIn)
-    .sign(secret);
+    .sign(authSecret);
 }
 
 // Doğrulanmış JWT payload'ından hangi silonun token'ı olduğunu çözer.
 async function sessionFromToken(token: string): Promise<ApiSession | null> {
   try {
-    const { payload } = await jwtVerify(token, secret);
+    const { payload } = await jwtVerify(token, authSecret);
     const tokenVersion = typeof payload.ver === "number" ? payload.ver : 0;
     if (typeof payload.adminId === "string" && payload.adminId) {
       const admin = await prisma.admin.findUnique({ where: { id: payload.adminId }, select: { email: true, authVersion: true } });

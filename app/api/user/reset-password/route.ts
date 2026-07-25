@@ -4,6 +4,7 @@ import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { checkRate } from "@/lib/rateLimit";
 import { hashPassword } from "@/lib/userAuth";
+import { PASSWORD_ERROR, PASSWORD_MAX_LENGTH, PASSWORD_MIN_LENGTH } from "@/lib/passwordPolicy";
 
 export const runtime = "nodejs";
 
@@ -12,7 +13,7 @@ export const runtime = "nodejs";
 
 const schema = z.object({
   token: z.string().min(16, "Geçersiz bağlantı").max(200),
-  password: z.string().min(6, "Şifre en az 6 karakter olmalı").max(100),
+  password: z.string().min(PASSWORD_MIN_LENGTH, PASSWORD_ERROR).max(PASSWORD_MAX_LENGTH),
 });
 
 export async function POST(req: NextRequest) {
@@ -45,6 +46,10 @@ export async function POST(req: NextRequest) {
   await prisma.$transaction([
     prisma.user.update({ where: { id: rec.userId }, data: { passwordHash, authVersion: { increment: 1 } } }),
     prisma.passwordResetToken.deleteMany({ where: { userId: rec.userId } }),
+    prisma.pushToken.updateMany({
+      where: { recipientRole: "user", recipientId: rec.userId, active: true },
+      data: { active: false },
+    }),
   ]);
 
   return NextResponse.json({ ok: true });

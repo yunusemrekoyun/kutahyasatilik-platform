@@ -94,7 +94,7 @@ export default function ValuationTool({
         {/* SOL: Form */}
         <div className="p-6 sm:p-8">
           <div className="flex items-center gap-2.5">
-            <BarChart3 className="h-6 w-6 text-brand-700" strokeWidth={1.7} />
+            <BarChart3 aria-hidden="true" className="h-6 w-6 text-brand-700" strokeWidth={1.7} />
             <h2 className="font-display text-lg font-bold text-slate-900">Mülk Bilgileri</h2>
           </div>
 
@@ -175,17 +175,17 @@ export default function ValuationTool({
         </div>
 
         {/* SAĞ: Sonuç */}
-        <div className="bg-brand-950 p-6 text-white sm:p-8">
+        <div role="region" aria-label="Ön değerleme sonucu" aria-live="polite" className="bg-brand-950 p-6 text-white sm:p-8">
           {!result ? (
             <div className="flex h-full min-h-[220px] flex-col items-center justify-center text-center text-brand-200">
-              <Tag className="h-10 w-10 text-brand-200" />
+              <Tag aria-hidden="true" className="h-10 w-10 text-brand-200" />
               <p className="mt-3 text-sm">
                 İlçe ve alanı girin, tahmini değer aralığını anında görün.
               </p>
             </div>
           ) : status === "ok" ? (
             <div className="flex h-full min-h-[220px] flex-col items-center justify-center text-center">
-              <CheckCircle2 className="h-12 w-12 text-green-400" />
+              <CheckCircle2 aria-hidden="true" className="h-12 w-12 text-green-400" />
               <h3 className="mt-3 text-xl font-bold">Talebiniz alındı!</h3>
               <p className="mt-2 text-sm text-brand-100">
                 Uzmanımız en kısa sürede sizi arayıp ücretsiz, yerinde ekspertiz için
@@ -213,6 +213,7 @@ export default function ValuationTool({
 
               {!showLead ? (
                 <button
+                  type="button"
                   onClick={() => setShowLead(true)}
                   className="mt-6 w-full rounded-[10px] bg-paper px-4 py-3.5 text-base font-semibold text-brand-800 transition hover:bg-brand-50"
                 >
@@ -223,12 +224,13 @@ export default function ValuationTool({
                   <LoginRequiredNotice text="Ekspertiz talebi için giriş yapın" />
                 </div>
               ) : (
-                <form onSubmit={handleLead} className="mt-6 space-y-3">
+                <form onSubmit={handleLead} aria-busy={status === "loading"} aria-describedby={status === "error" ? "valuation-lead-error" : undefined} className="mt-6 space-y-3">
                   <div>
-                    <label htmlFor="vt-name" className="mb-1.5 block text-sm font-semibold text-brand-100">Ad Soyad <span className="text-gold-300">*</span></label>
+                    <label htmlFor="vt-name" className="mb-1.5 block text-sm font-semibold text-brand-100">Ad Soyad <span aria-hidden="true" className="text-gold-300">*</span></label>
                     <input
                       id="vt-name"
                       required
+                      autoComplete="name"
                       value={name}
                       onChange={(e) => setName(e.target.value)}
                       placeholder="Adınız ve soyadınız"
@@ -236,12 +238,13 @@ export default function ValuationTool({
                     />
                   </div>
                   <div>
-                    <label htmlFor="vt-phone" className="mb-1.5 block text-sm font-semibold text-brand-100">Telefon <span className="text-gold-300">*</span></label>
+                    <label htmlFor="vt-phone" className="mb-1.5 block text-sm font-semibold text-brand-100">Telefon <span aria-hidden="true" className="text-gold-300">*</span></label>
                     <input
                       id="vt-phone"
                       required
                       type="tel"
                       inputMode="tel"
+                      autoComplete="tel"
                       value={phone}
                       onChange={(e) => setPhone(e.target.value)}
                       placeholder="05__ ___ __ __"
@@ -249,7 +252,7 @@ export default function ValuationTool({
                     />
                   </div>
                   {status === "error" && (
-                    <p className="rounded-[10px] bg-red-500/15 px-3.5 py-2.5 text-sm font-medium text-red-200 ring-1 ring-red-400/30">{error}</p>
+                    <p id="valuation-lead-error" role="alert" className="rounded-[10px] bg-red-500/15 px-3.5 py-2.5 text-sm font-medium text-red-200 ring-1 ring-red-400/30">{error}</p>
                   )}
                   <button
                     type="submit"
@@ -259,7 +262,7 @@ export default function ValuationTool({
                     {status === "loading" ? "Gönderiliyor..." : "Ekspertiz Talebini Gönder"}
                   </button>
                   <p className="flex items-center justify-center gap-1.5 text-center text-[13px] text-brand-200">
-                    <Lock className="h-3.5 w-3.5" /> Bilgileriniz yalnızca iletişim için kullanılır.
+                    <Lock aria-hidden="true" className="h-3.5 w-3.5" /> Bilgileriniz yalnızca iletişim için kullanılır.
                   </p>
                 </form>
               )}

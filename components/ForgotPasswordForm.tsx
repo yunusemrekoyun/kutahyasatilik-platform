@@ -34,22 +34,22 @@ export default function ForgotPasswordForm() {
 
   if (status === "sent") {
     return (
-      <div className="rounded-[10px] bg-green-50 p-4 text-center text-sm leading-relaxed text-green-800 ring-1 ring-green-200">
+      <div role="status" className="rounded-[10px] bg-green-50 p-4 text-center text-sm leading-relaxed text-green-800 ring-1 ring-green-200">
         {msg}
         <p className="mt-3">
-          <Link href="/giris" className="font-semibold text-brand-700 hover:underline">Girişe dön</Link>
+          <Link href="/giris" className="inline-flex min-h-11 items-center font-semibold text-brand-700 hover:underline">Girişe dön</Link>
         </p>
       </div>
     );
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
+    <form onSubmit={handleSubmit} aria-busy={status === "loading"} aria-describedby={error ? "forgot-password-error" : undefined} className="space-y-4">
       <div>
         <label htmlFor="fp-email" className="mb-1.5 block text-sm font-semibold text-slate-700">E-posta</label>
         <input id="fp-email" name="email" type="email" required autoComplete="email" placeholder="ornek@eposta.com" className={inputCls} />
       </div>
-      {error && <p className="rounded-[10px] bg-red-50 px-3.5 py-2.5 text-sm font-medium text-red-700 ring-1 ring-red-200">{error}</p>}
+      {error && <p id="forgot-password-error" role="alert" className="rounded-[10px] bg-red-50 px-3.5 py-2.5 text-sm font-medium text-red-700 ring-1 ring-red-200">{error}</p>}
       <button
         type="submit"
         disabled={status === "loading"}
@@ -58,7 +58,7 @@ export default function ForgotPasswordForm() {
         {status === "loading" ? "Gönderiliyor..." : "Sıfırlama bağlantısı gönder"}
       </button>
       <p className="pt-1 text-center text-sm text-slate-500">
-        <Link href="/giris" className="font-semibold text-brand-700 hover:underline">Girişe dön</Link>
+        <Link href="/giris" className="inline-flex min-h-11 items-center font-semibold text-brand-700 hover:underline">Girişe dön</Link>
       </p>
     </form>
   );

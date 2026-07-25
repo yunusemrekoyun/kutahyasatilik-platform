@@ -5,6 +5,7 @@ import { slugify } from "@/lib/format";
 import { notifyAgent } from "@/lib/notify";
 import { sendEmail, notificationEmail } from "@/lib/email";
 import bcrypt from "bcryptjs";
+import { isPasswordLengthValid, PASSWORD_ERROR } from "@/lib/passwordPolicy";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -65,7 +66,9 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
 
     if (action === "activate") {
       const password = String(body?.password ?? "");
-      if (password.length < 6) return NextResponse.json({ ok: false, error: "Parola en az 6 karakter olmalı" }, { status: 400 });
+      if (!isPasswordLengthValid(password)) {
+        return NextResponse.json({ ok: false, error: PASSWORD_ERROR }, { status: 400 });
+      }
       const app = await prisma.agentApplication.findUnique({ where: { id } });
       if (!app) return NextResponse.json({ ok: false, error: "Başvuru bulunamadı" }, { status: 404 });
       if (app.agentId) return NextResponse.json({ ok: false, error: "Bu başvuru zaten aktive edilmiş" }, { status: 400 });

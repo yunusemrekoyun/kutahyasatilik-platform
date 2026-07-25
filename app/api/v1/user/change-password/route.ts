@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { checkRate } from "@/lib/rateLimit";
 import { verifyUserCredentials, hashPassword } from "@/lib/userAuth";
 import { resolveApiSession } from "@/lib/apiAuth";
+import { PASSWORD_ERROR, PASSWORD_MAX_LENGTH, PASSWORD_MIN_LENGTH } from "@/lib/passwordPolicy";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -11,7 +12,7 @@ export const dynamic = "force-dynamic";
 // Mobil oturum-içi şifre değiştirme — web /api/user/change-password Bearer twin'i.
 const schema = z.object({
   currentPassword: z.string().min(1, "Mevcut şifrenizi girin").max(100),
-  newPassword: z.string().min(6, "Yeni şifre en az 6 karakter olmalı").max(100),
+  newPassword: z.string().min(PASSWORD_MIN_LENGTH, PASSWORD_ERROR).max(PASSWORD_MAX_LENGTH),
 });
 
 export async function POST(req: NextRequest) {
@@ -42,6 +43,10 @@ export async function POST(req: NextRequest) {
   await prisma.$transaction([
     prisma.user.update({ where: { id: user.id }, data: { passwordHash, authVersion: { increment: 1 } } }),
     prisma.passwordResetToken.deleteMany({ where: { userId: user.id } }),
+    prisma.pushToken.updateMany({
+      where: { recipientRole: "user", recipientId: user.id, active: true },
+      data: { active: false },
+    }),
   ]);
 
   return NextResponse.json({ ok: true, message: "Şifreniz güncellendi. Lütfen yeniden giriş yapın.", needAuth: true });

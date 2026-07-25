@@ -22,8 +22,14 @@ export default async function SiteLayout({ children }: { children: React.ReactNo
 
   return (
     <SiteContactProvider contact={contact}>
+      <a
+        href="#main-content"
+        className="fixed left-4 top-4 z-[120] -translate-y-24 rounded-lg bg-paper px-4 py-3 font-semibold text-brand-950 shadow-prestige transition-transform focus:translate-y-0"
+      >
+        Ana içeriğe geç
+      </a>
       <Header />
-      <main className="flex-1 pb-16 lg:pb-0">{children}</main>
+      <main id="main-content" tabIndex={-1} className="flex-1 pb-16 outline-none lg:pb-0">{children}</main>
       <Footer />
       <FloatingWhatsApp />
       <CompareBar />

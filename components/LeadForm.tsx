@@ -122,7 +122,7 @@ export default function LeadForm({
 
   if (status === "ok") {
     return (
-      <div className="rounded-lg border border-green-200 bg-green-50 p-6 text-center">
+      <div role="status" className="rounded-lg border border-green-200 bg-green-50 p-6 text-center">
         <span className="mx-auto grid h-12 w-12 place-items-center rounded-full bg-paper text-green-600 ring-1 ring-green-200">
           <CheckCircle2 className="h-7 w-7" />
         </span>
@@ -139,7 +139,7 @@ export default function LeadForm({
     "w-full h-12 rounded-[10px] border border-slate-300 bg-paper px-3.5 text-base text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/30";
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
+    <form onSubmit={handleSubmit} aria-busy={status === "loading"} aria-describedby={status === "error" ? "lead-form-error" : undefined} className="space-y-4">
       {!compact && (
         <div>
           <h3 className="font-display text-lg font-bold text-slate-900">{cfg.title}</h3>
@@ -150,17 +150,17 @@ export default function LeadForm({
       )}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div>
-          <label htmlFor="lf-name" className={labelCls}>Ad Soyad <span className="text-red-500">*</span></label>
-          <input id="lf-name" name="name" required value={name} onChange={(e) => setName(e.target.value)} placeholder="Adınız ve soyadınız" className={inputCls} />
+          <label htmlFor="lf-name" className={labelCls}>Ad Soyad <span aria-hidden="true" className="text-red-500">*</span></label>
+          <input id="lf-name" name="name" required autoComplete="name" value={name} onChange={(e) => setName(e.target.value)} placeholder="Adınız ve soyadınız" className={inputCls} />
         </div>
         <div>
-          <label htmlFor="lf-phone" className={labelCls}>Telefon <span className="text-red-500">*</span></label>
-          <input id="lf-phone" name="phone" required type="tel" inputMode="tel" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="05__ ___ __ __" className={inputCls} />
+          <label htmlFor="lf-phone" className={labelCls}>Telefon <span aria-hidden="true" className="text-red-500">*</span></label>
+          <input id="lf-phone" name="phone" required type="tel" inputMode="tel" autoComplete="tel" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="05__ ___ __ __" className={inputCls} />
         </div>
       </div>
       <div>
         <label htmlFor="lf-email" className={labelCls}>E-posta <span className="font-normal text-slate-400">(opsiyonel)</span></label>
-        <input id="lf-email" name="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="ornek@eposta.com" className={inputCls} />
+        <input id="lf-email" name="email" type="email" autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="ornek@eposta.com" className={inputCls} />
       </div>
       {cfg.showDate && (
         <div>
@@ -173,7 +173,7 @@ export default function LeadForm({
         <textarea id="lf-message" name="message" rows={compact ? 2 : 3} placeholder={cfg.messagePlaceholder} className={`${inputCls} h-auto py-3 leading-relaxed`} />
       </div>
       {status === "error" && (
-        <p className="rounded-[10px] bg-red-50 px-3.5 py-2.5 text-sm font-medium text-red-700 ring-1 ring-red-200">{error}</p>
+        <p id="lead-form-error" role="alert" className="rounded-[10px] bg-red-50 px-3.5 py-2.5 text-sm font-medium text-red-700 ring-1 ring-red-200">{error}</p>
       )}
       <button
         type="submit"
@@ -183,7 +183,7 @@ export default function LeadForm({
         {status === "loading" ? "Gönderiliyor..." : cfg.cta}
       </button>
       <p className="flex items-center justify-center gap-1.5 text-center text-[13px] text-slate-500">
-        <Lock className="h-3.5 w-3.5" /> Bilgileriniz yalnızca sizinle iletişim için kullanılır.
+        <Lock aria-hidden="true" className="h-3.5 w-3.5" /> Bilgileriniz yalnızca sizinle iletişim için kullanılır.
       </p>
     </form>
   );

@@ -1,0 +1,11 @@
+[extend]
+useDefault = true
+
+[[allowlists]]
+description = "Legacy district comparison row metadata; the quoted value is a typed model field name."
+condition = "AND"
+paths = ['''^components/DistrictCompare\.tsx$''']
+regexTarget = "line"
+regexes = [
+  '''^\s*\{\s*label:\s*"Arsa m² Fiyatı",\s*key:\s*"avgPriceArsaM2",\s*fmt:\s*tl,\s*higherBetter:\s*false\s*\},\s*$''',
+]

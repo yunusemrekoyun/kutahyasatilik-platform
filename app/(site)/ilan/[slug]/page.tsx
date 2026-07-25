@@ -246,7 +246,7 @@ export default async function ListingPage({
       />
 
       {/* Breadcrumb */}
-      <nav className="mb-4 text-sm text-slate-500">
+      <nav aria-label="Sayfa yolu" className="mb-4 text-sm text-slate-500">
         <Link href="/" className="hover:text-brand-700">Ana Sayfa</Link>
         <span className="mx-2">/</span>
         <Link href="/ilanlar" className="hover:text-brand-700">İlanlar</Link>
@@ -403,9 +403,9 @@ export default async function ListingPage({
         </div>
 
         {/* SAĞ: iletişim (sticky) */}
-        <aside className="lg:col-span-4">
+        <aside aria-label="İlan iletişim ve danışman bilgileri" className="lg:col-span-4">
           <div className="sticky top-20 space-y-4">
-            <div id="ilan-iletisim" className="scroll-mt-24 border border-stone border-t-[3px] border-t-gold-700 bg-paper p-6 shadow-card">
+            <div id="ilan-iletisim" tabIndex={-1} className="scroll-mt-24 border border-stone border-t-[3px] border-t-gold-700 bg-paper p-6 shadow-card outline-none">
               <span className={`inline-block text-2xl font-bold tabular-nums ${isSold ? "text-slate-500 line-through" : "text-gold-800"}`}>{formatPrice(listing.price, listing.currency)}</span>
               {isSold ? (
                 <div className="mt-4 rounded-lg bg-red-50 p-4 ring-1 ring-red-100">

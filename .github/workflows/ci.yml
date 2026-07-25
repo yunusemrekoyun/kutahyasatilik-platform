@@ -31,15 +31,34 @@ jobs:
       NEXT_PUBLIC_SITE_URL: https://kutahyasatilik.com
       PUSH_ENABLED: "false"
     steps:
-      - uses: actions/checkout@v4
-      - run: npm run check:secrets
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Scan changed commits for secrets
+        uses: gitleaks/gitleaks-action@e0c47f4f8be36e29cdc102c57e68cb5cbf0e8d1e # v3.0.0
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          GITLEAKS_ENABLE_COMMENTS: "false"
+          GITLEAKS_ENABLE_SUMMARY: "false"
+          GITLEAKS_ENABLE_UPLOAD_ARTIFACT: "false"
+          GITLEAKS_VERSION: "8.30.1"
+      - name: Scan full Git history for secrets
+        shell: bash
+        run: gitleaks git . --log-opts=--all --redact=100 --no-banner --exit-code=1 --log-level=warn
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6.5.0
         with:
           node-version: 24
           cache: npm
+      - run: npm run check:secrets
       - name: Prepare ephemeral CI secrets
         shell: bash
-        run: printf 'AUTH_SECRET=%s\n' "$(openssl rand -hex 32)" >> "$GITHUB_ENV"
+        run: |
+          set +x
+          generated_value="$(openssl rand -hex 64)"
+          printf '::add-mask::%s\n' "$generated_value"
+          printf 'AUTH_SECRET=%s\n' "$generated_value" >> "$GITHUB_ENV"
+          unset generated_value
       - run: npm ci
       - run: npx prisma migrate deploy
       - run: npm run lint

@@ -1,5 +1,5 @@
 import { execFileSync } from "node:child_process";
-import { readFileSync, statSync } from "node:fs";
+import { existsSync, readFileSync, statSync } from "node:fs";
 
 const trackedFiles = execFileSync(
   "git",
@@ -23,7 +23,7 @@ function isSensitivePath(file) {
   const base = parts.at(-1) ?? "";
   const isEnv = /^\.env(?:\.|$)/.test(base) && !/\.example$/i.test(base);
   const isCredentialFile =
-    /\.(?:pem|key|p12|pfx|jks|keystore|mobileprovision)$/i.test(base) ||
+    /\.(?:pem|key|p8|p12|pfx|cer|crt|jks|keystore|mobileprovision)$/i.test(base) ||
     /^(?:credentials.*|service-account.*|google-services)\.json$/i.test(base) ||
     base === "GoogleService-Info.plist";
   const isSecretDirectory = parts.some((part) => part === ".secrets" || part === "secrets");
@@ -42,6 +42,7 @@ function isSafeAssignment(value) {
 }
 
 for (const file of trackedFiles) {
+  if (!existsSync(file)) continue;
   if (isSensitivePath(file)) {
     findings.push(`${file}: takip edilen hassas dosya`);
     continue;

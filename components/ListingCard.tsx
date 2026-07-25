@@ -42,16 +42,17 @@ export default function ListingCard({
   const isLand = listing.propertyType === "arsa" || listing.propertyType === "tarla";
   const isSold = listing.status === "sold";
   const location = `${listing.neighborhood ? `${listing.neighborhood}, ` : ""}${listing.district}`;
+  const titleId = `listing-${listing.slug}-title`;
 
   return (
-    <article className={`group flex overflow-hidden border border-stone bg-paper transition duration-200 hover:border-brand-300 ${
+    <article aria-labelledby={titleId} className={`group flex overflow-hidden border border-stone bg-paper transition duration-200 hover:border-brand-300 ${
       variant === "compact" ? "flex-row" : "flex-col"
     }`}>
       <div className={`relative overflow-hidden bg-slate-100 ${
         variant === "editorial" ? "aspect-[16/10]" : variant === "compact" ? "w-36 shrink-0 sm:w-44" : "aspect-[4/3]"
       }`}>
         <CardActions listing={listing} />
-        <Link href={`/ilan/${listing.slug}`} className="relative block h-full w-full">
+        <Link href={`/ilan/${listing.slug}`} aria-label={`${listing.title} ilanını incele`} className="relative block h-full w-full">
           <Image
             src={cover}
             alt={listing.title}
@@ -66,7 +67,7 @@ export default function ListingCard({
         <div className="pointer-events-none absolute left-3 top-3">
           {!isSold && (listing.featured ? (
             <span className="inline-flex items-center gap-1 rounded-md bg-paper/95 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wide text-gold-800">
-              <Star className="h-3.5 w-3.5 fill-current" /> Vitrinde
+              <Star aria-hidden="true" className="h-3.5 w-3.5 fill-current" /> Vitrinde
             </span>
           ) : listing.verified ? (
             <span className="inline-flex items-center gap-1 rounded-md bg-green-700 px-2.5 py-1 text-[11px] font-semibold text-white">
@@ -90,20 +91,20 @@ export default function ListingCard({
           <span className="eyebrow mb-2 block line-clamp-1">
             {PROPERTY_TYPE_LABELS[listing.propertyType] || listing.propertyType} · {location}
           </span>
-          <h3 className={`line-clamp-2 font-display font-semibold leading-snug text-ink transition-colors group-hover:text-brand-700 ${variant === "editorial" ? "text-2xl sm:text-3xl" : variant === "compact" ? "text-base" : "text-xl"}`}>
+          <h3 id={titleId} className={`line-clamp-2 font-display font-semibold leading-snug text-ink transition-colors group-hover:text-brand-700 ${variant === "editorial" ? "text-2xl sm:text-3xl" : variant === "compact" ? "text-base" : "text-xl"}`}>
             {listing.title}
           </h3>
         </Link>
 
         <div className={`mt-3 flex flex-wrap items-center gap-x-4 gap-y-1 text-[13px] font-medium text-muted ${variant === "compact" ? "hidden sm:flex" : ""}`}>
           {!isLand && listing.rooms && (
-            <span className="inline-flex items-center gap-1.5"><BedDouble className="h-[18px] w-[18px] text-slate-400" /> {listing.rooms}</span>
+            <span className="inline-flex items-center gap-1.5"><BedDouble aria-hidden="true" className="h-[18px] w-[18px] text-slate-400" /> {listing.rooms}</span>
           )}
           {listing.areaGross && (
-            <span className="inline-flex items-center gap-1.5"><Maximize className="h-[18px] w-[18px] text-slate-400" /> {listing.areaGross} m²</span>
+            <span className="inline-flex items-center gap-1.5"><Maximize aria-hidden="true" className="h-[18px] w-[18px] text-slate-400" /> {listing.areaGross} m²</span>
           )}
           <span className="inline-flex items-center gap-1.5">
-            <MapPin className="h-[18px] w-[18px] text-slate-400" /> {listing.district}
+            <MapPin aria-hidden="true" className="h-[18px] w-[18px] text-slate-400" /> {listing.district}
           </span>
         </div>
 
@@ -119,7 +120,7 @@ export default function ListingCard({
                   : "bg-green-50 text-green-700 ring-green-200";
               return (
                 <span key={i} className={`inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-[11px] font-semibold ring-1 ${cls}`}>
-                  <Icon className="h-3 w-3" /> {b.text}
+                  <Icon aria-hidden="true" className="h-3 w-3" /> {b.text}
                 </span>
               );
             })}
@@ -132,11 +133,11 @@ export default function ListingCard({
               // eslint-disable-next-line @next/next/no-img-element
               <img
                 src={agentLogo}
-                alt={listing.agentName}
+                alt=""
                 className="h-7 w-7 shrink-0 rounded-full object-cover"
               />
             ) : (
-              <span className="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-brand-50 text-xs font-bold text-brand-700">
+              <span aria-hidden="true" className="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-brand-50 text-xs font-bold text-brand-700">
                 {listing.agentName.charAt(0).toUpperCase()}
               </span>
             )}
@@ -150,9 +151,10 @@ export default function ListingCard({
           </span>
           <Link
             href={`/ilan/${listing.slug}`}
-            className={`shrink-0 items-center gap-1 text-sm font-semibold text-brand-700 transition-colors hover:text-brand-900 ${variant === "compact" ? "hidden sm:inline-flex" : "inline-flex"}`}
+            aria-label={`${listing.title} ilanını incele`}
+            className={`min-h-11 shrink-0 items-center gap-1 text-sm font-semibold text-brand-700 transition-colors hover:text-brand-900 ${variant === "compact" ? "hidden sm:inline-flex" : "inline-flex"}`}
           >
-            İncele <ArrowRight className="h-[18px] w-[18px]" />
+            İncele <ArrowRight aria-hidden="true" className="h-[18px] w-[18px]" />
           </Link>
         </div>
       </div>

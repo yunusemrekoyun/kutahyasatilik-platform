@@ -22,11 +22,17 @@ for (const viewport of viewports) {
     }
 
     await page.goto("/ilanlar");
-    const detailHref = await page.locator('a[href^="/ilan/"]').first().getAttribute("href");
-    if (detailHref) {
+    const detailLink = page.locator('a[href^="/ilan/"]').first();
+    if (await detailLink.count()) {
+      const detailHref = await detailLink.getAttribute("href");
+      if (!detailHref) throw new Error("Listing detail link is missing its href.");
       await page.goto(detailHref);
       await expect(page.locator("h1")).toBeVisible();
       await testInfo.attach(`${viewport.name}-detail`, { body: await page.screenshot({ fullPage: true }), contentType: "image/png" });
+    } else {
+      await expect(
+        page.getByRole("heading", { name: "Bu kriterlere uygun ilan bulunamadı" }),
+      ).toBeVisible();
     }
   });
 }

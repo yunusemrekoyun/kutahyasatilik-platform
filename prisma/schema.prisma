@@ -1,5 +1,5 @@
 // Kütahya Satılık - Dijital Emlak Ofisi
-// Prisma 7 schema (SQLite -> kolayca Postgres'e geçirilebilir)
+// Prisma 7 + PostgreSQL production schema
 
 generator client {
   provider = "prisma-client"

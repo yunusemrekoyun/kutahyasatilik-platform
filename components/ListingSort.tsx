@@ -30,7 +30,7 @@ export default function ListingSort() {
           <option value="price_desc">Fiyat (Azalan)</option>
           <option value="oldest">En Eski</option>
         </select>
-        <ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+        <ChevronDown aria-hidden="true" className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
       </div>
     </div>
   );

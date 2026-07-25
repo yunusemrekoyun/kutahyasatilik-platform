@@ -82,7 +82,7 @@ export default async function ListingsPage({
   return (
     <div className="mx-auto max-w-7xl px-5 py-10 sm:px-6 sm:py-14">
       <TrackView />
-      <nav className="mb-2 text-sm text-slate-500">
+      <nav aria-label="Sayfa yolu" className="mb-2 text-sm text-slate-500">
         <Link href="/" className="hover:text-brand-700">Ana Sayfa</Link>
         <span className="mx-2 text-slate-300">/</span>
         <span className="text-slate-700">{pageTitle}</span>

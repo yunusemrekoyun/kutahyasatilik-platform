@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter, useSearchParams } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { X, SlidersHorizontal, Search, Check, BellRing } from "lucide-react";
 import { DISTRICTS, PROPERTY_TYPES, PROPERTY_TYPE_LABELS } from "@/lib/constants";
 import { formatNumber } from "@/lib/format";
@@ -23,6 +23,48 @@ export default function ListingFilters() {
   const router = useRouter();
   const sp = useSearchParams();
   const [open, setOpen] = useState(false);
+  const sheetRef = useRef<HTMLElement>(null);
+  const closeButtonRef = useRef<HTMLButtonElement>(null);
+  const triggerRef = useRef<HTMLButtonElement>(null);
+
+  useEffect(() => {
+    if (!open) return;
+    const trigger = triggerRef.current;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    closeButtonRef.current?.focus();
+
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        event.preventDefault();
+        setOpen(false);
+        return;
+      }
+      if (event.key !== "Tab" || !sheetRef.current) return;
+      const focusable = Array.from(
+        sheetRef.current.querySelectorAll<HTMLElement>(
+          'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
+        )
+      ).filter((element) => element.getClientRects().length > 0);
+      if (focusable.length === 0) return;
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
+    };
+
+    document.addEventListener("keydown", onKeyDown);
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      document.removeEventListener("keydown", onKeyDown);
+      trigger?.focus();
+    };
+  }, [open]);
 
   const birim = sp.get("birim") === "donum" ? "donum" : "m2";
   const unitLabel = birim === "donum" ? "dönüm" : "m²";
@@ -96,10 +138,11 @@ export default function ListingFilters() {
     <>
       {/* Başlık */}
       <div className="mb-4 flex items-center justify-between border-b border-stone pb-4">
-        <h2 className="font-display text-lg font-bold text-brand-900">Filtreler</h2>
+        <h2 id="listing-filter-title" className="font-display text-lg font-bold text-brand-900">Filtreler</h2>
         <div className="flex items-center gap-3">
           {activeCount > 0 && (
             <button
+              type="button"
               onClick={() => {
                 const owner = new URLSearchParams();
                 if (sp.get("ofis")) owner.set("ofis", sp.get("ofis")!);
@@ -107,13 +150,13 @@ export default function ListingFilters() {
                 const query = owner.toString();
                 router.push(`/ilanlar${query ? `?${query}` : ""}`);
               }}
-              className="text-sm font-medium text-slate-500 transition hover:text-brand-700"
+              className="min-h-11 px-1 text-sm font-medium text-slate-500 transition hover:text-brand-700"
             >
               Temizle
             </button>
           )}
-          <button onClick={() => setOpen(false)} aria-label="Kapat" className="text-slate-400 hover:text-slate-700 lg:hidden">
-            <X className="h-5 w-5" />
+          <button ref={closeButtonRef} type="button" onClick={() => setOpen(false)} aria-label="Filtreleri kapat" className="grid h-11 w-11 place-items-center text-slate-400 hover:text-slate-700 lg:hidden">
+            <X aria-hidden="true" className="h-5 w-5" />
           </button>
         </div>
       </div>
@@ -121,31 +164,35 @@ export default function ListingFilters() {
       <div className="space-y-5">
         {/* Arama */}
         <div className="relative">
-          <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+          <Search aria-hidden="true" className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
           <input
+            id="listing-filter-search"
+            type="search"
             key={sp.get("q") || "q-empty"}
             defaultValue={sp.get("q") || ""}
             onBlur={(e) => update("q", e.target.value)}
             onKeyDown={(e) => { if (e.key === "Enter") update("q", (e.target as HTMLInputElement).value); }}
             placeholder="İlan no, kelime, mahalle..."
-            aria-label="Arama"
+            aria-label="İlanlarda ara"
             className={`${fieldCls} pl-9`}
           />
         </div>
 
         {/* Emlak Tipi (tek seçim) */}
         <div className={sectionCls}>
-          <h3 className={headCls}>Emlak Tipi</h3>
-          <div className="space-y-1">
+          <h3 id="property-type-filter-title" className={headCls}>Emlak Tipi</h3>
+          <div role="group" aria-labelledby="property-type-filter-title" className="space-y-1">
             {PROPERTY_TYPES.map((p) => {
               const on = sp.get("tur") === p.value;
               return (
                 <button
                   key={p.value}
+                  type="button"
                   onClick={() => update("tur", on ? "" : p.value)}
-                  className={`flex w-full items-center gap-3 rounded-lg px-2.5 py-2 text-left text-[15px] transition ${on ? "bg-brand-50 font-semibold text-brand-700" : "text-slate-700 hover:bg-slate-50"}`}
+                  aria-pressed={on}
+                  className={`flex min-h-11 w-full items-center gap-3 rounded-lg px-2.5 py-2 text-left text-[15px] transition ${on ? "bg-brand-50 font-semibold text-brand-700" : "text-slate-700 hover:bg-slate-50"}`}
                 >
-                  <span className={`grid h-5 w-5 shrink-0 place-items-center rounded border ${on ? "border-brand-600 bg-brand-600 text-white" : "border-slate-300"}`}>
+                  <span aria-hidden="true" className={`grid h-5 w-5 shrink-0 place-items-center rounded border ${on ? "border-brand-600 bg-brand-600 text-white" : "border-slate-300"}`}>
                     {on && <Check className="h-3.5 w-3.5" strokeWidth={3} />}
                   </span>
                   {p.label}
@@ -157,8 +204,8 @@ export default function ListingFilters() {
 
         {/* İlçe */}
         <div className={sectionCls}>
-          <h3 className={headCls}>İlçe</h3>
-          <select value={sp.get("ilce") || ""} onChange={(e) => update("ilce", e.target.value)} className={fieldCls}>
+          <label htmlFor="listing-filter-district" className={headCls}>İlçe</label>
+          <select id="listing-filter-district" value={sp.get("ilce") || ""} onChange={(e) => update("ilce", e.target.value)} className={fieldCls}>
             <option value="">Tüm İlçeler</option>
             {DISTRICTS.map((d) => <option key={d.slug} value={d.name}>{d.name}</option>)}
           </select>
@@ -166,25 +213,27 @@ export default function ListingFilters() {
 
         {/* Fiyat Aralığı */}
         <div className={sectionCls}>
-          <h3 className={headCls}>Fiyat Aralığı (₺)</h3>
+          <h3 id="price-filter-title" className={headCls}>Fiyat Aralığı (₺)</h3>
           <div className="flex items-center gap-2">
-            <ThousandsInput key={sp.get("min") || "min"} defaultValue={sp.get("min") || ""} onCommit={(raw) => update("min", raw)} placeholder="Min" className={fieldCls} />
-            <span className="text-slate-400">–</span>
-            <ThousandsInput key={sp.get("max") || "max"} defaultValue={sp.get("max") || ""} onCommit={(raw) => update("max", raw)} placeholder="Max" className={fieldCls} />
+            <ThousandsInput key={sp.get("min") || "min"} defaultValue={sp.get("min") || ""} onCommit={(raw) => update("min", raw)} placeholder="Min" ariaLabel="Minimum fiyat" className={fieldCls} />
+            <span aria-hidden="true" className="text-slate-400">–</span>
+            <ThousandsInput key={sp.get("max") || "max"} defaultValue={sp.get("max") || ""} onCommit={(raw) => update("max", raw)} placeholder="Max" ariaLabel="Maksimum fiyat" className={fieldCls} />
           </div>
         </div>
 
         {/* Oda Sayısı */}
         <div className={sectionCls}>
-          <h3 className={headCls}>Oda Sayısı</h3>
-          <div className="grid grid-cols-3 gap-2">
+          <h3 id="room-filter-title" className={headCls}>Oda Sayısı</h3>
+          <div role="group" aria-labelledby="room-filter-title" className="grid grid-cols-3 gap-2">
             {ROOMS.map((r) => {
               const on = sp.get("oda") === r;
               return (
                 <button
                   key={r}
+                  type="button"
                   onClick={() => update("oda", on ? "" : r)}
-                  className={`rounded-lg border py-2 text-sm font-medium transition ${on ? "border-brand-600 bg-brand-50 text-brand-700" : "border-slate-300 text-slate-600 hover:border-brand-300"}`}
+                  aria-pressed={on}
+                  className={`min-h-11 rounded-lg border py-2 text-sm font-medium transition ${on ? "border-brand-600 bg-brand-50 text-brand-700" : "border-slate-300 text-slate-600 hover:border-brand-300"}`}
                 >
                   {r}
                 </button>
@@ -195,35 +244,37 @@ export default function ListingFilters() {
 
         {/* Alan Aralığı */}
         <div className={sectionCls}>
-          <h3 className={headCls}>Alan Aralığı</h3>
+          <h3 id="area-filter-title" className={headCls}>Alan Aralığı</h3>
           <div className="grid grid-cols-3 gap-2">
-            <select value={birim} onChange={(e) => setBirim(e.target.value)} className={fieldCls}>
+            <select aria-label="Alan birimi" value={birim} onChange={(e) => setBirim(e.target.value)} className={fieldCls}>
               <option value="m2">m²</option>
               <option value="donum">Dönüm</option>
             </select>
-            <input key={`minAlan-${sp.get("minAlan") || ""}`} defaultValue={sp.get("minAlan") || ""} onBlur={(e) => update("minAlan", e.target.value)} onKeyDown={(e) => { if (e.key === "Enter") update("minAlan", (e.target as HTMLInputElement).value); }} type="number" min={0} inputMode="numeric" placeholder={`Min`} className={fieldCls} />
-            <input key={`maxAlan-${sp.get("maxAlan") || ""}`} defaultValue={sp.get("maxAlan") || ""} onBlur={(e) => update("maxAlan", e.target.value)} onKeyDown={(e) => { if (e.key === "Enter") update("maxAlan", (e.target as HTMLInputElement).value); }} type="number" min={0} inputMode="numeric" placeholder={`Max`} className={fieldCls} />
+            <input aria-label={`Minimum alan (${unitLabel})`} key={`minAlan-${sp.get("minAlan") || ""}`} defaultValue={sp.get("minAlan") || ""} onBlur={(e) => update("minAlan", e.target.value)} onKeyDown={(e) => { if (e.key === "Enter") update("minAlan", (e.target as HTMLInputElement).value); }} type="number" min={0} inputMode="numeric" placeholder="Min" className={fieldCls} />
+            <input aria-label={`Maksimum alan (${unitLabel})`} key={`maxAlan-${sp.get("maxAlan") || ""}`} defaultValue={sp.get("maxAlan") || ""} onBlur={(e) => update("maxAlan", e.target.value)} onKeyDown={(e) => { if (e.key === "Enter") update("maxAlan", (e.target as HTMLInputElement).value); }} type="number" min={0} inputMode="numeric" placeholder="Max" className={fieldCls} />
           </div>
           {birim === "donum" && <p className="mt-1.5 text-[11px] text-slate-400">1 dönüm = 1.000 m²</p>}
         </div>
 
         {/* İmar (arsa/tarla) */}
         <div className={sectionCls}>
-          <h3 className={headCls}>İmar Durumu <span className="font-normal text-slate-400">(arsa/tarla)</span></h3>
-          <input key={sp.get("imar") || "imar"} defaultValue={sp.get("imar") || ""} onBlur={(e) => update("imar", e.target.value)} onKeyDown={(e) => { if (e.key === "Enter") update("imar", (e.target as HTMLInputElement).value); }} placeholder="Konut, Ticari..." className={fieldCls} />
+          <label htmlFor="listing-filter-zoning" className={headCls}>İmar Durumu <span className="font-normal text-slate-400">(arsa/tarla)</span></label>
+          <input id="listing-filter-zoning" key={sp.get("imar") || "imar"} defaultValue={sp.get("imar") || ""} onBlur={(e) => update("imar", e.target.value)} onKeyDown={(e) => { if (e.key === "Enter") update("imar", (e.target as HTMLInputElement).value); }} placeholder="Konut, Ticari..." className={fieldCls} />
         </div>
 
         {/* Olanaklar */}
         <div className={sectionCls}>
-          <h3 className={headCls}>Olanaklar</h3>
-          <div className="flex flex-wrap gap-2">
+          <h3 id="amenities-filter-title" className={headCls}>Olanaklar</h3>
+          <div role="group" aria-labelledby="amenities-filter-title" className="flex flex-wrap gap-2">
             {AMENITIES.map((a) => {
               const on = !!sp.get(a.key);
               return (
                 <button
                   key={a.key}
+                  type="button"
                   onClick={() => toggle(a.key)}
-                  className={`rounded-full px-3.5 py-1.5 text-sm font-medium transition ${on ? "bg-brand-700 text-white" : "bg-slate-100 text-slate-600 hover:bg-slate-200"}`}
+                  aria-pressed={on}
+                  className={`min-h-11 rounded-full px-3.5 py-1.5 text-sm font-medium transition ${on ? "bg-brand-700 text-white" : "bg-slate-100 text-slate-600 hover:bg-slate-200"}`}
                 >
                   {a.label}
                 </button>
@@ -241,8 +292,8 @@ export default function ListingFilters() {
                 const label = chipLabel(c.k, c.v);
                 if (!label) return null;
                 return (
-                  <button key={c.k} onClick={() => update(c.k, "")} className="inline-flex items-center gap-1 rounded-full bg-brand-50 px-3 py-1 text-xs font-medium text-brand-700 hover:bg-brand-100">
-                    {label} <X className="h-3 w-3" />
+                  <button key={c.k} type="button" onClick={() => update(c.k, "")} aria-label={`${label} filtresini kaldır`} className="inline-flex min-h-11 items-center gap-1 rounded-full bg-brand-50 px-3 py-1 text-xs font-medium text-brand-700 hover:bg-brand-100">
+                    {label} <X aria-hidden="true" className="h-3 w-3" />
                   </button>
                 );
               })}
@@ -253,15 +304,16 @@ export default function ListingFilters() {
 
       {/* Bu aramayı kaydet → alıcı talebi (kriterler taşınır, uygun ilan gelince haber) */}
       <button
+        type="button"
         onClick={saveSearch}
         className="mt-5 flex w-full items-center justify-center gap-2 rounded-lg border border-brand-200 bg-brand-50 px-4 py-3 text-sm font-semibold text-brand-700 transition hover:bg-brand-100"
       >
-        <BellRing className="h-4 w-4" /> Bu aramayı kaydet, uygun ilan gelince haber ver
+        <BellRing aria-hidden="true" className="h-4 w-4" /> Bu aramayı kaydet, uygun ilan gelince haber ver
       </button>
 
       {/* Mobil: sonuçları gör (sheet'i kapatır; filtreler zaten anında uygulanır) */}
       <div className="mt-6 lg:hidden">
-        <button onClick={() => setOpen(false)} className="w-full rounded-lg bg-brand-700 px-4 py-3 text-base font-semibold text-white transition hover:bg-brand-800">
+        <button type="button" onClick={() => setOpen(false)} className="min-h-11 w-full rounded-lg bg-brand-700 px-4 py-3 text-base font-semibold text-white transition hover:bg-brand-800">
           Sonuçları Gör
         </button>
       </div>
@@ -272,18 +324,28 @@ export default function ListingFilters() {
     <>
       {/* Mobil tetikleyici */}
       <button
+        ref={triggerRef}
+        type="button"
         onClick={() => setOpen(true)}
+        aria-controls="listing-filters"
+        aria-expanded={open}
+        aria-label={activeCount > 0 ? `Filtreleri aç, ${activeCount} aktif filtre` : "Filtreleri aç"}
         className="mb-4 flex w-full items-center justify-center gap-2 rounded-lg border border-slate-300 bg-paper px-4 py-3 text-[15px] font-medium text-slate-700 lg:hidden"
       >
-        <SlidersHorizontal className="h-5 w-5" /> Filtrele
-        {activeCount > 0 && <span className="rounded-full bg-brand-600 px-2 py-0.5 text-xs font-semibold text-white">{activeCount}</span>}
+        <SlidersHorizontal aria-hidden="true" className="h-5 w-5" /> Filtrele
+        {activeCount > 0 && <span aria-hidden="true" className="rounded-full bg-brand-600 px-2 py-0.5 text-xs font-semibold text-white">{activeCount}</span>}
       </button>
 
       {/* Mobil arka plan */}
-      {open && <div onClick={() => setOpen(false)} className="fixed inset-0 z-40 bg-black/40 lg:hidden" />}
+      {open && <div aria-hidden="true" onClick={() => setOpen(false)} className="fixed inset-0 z-40 bg-black/40 lg:hidden" />}
 
       {/* Sidebar (masaüstü) / Sheet (mobil) */}
       <aside
+        id="listing-filters"
+        ref={sheetRef}
+        role={open ? "dialog" : undefined}
+        aria-modal={open ? true : undefined}
+        aria-labelledby="listing-filter-title"
         className={`${open ? "fixed inset-y-0 right-0 z-50 w-[92%] max-w-sm overflow-y-auto shadow-prestige" : "hidden"} bg-paper p-5 lg:sticky lg:top-24 lg:z-auto lg:block lg:max-h-[calc(100vh-7rem)] lg:w-auto lg:overflow-y-auto lg:border-r lg:border-stone lg:bg-transparent lg:py-0 lg:pl-0 lg:pr-6`}
       >
         {content}

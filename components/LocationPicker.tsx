@@ -78,7 +78,9 @@ export default function LocationPicker({
       <input type="hidden" name={lngName} value={lng ?? ""} readOnly />
 
       <div className="flex gap-2">
+        <label htmlFor="location-address-search" className="sr-only">Haritada adres ara</label>
         <input
+          id="location-address-search"
           value={q}
           onChange={(e) => setQ(e.target.value)}
           onKeyDown={(e) => {
@@ -88,26 +90,28 @@ export default function LocationPicker({
             }
           }}
           placeholder="Adres ara: örn. Cumhuriyet Mah. Kütahya"
+          aria-describedby={err ? "location-search-error" : "location-search-help"}
           className={inputCls}
         />
         <button
           type="button"
           onClick={search}
           disabled={searching}
-          className="shrink-0 rounded-lg bg-brand-700 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-brand-800 disabled:opacity-60"
+          aria-busy={searching}
+          className="min-h-11 shrink-0 rounded-lg bg-brand-700 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-brand-800 disabled:opacity-60"
         >
           {searching ? "Aranıyor..." : "Ara"}
         </button>
       </div>
-      {err && <p className="text-xs text-red-600">{err}</p>}
+      {err && <p id="location-search-error" role="alert" className="text-xs text-red-600">{err}</p>}
 
-      <div className="h-72 overflow-hidden rounded-lg ring-1 ring-stone">
+      <div role="region" aria-label="Mülk konumu haritası" className="h-72 overflow-hidden rounded-lg ring-1 ring-stone">
         <Inner lat={lat} lng={lng} center={center} zoom={zoom} onPick={pick} />
       </div>
 
       <div className="flex flex-wrap items-center gap-3 text-sm">
-        <span className="text-slate-500">Haritaya tıklayın veya pini sürükleyin.</span>
-        <code className="rounded bg-slate-900 px-2 py-1 text-xs text-emerald-300">
+        <span id="location-search-help" className="text-slate-500">Adres arayın; isterseniz haritaya tıklayın veya pini sürükleyin.</span>
+        <code aria-live="polite" className="rounded bg-slate-900 px-2 py-1 text-xs text-emerald-300">
           {lat != null && lng != null ? `${lat.toFixed(5)}, ${lng.toFixed(5)}` : "lat: — , lng: —"}
         </code>
         {lat != null && (
@@ -117,7 +121,7 @@ export default function LocationPicker({
               setLat(null);
               setLng(null);
             }}
-            className="text-xs text-slate-500 underline hover:text-slate-700"
+            className="min-h-11 px-1 text-xs text-slate-500 underline hover:text-slate-700"
           >
             Konumu temizle
           </button>

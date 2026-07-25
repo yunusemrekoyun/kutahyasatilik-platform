@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import * as Sentry from "@sentry/nextjs";
 import { resolveApiSession } from "@/lib/apiAuth";
 import { markRead, markAllRead } from "@/lib/notify";
 import { checkRate } from "@/lib/rateLimit";
@@ -22,7 +23,11 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ ok: false, error: "id veya all gerekli" }, { status: 400 });
     }
     return NextResponse.json({ ok: true });
-  } catch {
-    return NextResponse.json({ ok: true });
+  } catch (error) {
+    Sentry.captureException(error);
+    return NextResponse.json(
+      { ok: false, error: "Bildirim güncellenemedi" },
+      { status: 500 },
+    );
   }
 }

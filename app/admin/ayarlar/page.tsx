@@ -31,7 +31,7 @@ export default async function SettingsPage() {
         </label>
         <label className="block">
           <span className="mb-1 block text-sm font-medium text-slate-700">WhatsApp Numarası (ülke kodlu, sadece rakam)</span>
-          <input name="whatsapp" defaultValue={s.whatsapp || SITE.whatsapp} placeholder="905320000000" className={inputCls} />
+          <input name="whatsapp" defaultValue={s.whatsapp || SITE.whatsapp} placeholder="90 ile başlayan uluslararası format" className={inputCls} />
         </label>
         <label className="block">
           <span className="mb-1 block text-sm font-medium text-slate-700">E-posta</span>

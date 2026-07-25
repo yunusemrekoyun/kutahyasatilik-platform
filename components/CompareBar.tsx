@@ -9,7 +9,7 @@ export default function CompareBar() {
   if (!hydrated || compare.length === 0) return null;
 
   return (
-    <div className="fixed bottom-14 lg:bottom-0 inset-x-0 z-40 border-t border-brand-800 bg-brand-900/95 backdrop-blur text-white shadow-2xl">
+    <div role="region" aria-label="Karşılaştırmaya eklenen ilanlar" className="fixed bottom-14 lg:bottom-0 inset-x-0 z-40 border-t border-brand-800 bg-brand-900/95 backdrop-blur text-white shadow-2xl">
       <div className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 py-3">
         <div className="flex items-center gap-2 min-w-0">
           <span className="hidden sm:inline text-sm font-semibold text-gold-300">Karşılaştırma:</span>
@@ -22,14 +22,14 @@ export default function CompareBar() {
           </div>
         </div>
         <div className="flex shrink-0 items-center gap-2">
-          <button onClick={clearCompare} className="rounded-lg px-3 py-2 text-xs text-white/70 hover:text-white">
+          <button type="button" onClick={clearCompare} className="min-h-11 rounded-lg px-3 py-2 text-xs text-white/70 hover:text-white">
             Temizle
           </button>
           <Link
             href="/karsilastir"
-            className="inline-flex items-center gap-1 rounded-lg bg-white px-4 py-2 text-xs font-bold text-brand-950 hover:bg-brand-50"
+            className="inline-flex min-h-11 items-center gap-1 rounded-lg bg-white px-4 py-2 text-xs font-bold text-brand-950 hover:bg-brand-50"
           >
-            Karşılaştır ({compare.length}) <ArrowRight className="h-4 w-4" />
+            Karşılaştır ({compare.length}) <ArrowRight aria-hidden="true" className="h-4 w-4" />
           </Link>
         </div>
       </div>

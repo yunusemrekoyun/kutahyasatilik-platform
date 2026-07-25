@@ -48,16 +48,14 @@ test("marketplace directories and official local tools keep their public contrac
   }
 });
 
-test("app-link manifests are published and the push worker is private", async ({ request }) => {
+test("unconfigured app-link manifests fail closed and the push worker is private", async ({ request }) => {
   const aasa = await request.get("/.well-known/apple-app-site-association");
-  expect(aasa.ok()).toBeTruthy();
-  const aasaBody = await aasa.json();
-  expect(aasaBody).toMatchObject({ applinks: { apps: [] } });
-  expect(Array.isArray(aasaBody.applinks.details)).toBeTruthy();
+  expect(aasa.status()).toBe(404);
+  expect(aasa.headers()["cache-control"]).toBe("no-store");
 
   const assetLinks = await request.get("/.well-known/assetlinks.json");
-  expect(assetLinks.ok()).toBeTruthy();
-  expect(Array.isArray(await assetLinks.json())).toBeTruthy();
+  expect(assetLinks.status()).toBe(404);
+  expect(assetLinks.headers()["cache-control"]).toBe("no-store");
 
   const worker = await request.post("/api/internal/push/dispatch");
   expect(worker.status()).toBe(401);

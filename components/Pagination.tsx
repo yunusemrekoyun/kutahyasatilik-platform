@@ -34,20 +34,22 @@ export default function Pagination({
     prev = p;
   }
 
-  const btn = "grid h-10 min-w-10 place-items-center rounded-lg px-3 text-sm font-medium transition";
+  const btn = "grid min-h-11 min-w-11 place-items-center rounded-lg px-3 text-sm font-medium transition";
 
   return (
-    <nav className="mt-10 flex items-center justify-center gap-1.5">
+    <nav aria-label="İlan sonuç sayfaları" className="mt-10 flex items-center justify-center gap-1.5">
       {page > 1 && (
-        <Link href={makeHref(page - 1)} className={`${btn} bg-paper text-slate-700 ring-1 ring-stone hover:ring-brand-300`}>‹ Önceki</Link>
+        <Link rel="prev" href={makeHref(page - 1)} className={`${btn} bg-paper text-slate-700 ring-1 ring-stone hover:ring-brand-300`}>‹ Önceki</Link>
       )}
       {pages.map((p, i) =>
         p === "..." ? (
-          <span key={`e${i}`} className="px-2 text-slate-400">…</span>
+          <span key={`e${i}`} aria-hidden="true" className="px-2 text-slate-400">…</span>
         ) : (
           <Link
             key={p}
             href={makeHref(p)}
+            aria-label={`${p}. sayfaya git`}
+            aria-current={p === page ? "page" : undefined}
             className={`${btn} ${p === page ? "bg-brand-700 text-white" : "bg-paper text-slate-700 ring-1 ring-stone hover:ring-brand-300"}`}
           >
             {p}
@@ -55,7 +57,7 @@ export default function Pagination({
         )
       )}
       {page < totalPages && (
-        <Link href={makeHref(page + 1)} className={`${btn} bg-paper text-slate-700 ring-1 ring-stone hover:ring-brand-300`}>Sonraki ›</Link>
+        <Link rel="next" href={makeHref(page + 1)} className={`${btn} bg-paper text-slate-700 ring-1 ring-stone hover:ring-brand-300`}>Sonraki ›</Link>
       )}
     </nav>
   );

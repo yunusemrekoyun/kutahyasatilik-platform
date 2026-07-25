@@ -94,9 +94,9 @@ export default function SellerForm({
 
   if (status === "ok") {
     return (
-      <div className="rounded-lg bg-paper p-8 text-center ring-1 ring-stone">
+      <div role="status" className="rounded-lg bg-paper p-8 text-center ring-1 ring-stone">
         <span className="mx-auto grid h-14 w-14 place-items-center rounded-full bg-green-50 text-green-600 ring-1 ring-green-200">
-          <CheckCircle2 className="h-8 w-8" />
+          <CheckCircle2 aria-hidden="true" className="h-8 w-8" />
         </span>
         <h3 className="mt-4 font-display text-2xl font-bold text-slate-900">Talebiniz alındı</h3>
         <p className="mt-2 leading-relaxed text-slate-600">
@@ -112,20 +112,25 @@ export default function SellerForm({
     "w-full h-12 rounded-[10px] border border-slate-300 bg-paper px-3.5 text-base text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/30";
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
+    <form
+      onSubmit={handleSubmit}
+      aria-busy={status === "uploading" || status === "loading"}
+      aria-describedby={status === "error" ? "seller-form-error" : undefined}
+      className="space-y-4"
+    >
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div>
-          <label htmlFor="sf-name" className={labelCls}>Ad Soyad <span className="text-red-500">*</span></label>
-          <input id="sf-name" name="name" required defaultValue={defaultName} placeholder="Adınız ve soyadınız" className={inputCls} />
+          <label htmlFor="sf-name" className={labelCls}>Ad Soyad <span aria-hidden="true" className="text-red-500">*</span></label>
+          <input id="sf-name" name="name" required autoComplete="name" defaultValue={defaultName} placeholder="Adınız ve soyadınız" className={inputCls} />
         </div>
         <div>
-          <label htmlFor="sf-phone" className={labelCls}>Telefon <span className="text-red-500">*</span></label>
-          <input id="sf-phone" name="phone" required type="tel" inputMode="tel" placeholder="05__ ___ __ __" className={inputCls} />
+          <label htmlFor="sf-phone" className={labelCls}>Telefon <span aria-hidden="true" className="text-red-500">*</span></label>
+          <input id="sf-phone" name="phone" required type="tel" inputMode="tel" autoComplete="tel" placeholder="05__ ___ __ __" className={inputCls} />
         </div>
       </div>
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div>
-          <label htmlFor="sf-district" className={labelCls}>İlçe <span className="text-red-500">*</span></label>
+          <label htmlFor="sf-district" className={labelCls}>İlçe <span aria-hidden="true" className="text-red-500">*</span></label>
           <select id="sf-district" name="district" required defaultValue="" className={inputCls}>
             <option value="" disabled>İlçe seçin</option>
             {DISTRICTS.map((d) => (
@@ -140,7 +145,7 @@ export default function SellerForm({
       </div>
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div>
-          <label htmlFor="sf-type" className={labelCls}>Mülk Türü <span className="text-red-500">*</span></label>
+          <label htmlFor="sf-type" className={labelCls}>Mülk Türü <span aria-hidden="true" className="text-red-500">*</span></label>
           <select id="sf-type" name="propertyType" required defaultValue="" className={inputCls}>
             <option value="" disabled>Tür seçin</option>
             {PROPERTY_TYPES.map((p) => (
@@ -159,27 +164,29 @@ export default function SellerForm({
         <textarea id="sf-message" name="message" rows={3} placeholder="m², oda sayısı, bina durumu gibi detaylar..." className={`${inputCls} h-auto py-3 leading-relaxed`} />
       </div>
 
-      <div>
-        <span className={labelCls}>Konum <span className="font-normal text-slate-400">(opsiyonel — mülkün yerini haritada işaretleyin)</span></span>
+      <fieldset>
+        <legend className={labelCls}>Konum <span className="font-normal text-slate-400">(opsiyonel — mülkün yerini haritada işaretleyin)</span></legend>
         <LocationPicker latName="lat" lngName="lng" />
-      </div>
+      </fieldset>
 
       <div>
-        <span className={labelCls}>Fotoğraf ekleyin <span className="font-normal text-slate-400">(opsiyonel, en fazla 6)</span></span>
+        <label htmlFor="sf-photos" className={labelCls}>Fotoğraf ekleyin <span className="font-normal text-slate-400">(opsiyonel, en fazla 6)</span></label>
         <input
+          id="sf-photos"
           type="file"
           accept="image/*"
           multiple
           onChange={(e) => setFiles(Array.from(e.target.files || []))}
-          className="block w-full text-sm text-slate-600 file:mr-3 file:rounded-[10px] file:border-0 file:bg-brand-50 file:px-4 file:py-2.5 file:text-sm file:font-semibold file:text-brand-700 hover:file:bg-brand-100"
+          aria-describedby="sf-photo-status"
+          className="block min-h-11 w-full text-sm text-slate-600 file:mr-3 file:min-h-11 file:rounded-[10px] file:border-0 file:bg-brand-50 file:px-4 file:py-2.5 file:text-sm file:font-semibold file:text-brand-700 hover:file:bg-brand-100"
         />
-        {files.length > 0 && (
-          <p className="mt-1.5 text-sm text-slate-500">{files.length} fotoğraf seçildi</p>
-        )}
+        <p id="sf-photo-status" aria-live="polite" className={files.length > 0 ? "mt-1.5 text-sm text-slate-500" : "sr-only"}>
+          {files.length > 0 ? `${files.length} fotoğraf seçildi` : "Henüz fotoğraf seçilmedi"}
+        </p>
       </div>
 
       {status === "error" && (
-        <p className="rounded-[10px] bg-red-50 px-3.5 py-2.5 text-sm font-medium text-red-700 ring-1 ring-red-200">{error}</p>
+        <p id="seller-form-error" role="alert" className="rounded-[10px] bg-red-50 px-3.5 py-2.5 text-sm font-medium text-red-700 ring-1 ring-red-200">{error}</p>
       )}
 
       <button
@@ -194,7 +201,7 @@ export default function SellerForm({
           : "İlan Talebi Oluştur"}
       </button>
       <p className="flex items-center justify-center gap-1.5 text-center text-[13px] text-slate-500">
-        <Lock className="h-3.5 w-3.5" /> Bilgileriniz KVKK kapsamında korunur. Spam göndermiyoruz.
+        <Lock aria-hidden="true" className="h-3.5 w-3.5" /> Bilgileriniz KVKK kapsamında korunur. Spam göndermiyoruz.
       </p>
     </form>
   );

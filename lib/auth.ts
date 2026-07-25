@@ -3,20 +3,9 @@ import { cookies } from "next/headers";
 import { SignJWT, jwtVerify } from "jose";
 import bcrypt from "bcryptjs";
 import { prisma } from "./prisma";
+import { authSecret } from "./authSecret";
 
 const COOKIE_NAME = "ks_admin";
-
-// Üretimde AUTH_SECRET zorunludur — yoksa oturum imzaları herkese açık fallback
-// secret ile üretilir ve forge edilebilir. Boot etmeyi reddet (fail-fast).
-if (process.env.NODE_ENV === "production" && !process.env.AUTH_SECRET) {
-  throw new Error(
-    "AUTH_SECRET tanımlı değil. Üretimde .env içinde en az 32 karakterlik rastgele bir AUTH_SECRET zorunludur."
-  );
-}
-
-const secret = new TextEncoder().encode(
-  process.env.AUTH_SECRET || "kutahya-satilik-dev-secret-change-in-production-please"
-);
 
 export type SessionPayload = { adminId: string; email: string };
 
@@ -38,7 +27,7 @@ export async function createSession(payload: SessionPayload) {
     .setProtectedHeader({ alg: "HS256" })
     .setIssuedAt()
     .setExpirationTime("7d")
-    .sign(secret);
+    .sign(authSecret);
 
   const cookieStore = await cookies();
   cookieStore.set(COOKIE_NAME, token, {
@@ -60,7 +49,7 @@ export async function getSession(): Promise<SessionPayload | null> {
   const token = cookieStore.get(COOKIE_NAME)?.value;
   if (!token) return null;
   try {
-    const { payload } = await jwtVerify(token, secret);
+    const { payload } = await jwtVerify(token, authSecret);
     // Çapraz-silo koruması: tüm oturumlar aynı AUTH_SECRET ile imzalı; bu cookie'ye
     // başka silonun (ör. ks_user) token'ı konsa imza geçerli olur. adminId'nin
     // varlığını şart koşarak yalnız gerçek admin token'ını kabul et.

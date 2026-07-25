@@ -2,16 +2,48 @@ import { readdir, stat } from "node:fs/promises";
 import { join, relative } from "node:path";
 
 const root = join(process.cwd(), ".next", "standalone");
-const forbidden = ["docs", "rapor", ".agents", "prisma/migrations", "public/uploads"];
+const forbiddenDirectories = new Set([
+  ".agents",
+  "docs",
+  "kutahyasatilik ilan",
+  "public/uploads",
+  "rapor",
+  "prisma/migrations",
+]);
 const maxBytes = Number(process.env.STANDALONE_MAX_MB || 250) * 1024 * 1024;
 let total = 0;
 const violations = [];
+
+function normalizePath(value) {
+  return value
+    .normalize("NFC")
+    .replaceAll("\\", "/")
+    .toLocaleLowerCase("tr-TR");
+}
+
+function isForbiddenPath(value) {
+  const segments = value.split("/");
+  if (segments.some((segment) => segment === ".env" || segment.startsWith(".env."))) {
+    return true;
+  }
+  return [...forbiddenDirectories].some(
+    (name) =>
+      value === name ||
+      value.startsWith(`${name}/`) ||
+      value.includes(`/${name}/`) ||
+      value.endsWith(`/${name}`),
+  );
+}
 
 async function walk(directory) {
   for (const entry of await readdir(directory, { withFileTypes: true })) {
     const absolute = join(directory, entry.name);
     const rel = relative(root, absolute).replaceAll("\\", "/");
-    if (forbidden.some((name) => rel === name || rel.endsWith(`/${name}`))) violations.push(rel);
+    const normalizedRel = normalizePath(rel);
+    if (isForbiddenPath(normalizedRel)) {
+      violations.push(rel);
+      continue;
+    }
     if (entry.isDirectory()) await walk(absolute);
     else total += (await stat(absolute)).size;
   }

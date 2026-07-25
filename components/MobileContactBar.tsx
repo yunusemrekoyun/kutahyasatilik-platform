@@ -19,12 +19,12 @@ export default function MobileContactBar({
   // Her zaman görünür: birincil eylem forma/talep alanına götürür (#ilan-iletisim).
   // Telefon/WhatsApp yalnız tanımlıysa kompakt ikon olarak eklenir (sahte link yok).
   return (
-    <div className="fixed inset-x-0 bottom-[58px] z-30 flex gap-2 border-t border-stone bg-paper/95 p-2.5 backdrop-blur lg:hidden">
+    <div role="region" aria-label="İlan iletişim seçenekleri" className="fixed inset-x-0 bottom-[58px] z-30 flex gap-2 border-t border-stone bg-paper/95 p-2.5 backdrop-blur lg:hidden">
       <a
         href="#ilan-iletisim"
         className="flex flex-1 items-center justify-center gap-2 rounded-[10px] bg-brand-700 py-3.5 text-sm font-semibold text-white"
       >
-        <CalendarDays className="h-4 w-4" /> Randevu / Bilgi Al
+        <CalendarDays aria-hidden="true" className="h-4 w-4" /> Randevu / Bilgi Al
       </a>
       {c.phoneRaw && (
         <a
@@ -33,7 +33,7 @@ export default function MobileContactBar({
           aria-label="Telefon ile ara"
           className="grid w-12 shrink-0 place-items-center rounded-[10px] bg-brand-50 text-brand-700"
         >
-          <Phone className="h-5 w-5" />
+          <Phone aria-hidden="true" className="h-5 w-5" />
         </a>
       )}
       {c.whatsapp && (
@@ -45,7 +45,7 @@ export default function MobileContactBar({
           aria-label="WhatsApp'tan yaz"
           className="grid w-12 shrink-0 place-items-center rounded-[10px] bg-green-600 text-white"
         >
-          <MessageCircle className="h-5 w-5" />
+          <MessageCircle aria-hidden="true" className="h-5 w-5" />
         </a>
       )}
     </div>

@@ -19,24 +19,30 @@ export default function ListingDetailActions({ listing }: { listing: ListingSnap
   return (
     <div className="flex gap-2">
       <button
+        type="button"
         onClick={() => toggleFavorite(listing)}
+        aria-pressed={fav}
+        aria-label={fav ? "İlanı favorilerden çıkar" : "İlanı favorilere ekle"}
         className={`flex flex-1 items-center justify-center gap-1.5 rounded-lg border px-3 py-2.5 text-sm font-semibold transition ${
           fav ? "border-red-200 bg-red-50 text-red-600" : "border-stone bg-paper text-slate-700 hover:border-red-200 hover:text-red-600"
         }`}
       >
         {fav ? (
-          <><Heart className="h-4 w-4 fill-current" /> Favoride</>
+          <><Heart aria-hidden="true" className="h-4 w-4 fill-current" /> Favoride</>
         ) : (
-          <><Heart className="h-4 w-4" /> Favori</>
+          <><Heart aria-hidden="true" className="h-4 w-4" /> Favori</>
         )}
       </button>
       <button
+        type="button"
         onClick={() => toggleCompare(listing)}
+        aria-pressed={cmp}
+        aria-label={cmp ? "İlanı karşılaştırmadan çıkar" : "İlanı karşılaştırmaya ekle"}
         className={`flex flex-1 items-center justify-center gap-1.5 rounded-lg border px-3 py-2.5 text-sm font-semibold transition ${
           cmp ? "border-brand-200 bg-brand-50 text-brand-700" : "border-stone bg-paper text-slate-700 hover:border-brand-200 hover:text-brand-700"
         }`}
       >
-        <ArrowLeftRight className="h-4 w-4" /> {cmp ? "Eklendi" : "Karşılaştır"}
+        <ArrowLeftRight aria-hidden="true" className="h-4 w-4" /> {cmp ? "Eklendi" : "Karşılaştır"}
       </button>
     </div>
   );

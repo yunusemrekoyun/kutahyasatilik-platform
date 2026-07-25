@@ -13,6 +13,7 @@ import { sendEmail, notificationEmail } from "@/lib/email";
 import bcrypt from "bcryptjs";
 import { listingAmenityRows } from "@/lib/listingAmenities";
 import { validateExternalHttpUrl } from "@/lib/externalUrl";
+import { isPasswordLengthValid, PASSWORD_ERROR } from "@/lib/passwordPolicy";
 
 async function ensureAuth() {
   const session = await getSession();
@@ -318,10 +319,16 @@ export async function rejectAgent(formData: FormData) {
   const id = String(formData.get("id") || "");
   const note = str(formData.get("note"));
   if (!id) return;
-  await prisma.agent.update({
-    where: { id },
-    data: { status: "rejected", note },
-  });
+  await prisma.$transaction([
+    prisma.agent.update({
+      where: { id },
+      data: { status: "rejected", note },
+    }),
+    prisma.pushToken.updateMany({
+      where: { recipientRole: "agent", recipientId: id, active: true },
+      data: { active: false },
+    }),
+  ]);
   revalidatePath("/admin/emlakcilar");
 }
 
@@ -329,7 +336,13 @@ export async function suspendAgent(formData: FormData) {
   await ensureAuth();
   const id = String(formData.get("id") || "");
   if (!id) return;
-  await prisma.agent.update({ where: { id }, data: { status: "suspended" } });
+  await prisma.$transaction([
+    prisma.agent.update({ where: { id }, data: { status: "suspended" } }),
+    prisma.pushToken.updateMany({
+      where: { recipientRole: "agent", recipientId: id, active: true },
+      data: { active: false },
+    }),
+  ]);
   revalidatePath("/admin/emlakcilar");
 }
 
@@ -338,7 +351,13 @@ export async function deleteAgent(formData: FormData) {
   const id = String(formData.get("id") || "");
   if (!id) return;
   // İlanların emlakçı bağı kopar (onDelete: SetNull); ilanlar admin'e devrolur.
-  await prisma.agent.delete({ where: { id } });
+  await prisma.$transaction([
+    prisma.pushToken.updateMany({
+      where: { recipientRole: "agent", recipientId: id, active: true },
+      data: { active: false },
+    }),
+    prisma.agent.delete({ where: { id } }),
+  ]);
   revalidatePath("/admin/emlakcilar");
 }
 
@@ -660,7 +679,7 @@ export async function activateApplication(formData: FormData) {
   const id = String(formData.get("id") || "");
   const password = String(formData.get("password") || "");
   if (!id) return;
-  if (password.length < 6) throw new Error("Parola en az 6 karakter olmalı");
+  if (!isPasswordLengthValid(password)) throw new Error(PASSWORD_ERROR);
 
   const app = await prisma.agentApplication.findUnique({ where: { id } });
   if (!app) throw new Error("Başvuru bulunamadı");

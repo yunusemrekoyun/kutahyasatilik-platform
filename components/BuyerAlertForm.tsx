@@ -63,9 +63,9 @@ export default function BuyerAlertForm() {
   if (status === "ok") {
     return (
       <div className="space-y-8">
-        <div className="rounded-lg bg-green-50 p-6 text-center ring-1 ring-green-200">
+        <div role="status" className="rounded-lg bg-green-50 p-6 text-center ring-1 ring-green-200">
           <span className="mx-auto grid h-14 w-14 place-items-center rounded-full bg-paper text-green-600 ring-1 ring-green-200">
-            <CheckCircle2 className="h-8 w-8" />
+            <CheckCircle2 aria-hidden="true" className="h-8 w-8" />
           </span>
           <h3 className="mt-4 font-display text-xl font-bold text-slate-900">Talebiniz kaydedildi</h3>
           <p className="mt-2 text-sm text-slate-600">
@@ -88,7 +88,7 @@ export default function BuyerAlertForm() {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
+    <form onSubmit={handleSubmit} aria-busy={status === "loading"} aria-describedby={status === "error" ? "buyer-alert-error" : undefined} className="space-y-4">
       {prefilled && (
         <p className="rounded-[10px] bg-brand-50 px-3.5 py-2.5 text-sm text-brand-800 ring-1 ring-brand-100">
           Arama kriterleriniz forma taşındı. Ad ve telefonunuzu ekleyip kaydedin; uygun ilan geldiğinde haber verelim.
@@ -96,17 +96,17 @@ export default function BuyerAlertForm() {
       )}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div>
-          <label htmlFor="ba-name" className={labelCls}>Ad Soyad <span className="text-red-500">*</span></label>
-          <input id="ba-name" name="name" required placeholder="Adınız ve soyadınız" className={inputCls} />
+          <label htmlFor="ba-name" className={labelCls}>Ad Soyad <span aria-hidden="true" className="text-red-500">*</span></label>
+          <input id="ba-name" name="name" required autoComplete="name" placeholder="Adınız ve soyadınız" className={inputCls} />
         </div>
         <div>
-          <label htmlFor="ba-phone" className={labelCls}>Telefon <span className="text-red-500">*</span></label>
-          <input id="ba-phone" name="phone" required type="tel" inputMode="tel" placeholder="05__ ___ __ __" className={inputCls} />
+          <label htmlFor="ba-phone" className={labelCls}>Telefon <span aria-hidden="true" className="text-red-500">*</span></label>
+          <input id="ba-phone" name="phone" required type="tel" inputMode="tel" autoComplete="tel" placeholder="05__ ___ __ __" className={inputCls} />
         </div>
       </div>
       <div>
         <label htmlFor="ba-email" className={labelCls}>E-posta <span className="font-normal text-slate-400">(opsiyonel)</span></label>
-        <input id="ba-email" name="email" type="email" placeholder="ornek@eposta.com" className={inputCls} />
+        <input id="ba-email" name="email" type="email" autoComplete="email" placeholder="ornek@eposta.com" className={inputCls} />
       </div>
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -157,7 +157,7 @@ export default function BuyerAlertForm() {
       </div>
 
       {status === "error" && (
-        <p className="rounded-[10px] bg-red-50 px-3.5 py-2.5 text-sm font-medium text-red-700 ring-1 ring-red-200">{error}</p>
+        <p id="buyer-alert-error" role="alert" className="rounded-[10px] bg-red-50 px-3.5 py-2.5 text-sm font-medium text-red-700 ring-1 ring-red-200">{error}</p>
       )}
 
       <button
@@ -168,7 +168,7 @@ export default function BuyerAlertForm() {
         {status === "loading" ? "Aranıyor..." : "Talebimi Bırak ve Uygun İlanları Gör"}
       </button>
       <p className="flex items-center justify-center gap-1.5 text-center text-[13px] text-slate-500">
-        <Lock className="h-3.5 w-3.5" /> Kriterlerinize uyan ilan geldiğinde haber veririz. Spam göndermiyoruz.
+        <Lock aria-hidden="true" className="h-3.5 w-3.5" /> Kriterlerinize uyan ilan geldiğinde haber veririz. Spam göndermiyoruz.
       </p>
     </form>
   );

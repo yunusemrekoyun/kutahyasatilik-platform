@@ -58,6 +58,7 @@ export default function LocationPickerInner({
         <Marker
           position={[lat, lng]}
           icon={markerIcon}
+          alt="Seçili mülk konumu"
           draggable
           eventHandlers={{
             dragend: (e) => {

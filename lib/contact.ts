@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { SITE } from "@/lib/site";
+import { resolvePublicContactNumber } from "@/lib/contactValidation";
 
 // Sitenin iletişim bilgilerinin TEK kaynağı.
 // Öncelik: admin > Ayarlar (Setting tablosu) → yoksa lib/site.ts env varsayılanı.
@@ -24,11 +25,12 @@ export async function getSiteContact(): Promise<SiteContact> {
   } catch {
     /* veritabanı hazır değilse env varsayılanı kullanılır */
   }
-  const phone = s.phone || SITE.phone || "";
+  const phone = resolvePublicContactNumber(s.phone, SITE.phone);
+  const whatsapp = resolvePublicContactNumber(s.whatsapp, SITE.whatsapp);
   return {
-    phone,
-    phoneRaw: phone.replace(/[^\d+]/g, ""),
-    whatsapp: (s.whatsapp || SITE.whatsapp || "").replace(/[^\d]/g, ""),
+    phone: phone?.display || "",
+    phoneRaw: phone?.dial || "",
+    whatsapp: whatsapp?.digits || "",
     email: s.email || SITE.email || "",
     address: s.address || SITE.address || "",
   };

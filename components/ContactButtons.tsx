@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Phone, MessageCircle, CalendarDays, ClipboardCheck, Banknote, X } from "lucide-react";
 import { telLink, whatsappLink } from "@/lib/site";
 import { useSiteContact } from "./SiteContactProvider";
@@ -26,8 +26,50 @@ export default function ContactButtons({
 }) {
   const [modal, setModal] = useState<ModalType>(null);
   const c = useSiteContact();
+  const dialogRef = useRef<HTMLDivElement>(null);
+  const closeButtonRef = useRef<HTMLButtonElement>(null);
+  const returnFocusRef = useRef<HTMLButtonElement | null>(null);
 
   const waMessage = `Merhaba, "${listingTitle}" ilanı (kutahyasatilik.com) hakkında bilgi almak istiyorum.`;
+  const modalTitle = modal === "appointment" ? "Randevu Talep Et" : modal === "expertise" ? "Ücretsiz Ekspertiz İste" : "Fiyat Teklifi Al";
+
+  useEffect(() => {
+    if (!modal) return;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    closeButtonRef.current?.focus();
+
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        event.preventDefault();
+        setModal(null);
+        return;
+      }
+      if (event.key !== "Tab" || !dialogRef.current) return;
+      const focusable = Array.from(
+        dialogRef.current.querySelectorAll<HTMLElement>(
+          'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
+        )
+      ).filter((element) => element.getClientRects().length > 0);
+      if (focusable.length === 0) return;
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
+    };
+
+    document.addEventListener("keydown", onKeyDown);
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      document.removeEventListener("keydown", onKeyDown);
+      returnFocusRef.current?.focus();
+    };
+  }, [modal]);
 
   return (
     <>
@@ -44,7 +86,7 @@ export default function ContactButtons({
             onClick={() => trackConversion({ type: "phone_click", listingId, district })}
             className="col-span-2 inline-flex items-center justify-center gap-2 rounded-[10px] bg-brand-700 px-4 py-3.5 font-semibold text-white transition hover:bg-brand-800"
           >
-            <Phone className="h-5 w-5" /> Telefon ile Ara
+            <Phone aria-hidden="true" className="h-5 w-5" /> Telefon ile Ara
           </a>
         )}
         {c.whatsapp && (
@@ -55,26 +97,29 @@ export default function ContactButtons({
             onClick={() => trackConversion({ type: "whatsapp_click", listingId, district })}
             className="col-span-2 inline-flex items-center justify-center gap-2 rounded-[10px] bg-green-600 px-4 py-3.5 font-semibold text-white transition hover:bg-green-700"
           >
-            <MessageCircle className="h-5 w-5" /> WhatsApp&apos;tan Yaz
+            <MessageCircle aria-hidden="true" className="h-5 w-5" /> WhatsApp&apos;tan Yaz
           </a>
         )}
         <button
-          onClick={() => setModal("appointment")}
+          type="button"
+          onClick={(event) => { returnFocusRef.current = event.currentTarget; setModal("appointment"); }}
           className="inline-flex items-center justify-center gap-1.5 rounded-[10px] border border-brand-200 bg-brand-50 px-3 py-3 text-sm font-semibold text-brand-800 transition hover:bg-brand-100"
         >
-          <CalendarDays className="h-4 w-4" /> Randevu Talep Et
+          <CalendarDays aria-hidden="true" className="h-4 w-4" /> Randevu Talep Et
         </button>
         <button
-          onClick={() => setModal("expertise")}
+          type="button"
+          onClick={(event) => { returnFocusRef.current = event.currentTarget; setModal("expertise"); }}
           className="inline-flex items-center justify-center gap-1.5 rounded-[10px] border border-brand-200 bg-brand-50 px-3 py-3 text-sm font-semibold text-brand-800 transition hover:bg-brand-100"
         >
-          <ClipboardCheck className="h-4 w-4" /> Ekspertiz İste
+          <ClipboardCheck aria-hidden="true" className="h-4 w-4" /> Ekspertiz İste
         </button>
         <button
-          onClick={() => setModal("price_offer")}
+          type="button"
+          onClick={(event) => { returnFocusRef.current = event.currentTarget; setModal("price_offer"); }}
           className="col-span-2 inline-flex items-center justify-center gap-1.5 rounded-[10px] border border-gold-300 bg-gold-50 px-3 py-3 text-sm font-semibold text-gold-700 transition hover:bg-gold-100"
         >
-          <Banknote className="h-4 w-4" /> Fiyat Teklifi Al
+          <Banknote aria-hidden="true" className="h-4 w-4" /> Fiyat Teklifi Al
         </button>
       </div>
 
@@ -86,20 +131,26 @@ export default function ContactButtons({
 
       {modal && (
         <div
+          role="presentation"
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
           onClick={() => setModal(null)}
         >
           <div
+            ref={dialogRef}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="listing-contact-dialog-title"
+            aria-describedby="listing-contact-dialog-description"
             className="max-h-[90vh] w-full max-w-md overflow-y-auto rounded-lg bg-paper p-6 shadow-prestige"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="mb-2 flex items-start justify-between">
-              <h3 className="font-display text-lg font-bold text-slate-900">
-                {modal === "appointment" ? "Randevu Talep Et" : modal === "expertise" ? "Ücretsiz Ekspertiz İste" : "Fiyat Teklifi Al"}
+              <h3 id="listing-contact-dialog-title" className="font-display text-lg font-bold text-slate-900">
+                {modalTitle}
               </h3>
-              <button onClick={() => setModal(null)} className="text-slate-400 hover:text-slate-700" aria-label="Kapat"><X className="h-5 w-5" /></button>
+              <button ref={closeButtonRef} type="button" onClick={() => setModal(null)} className="grid h-11 w-11 shrink-0 place-items-center text-slate-400 hover:text-slate-700" aria-label={`${modalTitle} penceresini kapat`}><X aria-hidden="true" className="h-5 w-5" /></button>
             </div>
-            <p className="text-xs text-slate-500 mb-4">İlan: {listingTitle}</p>
+            <p id="listing-contact-dialog-description" className="mb-4 text-xs text-slate-500">İlan: {listingTitle}</p>
             <LeadForm
               type={modal}
               listingId={listingId}

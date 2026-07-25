@@ -19,6 +19,8 @@ export default function ThousandsInput({
   required = false,
   submitFormatted = false,
   onCommit,
+  ariaLabel,
+  ariaDescribedBy,
 }: {
   name?: string;
   id?: string;
@@ -28,6 +30,8 @@ export default function ThousandsInput({
   required?: boolean;
   submitFormatted?: boolean;
   onCommit?: (raw: string) => void;
+  ariaLabel?: string;
+  ariaDescribedBy?: string;
 }) {
   const [raw, setRaw] = useState(String(defaultValue ?? "").replace(/\D/g, ""));
 
@@ -40,6 +44,8 @@ export default function ThousandsInput({
         inputMode="numeric"
         autoComplete="off"
         required={required}
+        aria-label={ariaLabel}
+        aria-describedby={ariaDescribedBy}
         value={fmt(raw)}
         placeholder={placeholder}
         className={className}

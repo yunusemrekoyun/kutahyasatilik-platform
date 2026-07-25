@@ -6,7 +6,7 @@ import { getUserSession } from "./userAuth";
 import { sendEmail, notificationEmail, emailEnabled } from "./email";
 import { findAlertsForListing, type ListingForMatch } from "./matching";
 
-// Merkezi bildirim yardımcıları. İlk sürüm: site-içi (e-posta katmanı sonra eklenecek).
+// Merkezi bildirim yardımcıları: site içi kayıt, push outbox ve opsiyonel e-posta.
 // notify() çağrıları İKİNCİLDİR: hata olsa bile çağıran akışı (lead/onay vb.) bozmaz.
 
 export type NotificationRole = "user" | "agent" | "admin";

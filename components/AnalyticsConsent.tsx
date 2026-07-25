@@ -1,16 +1,20 @@
 "use client";
 
 import Script from "next/script";
-import { useSyncExternalStore } from "react";
+import { useEffect, useRef, useSyncExternalStore } from "react";
 
 const KEY = "ks_analytics_consent";
 const CHANGE_EVENT = "ks-consent-change";
 type Consent = "granted" | "denied" | "unknown" | "loading";
 let forcePanelOpen = false;
+let focusPanelOnOpen = false;
+let panelOpenedFromSettings = false;
 
 function subscribe(onStoreChange: () => void) {
   const handleOpen = () => {
     forcePanelOpen = true;
+    focusPanelOnOpen = true;
+    panelOpenedFromSettings = true;
     onStoreChange();
   };
   globalThis.addEventListener("storage", onStoreChange);
@@ -31,11 +35,23 @@ function getSnapshot(): Consent {
 
 export default function AnalyticsConsent({ gaId, gtagId }: { gaId?: string; gtagId?: string }) {
   const consent = useSyncExternalStore(subscribe, getSnapshot, () => "loading");
+  const panelRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (consent !== "unknown" || !focusPanelOnOpen) return;
+    focusPanelOnOpen = false;
+    panelRef.current?.focus();
+  }, [consent]);
 
   function choose(value: "granted" | "denied") {
+    const restoreSettingsFocus = panelOpenedFromSettings;
     forcePanelOpen = false;
+    panelOpenedFromSettings = false;
     globalThis.localStorage?.setItem(KEY, value);
     globalThis.dispatchEvent(new Event(CHANGE_EVENT));
+    if (restoreSettingsFocus) {
+      requestAnimationFrame(() => document.getElementById("consent-settings-link")?.focus());
+    }
   }
 
   const measurementId = gaId || gtagId;
@@ -56,8 +72,17 @@ export default function AnalyticsConsent({ gaId, gtagId }: { gaId?: string; gtag
         </>
       ) : null}
       {consent === "unknown" ? (
-        <div role="dialog" aria-label="Çerez ve analiz tercihi" className="fixed inset-x-3 bottom-3 z-[100] mx-auto max-w-3xl rounded-lg bg-brand-950 p-4 text-white shadow-2xl ring-1 ring-white/15 sm:flex sm:items-center sm:gap-5 sm:p-5">
-          <p className="flex-1 text-sm leading-relaxed text-brand-100">
+        <div
+          ref={panelRef}
+          role="dialog"
+          aria-modal="false"
+          aria-labelledby="analytics-consent-title"
+          aria-describedby="analytics-consent-description"
+          tabIndex={-1}
+          className="fixed inset-x-3 bottom-3 z-[100] mx-auto max-w-3xl rounded-lg bg-brand-950 p-4 text-white shadow-2xl ring-1 ring-white/15 outline-none sm:flex sm:items-center sm:gap-5 sm:p-5"
+        >
+          <h2 id="analytics-consent-title" className="sr-only">Çerez ve analiz tercihi</h2>
+          <p id="analytics-consent-description" className="flex-1 text-sm leading-relaxed text-brand-100">
             Siteyi geliştirmek için anonim kullanım ölçümü yapmak istiyoruz. Zorunlu işlevler analiz izninden bağımsız çalışır.
           </p>
           <div className="mt-3 flex shrink-0 gap-2 sm:mt-0">
