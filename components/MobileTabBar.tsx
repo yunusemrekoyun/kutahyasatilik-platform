@@ -24,7 +24,7 @@ export default function MobileTabBar() {
     exact ? pathname === href : pathname === href || pathname.startsWith(href + "/");
 
   return (
-    <nav aria-label="Mobil ana menü" className="fixed inset-x-0 bottom-0 z-40 border-t border-stone bg-paper/95 pb-[env(safe-area-inset-bottom)] backdrop-blur-xl lg:hidden">
+    <nav aria-label="Mobil ana menü" className="fixed inset-x-0 bottom-0 z-40 border-t border-slate-200 bg-white/95 pb-[env(safe-area-inset-bottom)] shadow-[0_-4px_18px_rgba(15,23,42,0.06)] backdrop-blur lg:hidden">
       <div className="mx-auto grid max-w-md grid-cols-5">
         {TABS.map((t) => {
           const active = isActive(t.href, t.exact);
@@ -34,8 +34,8 @@ export default function MobileTabBar() {
               key={t.href}
               href={t.href}
               aria-current={active ? "page" : undefined}
-              className={`relative flex min-h-14 flex-col items-center justify-center gap-1 border-t-2 text-[10px] font-semibold transition ${
-                active ? "border-gold-700 text-brand-800" : "border-transparent text-muted"
+              className={`relative flex min-h-14 flex-col items-center justify-center gap-0.5 text-[10px] font-medium transition ${
+                active ? "text-brand-700" : "text-slate-500"
               }`}
             >
               <span className="relative">

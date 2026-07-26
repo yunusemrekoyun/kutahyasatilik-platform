@@ -45,7 +45,7 @@ export default function ListingCard({
   const titleId = `listing-${listing.slug}-title`;
 
   return (
-    <article aria-labelledby={titleId} className={`group flex overflow-hidden border border-stone bg-paper transition duration-200 hover:border-brand-300 ${
+    <article aria-labelledby={titleId} className={`group flex overflow-hidden rounded-xl bg-white ring-1 ring-slate-200 transition duration-200 hover:-translate-y-0.5 hover:shadow-card hover:ring-brand-200 ${
       variant === "compact" ? "flex-row" : "flex-col"
     }`}>
       <div className={`relative overflow-hidden bg-slate-100 ${
@@ -60,13 +60,13 @@ export default function ListingCard({
             sizes="(max-width: 768px) 100vw, 33vw"
             loading={priority ? "eager" : "lazy"}
             fetchPriority={priority ? "high" : "auto"}
-            className="object-cover transition duration-500 group-hover:scale-[1.02]"
+            className="object-cover transition duration-300 group-hover:scale-[1.03]"
           />
         </Link>
         {/* Tek durum işareti: Satıldıda gizli (SATILDI overlay var) — yoksa Öne çıkan > Doğrulanmış > Satılık */}
         <div className="pointer-events-none absolute left-3 top-3">
           {!isSold && (listing.featured ? (
-            <span className="inline-flex items-center gap-1 rounded-md bg-paper/95 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wide text-gold-800">
+            <span className="inline-flex items-center gap-1 rounded-md bg-gold-200 px-2.5 py-1 text-[11px] font-semibold text-gold-900 shadow-sm">
               <Star aria-hidden="true" className="h-3.5 w-3.5 fill-current" /> Vitrinde
             </span>
           ) : listing.verified ? (
@@ -74,7 +74,7 @@ export default function ListingCard({
               Doğrulanmış
             </span>
           ) : (
-            <span className="rounded-md bg-brand-950/85 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wide text-white">
+            <span className="rounded-md bg-brand-700 px-2.5 py-1 text-[11px] font-semibold text-white shadow-sm">
               Satılık
             </span>
           ))}
@@ -88,15 +88,15 @@ export default function ListingCard({
 
       <div className={`flex min-w-0 flex-grow flex-col ${variant === "editorial" ? "p-5 sm:p-6" : "p-4"}`}>
         <Link href={`/ilan/${listing.slug}`} className="block">
-          <span className="eyebrow mb-2 block line-clamp-1">
+          <span className="mb-1 block line-clamp-1 text-[13px] font-medium text-slate-500">
             {PROPERTY_TYPE_LABELS[listing.propertyType] || listing.propertyType} · {location}
           </span>
-          <h3 id={titleId} className={`line-clamp-2 font-display font-semibold leading-snug text-ink transition-colors group-hover:text-brand-700 ${variant === "editorial" ? "text-2xl sm:text-3xl" : variant === "compact" ? "text-base" : "text-xl"}`}>
+          <h3 id={titleId} className={`line-clamp-2 font-display font-semibold leading-snug text-slate-900 transition-colors group-hover:text-brand-700 ${variant === "editorial" ? "text-2xl sm:text-3xl" : variant === "compact" ? "text-base" : "text-lg"}`}>
             {listing.title}
           </h3>
         </Link>
 
-        <div className={`mt-3 flex flex-wrap items-center gap-x-4 gap-y-1 text-[13px] font-medium text-muted ${variant === "compact" ? "hidden sm:flex" : ""}`}>
+        <div className={`mt-3 flex flex-wrap items-center gap-x-4 gap-y-1 text-[13px] font-medium text-slate-600 ${variant === "compact" ? "hidden sm:flex" : ""}`}>
           {!isLand && listing.rooms && (
             <span className="inline-flex items-center gap-1.5"><BedDouble aria-hidden="true" className="h-[18px] w-[18px] text-slate-400" /> {listing.rooms}</span>
           )}
@@ -145,14 +145,14 @@ export default function ListingCard({
           </div>
         )}
 
-        <div className="mt-auto flex items-end justify-between gap-2 border-t border-stone pt-4">
-          <span className={`${variant === "editorial" ? "text-2xl" : "text-lg"} font-bold tabular-nums text-gold-800`}>
+        <div className="mt-auto flex items-center justify-between gap-2 border-t border-slate-100 pt-4">
+          <span className={`rounded-lg bg-gold-100 px-3 py-1.5 ${variant === "editorial" ? "text-xl" : "text-lg"} font-bold tabular-nums text-gold-900`}>
             {formatPrice(listing.price, listing.currency)}
           </span>
           <Link
             href={`/ilan/${listing.slug}`}
             aria-label={`${listing.title} ilanını incele`}
-            className={`min-h-11 shrink-0 items-center gap-1 text-sm font-semibold text-brand-700 transition-colors hover:text-brand-900 ${variant === "compact" ? "hidden sm:inline-flex" : "inline-flex"}`}
+            className={`min-h-11 shrink-0 items-center gap-1 rounded-lg bg-brand-700 px-4 text-sm font-semibold text-white transition-colors hover:bg-brand-800 ${variant === "compact" ? "hidden sm:inline-flex" : "inline-flex"}`}
           >
             İncele <ArrowRight aria-hidden="true" className="h-[18px] w-[18px]" />
           </Link>
