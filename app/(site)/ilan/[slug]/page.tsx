@@ -237,7 +237,7 @@ export default async function ListingPage({
   };
 
   return (
-    <div className="mx-auto max-w-7xl px-5 py-8 pb-36 sm:px-6 lg:pb-10">
+    <div className="mx-auto max-w-7xl px-4 py-8 pb-36 lg:pb-10">
       <TrackView listingId={listing.id} district={listing.district} />
       {!isSold && <MobileContactBar listingId={listing.id} listingTitle={listing.title} district={listing.district} />}
       <script
@@ -254,12 +254,12 @@ export default async function ListingPage({
         <Link href={`/ilanlar?ilce=${encodeURIComponent(listing.district)}`} className="hover:text-brand-700">{listing.district}</Link>
       </nav>
 
-      <div className="grid gap-10 lg:grid-cols-12">
+      <div className="grid gap-8 lg:grid-cols-12">
         {/* SOL: galeri + detay */}
-        <div className="space-y-10 lg:col-span-8">
+        <div className="space-y-8 lg:col-span-8">
           <Gallery images={listing.images} title={listing.title} />
 
-          <div className="border-y border-stone bg-paper py-7 sm:px-7">
+          <div className="rounded-2xl bg-white p-5 ring-1 ring-slate-200 sm:p-7">
             <div className="flex flex-col justify-between gap-5 border-b border-stone pb-6 md:flex-row md:items-start">
               <div>
                 <div className="flex flex-wrap items-center gap-2">
@@ -284,14 +284,14 @@ export default async function ListingPage({
                 </p>
               </div>
               <div className="shrink-0">
-                <span className="inline-block text-[30px] font-bold leading-tight tabular-nums text-gold-800">
+                <span className="inline-block rounded-xl bg-gold-100 px-4 py-2 text-[28px] font-bold leading-tight tabular-nums text-gold-900">
                   {formatPrice(listing.price, listing.currency)}
                 </span>
               </div>
             </div>
 
             {/* Künye — en önemli metrikler */}
-            <div className="mt-6 grid grid-cols-2 divide-x divide-stone border-y border-stone md:grid-cols-4">
+            <div className="mt-6 grid grid-cols-2 divide-x divide-slate-200 rounded-xl bg-slate-50 ring-1 ring-slate-200 md:grid-cols-4">
               {keyMetrics.map((m) => (
                 <div key={m.label} className="px-3 py-4 sm:px-4">
                   <p className="mb-1 text-[13px] font-medium uppercase tracking-wide text-slate-500">{m.label}</p>
@@ -389,13 +389,13 @@ export default async function ListingPage({
 
           {/* HARİTA */}
           {mapPoints.length > 0 && (
-            <div className="border-y border-stone bg-paper py-6 sm:px-6">
+            <div className="rounded-2xl bg-white p-6 ring-1 ring-slate-200">
               <h2 className="font-display text-xl font-bold text-slate-900">Konum</h2>
               <p className="mt-1 text-sm text-slate-500">{listing.district} / Kütahya</p>
               {listing.locationVisibility === "approximate" && (
                 <p className="mt-1 text-xs text-slate-400">Mülk sahibinin gizliliği için yaklaşık konum gösterilmektedir.</p>
               )}
-              <div className="mt-4 overflow-hidden border border-stone">
+              <div className="mt-4 overflow-hidden rounded-xl ring-1 ring-slate-200">
                 <ListingsMap points={mapPoints} height="360px" showFilter={false} />
               </div>
             </div>
@@ -405,7 +405,7 @@ export default async function ListingPage({
         {/* SAĞ: iletişim (sticky) */}
         <aside aria-label="İlan iletişim ve danışman bilgileri" className="lg:col-span-4">
           <div className="sticky top-20 space-y-4">
-            <div id="ilan-iletisim" tabIndex={-1} className="scroll-mt-24 border border-stone border-t-[3px] border-t-gold-700 bg-paper p-6 shadow-card outline-none">
+            <div id="ilan-iletisim" tabIndex={-1} className="scroll-mt-24 rounded-2xl border-t-[3px] border-t-gold-600 bg-white p-6 shadow-prestige ring-1 ring-slate-200 outline-none">
               <span className={`inline-block text-2xl font-bold tabular-nums ${isSold ? "text-slate-500 line-through" : "text-gold-800"}`}>{formatPrice(listing.price, listing.currency)}</span>
               {isSold ? (
                 <div className="mt-4 rounded-lg bg-red-50 p-4 ring-1 ring-red-100">
@@ -434,7 +434,7 @@ export default async function ListingPage({
 
             {/* Danışman etiketi */}
             {listing.agent && (
-              <div className="border border-stone bg-paper p-5">
+              <div className="rounded-2xl bg-white p-5 ring-1 ring-slate-200">
                 <p className="text-xs font-medium uppercase tracking-wider text-slate-400">İlan Danışmanı</p>
                 <div className="mt-3 flex items-center gap-3">
                   {agentLogo ? (
@@ -472,7 +472,7 @@ export default async function ListingPage({
                 </p>
               </div>
             )}
-            <div className="ceramic-grid border border-brand-100 bg-brand-50 p-5 text-center">
+            <div className="rounded-2xl bg-brand-50 p-5 text-center ring-1 ring-brand-100">
               <p className="text-sm font-semibold text-brand-900">Bu mülke benzer fırsatlar mı arıyorsunuz?</p>
               <Link href="/ilanlar" className="mt-2 inline-flex items-center gap-1 text-sm font-bold text-brand-700 hover:underline">Tüm ilanları gör <ArrowRight className="h-4 w-4" /></Link>
             </div>
@@ -483,8 +483,8 @@ export default async function ListingPage({
       {/* BENZER İLANLAR */}
       {similar.length > 0 && (
         <section className="mt-14">
-          <p className="eyebrow">Portföyden</p>
-          <h2 className="mt-2 font-display text-3xl font-semibold text-brand-950">Benzer ilanlar</h2>
+          <p className="text-xs font-bold uppercase tracking-wider text-brand-700">Portföyden</p>
+          <h2 className="mt-2 font-display text-2xl font-bold text-brand-900 sm:text-3xl">Benzer ilanlar</h2>
           <p className="mt-1.5 text-slate-500">Bu mülke yakın diğer seçenekler.</p>
           <div className="mt-6 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
             {similar.map((l) => (

@@ -55,7 +55,7 @@ export default function StartConversation({
 
       {open && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4" onClick={() => setOpen(false)}>
-          <div className="w-full max-w-md rounded-lg bg-paper p-6 shadow-prestige" onClick={(e) => e.stopPropagation()}>
+          <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-prestige" onClick={(e) => e.stopPropagation()}>
             <div className="mb-3 flex items-center justify-between">
               <h3 className="font-display text-lg font-bold text-slate-900">Danışmana Mesaj</h3>
               <button onClick={() => setOpen(false)} aria-label="Kapat"><X className="h-5 w-5 text-slate-400" /></button>

@@ -18,7 +18,7 @@ export default function AnalysisSection({
       : "text-amber-600";
 
   return (
-    <section className="rounded-lg bg-paper p-6 ring-1 ring-stone">
+    <section className="rounded-2xl bg-white p-6 ring-1 ring-slate-200">
       <div className="flex items-center gap-2.5">
         <span className="grid h-10 w-10 place-items-center rounded-lg bg-brand-50 text-brand-700">
           <LineChart className="h-5 w-5" />
