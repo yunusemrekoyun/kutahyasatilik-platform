@@ -94,7 +94,7 @@ export default function Header() {
   return (
     <header className="sticky top-0 z-40">
       <div className="hidden bg-brand-950 text-brand-100 md:block">
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-1.5 text-xs">
+        <div className="mx-auto flex max-w-7xl items-center justify-between px-4 text-xs">
           <div className="flex items-center gap-2">
             <Star aria-hidden="true" className="h-3.5 w-3.5 fill-current text-gold-300" />
             <span className="text-brand-200">{SITE.brand}</span>

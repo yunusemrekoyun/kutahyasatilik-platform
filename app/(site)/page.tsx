@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
 import {
   ArrowRight,
@@ -52,6 +53,18 @@ async function getHomeTexts() {
   }
 }
 
+function getOptimizedHeroImage(value?: string) {
+  const safeImage = publicImageUrl(value);
+  if (!safeImage || (safeImage.startsWith("/") && !safeImage.startsWith("//"))) return safeImage;
+  const configuredMediaUrl = process.env.NEXT_PUBLIC_MEDIA_URL;
+  if (!configuredMediaUrl) return null;
+  try {
+    return new URL(safeImage).origin === new URL(configuredMediaUrl).origin ? safeImage : null;
+  } catch {
+    return null;
+  }
+}
+
 export default async function Home() {
   const [featured, points, marketplaceStats, texts, testimonials, contact] = await Promise.all([
     getFeaturedListings(6),
@@ -71,7 +84,7 @@ export default async function Home() {
     "home_hero_subtitle",
     `Merkez ve tüm ilçelerde ${marketplaceStats.activeListings} güncel ilanı, bölgesel verileri ve yerel danışmanlığı tek yerde keşfedin.`,
   );
-  const heroImage = publicImageUrl(texts.get("home_hero_image"));
+  const heroImage = getOptimizedHeroImage(texts.get("home_hero_image"));
   const whyTitle = t("home_why_title", `Neden ${SITE.name}?`);
 
   return (
@@ -82,13 +95,13 @@ export default async function Home() {
       <section className="relative isolate overflow-hidden bg-brand-950 text-white">
         {heroImage ? (
           <>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
+            <Image
               src={heroImage}
               alt=""
               aria-hidden="true"
-              loading="eager"
-              fetchPriority="high"
+              fill
+              priority
+              sizes="100vw"
               className="absolute inset-0 -z-10 h-full w-full object-cover opacity-55"
             />
             <div className="absolute inset-0 -z-10 bg-gradient-to-b from-brand-950/70 via-brand-950/50 to-brand-950/90" />

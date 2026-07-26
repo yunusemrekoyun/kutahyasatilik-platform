@@ -346,7 +346,7 @@ export default function ListingFilters() {
         role={open ? "dialog" : undefined}
         aria-modal={open ? true : undefined}
         aria-labelledby="listing-filter-title"
-        className={`${open ? "fixed inset-y-0 right-0 z-50 w-[92%] max-w-sm overflow-y-auto shadow-prestige" : "hidden"} bg-white p-5 lg:sticky lg:top-24 lg:z-auto lg:block lg:max-h-[calc(100vh-7rem)] lg:w-auto lg:overflow-y-auto lg:rounded-xl lg:p-5 lg:ring-1 lg:ring-slate-200`}
+        className={`${open ? "fixed inset-y-0 right-0 z-50 w-[92%] max-w-sm overflow-y-auto shadow-prestige" : "hidden"} bg-white p-5 lg:sticky lg:top-28 lg:z-auto lg:block lg:max-h-[calc(100vh-8rem)] lg:w-auto lg:overflow-y-auto lg:rounded-xl lg:p-5 lg:ring-1 lg:ring-slate-200`}
       >
         {content}
       </aside>

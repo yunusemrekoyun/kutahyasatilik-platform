@@ -195,7 +195,7 @@ export default async function AgencyProfilePage({
           </div>
 
           <aside className="lg:col-span-4">
-            <div className="rounded-2xl border-t-[3px] border-t-gold-600 bg-white p-6 shadow-card ring-1 ring-slate-200 lg:sticky lg:top-24">
+            <div className="rounded-2xl border-t-[3px] border-t-gold-600 bg-white p-6 shadow-card ring-1 ring-slate-200 lg:sticky lg:top-28">
               <p className="eyebrow">Doğrudan iletişim</p>
               <h2 className="mt-2 font-display text-2xl font-semibold text-brand-950">{agency.name}</h2>
               <p className="mt-3 text-sm leading-6 text-muted">

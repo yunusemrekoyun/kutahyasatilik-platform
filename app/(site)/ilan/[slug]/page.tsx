@@ -404,8 +404,8 @@ export default async function ListingPage({
 
         {/* SAĞ: iletişim (sticky) */}
         <aside aria-label="İlan iletişim ve danışman bilgileri" className="lg:col-span-4">
-          <div className="sticky top-20 space-y-4">
-            <div id="ilan-iletisim" tabIndex={-1} className="scroll-mt-24 rounded-2xl border-t-[3px] border-t-gold-600 bg-white p-6 shadow-prestige ring-1 ring-slate-200 outline-none">
+          <div className="sticky top-28 space-y-4">
+            <div id="ilan-iletisim" tabIndex={-1} className="scroll-mt-32 rounded-2xl border-t-[3px] border-t-gold-600 bg-white p-6 shadow-prestige ring-1 ring-slate-200 outline-none">
               <span className={`inline-block text-2xl font-bold tabular-nums ${isSold ? "text-slate-500 line-through" : "text-gold-800"}`}>{formatPrice(listing.price, listing.currency)}</span>
               {isSold ? (
                 <div className="mt-4 rounded-lg bg-red-50 p-4 ring-1 ring-red-100">
