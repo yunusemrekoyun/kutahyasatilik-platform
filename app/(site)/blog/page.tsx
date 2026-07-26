@@ -27,17 +27,17 @@ export default async function BlogList() {
       <TrackView />
       <PageIntro eyebrow="Yerel bilgi" title="Doğru Gayrimenkul Rehberi" intro="Kütahya'da alım, satım ve yatırım kararları için sahadan bilgiler, bölge analizleri ve pratik rehberler." />
 
-      <div className="mx-auto max-w-7xl px-5 py-14 sm:px-6 sm:py-20">{posts.length === 0 ? (
-        <p className="mt-12 rounded-lg bg-paper p-10 text-center text-slate-500 ring-1 ring-stone">
+      <div className="mx-auto max-w-7xl px-4 py-12 sm:py-16">{posts.length === 0 ? (
+        <p className="rounded-xl bg-white p-10 text-center text-slate-500 ring-1 ring-slate-200">
           Henüz yazı yayınlanmadı. Çok yakında burada olacağız.
         </p>
       ) : (
-        <div className="mt-10 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {posts.map((p) => (
             <Link
               key={p.id}
               href={`/blog/${p.slug}`}
-              className="group overflow-hidden rounded-lg bg-paper ring-1 ring-stone transition hover:shadow-prestige hover:ring-brand-200"
+              className="group overflow-hidden rounded-xl bg-white ring-1 ring-slate-200 transition hover:-translate-y-0.5 hover:shadow-card hover:ring-brand-200"
             >
               <div className="relative aspect-[16/10] overflow-hidden bg-slate-100">
                 {p.coverImage ? (

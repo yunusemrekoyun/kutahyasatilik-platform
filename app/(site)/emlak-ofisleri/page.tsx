@@ -70,7 +70,7 @@ export default async function AgenciesPage({
         }
       />
 
-      <main className="mx-auto max-w-7xl px-5 py-14 sm:px-6 sm:py-20">
+      <main className="mx-auto max-w-7xl px-4 py-12 sm:py-16">
         <div className="flex flex-col gap-3 border-b border-stone pb-6 sm:flex-row sm:items-end sm:justify-between">
           <div>
             <p className="eyebrow">Yerel portföy ortakları</p>
@@ -97,8 +97,8 @@ export default async function AgenciesPage({
             />
           </>
         ) : (
-          <section className="ceramic-grid mt-8 border-y border-stone bg-paper px-6 py-14 text-center">
-            <span className="mx-auto grid h-14 w-14 place-items-center rounded-lg border border-stone bg-canvas text-brand-700">
+          <section className="mt-8 rounded-xl bg-white px-6 py-14 text-center ring-1 ring-slate-200">
+            <span className="mx-auto grid h-14 w-14 place-items-center rounded-full bg-brand-50 text-brand-700">
               <Building2 className="h-7 w-7" />
             </span>
             <h2 className="mt-4 font-display text-2xl font-semibold text-brand-950">

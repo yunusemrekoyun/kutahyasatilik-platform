@@ -33,12 +33,12 @@ export default async function LandingPageView({
 
       <div className="mx-auto max-w-7xl px-4 py-10">
         {/* İlçe linkleri */}
-        <div className="mb-10 flex flex-wrap gap-x-5 gap-y-3 border-y border-stone py-5">
+        <div className="mb-10 flex flex-wrap gap-2.5">
           {DISTRICTS.slice(0, 6).map((d) => (
             <Link
               key={d.slug}
               href={`/ilanlar?ilce=${encodeURIComponent(d.name)}`}
-              className="text-sm font-semibold text-muted hover:text-brand-800"
+              className="inline-flex min-h-11 items-center rounded-lg bg-white px-4 text-sm font-medium text-slate-700 ring-1 ring-slate-200 hover:text-brand-700 hover:ring-brand-300"
             >
               {d.name}
             </Link>
@@ -53,16 +53,16 @@ export default async function LandingPageView({
               ))}
             </div>
           ) : (
-            <div className="rounded-lg bg-paper p-10 text-center ring-1 ring-stone">
+            <div className="rounded-xl bg-white p-10 text-center ring-1 ring-slate-200">
               <p className="text-slate-600">Bu kategoride şu an aktif ilan bulunmuyor. Aşağıdan bizimle iletişime geçin, size uygun seçenekleri sunalım.</p>
             </div>
           )}
         </section>
 
         {points.length > 0 && (
-          <section className="mt-16 border-t border-stone pt-10">
+          <section className="mt-16 border-t border-slate-200 pt-10">
             <SectionHeading eyebrow="Konum" title="Harita üzerinde" description="İlanları ilçeleri ve çevreleriyle birlikte inceleyin." />
-            <div className="mt-6 overflow-hidden border border-stone">
+            <div className="mt-6 overflow-hidden rounded-xl ring-1 ring-slate-200">
               <ListingsMap points={points} height="420px" />
             </div>
           </section>

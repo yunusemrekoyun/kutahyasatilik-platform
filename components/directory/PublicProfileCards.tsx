@@ -27,7 +27,7 @@ export function AgencyCard({ agency }: { agency: PublicAgencyCard }) {
   const logo = publicImageUrl(agency.logo);
 
   return (
-    <article className="group relative flex h-full flex-col overflow-hidden border border-stone bg-paper transition hover:border-brand-300">
+    <article className="group relative flex h-full flex-col overflow-hidden rounded-xl bg-white ring-1 ring-slate-200 transition hover:-translate-y-0.5 hover:shadow-card hover:ring-brand-200">
       <div className="relative aspect-[16/7] overflow-hidden border-b border-stone bg-brand-950">
         {cover ? (
           // eslint-disable-next-line @next/next/no-img-element
@@ -99,7 +99,7 @@ export function AgentCard({ agent }: { agent: PublicAgentCard }) {
   const logo = publicImageUrl(agent.logo);
 
   return (
-    <article className="group relative flex h-full flex-col border border-stone bg-paper p-5 transition hover:border-brand-300">
+    <article className="group relative flex h-full flex-col rounded-xl bg-white p-5 ring-1 ring-slate-200 transition hover:-translate-y-0.5 hover:shadow-card hover:ring-brand-200">
       <div className="flex items-start gap-4">
         <div className="grid h-20 w-20 shrink-0 place-items-center overflow-hidden rounded-lg bg-brand-50 text-xl font-bold text-brand-800">
           {logo ? (

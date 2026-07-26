@@ -52,7 +52,7 @@ export default async function ValuationPage() {
           ))}
         </div>
 
-        <div className="mt-10 rounded-lg bg-brand-50 p-6 text-center ring-1 ring-brand-100 sm:p-8">
+        <div className="mt-10 rounded-2xl bg-brand-50 p-6 text-center ring-1 ring-brand-100 sm:p-8">
           <h2 className="font-display text-2xl font-bold text-brand-900">
             Mülkünüzü satmaya hazır mısınız?
           </h2>

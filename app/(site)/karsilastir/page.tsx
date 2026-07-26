@@ -39,9 +39,9 @@ export default function ComparePage() {
       </div>
 
       {!hydrated ? (
-        <div className="skeleton mt-8 h-96 rounded-lg" />
+        <div className="skeleton mt-8 h-96 rounded-xl" />
       ) : compare.length === 0 ? (
-        <div className="mt-8 rounded-lg bg-paper p-12 text-center ring-1 ring-stone">
+        <div className="mt-8 rounded-xl bg-white p-12 text-center ring-1 ring-slate-200">
           <ArrowLeftRight className="mx-auto h-12 w-12 text-slate-300" />
           <h2 className="mt-4 text-lg font-bold text-slate-800">Karşılaştırma listeniz boş</h2>
           <p className="mt-1 text-slate-500">İlan kartlarındaki <ArrowLeftRight className="inline h-3.5 w-3.5 align-text-bottom" /> ikonuyla en fazla 4 ilanı yan yana karşılaştırın.</p>
@@ -50,7 +50,7 @@ export default function ComparePage() {
           </Link>
         </div>
       ) : (
-        <div className="mt-8 overflow-x-auto rounded-lg bg-paper ring-1 ring-stone">
+        <div className="mt-8 overflow-x-auto rounded-xl bg-white ring-1 ring-slate-200">
           <table className="w-full min-w-[640px]">
             <thead>
               <tr>

@@ -5,6 +5,7 @@ import { getMapPoints } from "@/lib/listings";
 import ListingsMap from "@/components/ListingsMap";
 import NotFoundCTA from "@/components/NotFoundCTA";
 import TrackView from "@/components/TrackView";
+import { PageIntro } from "@/components/ui/Editorial";
 
 export const revalidate = 300; // ISR: her 5 dakikada yenilenir (CDN cache + admin revalidatePath)
 
@@ -18,16 +19,14 @@ export const metadata: Metadata = {
 export default async function MapPage() {
   const points = await getMapPoints();
   return (
-    <div className="mx-auto max-w-7xl px-4 py-8">
+    <div>
       <TrackView />
-      <h1 className="font-display text-2xl font-bold text-slate-900 sm:text-3xl">Harita ile İlan Ara</h1>
-      <p className="mt-1.5 text-slate-500">
-        İlçe seçerek bölgedeki tüm ilanları haritada görüntüleyin ve doğrudan ilana ulaşın.
-      </p>
-      <div className="mt-6 overflow-hidden rounded-lg ring-1 ring-stone">
+      <PageIntro eyebrow="Kütahya portföyü" title="Harita ile ilan ara" intro="İlçe seçerek bölgedeki tüm ilanları haritada görüntüleyin ve doğrudan ilana ulaşın." />
+      <div className="mx-auto max-w-7xl px-4 py-10">
+      <div className="overflow-hidden rounded-xl ring-1 ring-slate-200">
         <ListingsMap points={points} height="600px" />
       </div>
-      <div className="mt-8 flex flex-col gap-4 border-y border-stone bg-paper px-5 py-5 sm:flex-row sm:items-center sm:justify-between">
+      <div className="mt-8 flex flex-col gap-4 rounded-xl bg-white px-5 py-5 ring-1 ring-slate-200 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex gap-3">
           <Landmark className="mt-0.5 h-5 w-5 shrink-0 text-brand-700" aria-hidden="true" />
           <div>
@@ -41,6 +40,7 @@ export default async function MapPage() {
       </div>
       <div className="mt-12">
         <NotFoundCTA />
+      </div>
       </div>
     </div>
   );

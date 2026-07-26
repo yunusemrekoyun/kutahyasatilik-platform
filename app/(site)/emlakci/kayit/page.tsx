@@ -36,7 +36,7 @@ export default function AgentRegisterPage() {
           </div>
         </div>
 
-        <div className="rounded-lg border border-stone bg-paper p-6 sm:p-7">
+        <div className="rounded-2xl bg-white p-6 shadow-card ring-1 ring-slate-200 sm:p-7">
           <h2 className="text-xl font-extrabold text-slate-900">Danışman Başvuru Formu</h2>
           <p className="mt-1 text-sm text-slate-500">Bilgilerinizi girin, başvurunuzu inceleyelim.</p>
           <div className="mt-5">

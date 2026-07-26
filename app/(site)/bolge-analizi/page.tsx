@@ -66,7 +66,7 @@ export default async function RegionAnalysis() {
       {showScores && (<>
       {/* Isı haritası */}
       <section className="mx-auto max-w-6xl px-4 py-10">
-        <div className="rounded-lg bg-paper p-5 ring-1 ring-stone sm:p-7">
+        <div className="rounded-xl bg-white p-5 ring-1 ring-slate-200 sm:p-7">
           <h2 className="font-display text-2xl font-bold text-brand-900">Fiyat Isı Haritası</h2>
           <p className="mt-1 text-sm text-slate-600">
             Arsa m² fiyatına göre renklendirilmiştir — <span className="font-semibold text-green-600">yeşil: uygun</span>, <span className="font-semibold text-red-600">kırmızı: yüksek</span>. Marker üzerine gelin.
@@ -88,7 +88,7 @@ export default async function RegionAnalysis() {
       {/* Sıralı liste */}
       <section className="mx-auto max-w-6xl px-4 pb-16">
         <h2 className="font-display text-2xl font-bold text-brand-900">Yatırım Puanına Göre İlçeler</h2>
-        <div className="mt-5 overflow-hidden rounded-lg bg-paper ring-1 ring-stone">
+        <div className="mt-5 overflow-hidden rounded-xl bg-white ring-1 ring-slate-200">
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>

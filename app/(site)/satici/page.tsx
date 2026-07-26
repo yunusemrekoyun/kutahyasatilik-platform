@@ -43,7 +43,7 @@ export default async function SellerPage() {
       {/* FORM + GÜVEN */}
       <section className="mx-auto max-w-7xl px-4 py-12">
         <div className="grid items-start gap-8 lg:grid-cols-12">
-          <div className="border border-stone bg-paper p-6 sm:p-8 lg:col-span-8">
+          <div className="rounded-2xl bg-white p-6 ring-1 ring-slate-200 sm:p-8 lg:col-span-8">
             <div className="border-b border-slate-100 pb-5">
               <h2 className="font-display text-2xl font-bold text-brand-900">İlan Talebi Oluştur</h2>
               <p className="mt-1.5 text-slate-500">
@@ -70,7 +70,7 @@ export default async function SellerPage() {
 
           <div className="space-y-4 lg:col-span-4">
             {TRUST.map((t) => (
-              <div key={t.title} className="flex items-start gap-4 rounded-lg bg-paper p-6 ring-1 ring-stone">
+              <div key={t.title} className="flex items-start gap-4 rounded-xl bg-white p-6 ring-1 ring-slate-200">
                 <span className="grid h-12 w-12 shrink-0 place-items-center rounded-full bg-brand-50 text-brand-700">
                   <t.Icon className="h-6 w-6" strokeWidth={1.7} />
                 </span>

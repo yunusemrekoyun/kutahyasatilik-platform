@@ -99,7 +99,7 @@ export default async function LocalToolsPage() {
         intro="İmar, parsel, adres ve belediye işlemlerinde ihtiyaç duyabileceğiniz doğrulanmış kurum bağlantılarını tek yerde inceleyin. Her hizmet ilgili kurumun kendi sitesinde açılır."
       />
 
-      <section className="border-b border-stone bg-paper">
+      <section className="border-b border-slate-200 bg-white">
         <div className="mx-auto grid max-w-7xl gap-5 px-5 py-6 sm:px-6 md:grid-cols-2">
           <div className="flex gap-3">
             <ShieldCheck className="mt-0.5 h-5 w-5 shrink-0 text-green-700" aria-hidden="true" />
@@ -114,7 +114,7 @@ export default async function LocalToolsPage() {
 
       <main className="mx-auto max-w-5xl px-5 py-12 sm:px-6 sm:py-16">
         {resources.length === 0 ? (
-          <div className="ceramic-grid border-y border-stone px-5 py-14 text-center">
+          <div className="rounded-xl bg-white px-5 py-14 text-center ring-1 ring-slate-200">
             <Landmark className="mx-auto h-8 w-8 text-brand-600" aria-hidden="true" />
             <h2 className="mt-4 font-display text-2xl font-semibold text-brand-950">Doğrulanmış bağlantılar hazırlanıyor</h2>
             <p className="mx-auto mt-3 max-w-xl leading-7 text-muted">Kurum adresleri doğrulandıktan sonra bu alanda yayımlanacak. Bu sırada arama sonuçlarındaki benzer isimli, resmî olmayan sitelerde kişisel bilgi paylaşmayın.</p>
@@ -127,7 +127,7 @@ export default async function LocalToolsPage() {
                 description: "Yerel işlemler için yetkili kurum bağlantıları.",
               };
               return (
-                <section key={type} aria-labelledby={`resource-${type}`}>
+                <section key={type} aria-labelledby={`resource-${type}`} className="rounded-xl bg-white p-5 ring-1 ring-slate-200 sm:p-6">
                   <div className="flex gap-3 border-b border-stone pb-5">
                     <span className="grid h-10 w-10 shrink-0 place-items-center rounded-lg bg-brand-50 text-brand-700"><ResourceIcon type={type} /></span>
                     <div>
