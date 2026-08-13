@@ -62,12 +62,9 @@ const nextConfig: NextConfig = {
     root: path.join(__dirname),
   },
   images: {
-    remotePatterns: [
-      { protocol: "https", hostname: "picsum.photos" },
-      { protocol: "https", hostname: "fastly.picsum.photos" },
-      { protocol: "https", hostname: "images.unsplash.com" },
-      ...mediaPatterns,
-    ],
+    // Yalnız kendi medya host'umuz. picsum/unsplash seed verisi içindi;
+    // üretimde bu hostlara işaret eden görsel kalmadığı doğrulandı.
+    remotePatterns: [...mediaPatterns],
   },
   serverExternalPackages: ["pg", "sharp", "ioredis"],
   // sharp'ın native binary'sini (@img/sharp-linux-x64 vb.) standalone çıktısına zorla dahil et.
