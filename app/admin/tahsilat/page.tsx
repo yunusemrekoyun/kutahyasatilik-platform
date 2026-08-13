@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { savePayment, updatePaymentStatus, deletePayment } from "@/app/admin/actions";
 import { formatPrice } from "@/lib/format";
@@ -20,14 +21,26 @@ type PaymentRow = {
   agent: { name: string } | null;
 };
 
-export default async function AdminTahsilatPage() {
+const PER_PAGE = 50;
+
+export default async function AdminTahsilatPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ sayfa?: string }>;
+}) {
+  const page = Math.max(1, Number((await searchParams).sayfa) || 1);
   let payments: PaymentRow[] = [];
   let agents: { id: string; name: string }[] = [];
+  // Özet kartları TÜM tablodan hesaplanır. Eskiden kırpılmış listeden
+  // türetiliyordu, yani 200 kayıt aşıldığında gösterilen tutarlar eksikti.
+  let totals: { status: string; _sum: { amount: number | null }; _count: { _all: number } }[] = [];
+  let totalCount = 0;
   try {
-    [payments, agents] = await Promise.all([
+    [payments, agents, totals, totalCount] = await Promise.all([
       prisma.payment.findMany({
         orderBy: { createdAt: "desc" },
-        take: 200,
+        take: PER_PAGE,
+        skip: (page - 1) * PER_PAGE,
         select: {
           id: true, amount: true, currency: true, period: true,
           method: true, purpose: true, status: true,
@@ -35,17 +48,18 @@ export default async function AdminTahsilatPage() {
         },
       }),
       prisma.agent.findMany({ orderBy: { name: "asc" }, select: { id: true, name: true } }),
+      prisma.payment.groupBy({ by: ["status"], _sum: { amount: true }, _count: { _all: true } }),
+      prisma.payment.count(),
     ]);
   } catch {
     /* tablo henüz yoksa (migration deploy edilmedi) — boş göster */
   }
 
-  const sum = (st: string) => payments.filter((p) => p.status === st).reduce((a, p) => a + p.amount, 0);
-  const cards = [
-    { st: "pending", count: payments.filter((p) => p.status === "pending").length, total: sum("pending") },
-    { st: "paid", count: payments.filter((p) => p.status === "paid").length, total: sum("paid") },
-    { st: "overdue", count: payments.filter((p) => p.status === "overdue").length, total: sum("overdue") },
-  ];
+  const totalPages = Math.max(1, Math.ceil(totalCount / PER_PAGE));
+  const cards = ["pending", "paid", "overdue"].map((st) => {
+    const row = totals.find((t) => t.status === st);
+    return { st, count: row?._count._all ?? 0, total: row?._sum.amount ?? 0 };
+  });
 
   return (
     <div className="mx-auto max-w-5xl">
@@ -150,6 +164,20 @@ export default async function AdminTahsilatPage() {
           </table>
         )}
       </section>
+
+      {totalPages > 1 && (
+        <div className="mt-4 flex items-center justify-between text-sm">
+          <span className="text-slate-500">Sayfa {page} / {totalPages} · {totalCount} kayıt</span>
+          <div className="flex gap-2">
+            {page > 1 && (
+              <Link href={`/admin/tahsilat${page - 1 > 1 ? `?sayfa=${page - 1}` : ""}`} className="rounded-lg bg-paper px-3 py-1.5 font-medium text-slate-700 ring-1 ring-stone hover:ring-brand-300">‹ Önceki</Link>
+            )}
+            {page < totalPages && (
+              <Link href={`/admin/tahsilat?sayfa=${page + 1}`} className="rounded-lg bg-paper px-3 py-1.5 font-medium text-slate-700 ring-1 ring-stone hover:ring-brand-300">Sonraki ›</Link>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

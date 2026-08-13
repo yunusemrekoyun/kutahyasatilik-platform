@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { updateAdRequestStatus, deleteAdRequest } from "@/app/admin/actions";
 
@@ -15,10 +16,19 @@ type Row = {
   email: string | null; message: string | null; status: string; createdAt: Date;
 };
 
-export default async function AdminReklamTalepleriPage() {
+const PER_PAGE = 50;
+
+export default async function AdminReklamTalepleriPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ sayfa?: string }>;
+}) {
+  const page = Math.max(1, Number((await searchParams).sayfa) || 1);
+  let totalCount = 0;
   let rows: Row[] = [];
   try {
-    rows = await prisma.adRequest.findMany({ orderBy: { createdAt: "desc" }, take: 200 });
+    totalCount = await prisma.adRequest.count();
+    rows = await prisma.adRequest.findMany({ orderBy: { createdAt: "desc" }, take: PER_PAGE, skip: (page - 1) * PER_PAGE });
   } catch {
     /* tablo henüz yoksa */
   }
@@ -65,6 +75,20 @@ export default async function AdminReklamTalepleriPage() {
               </div>
             );
           })}
+        </div>
+      )}
+
+      {Math.ceil(totalCount / PER_PAGE) > 1 && (
+        <div className="mt-4 flex items-center justify-between text-sm">
+          <span className="text-slate-500">Sayfa {page} / {Math.ceil(totalCount / PER_PAGE)} · {totalCount} kayıt</span>
+          <div className="flex gap-2">
+            {page > 1 && (
+              <Link href={`/admin/reklam-talepleri${page - 1 > 1 ? `?sayfa=${page - 1}` : ""}`} className="rounded-lg bg-paper px-3 py-1.5 font-medium text-slate-700 ring-1 ring-stone hover:ring-brand-300">‹ Önceki</Link>
+            )}
+            {page < Math.ceil(totalCount / PER_PAGE) && (
+              <Link href={`/admin/reklam-talepleri?sayfa=${page + 1}`} className="rounded-lg bg-paper px-3 py-1.5 font-medium text-slate-700 ring-1 ring-stone hover:ring-brand-300">Sonraki ›</Link>
+            )}
+          </div>
         </div>
       )}
     </div>

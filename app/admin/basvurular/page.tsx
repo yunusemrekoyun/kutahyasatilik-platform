@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { updateApplicationStatus, activateApplication, createOffer } from "@/app/admin/actions";
 import { formatPrice } from "@/lib/format";
@@ -31,12 +32,22 @@ type App = {
   offers: Offer[];
 };
 
-export default async function AdminBasvurularPage() {
+const PER_PAGE = 50;
+
+export default async function AdminBasvurularPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ sayfa?: string }>;
+}) {
+  const page = Math.max(1, Number((await searchParams).sayfa) || 1);
+  let totalCount = 0;
   let apps: App[] = [];
   try {
+    totalCount = await prisma.agentApplication.count();
     apps = await prisma.agentApplication.findMany({
       orderBy: { createdAt: "desc" },
-      take: 200,
+      take: PER_PAGE,
+      skip: (page - 1) * PER_PAGE,
       include: {
         offers: {
           orderBy: { version: "desc" },
@@ -148,6 +159,20 @@ export default async function AdminBasvurularPage() {
               </div>
             );
           })}
+        </div>
+      )}
+
+      {Math.ceil(totalCount / PER_PAGE) > 1 && (
+        <div className="mt-4 flex items-center justify-between text-sm">
+          <span className="text-slate-500">Sayfa {page} / {Math.ceil(totalCount / PER_PAGE)} · {totalCount} kayıt</span>
+          <div className="flex gap-2">
+            {page > 1 && (
+              <Link href={`/admin/basvurular${page - 1 > 1 ? `?sayfa=${page - 1}` : ""}`} className="rounded-lg bg-paper px-3 py-1.5 font-medium text-slate-700 ring-1 ring-stone hover:ring-brand-300">‹ Önceki</Link>
+            )}
+            {page < Math.ceil(totalCount / PER_PAGE) && (
+              <Link href={`/admin/basvurular?sayfa=${page + 1}`} className="rounded-lg bg-paper px-3 py-1.5 font-medium text-slate-700 ring-1 ring-stone hover:ring-brand-300">Sonraki ›</Link>
+            )}
+          </div>
         </div>
       )}
     </div>
