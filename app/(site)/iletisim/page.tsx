@@ -5,6 +5,11 @@ import TrackView from "@/components/TrackView";
 import { SITE, telLink, whatsappLink } from "@/lib/site";
 import { getSiteContact } from "@/lib/contact";
 
+// ISR: iletişim bilgileri Ayarlar'dan (Setting tablosu) geliyor ve bu sayfa
+// artık statik üretiliyor. revalidate olmadan admin'in değiştirdiği telefon
+// hiç yansımaz — sitenin geri kalanıyla aynı 5 dakikalık tazelenme.
+export const revalidate = 300;
+
 export const metadata: Metadata = {
   title: "İletişim",
   description: "Kütahya Satılık - Dijital Emlak Ofisi ile iletişime geçin. Telefon, WhatsApp veya form ile bize ulaşın.",
