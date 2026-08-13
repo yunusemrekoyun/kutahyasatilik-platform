@@ -25,8 +25,8 @@ export const PROPERTY_TYPES = [
   { value: "villa", label: "Villa" },
   { value: "mustakil", label: "Müstakil Ev" },
   { value: "arsa", label: "Arsa" },
-  { value: "tarla", label: "Tarla / Yatırımlık Arsa" },
-  { value: "isyeri", label: "İşyeri / Dükkan" },
+  { value: "tarla", label: "Tarla" },
+  { value: "isyeri", label: "İş Yeri" },
 ];
 
 export const PROPERTY_TYPE_LABELS: Record<string, string> = Object.fromEntries(
