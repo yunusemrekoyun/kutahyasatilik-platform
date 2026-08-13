@@ -199,16 +199,25 @@ model Listing {
   @@index([propertyType])
   @@index([district])
   @@index([status])
-  @@index([featured])
-  @@index([moderationStatus])
   @@index([agentId])
   @@index([agencyId])
   // Kamu liste/filtre sorguları her zaman moderationStatus+status ile başlar;
   // en sık filtreler district/propertyType, varsayılan sıralama featured+createdAt.
   @@index([moderationStatus, status, district])
   @@index([moderationStatus, status, propertyType])
-  @@index([featured, createdAt])
+  // Varsayılan liste sıralaması. status filtresi eşitlik DEĞİL (not: passive),
+  // bu yüzden status'u indekse koymak sıralamaya katkı sağlamıyor; ölçümde
+  // planlayıcı böyle bir indeksi hiç kullanmadı. moderationStatus eşitliği +
+  // sıralama anahtarları ise derin sayfalarda 17ms'yi 2ms'ye indiriyor.
+  // Bu indeks eski [featured, createdAt] indeksinin yerini alır.
+  @@index([moderationStatus, featured(sort: Desc), createdAt(sort: Desc)])
   @@index([price])
+  // Serbest metin araması ILIKE '%...%' üretir; B-tree bunu kullanamaz ve her
+  // aramada seq scan olur. pg_trgm GIN indeksleri bu kalıbı indeksler.
+  @@index([title(ops: raw("gin_trgm_ops"))], type: Gin)
+  @@index([description(ops: raw("gin_trgm_ops"))], type: Gin)
+  @@index([neighborhood(ops: raw("gin_trgm_ops"))], type: Gin)
+  @@index([address(ops: raw("gin_trgm_ops"))], type: Gin)
 }
 
 // ---------------------------------------------------------------------------
