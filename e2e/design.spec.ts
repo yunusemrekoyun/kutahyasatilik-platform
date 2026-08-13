@@ -8,7 +8,7 @@ const viewports = [
 ];
 
 for (const viewport of viewports) {
-  test(`classic public surfaces render without horizontal overflow — ${viewport.name}`, async ({ page }, testInfo) => {
+  test(`editorial public surfaces render without horizontal overflow — ${viewport.name}`, async ({ page }, testInfo) => {
     await page.setViewportSize({ width: viewport.width, height: viewport.height });
 
     for (const [name, path] of [["home", "/"], ["listings", "/ilanlar"], ["seller", "/satici"], ["login", "/giris"]] as const) {
