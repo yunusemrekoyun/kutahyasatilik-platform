@@ -91,50 +91,6 @@ body {
 
 .surface-paper { background: var(--color-paper); }
 
-/*
- * Classic public storefront theme
- *
- * The operational admin/agent shells intentionally keep the editorial token
- * values declared in @theme. Public pages opt in through the site layout so
- * the classic storefront can evolve without leaking into either panel.
- */
-.classic-public {
-  --color-canvas: #f6f7f9;
-  --color-paper: #ffffff;
-  --color-stone: #e2e8f0;
-  --color-ink: #0f172a;
-  --color-muted: #64748b;
-  --shadow-card: 0 1px 2px rgba(15, 23, 42, 0.04), 0 6px 16px -10px rgba(15, 23, 42, 0.12);
-  --shadow-prestige: 0 10px 30px -16px rgba(10, 23, 48, 0.2);
-  min-height: 100vh;
-  background: #f6f7f9;
-  color: #0f172a;
-}
-
-.classic-public .gold-divider {
-  height: 2px;
-  width: 36px;
-  border-radius: 9999px;
-}
-
-.classic-public .classic-card {
-  border: 1px solid #e2e8f0;
-  border-radius: 0.875rem;
-  background: #fff;
-  box-shadow: var(--shadow-card);
-}
-
-.classic-public .classic-panel {
-  border: 1px solid #e2e8f0;
-  border-radius: 1rem;
-  background: #fff;
-}
-
-.classic-public .eyebrow {
-  color: #1e3a6b;
-  letter-spacing: .1em;
-}
-
 .font-display {
   font-family: var(--font-display);
 }
