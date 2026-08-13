@@ -27,26 +27,43 @@ const STATUS_TONE: Record<string, "danger" | "warning" | "success" | "brand"> = 
   closed: "success",
 };
 
+const PER_PAGE = 50;
+
 export default async function AdminLeads({
   searchParams,
 }: {
-  searchParams: Promise<{ tip?: string; durum?: string }>;
+  searchParams: Promise<{ tip?: string; durum?: string; sayfa?: string }>;
 }) {
   const sp = await searchParams;
   const where: Record<string, unknown> = {};
   if (sp.tip) where.type = sp.tip;
   if (sp.durum) where.status = sp.durum;
+  const page = Math.max(1, Number(sp.sayfa) || 1);
 
-  const leads = await prisma.lead.findMany({
-    where,
-    orderBy: { createdAt: "desc" },
-    include: { listing: { select: { title: true, slug: true } } },
-    take: 200,
-  });
+  // Sayfalama ZORUNLU: talepler sürekli birikir; sabit take ile fazlası ekranda
+  // hiç görünmezdi ve başlıktaki sayaç gerçek toplamı değil o tavanı gösterirdi.
+  const [total, leads] = await Promise.all([
+    prisma.lead.count({ where }),
+    prisma.lead.findMany({
+      where,
+      orderBy: { createdAt: "desc" },
+      include: { listing: { select: { title: true, slug: true } } },
+      take: PER_PAGE,
+      skip: (page - 1) * PER_PAGE,
+    }),
+  ]);
+  const totalPages = Math.max(1, Math.ceil(total / PER_PAGE));
+  const pageQs = (p: number) => {
+    const qs = new URLSearchParams();
+    if (sp.tip) qs.set("tip", sp.tip);
+    if (sp.durum) qs.set("durum", sp.durum);
+    if (p > 1) qs.set("sayfa", String(p));
+    return qs.toString() ? `?${qs}` : "";
+  };
 
   return (
     <div>
-      <PageHeader title="Gelen Talepler" description={`${leads.length} kayıt`} />
+      <PageHeader title="Gelen Talepler" description={`${total} kayıt`} />
 
       {/* Tip sekmeleri */}
       <div className="flex flex-wrap gap-2">
@@ -155,6 +172,20 @@ export default async function AdminLeads({
           );
         })}
       </div>
+
+      {totalPages > 1 && (
+        <div className="mt-4 flex items-center justify-between text-sm">
+          <span className="text-slate-500">Sayfa {page} / {totalPages}</span>
+          <div className="flex gap-2">
+            {page > 1 && (
+              <Link href={`/admin/talepler${pageQs(page - 1)}`} className="rounded-lg bg-paper px-3 py-1.5 font-medium text-slate-700 ring-1 ring-stone hover:ring-brand-300">‹ Önceki</Link>
+            )}
+            {page < totalPages && (
+              <Link href={`/admin/talepler${pageQs(page + 1)}`} className="rounded-lg bg-paper px-3 py-1.5 font-medium text-slate-700 ring-1 ring-stone hover:ring-brand-300">Sonraki ›</Link>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

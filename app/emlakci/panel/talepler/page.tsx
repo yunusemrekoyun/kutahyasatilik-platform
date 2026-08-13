@@ -9,15 +9,29 @@ import { updateAgentLeadStatus } from "../actions";
 
 export const dynamic = "force-dynamic";
 
-export default async function AgentLeads() {
+const PER_PAGE = 50;
+
+export default async function AgentLeads({
+  searchParams,
+}: {
+  searchParams: Promise<{ sayfa?: string }>;
+}) {
   const session = await getAgentSession();
+  const page = Math.max(1, Number((await searchParams).sayfa) || 1);
   // Yalnız emlakçının kendi ilanlarına gelen talepler.
-  const leads = await prisma.lead.findMany({
-    where: { listing: { agentId: session!.agentId } },
-    orderBy: { createdAt: "desc" },
-    include: { listing: { select: { title: true, slug: true } } },
-    take: 200,
-  });
+  // Sayfalama ZORUNLU: sabit take ile eski talepler emlakçıya hiç görünmezdi.
+  const where = { listing: { agentId: session!.agentId } };
+  const [total, leads] = await Promise.all([
+    prisma.lead.count({ where }),
+    prisma.lead.findMany({
+      where,
+      orderBy: { createdAt: "desc" },
+      include: { listing: { select: { title: true, slug: true } } },
+      take: PER_PAGE,
+      skip: (page - 1) * PER_PAGE,
+    }),
+  ]);
+  const totalPages = Math.max(1, Math.ceil(total / PER_PAGE));
 
   return (
     <div className="space-y-6">
@@ -78,6 +92,20 @@ export default async function AgentLeads() {
           </div>
         ))}
       </div>
+
+      {totalPages > 1 && (
+        <div className="flex items-center justify-between text-sm">
+          <span className="text-slate-500">Sayfa {page} / {totalPages}</span>
+          <div className="flex gap-2">
+            {page > 1 && (
+              <Link href={`/emlakci/panel/talepler${page - 1 > 1 ? `?sayfa=${page - 1}` : ""}`} className="rounded-lg bg-paper px-3 py-1.5 font-medium text-slate-700 ring-1 ring-stone hover:ring-brand-300">‹ Önceki</Link>
+            )}
+            {page < totalPages && (
+              <Link href={`/emlakci/panel/talepler?sayfa=${page + 1}`} className="rounded-lg bg-paper px-3 py-1.5 font-medium text-slate-700 ring-1 ring-stone hover:ring-brand-300">Sonraki ›</Link>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
