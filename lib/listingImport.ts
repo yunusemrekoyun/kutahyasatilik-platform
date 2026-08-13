@@ -45,7 +45,7 @@ const LOWERCASE_FIELDS = new Set([
 ]);
 
 const ENUM_VALUES: Record<string, ReadonlySet<string>> = {
-  listingType: new Set(["sale", "rent"]),
+  listingType: new Set(["sale"]), // portföy yalnız satılık
   status: new Set(["active", "sold", "passive"]),
   currency: new Set(["TRY", "USD", "EUR"]),
   creditEligible: new Set(["yes", "no", "unknown"]),

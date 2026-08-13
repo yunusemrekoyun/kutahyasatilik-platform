@@ -136,12 +136,7 @@ export default function AgentListingForm({ listing }: { listing?: ListingData })
                 {PROPERTY_TYPES.map((p) => <option key={p.value} value={p.value}>{p.label}</option>)}
               </select>
             </Field>
-            <Field label="İşlem">
-              <select name="listingType" defaultValue={listing?.listingType || "sale"} className={inputCls}>
-                <option value="sale">Satılık</option>
-                <option value="rent">Kiralık</option>
-              </select>
-            </Field>
+            <input type="hidden" name="listingType" value="sale" />
             <Field label="Fiyat (₺) *">
               <ThousandsInput name="price" required defaultValue={listing?.price} placeholder="Örn. 2.500.000" className={inputCls} />
             </Field>

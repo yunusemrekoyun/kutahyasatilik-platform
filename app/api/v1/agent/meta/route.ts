@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { resolveApiAgent } from "@/lib/apiAgent";
+import { PROPERTY_TYPES } from "@/lib/constants";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -21,18 +22,9 @@ export async function GET(req: NextRequest) {
 
   return NextResponse.json({
     ok: true,
-    propertyTypes: [
-      { value: "daire", label: "Daire" },
-      { value: "villa", label: "Villa" },
-      { value: "mustakil", label: "Müstakil Ev" },
-      { value: "isyeri", label: "İşyeri / Dükkan" },
-      { value: "arsa", label: "Arsa" },
-      { value: "tarla", label: "Tarla" },
-    ],
-    listingTypes: [
-      { value: "sale", label: "Satılık" },
-      { value: "rent", label: "Kiralık" },
-    ],
+    // Etiketler tek kaynaktan (lib/constants) gelir; burada ikinci bir kopya tutulmaz.
+    propertyTypes: PROPERTY_TYPES,
+    listingTypes: [{ value: "sale", label: "Satılık" }],
     currencies: ["TRY", "USD", "EUR"],
     quota: { limit: quota, used, remaining: quota == null ? null : Math.max(0, quota - used) },
   });

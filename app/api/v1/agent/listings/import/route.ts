@@ -98,7 +98,7 @@ function validationErrors(input: ListingInput, existing: ExistingListing | null,
   if (!externalId || externalId.length > 100) errors.push("externalId zorunludur ve 100 karakteri aşamaz");
   if (!title) errors.push("title zorunludur");
   if (!propertyTypes.has(propertyType)) errors.push("propertyType geçersiz");
-  if (!["sale", "rent"].includes(listingType)) errors.push("listingType sale veya rent olmalıdır");
+  if (listingType !== "sale") errors.push("listingType yalnız sale olabilir");
   if (!price || price <= 0) errors.push("price pozitif olmalıdır");
   if (!["TRY", "USD", "EUR"].includes(currency)) errors.push("currency geçersiz");
   if (!districts.has(district)) errors.push("district geçersiz");
