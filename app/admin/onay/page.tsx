@@ -9,15 +9,32 @@ import { approveListing, rejectListing } from "../actions";
 
 export const dynamic = "force-dynamic";
 
-export default async function AdminModeration() {
-  const listings = await prisma.listing.findMany({
-    where: { moderationStatus: "pending" },
-    orderBy: { createdAt: "asc" },
-    include: {
-      images: { take: 1, orderBy: { sortOrder: "asc" } },
-      agent: { select: { name: true, title: true, agency: true, email: true } },
-    },
-  });
+const PER_PAGE = 25;
+
+export default async function AdminModeration({
+  searchParams,
+}: {
+  searchParams: Promise<{ sayfa?: string }>;
+}) {
+  const page = Math.max(1, Number((await searchParams).sayfa) || 1);
+  // Sayfalama ZORUNLU: aşağıdaki eşleşen-talep sayacı ilan BAŞINA ayrı sorgu
+  // atıyor (koşul her ilanın kendi fiyat/alan değerine bağlı, tek sorguya
+  // indirilemiyor). Sınırsız kuyrukta bu, tek istekte yüzlerce eşzamanlı
+  // sorgu demekti; sayfa boyutu aynı zamanda sorgu sayısının tavanıdır.
+  const [total, listings] = await Promise.all([
+    prisma.listing.count({ where: { moderationStatus: "pending" } }),
+    prisma.listing.findMany({
+      where: { moderationStatus: "pending" },
+      orderBy: { createdAt: "asc" },
+      take: PER_PAGE,
+      skip: (page - 1) * PER_PAGE,
+      include: {
+        images: { take: 1, orderBy: { sortOrder: "asc" } },
+        agent: { select: { name: true, title: true, agency: true, email: true } },
+      },
+    }),
+  ]);
+  const totalPages = Math.max(1, Math.ceil(total / PER_PAGE));
 
   const alertCounts = await Promise.all(listings.map((l) => countAlertsForListing(l)));
 
@@ -26,7 +43,7 @@ export default async function AdminModeration() {
       <div>
         <h1 className="text-2xl font-bold tracking-tight text-slate-900">Onay Bekleyen İlanlar</h1>
         <p className="text-sm text-slate-500">
-          Emlakçıların eklediği {listings.length} ilan yayın onayı bekliyor.
+          Emlakçıların eklediği {total} ilan yayın onayı bekliyor.
         </p>
       </div>
 
@@ -83,6 +100,20 @@ export default async function AdminModeration() {
           </div>
         ))}
       </div>
+
+      {totalPages > 1 && (
+        <div className="flex items-center justify-between text-sm">
+          <span className="text-slate-500">Sayfa {page} / {totalPages}</span>
+          <div className="flex gap-2">
+            {page > 1 && (
+              <Link href={`/admin/onay${page - 1 > 1 ? `?sayfa=${page - 1}` : ""}`} className="rounded-lg bg-paper px-3 py-1.5 font-medium text-slate-700 ring-1 ring-stone hover:ring-brand-300">‹ Önceki</Link>
+            )}
+            {page < totalPages && (
+              <Link href={`/admin/onay?sayfa=${page + 1}`} className="rounded-lg bg-paper px-3 py-1.5 font-medium text-slate-700 ring-1 ring-stone hover:ring-brand-300">Sonraki ›</Link>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
