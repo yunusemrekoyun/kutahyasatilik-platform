@@ -152,6 +152,39 @@ export async function getFeaturedListings(take = 6): Promise<ListingCardData[]> 
   return decorate(rows as RawCard[]);
 }
 
+// Karşılaştırma / favori / son gezilen listeleri istemcide localStorage snapshot'ı
+// olarak tutulur. Snapshot yazıldığı andaki fiyatı ve durumu taşır; ilan sonradan
+// satılır veya fiyatı değişirse ekranda eski değer kalırdı. Bu fonksiyon o
+// listeleri slug'larından tazeler. buildWhere() varsayılanı sayesinde yayından
+// kalkmış (passive/onaysız) ilanlar dönmez — istemci onları listeden düşürür.
+export async function getListingSnapshotsBySlugs(slugs: string[]) {
+  const clean = [...new Set(slugs.filter((s) => typeof s === "string" && s))].slice(0, 50);
+  if (!clean.length) return [];
+  const rows = await prisma.listing.findMany({
+    where: { ...buildWhere({}), slug: { in: clean } },
+    select: {
+      ...cardSelect,
+      areaNet: true,
+      floor: true,
+      buildingAge: true,
+      heating: true,
+    },
+  });
+  const cards = await decorate(rows as RawCard[]);
+  // Karşılaştırma tablosunun ihtiyaç duyduğu ek alanları kart verisine geri ekle.
+  const extras = new Map(rows.map((r) => [r.slug, r]));
+  return cards.map((c) => {
+    const e = extras.get(c.slug);
+    return {
+      ...c,
+      areaNet: e?.areaNet ?? null,
+      floor: e?.floor ?? null,
+      buildingAge: e?.buildingAge ?? null,
+      heating: e?.heating ?? null,
+    };
+  });
+}
+
 export async function getMapPoints(filter: ListingFilter = {}) {
   const rows = await prisma.listing.findMany({
     where: {

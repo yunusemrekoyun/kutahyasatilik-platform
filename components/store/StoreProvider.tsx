@@ -127,6 +127,54 @@ export default function StoreProvider({ children }: { children: React.ReactNode 
   useEffect(() => { if (hydrated) localStorage.setItem("ks_cmp", JSON.stringify(compare)); }, [compare, hydrated]);
   useEffect(() => { if (hydrated) localStorage.setItem("ks_recent", JSON.stringify(recent)); }, [recent, hydrated]);
 
+  // Snapshot tazeleme: localStorage'daki kayıtlar yazıldıkları andaki fiyatı ve
+  // durumu taşır. Tazelemezsek satılmış ilan "aktif" görünür (SATILDI rozeti ve
+  // iletişim gizleme çalışmaz) ve karşılaştırma tablosu eski fiyatla karar
+  // verdirir. Hydration'dan sonra bir kez sunucudan doğrularız; yayından kalkmış
+  // ilanlar listeden düşer. Girişli kullanıcının favorileri zaten sunucudan
+  // geldiği için yalnız compare/recent tazelenir.
+  const refreshedRef = useRef(false);
+  useEffect(() => {
+    if (!hydrated || authed === null || refreshedRef.current) return;
+    refreshedRef.current = true;
+
+    const anonymous = authed === false;
+    const slugs = [
+      ...compare.map((c) => c.slug),
+      ...recent.map((r) => r.slug),
+      ...(anonymous ? favoritesRef.current.map((f) => f.slug) : []),
+    ].filter(Boolean);
+    if (!slugs.length) return;
+
+    let cancelled = false;
+    (async () => {
+      try {
+        const res = await fetch("/api/listings/refresh", {
+          method: "POST",
+          headers: JSON_HEADERS,
+          body: JSON.stringify({ slugs: [...new Set(slugs)] }),
+        });
+        const d = await res.json().catch(() => null);
+        if (cancelled || !d?.ok) return;
+        const fresh = new Map<string, ListingSnapshot>(
+          (d.items as ListingSnapshot[]).map((i) => [i.slug, i])
+        );
+        // Dönen kayıtları güncelle, dönmeyenleri (artık yayında değil) çıkar.
+        const sync = (list: ListingSnapshot[]) =>
+          list.map((x) => fresh.get(x.slug)).filter((x): x is ListingSnapshot => !!x);
+        setCompare((prev) => sync(prev));
+        setRecent((prev) => sync(prev));
+        if (anonymous) setFavorites((prev) => sync(prev));
+      } catch {
+        /* tazeleme başarısızsa mevcut snapshot korunur */
+      }
+    })();
+
+    return () => { cancelled = true; };
+    // compare/recent bilerek bağımlılık dışı: tazeleme hydration'dan sonra tek sefer çalışır.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [hydrated, authed]);
+
   const toast = useCallback((message: string, type: Toast["type"] = "success") => {
     const id = Date.now() + Math.floor(Math.random() * 1000);
     setToasts((t) => [...t, { id, message, type }]);
