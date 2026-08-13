@@ -7,17 +7,19 @@ import { track } from "@/lib/track";
 export default function TrackView({
   type = "view",
   listingId,
+  postId,
   district,
 }: {
   type?: string;
   listingId?: string;
+  postId?: string;
   district?: string;
 }) {
   const fired = useRef(false);
   useEffect(() => {
     if (fired.current) return;
     fired.current = true;
-    track({ type, listingId, district });
-  }, [type, listingId, district]);
+    track({ type, listingId, postId, district });
+  }, [type, listingId, postId, district]);
   return null;
 }

@@ -15,6 +15,7 @@ const schema = z.object({
     "conversion",
   ]),
   listingId: z.string().max(40).optional().nullable(),
+  postId: z.string().max(40).optional().nullable(),
   district: z.string().max(60).optional().nullable(),
   pagePath: z.string().max(300).optional().nullable(),
   referrer: z.string().max(300).optional().nullable(),
@@ -43,6 +44,16 @@ export async function POST(req: NextRequest) {
     listingId = exists?.id ?? null;
   }
 
+  // Blog yazısı sayacı için (AnalyticsEvent'te post ilişkisi yok; yalnız sayaç artar).
+  let postId: string | null = null;
+  if (data.postId) {
+    const exists = await prisma.post.findUnique({
+      where: { id: data.postId },
+      select: { id: true },
+    });
+    postId = exists?.id ?? null;
+  }
+
   try {
     await prisma.analyticsEvent.create({
       data: {
@@ -55,6 +66,25 @@ export async function POST(req: NextRequest) {
         sessionId: data.sessionId || null,
       },
     });
+
+    // Listing.viewCount admin ve emlakçı panellerinde gösterilir. Eskiden ilan
+    // detayı render edilirken sunucuda artırılıyordu; sayfa ISR ile cache'lenince
+    // o artış yalnız yeniden üretimde çalışırdı. Sayacı gerçek ziyaretin
+    // kaydedildiği tek yere (bu olay) bağlıyoruz.
+    if (data.type === "view" && listingId) {
+      await prisma.listing
+        .update({ where: { id: listingId }, data: { viewCount: { increment: 1 } } })
+        .catch(() => {});
+    }
+
+    // Post.viewCount da aynı nedenle buraya taşındı: blog detayı statik ISR
+    // sayfası olduğu için render'daki artış ziyaret başına çalışmıyordu.
+    if (data.type === "view" && postId) {
+      await prisma.post
+        .update({ where: { id: postId }, data: { viewCount: { increment: 1 } } })
+        .catch(() => {});
+    }
+
     return NextResponse.json({ ok: true });
   } catch {
     return NextResponse.json({ ok: false }, { status: 500 });

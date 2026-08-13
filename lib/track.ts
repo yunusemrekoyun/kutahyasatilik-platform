@@ -5,6 +5,7 @@
 type TrackPayload = {
   type: string;
   listingId?: string;
+  postId?: string;
   district?: string;
 };
 

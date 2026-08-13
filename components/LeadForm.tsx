@@ -1,10 +1,11 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { CheckCircle2, Lock } from "lucide-react";
 import { useUtm } from "@/lib/useUtm";
 import { trackAdsConversion } from "@/lib/track";
 import { isValidTrPhone, TR_PHONE_ERROR } from "@/lib/validation";
+import { useSessionUser } from "@/lib/useSessionUser";
 import LoginRequiredNotice from "./LoginRequiredNotice";
 
 type LeadType = "appointment" | "expertise" | "price_offer" | "contact";
@@ -40,8 +41,6 @@ export default function LeadForm({
   district,
   compact = false,
   onDone,
-  isLoggedIn = true,
-  defaultName = "",
 }: {
   type: LeadType;
   listingId?: string;
@@ -49,36 +48,24 @@ export default function LeadForm({
   district?: string;
   compact?: boolean;
   onDone?: () => void;
-  isLoggedIn?: boolean;
-  defaultName?: string;
 }) {
   const utm = useUtm();
   const cfg = CONFIG[type];
   const [status, setStatus] = useState<"idle" | "loading" | "ok" | "error">("idle");
   const [error, setError] = useState("");
 
-  // Ön-doldurma: ad/telefon/e-posta oturumdan gelir (İlan sayfası statik/ISR olduğundan
-  // sunucudan geçirilemez; client açılışta /api/user/me'den çeker). Kullanıcı yazdıysa ezilmez.
-  const [name, setName] = useState(defaultName);
-  const [phone, setPhone] = useState("");
-  const [email, setEmail] = useState("");
-  useEffect(() => {
-    if (!isLoggedIn) return;
-    let active = true;
-    fetch("/api/user/me")
-      .then((r) => r.json())
-      .then((d) => {
-        if (!active || !d?.user) return;
-        setName((v) => v || d.user.name || "");
-        setPhone((v) => v || d.user.phone || "");
-        setEmail((v) => v || d.user.email || "");
-      })
-      .catch(() => {});
-    return () => { active = false; };
-  }, [isLoggedIn]);
+  // Oturum client'ta çözülür: sayfanın ISR/CDN cache'i korunsun diye sunucudan
+  // prop geçilmez (bkz. lib/useSessionUser).
+  const { loading: sessionLoading, user } = useSessionUser();
+
+  // Oturum henüz bilinmiyorken ne formu ne de giriş uyarısını göster — yanlış
+  // durumun bir an görünüp değişmesini önler.
+  if (sessionLoading) {
+    return <div aria-busy="true" className="skeleton h-40 rounded-xl" />;
+  }
 
   // Talep bırakmak için giriş zorunlu → giriş yoksa form yerine bildirim göster.
-  if (!isLoggedIn) {
+  if (!user) {
     return <LoginRequiredNotice text={`${cfg.title} için giriş yapın`} />;
   }
 
@@ -151,16 +138,16 @@ export default function LeadForm({
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div>
           <label htmlFor="lf-name" className={labelCls}>Ad Soyad <span aria-hidden="true" className="text-red-500">*</span></label>
-          <input id="lf-name" name="name" required autoComplete="name" value={name} onChange={(e) => setName(e.target.value)} placeholder="Adınız ve soyadınız" className={inputCls} />
+          <input id="lf-name" name="name" required autoComplete="name" defaultValue={user.name || ""} placeholder="Adınız ve soyadınız" className={inputCls} />
         </div>
         <div>
           <label htmlFor="lf-phone" className={labelCls}>Telefon <span aria-hidden="true" className="text-red-500">*</span></label>
-          <input id="lf-phone" name="phone" required type="tel" inputMode="tel" autoComplete="tel" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="05__ ___ __ __" className={inputCls} />
+          <input id="lf-phone" name="phone" required type="tel" inputMode="tel" autoComplete="tel" defaultValue={user.phone || ""} placeholder="05__ ___ __ __" className={inputCls} />
         </div>
       </div>
       <div>
         <label htmlFor="lf-email" className={labelCls}>E-posta <span className="font-normal text-slate-400">(opsiyonel)</span></label>
-        <input id="lf-email" name="email" type="email" autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="ornek@eposta.com" className={inputCls} />
+        <input id="lf-email" name="email" type="email" autoComplete="email" defaultValue={user.email || ""} placeholder="ornek@eposta.com" className={inputCls} />
       </div>
       {cfg.showDate && (
         <div>

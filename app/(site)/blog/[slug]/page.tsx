@@ -50,7 +50,8 @@ export default async function BlogPost({ params }: { params: Promise<{ slug: str
   const post = await getPost(slug);
   if (!post) notFound();
 
-  prisma.post.update({ where: { id: post.id }, data: { viewCount: { increment: 1 } } }).catch(() => {});
+  // Sayaç <TrackView /> → /api/track yolunda artırılır: bu sayfa statik ISR
+  // olduğu için render başına artış ziyaret başına çalışmıyordu.
 
   const tags = (post.tags || "").split(",").map((t) => t.trim()).filter(Boolean);
 
@@ -75,7 +76,7 @@ export default async function BlogPost({ params }: { params: Promise<{ slug: str
 
   return (
     <article className="mx-auto max-w-3xl px-4 py-10">
-      <TrackView />
+      <TrackView postId={post.id} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
 
       <nav className="mb-4 text-sm text-slate-500">

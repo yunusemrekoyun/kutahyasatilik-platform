@@ -5,6 +5,7 @@ import { Phone, MessageCircle, CalendarDays, ClipboardCheck, Banknote, X } from 
 import { telLink, whatsappLink } from "@/lib/site";
 import { useSiteContact } from "./SiteContactProvider";
 import { trackConversion } from "@/lib/track";
+import { useSessionUser } from "@/lib/useSessionUser";
 import LeadForm from "./LeadForm";
 
 type ModalType = "appointment" | "expertise" | "price_offer" | null;
@@ -14,16 +15,15 @@ export default function ContactButtons({
   listingTitle,
   district,
   layout = "grid",
-  isLoggedIn = true,
-  defaultName = "",
 }: {
   listingId: string;
   listingTitle: string;
   district?: string;
   layout?: "grid" | "stack";
-  isLoggedIn?: boolean;
-  defaultName?: string;
 }) {
+  // Oturumu burada da çağırıyoruz: bileşen sayfa yüklenirken mount olduğu için
+  // istek modal açılmadan tamamlanır, LeadForm cache'e hazır bulur.
+  useSessionUser();
   const [modal, setModal] = useState<ModalType>(null);
   const c = useSiteContact();
   const dialogRef = useRef<HTMLDivElement>(null);
@@ -157,8 +157,6 @@ export default function ContactButtons({
               listingTitle={listingTitle}
               district={district}
               compact
-              isLoggedIn={isLoggedIn}
-              defaultName={defaultName}
             />
           </div>
         </div>

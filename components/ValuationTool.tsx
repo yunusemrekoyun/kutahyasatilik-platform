@@ -9,6 +9,7 @@ import { formatPrice } from "@/lib/format";
 import { estimateValue } from "@/lib/valuation";
 import type { DistrictStat } from "@/lib/districtStats";
 import LoginRequiredNotice from "@/components/LoginRequiredNotice";
+import { useSessionUser } from "@/lib/useSessionUser";
 
 const ROOM_OPTIONS = ["1+0", "1+1", "2+1", "3+1", "4+1", "4+2", "5+1"];
 const LAND_TYPES = new Set(["arsa", "tarla"]);
@@ -16,14 +17,14 @@ const FALLBACK_DISTRICT = "Merkez";
 
 export default function ValuationTool({
   stats,
-  isLoggedIn = true,
-  defaultName = "",
 }: {
   stats: Record<string, DistrictStat>;
-  isLoggedIn?: boolean;
-  defaultName?: string;
 }) {
   const utm = useUtm();
+  // Oturum client'ta çözülür; sayfanın ISR/CDN cache'i korunur. Giriş uyarısı
+  // yalnız "Ekspertiz İste" tıklandıktan sonra görünür, o ana kadar sonuç hazırdır.
+  const { loading: sessionLoading, user } = useSessionUser();
+  const isLoggedIn = !!user;
 
   const [district, setDistrict] = useState("");
   const [propertyType, setPropertyType] = useState("daire");
@@ -31,7 +32,7 @@ export default function ValuationTool({
   const [rooms, setRooms] = useState("3+1");
 
   const [showLead, setShowLead] = useState(false);
-  const [name, setName] = useState(defaultName);
+  const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [status, setStatus] = useState<"idle" | "loading" | "ok" | "error">("idle");
   const [error, setError] = useState("");
@@ -219,6 +220,8 @@ export default function ValuationTool({
                 >
                   Ücretsiz Detaylı Ekspertiz İste
                 </button>
+              ) : sessionLoading ? (
+                <div aria-busy="true" className="skeleton mt-6 h-28 rounded-xl" />
               ) : !isLoggedIn ? (
                 <div className="mt-6">
                   <LoginRequiredNotice text="Ekspertiz talebi için giriş yapın" />

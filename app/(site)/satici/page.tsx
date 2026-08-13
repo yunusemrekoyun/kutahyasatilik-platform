@@ -7,7 +7,10 @@ import { PageIntro } from "@/components/ui/Editorial";
 import { prisma } from "@/lib/prisma";
 import { getUserSession } from "@/lib/userAuth";
 
-export const revalidate = 300; // ISR: admin görsel/ayar değişince revalidatePath ile tazelenir
+// Bu sayfa DİNAMİK: SellerForm'un giriş uyarısı ilk boyamada görünür olduğu için
+// oturum sunucuda okunur ve cookies() rotayı dinamiğe düşürür. Eskiden burada
+// revalidate = 300 yazıyordu ama hiçbir zaman etkili olmuyordu.
+export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
   title: "Mülkünüzü Satın - İlan Talebi Oluşturun",

@@ -4,17 +4,20 @@ import { useState } from "react";
 import Link from "next/link";
 import { MessageSquare, X, Send } from "lucide-react";
 import LoginRequiredNotice from "@/components/LoginRequiredNotice";
+import { useSessionUser } from "@/lib/useSessionUser";
 
 // İlan detayında "Mesaj Gönder / Teklif Ver" — kullanıcı o ilanın danışmanıyla sohbet başlatır.
 export default function StartConversation({
   listingId,
-  isLoggedIn,
   hasAgent,
 }: {
   listingId: string;
-  isLoggedIn: boolean;
   hasAgent: boolean;
 }) {
+  // Oturum client'ta çözülür (sayfa ISR/CDN cache'ini korumak için); istek mount'ta
+  // başlar, modal açıldığında sonuç hazırdır.
+  const { loading: sessionLoading, user } = useSessionUser();
+  const isLoggedIn = !!user;
   const [open, setOpen] = useState(false);
   const [mode, setMode] = useState<"text" | "offer">("text");
   const [text, setText] = useState("");
@@ -61,7 +64,9 @@ export default function StartConversation({
               <button onClick={() => setOpen(false)} aria-label="Kapat"><X className="h-5 w-5 text-slate-400" /></button>
             </div>
 
-            {!isLoggedIn ? (
+            {sessionLoading ? (
+              <div aria-busy="true" className="skeleton h-32 rounded-xl" />
+            ) : !isLoggedIn ? (
               <LoginRequiredNotice text="Mesaj / teklif göndermek için giriş yapın" />
             ) : status === "ok" ? (
               <div className="rounded-lg bg-green-50 p-5 text-center ring-1 ring-green-200">

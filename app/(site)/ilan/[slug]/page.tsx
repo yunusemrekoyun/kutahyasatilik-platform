@@ -11,7 +11,6 @@ import { SITE } from "@/lib/site";
 import Gallery from "@/components/Gallery";
 import ContactButtons from "@/components/ContactButtons";
 import StartConversation from "@/components/messaging/StartConversation";
-import { getUserSession } from "@/lib/userAuth";
 import AnalysisSection from "@/components/AnalysisSection";
 import ListingMedia from "@/components/ListingMedia";
 import PriceHistoryCard from "@/components/PriceHistoryCard";
@@ -27,14 +26,16 @@ import { groupListingAmenities } from "@/lib/listingAmenities";
 
 export const revalidate = 300; // ISR: her 5 dakikada yenilenir (CDN cache + admin revalidatePath)
 
-// Onaylı ilanları build'de önceden üret (ISR cache'lenebilir olur).
-// Yeni ilanlar talep anında üretilip cache'lenir (dynamicParams varsayılan true).
+// Build'de yalnız en güncel ilanları önceden üret; gerisi ilk talepte üretilip
+// cache'lenir (dynamicParams varsayılan true). revalidate 300 olduğu için geniş
+// bir set'i build'de üretmenin faydası yok — sayfalar zaten 5 dakikada tazeleniyor;
+// buna karşılık her ek sayfa deploy süresine ve build'in DB yüküne ekleniyor.
 export async function generateStaticParams() {
   const listings = await prisma.listing.findMany({
     where: { moderationStatus: "approved", status: { not: "passive" } },
     select: { slug: true },
-    orderBy: { createdAt: "desc" },
-    take: 1000,
+    orderBy: [{ featured: "desc" }, { createdAt: "desc" }],
+    take: 100,
   });
   return listings.map((l) => ({ slug: l.slug }));
 }
@@ -120,31 +121,33 @@ export default async function ListingPage({
   const listing = await getListing(slug);
   if (!listing) notFound();
 
-  // Görüntülenme sayacı (best-effort)
-  prisma.listing.update({ where: { id: listing.id }, data: { viewCount: { increment: 1 } } }).catch(() => {});
+  // Görüntülenme sayacı burada DEĞİL: sayfa ISR ile cache'lendiği için render
+  // başına artış gerçek ziyareti yansıtmaz. Sayaç <TrackView /> → /api/track
+  // yolunda, olay kaydıyla aynı yerde artırılır.
 
-  const district = await prisma.district.findFirst({ where: { name: listing.district } });
+  // Bu üç sorgu birbirinden bağımsız; ardışık await ile üç ayrı gidiş-dönüş oluyordu.
+  const [district, scoresSetting, similarRaw] = await Promise.all([
+    prisma.district.findFirst({ where: { name: listing.district } }),
+    // Bölge analizi skorlarını göster/gizle (Setting: analysis_scores; "0" ise gizli, varsayılan göster)
+    prisma.setting.findUnique({ where: { key: "analysis_scores" } }),
+    // Benzer ilanlar
+    prisma.listing.findMany({
+      where: {
+        status: "active",
+        moderationStatus: "approved",
+        id: { not: listing.id },
+        OR: [{ district: listing.district }, { propertyType: listing.propertyType }],
+      },
+      orderBy: [{ featured: "desc" }, { createdAt: "desc" }],
+      take: 3,
+      include: { images: { take: 1, orderBy: { sortOrder: "asc" } } },
+    }),
+  ]);
+
   const analysis = buildAnalysis(listing, district);
   const features = parseJsonArray(listing.features);
   const amenityGroups = groupListingAmenities(listing.amenities.map((item) => item.key));
-
-  // Bölge analizi skorlarını göster/gizle (Setting: analysis_scores; "0" ise gizli, varsayılan göster)
-  const scoresSetting = await prisma.setting.findUnique({ where: { key: "analysis_scores" } });
-  const session = await getUserSession();
   const showScores = scoresSetting?.value !== "0";
-
-  // Benzer ilanlar
-  const similarRaw = await prisma.listing.findMany({
-    where: {
-      status: "active",
-      moderationStatus: "approved",
-      id: { not: listing.id },
-      OR: [{ district: listing.district }, { propertyType: listing.propertyType }],
-    },
-    orderBy: [{ featured: "desc" }, { createdAt: "desc" }],
-    take: 3,
-    include: { images: { take: 1, orderBy: { sortOrder: "asc" } } },
-  });
   const similar = similarRaw.map((l) => ({
     slug: l.slug, title: l.title, price: l.price, currency: l.currency,
     propertyType: l.propertyType, district: l.district, neighborhood: l.neighborhood,
@@ -417,10 +420,10 @@ export default async function ListingPage({
                 <>
                   <p className="mt-3 text-sm text-slate-500">İletişime geçin, hemen yanıt verelim.</p>
                   <div className="mt-4">
-                    <ContactButtons listingId={listing.id} listingTitle={listing.title} district={listing.district} isLoggedIn={!!session} defaultName={session?.name ?? ""} />
+                    <ContactButtons listingId={listing.id} listingTitle={listing.title} district={listing.district} />
                   </div>
                   <div className="mt-2">
-                    <StartConversation listingId={listing.id} isLoggedIn={!!session} hasAgent={!!listing.agent} />
+                    <StartConversation listingId={listing.id} hasAgent={!!listing.agent} />
                   </div>
                 </>
               )}
