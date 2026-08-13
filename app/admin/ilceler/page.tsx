@@ -14,25 +14,25 @@ export default async function AdminDistricts() {
   return (
     <div>
       <div>
-        <h1 className="text-2xl font-bold tracking-tight text-slate-900">İlçe Verisi</h1>
-        <p className="text-sm text-slate-500">Kütahya&apos;nın {districts.length} ilçesi · bölge analizi verilerini düzenleyin (ilçeler sabittir)</p>
+        <h1 className="text-2xl font-bold tracking-tight text-ink">İlçe Verisi</h1>
+        <p className="text-sm text-muted">Kütahya&apos;nın {districts.length} ilçesi · bölge analizi verilerini düzenleyin (ilçeler sabittir)</p>
       </div>
 
       {/* Global toggle */}
-      <form action={setAnalysisScores} className="mt-6 flex flex-wrap items-center justify-between gap-4 rounded-lg bg-paper p-4 ring-1 ring-stone">
-        <label className="flex items-center gap-3 text-sm font-medium text-slate-700">
-          <input type="checkbox" name="show" defaultChecked={scoresVisible} className="h-4 w-4 rounded border-slate-300" />
+      <form action={setAnalysisScores} className="mt-6 flex flex-wrap items-center justify-between gap-4 bg-paper p-4 border border-stone">
+        <label className="flex items-center gap-3 text-sm font-medium text-ink">
+          <input type="checkbox" name="show" defaultChecked={scoresVisible} className="h-4 w-4 rounded border-stone" />
           Bölge analizi puanlarını sitede göster
         </label>
-        <button type="submit" className="rounded-lg bg-slate-800 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-900">
+        <button type="submit" className="rounded-lg bg-brand-800 px-4 py-2 text-sm font-semibold text-white hover:bg-brand-900">
           Kaydet
         </button>
       </form>
 
-      <div className="mt-6 overflow-hidden rounded-lg bg-paper ring-1 ring-stone">
+      <div className="mt-6 overflow-hidden bg-paper border border-stone">
         <table className="w-full text-sm">
           <thead>
-            <tr className="border-b border-stone bg-canvas text-left text-xs text-slate-500">
+            <tr className="border-b border-stone bg-canvas text-left text-xs text-muted">
               <th className="p-3">Ad</th>
               <th className="p-3">Puan</th>
               <th className="p-3">%3y</th>
@@ -42,14 +42,14 @@ export default async function AdminDistricts() {
           </thead>
           <tbody>
             {districts.length === 0 && (
-              <tr><td colSpan={5} className="p-8 text-center text-slate-400">İlçe verisi bulunamadı. (Seed ile 13 ilçe yüklenmiş olmalı.)</td></tr>
+              <tr><td colSpan={5} className="p-8 text-center text-muted/70">İlçe verisi bulunamadı. (Seed ile 13 ilçe yüklenmiş olmalı.)</td></tr>
             )}
             {districts.map((d) => (
-              <tr key={d.id} className="border-b border-slate-50 hover:bg-canvas">
-                <td className="p-3 font-medium text-slate-800">{d.name}</td>
-                <td className="p-3 text-slate-600">{d.investmentScore ?? "—"}</td>
-                <td className="p-3 text-slate-600">{d.valueGrowth3yPct != null ? `%${d.valueGrowth3yPct}` : "—"}</td>
-                <td className="p-3 text-slate-600">{d.valueGrowth5yPct != null ? `%${d.valueGrowth5yPct}` : "—"}</td>
+              <tr key={d.id} className="border-b border-stone/50 hover:bg-canvas">
+                <td className="p-3 font-medium text-ink">{d.name}</td>
+                <td className="p-3 text-muted">{d.investmentScore ?? "—"}</td>
+                <td className="p-3 text-muted">{d.valueGrowth3yPct != null ? `%${d.valueGrowth3yPct}` : "—"}</td>
+                <td className="p-3 text-muted">{d.valueGrowth5yPct != null ? `%${d.valueGrowth5yPct}` : "—"}</td>
                 <td className="p-3">
                   <div className="flex items-center justify-end gap-2">
                     <Link href={`/admin/ilceler/${d.id}`} className="rounded-md bg-brand-50 px-2.5 py-1 text-xs font-semibold text-brand-700 hover:bg-brand-100">Düzenle</Link>

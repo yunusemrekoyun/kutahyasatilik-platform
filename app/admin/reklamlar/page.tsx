@@ -20,8 +20,8 @@ export default async function AdminPopups() {
     <div>
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-slate-900">Pop-up Reklamlar</h1>
-          <p className="text-sm text-slate-500">{popups.length} reklam · {activeCount} aktif. Birden fazla aktifse en son güncellenen gösterilir.</p>
+          <h1 className="text-2xl font-bold tracking-tight text-ink">Pop-up Reklamlar</h1>
+          <p className="text-sm text-muted">{popups.length} reklam · {activeCount} aktif. Birden fazla aktifse en son güncellenen gösterilir.</p>
         </div>
         <Link href="/admin/reklamlar/yeni" className="rounded-lg bg-brand-700 px-4 py-2 text-sm font-bold text-white hover:bg-brand-800">
           + Yeni Reklam
@@ -30,24 +30,24 @@ export default async function AdminPopups() {
 
       <div className="mt-6 space-y-3">
         {popups.length === 0 && (
-          <p className="rounded-lg bg-paper p-10 text-center text-slate-400 ring-1 ring-stone">
+          <p className="bg-paper p-10 text-center text-muted/70 border border-stone">
             Henüz reklam yok. Kampanya/duyuru pop-up&apos;ı oluşturun.
           </p>
         )}
         {popups.map((p) => (
           <div key={p.id} className={`flex flex-wrap items-center gap-4 rounded-lg bg-paper p-4 ring-1 ${p.active ? "ring-green-200" : "ring-stone"}`}>
-            <div className="relative h-16 w-24 shrink-0 overflow-hidden rounded-lg bg-slate-100">
+            <div className="relative h-16 w-24 shrink-0 overflow-hidden rounded-lg bg-canvas">
               {p.imageUrl && <Image src={p.imageUrl} alt="" fill sizes="96px" className="object-cover" />}
             </div>
             <div className="min-w-0 flex-1">
               <div className="flex items-center gap-2">
-                <p className="font-bold text-slate-900">{p.title}</p>
-                <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${p.active ? "bg-green-100 text-green-700" : "bg-slate-100 text-slate-500"}`}>
+                <p className="font-bold text-ink">{p.title}</p>
+                <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${p.active ? "bg-green-100 text-green-700" : "bg-canvas text-muted"}`}>
                   {p.active ? "Aktif" : "Pasif"}
                 </span>
               </div>
-              {p.body && <p className="mt-0.5 line-clamp-1 text-sm text-slate-500">{p.body}</p>}
-              <p className="mt-1 text-xs text-slate-400">{FREQ_LABEL[p.frequency]} · {p.delaySec}sn gecikme · {formatDate(p.updatedAt)}</p>
+              {p.body && <p className="mt-0.5 line-clamp-1 text-sm text-muted">{p.body}</p>}
+              <p className="mt-1 text-xs text-muted/70">{FREQ_LABEL[p.frequency]} · {p.delaySec}sn gecikme · {formatDate(p.updatedAt)}</p>
             </div>
             <div className="flex items-center gap-2">
               <form action={togglePopup}>

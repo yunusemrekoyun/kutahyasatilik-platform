@@ -23,12 +23,12 @@ export default function AgentPanelHeader({ name }: { name: string }) {
           </span>
           <span className="leading-tight">
             <span className="block font-display font-bold text-brand-900">Danışman Paneli</span>
-            <span className="block text-[10px] uppercase tracking-wider text-slate-400">Kütahya Satılık</span>
+            <span className="block text-[10px] uppercase tracking-wider text-muted/70">Kütahya Satılık</span>
           </span>
         </Link>
         <div className="flex items-center gap-3">
           <NotificationBell />
-          <span className="hidden items-center gap-1.5 text-sm text-slate-600 sm:inline-flex">
+          <span className="hidden items-center gap-1.5 text-sm text-muted sm:inline-flex">
             <User className="h-4 w-4" />
             {name}
           </span>

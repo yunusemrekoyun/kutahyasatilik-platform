@@ -50,7 +50,7 @@ function ResourceFields({ resource }: { resource?: ResourceRow }) {
         <span className={adminLabel}>Kısa açıklama</span>
         <textarea name="description" rows={3} defaultValue={resource?.description ?? ""} className={`${adminInput} h-auto py-3`} />
       </label>
-      <div className="mt-4 flex flex-wrap gap-x-6 gap-y-3 text-sm text-slate-700">
+      <div className="mt-4 flex flex-wrap gap-x-6 gap-y-3 text-sm text-ink">
         <label className="flex min-h-11 items-center gap-2">
           <input type="checkbox" name="active" defaultChecked={resource?.active ?? true} className="h-4 w-4 rounded" />
           Kamu sayfasında göster
@@ -75,7 +75,7 @@ export default async function AdminLocalResourcesPage() {
       </div>
 
       <details className={`${adminCard} mb-8 p-5`}>
-        <summary className="cursor-pointer font-semibold text-slate-900">Yeni resmî bağlantı ekle</summary>
+        <summary className="cursor-pointer font-semibold text-ink">Yeni resmî bağlantı ekle</summary>
         <form action={saveLocalResource} className="mt-5">
           <ResourceFields />
           <button className={`${adminBtnPrimary} mt-5`}>Bağlantıyı Kaydet</button>
@@ -85,8 +85,8 @@ export default async function AdminLocalResourcesPage() {
       <div className="space-y-4">
         {resources.length === 0 && (
           <div className={`${adminCard} p-10 text-center`}>
-            <Landmark className="mx-auto h-8 w-8 text-slate-400" />
-            <p className="mt-3 font-medium text-slate-700">Henüz resmî bağlantı eklenmedi.</p>
+            <Landmark className="mx-auto h-8 w-8 text-muted/70" />
+            <p className="mt-3 font-medium text-ink">Henüz resmî bağlantı eklenmedi.</p>
           </div>
         )}
         {resources.map((resource) => (
@@ -95,10 +95,10 @@ export default async function AdminLocalResourcesPage() {
               <div className="flex flex-wrap items-center justify-between gap-3">
                 <div>
                   <div className="flex items-center gap-2">
-                    <span className="font-semibold text-slate-900">{resource.title}</span>
+                    <span className="font-semibold text-ink">{resource.title}</span>
                     <StatusBadge tone={resource.active ? "success" : "neutral"}>{resource.active ? "Aktif" : "Pasif"}</StatusBadge>
                   </div>
-                  <p className="mt-1 text-xs text-slate-500">
+                  <p className="mt-1 text-xs text-muted">
                     {resource.institution} · {LOCAL_RESOURCE_TYPES[resource.type]?.label ?? resource.type}
                     {resource.lastCheckedAt ? ` · Son kontrol ${resource.lastCheckedAt.toLocaleDateString("tr-TR")}` : " · Kontrol tarihi yok"}
                   </p>

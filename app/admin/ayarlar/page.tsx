@@ -14,49 +14,49 @@ async function getSettings() {
 }
 
 const inputCls =
-  "w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm focus:border-brand-500 focus:ring-1 focus:ring-brand-500 outline-none";
+  "w-full rounded-lg border border-stone px-3 py-2.5 text-sm focus:border-brand-500 focus:ring-1 focus:ring-brand-500 outline-none";
 
 export default async function SettingsPage() {
   const s = await getSettings();
 
   return (
     <div className="max-w-2xl">
-      <h1 className="text-2xl font-extrabold text-slate-900">Ayarlar</h1>
-      <p className="text-sm text-slate-500">İletişim ve marka bilgileri</p>
+      <h1 className="text-2xl font-extrabold text-ink">Ayarlar</h1>
+      <p className="text-sm text-muted">İletişim ve marka bilgileri</p>
 
-      <form action={saveSettings} className="mt-6 space-y-4 rounded-lg bg-paper p-6 ring-1 ring-stone">
+      <form action={saveSettings} className="mt-6 space-y-4 bg-paper p-6 border border-stone">
         <label className="block">
-          <span className="mb-1 block text-sm font-medium text-slate-700">Telefon (görünen)</span>
+          <span className="mb-1 block text-sm font-medium text-ink">Telefon (görünen)</span>
           <input name="phone" defaultValue={s.phone || SITE.phone} className={inputCls} />
         </label>
         <label className="block">
-          <span className="mb-1 block text-sm font-medium text-slate-700">WhatsApp Numarası (ülke kodlu, sadece rakam)</span>
+          <span className="mb-1 block text-sm font-medium text-ink">WhatsApp Numarası (ülke kodlu, sadece rakam)</span>
           <input name="whatsapp" defaultValue={s.whatsapp || SITE.whatsapp} placeholder="90 ile başlayan uluslararası format" className={inputCls} />
         </label>
         <label className="block">
-          <span className="mb-1 block text-sm font-medium text-slate-700">E-posta</span>
+          <span className="mb-1 block text-sm font-medium text-ink">E-posta</span>
           <input name="email" type="email" defaultValue={s.email || SITE.email} className={inputCls} />
         </label>
         <label className="block">
-          <span className="mb-1 block text-sm font-medium text-slate-700">Adres (iletişim sayfasında görünür)</span>
+          <span className="mb-1 block text-sm font-medium text-ink">Adres (iletişim sayfasında görünür)</span>
           <input name="address" defaultValue={s.address || SITE.address} className={inputCls} placeholder="Kütahya Merkez, ... Cad. No:.." />
         </label>
         <label className="block">
-          <span className="mb-1 block text-sm font-medium text-slate-700">Marka Sloganı</span>
+          <span className="mb-1 block text-sm font-medium text-ink">Marka Sloganı</span>
           <input name="brand" defaultValue={s.brand || SITE.brand} className={inputCls} />
         </label>
         <div className="block">
-          <span className="mb-1 block text-sm font-medium text-slate-700">Ana Sayfa Hero Görseli</span>
+          <span className="mb-1 block text-sm font-medium text-ink">Ana Sayfa Hero Görseli</span>
           <SettingImageField name="home_hero_image" defaultValue={s.home_hero_image || ""} />
-          <span className="mt-1.5 block text-xs text-slate-400">
+          <span className="mt-1.5 block text-xs text-muted/70">
             Ana sayfanın üst (lacivert) arama alanında silik arka plan olarak görünür. Boş bırakılırsa düz lacivert kullanılır.
           </span>
         </div>
 
         <div className="block">
-          <span className="mb-1 block text-sm font-medium text-slate-700">&ldquo;Mülkünü Sat&rdquo; Hero Görseli</span>
+          <span className="mb-1 block text-sm font-medium text-ink">&ldquo;Mülkünü Sat&rdquo; Hero Görseli</span>
           <SettingImageField name="seller_hero_image" defaultValue={s.seller_hero_image || ""} />
-          <span className="mt-1.5 block text-xs text-slate-400">
+          <span className="mt-1.5 block text-xs text-muted/70">
             Mülkünü Sat sayfasının üst (lacivert) alanında silik arka plan olarak görünür. Boş bırakılırsa düz lacivert kullanılır.
           </span>
         </div>

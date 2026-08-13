@@ -29,8 +29,8 @@ export default async function AgentPanelLayout({
         <AgentPanelHeader name={agent.name} />
         <div className="mx-auto max-w-md px-4 py-20 text-center">
           <div className="text-5xl">⏳</div>
-          <h1 className="mt-4 text-xl font-bold text-slate-900">Hesabınız aktif değil</h1>
-          <p className="mt-2 text-slate-600">
+          <h1 className="mt-4 text-xl font-bold text-ink">Hesabınız aktif değil</h1>
+          <p className="mt-2 text-muted">
             {agent.status === "pending"
               ? "Başvurunuz henüz onay bekliyor."
               : agent.status === "suspended"

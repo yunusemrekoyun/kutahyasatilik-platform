@@ -32,7 +32,7 @@ export default async function EditListingPage({
 
   return (
     <div>
-      <h1 className="mb-6 text-2xl font-extrabold text-slate-900">İlanı Düzenle</h1>
+      <h1 className="mb-6 text-2xl font-extrabold text-ink">İlanı Düzenle</h1>
       <ListingForm listing={data} agencies={agencies} />
     </div>
   );

@@ -61,8 +61,8 @@ type ListingData = {
 };
 
 const inputCls =
-  "w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm focus:border-brand-500 focus:ring-1 focus:ring-brand-500 outline-none";
-const labelCls = "block text-sm font-medium text-slate-700 mb-1";
+  "w-full rounded-lg border border-stone px-3 py-2.5 text-sm focus:border-brand-500 focus:ring-1 focus:ring-brand-500 outline-none";
+const labelCls = "block text-sm font-medium text-ink mb-1";
 
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
@@ -121,8 +121,8 @@ export default function AgentListingForm({ listing }: { listing?: ListingData })
       </div>
 
       {/* Temel bilgiler */}
-      <section className="rounded-lg bg-paper p-6 ring-1 ring-stone">
-        <h2 className="font-bold text-slate-900">Temel Bilgiler</h2>
+      <section className="bg-paper p-6 border border-stone">
+        <h2 className="font-bold text-ink">Temel Bilgiler</h2>
         <div className="mt-4 grid gap-4">
           <Field label="İlan Başlığı *">
             <input name="title" required defaultValue={listing?.title} className={inputCls} placeholder="Örn: Merkez'de 3+1 Sıfır Satılık Daire" />
@@ -173,12 +173,12 @@ export default function AgentListingForm({ listing }: { listing?: ListingData })
       </section>
 
       {/* Görseller */}
-      <section className="rounded-lg bg-paper p-6 ring-1 ring-stone">
-        <h2 className="font-bold text-slate-900">Görseller</h2>
-        <p className="text-xs text-slate-500">İlk görsel kapak olarak kullanılır. Sıralamak için okları kullanın.</p>
+      <section className="bg-paper p-6 border border-stone">
+        <h2 className="font-bold text-ink">Görseller</h2>
+        <p className="text-xs text-muted">İlk görsel kapak olarak kullanılır. Sıralamak için okları kullanın.</p>
         <div className="mt-4 grid grid-cols-3 gap-3 sm:grid-cols-5">
           {images.map((url, i) => (
-            <div key={url} className="group relative aspect-square overflow-hidden rounded-lg ring-1 ring-stone">
+            <div key={url} className="group relative aspect-square overflow-hidden rounded-lg border border-stone">
               <Image src={url} alt="" fill sizes="120px" className="object-cover" />
               {i === 0 && <span className="absolute left-1 top-1 rounded bg-brand-700 px-1.5 py-0.5 text-[10px] font-bold text-white">Kapak</span>}
               <div className="absolute inset-x-0 bottom-0 flex justify-between bg-black/50 p-1 opacity-0 transition group-hover:opacity-100">
@@ -188,7 +188,7 @@ export default function AgentListingForm({ listing }: { listing?: ListingData })
               </div>
             </div>
           ))}
-          <label className="grid aspect-square cursor-pointer place-items-center rounded-lg border-2 border-dashed border-slate-300 text-center text-xs text-slate-500 hover:border-brand-400 hover:text-brand-600">
+          <label className="grid aspect-square cursor-pointer place-items-center rounded-lg border-2 border-dashed border-stone text-center text-xs text-muted hover:border-brand-400 hover:text-brand-600">
             {uploading ? "Yükleniyor..." : "+ Görsel Ekle"}
             <input type="file" accept="image/*" multiple onChange={handleUpload} className="hidden" />
           </label>
@@ -196,9 +196,9 @@ export default function AgentListingForm({ listing }: { listing?: ListingData })
       </section>
 
       {/* Medya: video / drone / sanal tur */}
-      <section className="rounded-lg bg-paper p-6 ring-1 ring-stone">
-        <h2 className="font-bold text-slate-900">Video & Sanal Tur (opsiyonel)</h2>
-        <p className="text-xs text-slate-500">Tanıtım videosunu doğrudan yükleyin (önerilen) ya da YouTube/Vimeo linki yapıştırın. Sanal tur için Matterport/360 linki kullanın.</p>
+      <section className="bg-paper p-6 border border-stone">
+        <h2 className="font-bold text-ink">Video & Sanal Tur (opsiyonel)</h2>
+        <p className="text-xs text-muted">Tanıtım videosunu doğrudan yükleyin (önerilen) ya da YouTube/Vimeo linki yapıştırın. Sanal tur için Matterport/360 linki kullanın.</p>
         <div className="mt-4 grid gap-4">
           <Field label="Tanıtım Videosu (yükle veya link)">
             <VideoUploadField name="videoUrl" defaultValue={listing?.videoUrl ?? ""} />
@@ -213,8 +213,8 @@ export default function AgentListingForm({ listing }: { listing?: ListingData })
       </section>
 
       {/* Detaylar */}
-      <section className="rounded-lg bg-paper p-6 ring-1 ring-stone">
-        <h2 className="font-bold text-slate-900">Detaylar</h2>
+      <section className="bg-paper p-6 border border-stone">
+        <h2 className="font-bold text-ink">Detaylar</h2>
         <div className="mt-4 grid grid-cols-2 gap-4 sm:grid-cols-4">
           <Field label="Brüt m² *"><input name="areaGross" type="number" required min={1} defaultValue={listing?.areaGross ?? ""} className={inputCls} /></Field>
           <Field label="Net m²"><input name="areaNet" type="number" defaultValue={listing?.areaNet ?? ""} className={inputCls} /></Field>
@@ -236,8 +236,8 @@ export default function AgentListingForm({ listing }: { listing?: ListingData })
             { name: "balcony", label: "Balkon", val: listing?.balcony },
             { name: "parking", label: "Otopark", val: listing?.parking },
           ].map((c) => (
-            <label key={c.name} className="flex items-center gap-2 text-sm text-slate-700">
-              <input type="checkbox" name={c.name} defaultChecked={c.val} className="h-4 w-4 rounded border-slate-300" />
+            <label key={c.name} className="flex items-center gap-2 text-sm text-ink">
+              <input type="checkbox" name={c.name} defaultChecked={c.val} className="h-4 w-4 rounded border-stone" />
               {c.label}
             </label>
           ))}
@@ -252,9 +252,9 @@ export default function AgentListingForm({ listing }: { listing?: ListingData })
       <ProfessionalListingFields values={listing} propertyType={propertyType} inputClassName={inputCls} />
 
       {/* Konum */}
-      <section className="rounded-lg bg-paper p-6 ring-1 ring-stone">
-        <h2 className="font-bold text-slate-900">Konum (opsiyonel)</h2>
-        <p className="mt-1 text-xs text-slate-500">Haritada tıklayarak veya pini sürükleyerek konumu işaretleyin; ilan haritada görünür.</p>
+      <section className="bg-paper p-6 border border-stone">
+        <h2 className="font-bold text-ink">Konum (opsiyonel)</h2>
+        <p className="mt-1 text-xs text-muted">Haritada tıklayarak veya pini sürükleyerek konumu işaretleyin; ilan haritada görünür.</p>
         <div className="mt-4">
           <LocationPicker initialLat={listing?.lat ?? null} initialLng={listing?.lng ?? null} />
         </div>
@@ -264,7 +264,7 @@ export default function AgentListingForm({ listing }: { listing?: ListingData })
         <button type="submit" disabled={submitting || uploading} className="rounded-lg bg-brand-700 px-6 py-3 font-bold text-white hover:bg-brand-800 disabled:opacity-60">
           {submitting ? "Gönderiliyor..." : listing?.id ? "Güncelle ve Onaya Gönder" : "İlanı Onaya Gönder"}
         </button>
-        <Link href="/emlakci/panel" className="rounded-lg px-6 py-3 font-medium text-slate-600 hover:bg-slate-100">İptal</Link>
+        <Link href="/emlakci/panel" className="rounded-lg px-6 py-3 font-medium text-muted hover:bg-canvas">İptal</Link>
       </div>
     </form>
   );

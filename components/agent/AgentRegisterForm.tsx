@@ -47,8 +47,8 @@ export default function AgentRegisterForm() {
         <div className="flex justify-center">
           <CheckCircle2 aria-hidden="true" className="h-12 w-12 text-green-600" />
         </div>
-        <h3 className="mt-3 text-2xl font-bold text-slate-900">Başvurunuz alındı!</h3>
-        <p className="mt-2 text-slate-600">
+        <h3 className="mt-3 text-2xl font-bold text-ink">Başvurunuz alındı!</h3>
+        <p className="mt-2 text-muted">
           Danışman başvurunuz yönetim ekibimize iletildi. Değerlendirme sonrası size bir
           <b> teklif</b> sunulacak; kabul ve ödeme sonrası hesabınız açılır ve
           <b> giriş bilgileriniz tarafımızca iletilir</b>. Süreç boyunca sizinle iletişimde olacağız.
@@ -65,7 +65,7 @@ export default function AgentRegisterForm() {
   }
 
   const inputCls =
-    "w-full rounded-lg border border-slate-300 px-3.5 py-3 text-sm focus:border-brand-500 focus:ring-1 focus:ring-brand-500 outline-none";
+    "w-full rounded-lg border border-stone px-3.5 py-3 text-sm focus:border-brand-500 focus:ring-1 focus:ring-brand-500 outline-none";
 
   return (
     <form onSubmit={handleSubmit} aria-busy={status === "loading"} aria-describedby={error ? "agent-register-error" : undefined} className="space-y-3.5">
@@ -116,7 +116,7 @@ export default function AgentRegisterForm() {
           </>
         )}
       </button>
-      <p className="text-center text-xs text-slate-500">
+      <p className="text-center text-xs text-muted">
         Başvurunuz admin onayından sonra aktifleşir. Zaten hesabınız var mı?{" "}
         <Link href="/giris" className="inline-flex min-h-11 items-center font-semibold text-brand-700 hover:underline">
           Giriş yapın

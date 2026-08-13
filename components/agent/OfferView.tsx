@@ -17,8 +17,8 @@ type Offer = {
 const intervalLabel = (i: string) => (i === "yearly" ? "/yıl" : i === "one_time" ? " (tek seferlik)" : "/ay");
 
 const inputCls =
-  "h-12 w-full rounded-[10px] border border-slate-300 bg-paper px-3.5 text-base text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/30";
-const labelCls = "mb-1.5 block text-sm font-semibold text-slate-700";
+  "h-12 w-full rounded-[10px] border border-stone bg-paper px-3.5 text-base text-ink outline-none transition placeholder:text-muted/70 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/30";
+const labelCls = "mb-1.5 block text-sm font-semibold text-ink";
 
 async function postJson(url: string, body: unknown) {
   const res = await fetch(url, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
@@ -93,7 +93,7 @@ export default function OfferView() {
   if (phase === "offer" && offer) {
     return (
       <div className="space-y-5">
-        <div className="overflow-hidden rounded-lg ring-1 ring-stone">
+        <div className="overflow-hidden rounded-lg border border-stone">
           <div className="bg-brand-950 px-6 py-5 text-white">
             <p className="text-xs uppercase tracking-wider text-gold-300">Teklif v{offer.version}</p>
             <h2 className="mt-1 font-display text-xl font-bold">{offer.name}</h2>
@@ -104,7 +104,7 @@ export default function OfferView() {
           {offer.features.length > 0 && (
             <ul className="space-y-2 bg-paper px-6 py-5">
               {offer.features.map((f, i) => (
-                <li key={i} className="flex items-center gap-2 text-sm text-slate-700">
+                <li key={i} className="flex items-center gap-2 text-sm text-ink">
                   <Check className="h-4 w-4 shrink-0 text-green-600" /> {f}
                 </li>
               ))}
@@ -119,7 +119,7 @@ export default function OfferView() {
         >
           {loading ? "İşleniyor..." : "Teklifi Kabul Et"}
         </button>
-        <p className="text-center text-xs text-slate-400">Kabul ettiğinizde ödeme aşamasına geçilir.</p>
+        <p className="text-center text-xs text-muted/70">Kabul ettiğinizde ödeme aşamasına geçilir.</p>
       </div>
     );
   }
@@ -141,7 +141,7 @@ export default function OfferView() {
         <div>
           <label htmlFor="o-code" className={labelCls}>E-postanıza gelen 6 haneli kod</label>
           <input id="o-code" inputMode="numeric" required maxLength={6} value={code} onChange={(e) => setCode(e.target.value)} placeholder="••••••" className={`${inputCls} tracking-[0.4em]`} />
-          <p className="mt-1.5 text-xs text-slate-500">Kod 10 dakika geçerlidir.</p>
+          <p className="mt-1.5 text-xs text-muted">Kod 10 dakika geçerlidir.</p>
         </div>
       )}
       {error && <p className="rounded-[10px] bg-red-50 px-3.5 py-2.5 text-sm font-medium text-red-700 ring-1 ring-red-200">{error}</p>}

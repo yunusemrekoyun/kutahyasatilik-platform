@@ -140,11 +140,11 @@ export default function VideoUploadField({
       <input type="hidden" name={name} value={value} />
 
       {hasLocal ? (
-        <div className="flex items-center gap-3 rounded-lg border border-slate-300 bg-canvas p-2.5">
+        <div className="flex items-center gap-3 rounded-lg border border-stone bg-canvas p-2.5">
           <video src={value} muted playsInline className="h-14 w-24 shrink-0 rounded bg-black object-cover" />
           <div className="min-w-0 flex-1">
-            <p className="flex items-center gap-1.5 text-sm font-medium text-slate-800"><Film className="h-4 w-4 text-brand-600" /> Yüklü video</p>
-            <p className="truncate text-xs text-slate-500">{value}</p>
+            <p className="flex items-center gap-1.5 text-sm font-medium text-ink"><Film className="h-4 w-4 text-brand-600" /> Yüklü video</p>
+            <p className="truncate text-xs text-muted">{value}</p>
           </div>
           <button type="button" onClick={() => setValue("")} className="inline-flex items-center gap-1 rounded-md px-2 py-1.5 text-xs font-medium text-red-600 hover:bg-red-50">
             <Trash2 className="h-4 w-4" /> Kaldır
@@ -156,19 +156,19 @@ export default function VideoUploadField({
             value={value}
             onChange={(e) => setValue(e.target.value)}
             placeholder="https://www.youtube.com/watch?v=…  (link yapıştır)"
-            className="h-11 w-full rounded-lg border border-slate-300 bg-paper px-3.5 text-[15px] text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/30"
+            className="h-11 w-full rounded-lg border border-stone bg-paper px-3.5 text-[15px] text-ink outline-none transition placeholder:text-muted/70 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/30"
           />
           <div className="flex items-center gap-3">
-            <span className="text-xs text-slate-400">veya</span>
+            <span className="text-xs text-muted/70">veya</span>
             <button
               type="button"
               onClick={() => fileRef.current?.click()}
               disabled={busy}
-              className="inline-flex items-center gap-2 rounded-lg border border-slate-300 bg-paper px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-canvas disabled:opacity-60"
+              className="inline-flex items-center gap-2 rounded-lg border border-stone bg-paper px-4 py-2.5 text-sm font-semibold text-ink transition hover:bg-canvas disabled:opacity-60"
             >
               <UploadCloud className="h-4 w-4" /> Video Yükle
             </button>
-            <span className="text-xs text-slate-400">MP4/MOV · en fazla 1GB · yüksek çözünürlük otomatik 1080p&apos;ye küçültülür</span>
+            <span className="text-xs text-muted/70">MP4/MOV · en fazla 1GB · yüksek çözünürlük otomatik 1080p&apos;ye küçültülür</span>
           </div>
           <input ref={fileRef} type="file" accept="video/*" className="hidden" onChange={onPick} />
         </div>
@@ -185,8 +185,8 @@ export default function VideoUploadField({
                   : <Loader2 className="h-5 w-5 animate-spin text-brand-600" />}
               </span>
               <div className="min-w-0 flex-1">
-                <p className="truncate text-sm font-semibold text-slate-800">{task.fileName}</p>
-                <p className="text-xs text-slate-500">
+                <p className="truncate text-sm font-semibold text-ink">{task.fileName}</p>
+                <p className="text-xs text-muted">
                   {task.phase === "uploading" && `Yükleniyor… %${task.progress}`}
                   {task.phase === "processing" && "İşleniyor (transcode)…"}
                   {task.phase === "done" && (
@@ -196,14 +196,14 @@ export default function VideoUploadField({
                 </p>
               </div>
               {(task.phase === "done" || task.phase === "error") && (
-                <button type="button" onClick={() => setTask(null)} aria-label="Kapat" className="text-slate-400 hover:text-slate-700">
+                <button type="button" onClick={() => setTask(null)} aria-label="Kapat" className="text-muted/70 hover:text-ink">
                   <X className="h-4 w-4" />
                 </button>
               )}
             </div>
             {(task.phase === "uploading" || task.phase === "processing") && (
               <>
-                <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-slate-100">
+                <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-canvas">
                   <div
                     className={`h-full rounded-full bg-brand-600 transition-all ${task.phase === "processing" ? "animate-pulse" : ""}`}
                     style={{ width: `${task.phase === "processing" ? 100 : task.progress}%` }}

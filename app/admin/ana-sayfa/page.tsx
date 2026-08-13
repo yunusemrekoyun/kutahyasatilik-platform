@@ -20,25 +20,25 @@ export default async function AdminHomeTexts() {
   const map = new Map(rows.map((r) => [r.key, r.value]));
 
   const inputCls =
-    "w-full rounded-lg border border-slate-300 bg-paper px-3.5 py-2.5 text-[15px] text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/30";
+    "w-full rounded-lg border border-stone bg-paper px-3.5 py-2.5 text-[15px] text-ink outline-none transition placeholder:text-muted/70 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/30";
 
   return (
     <div>
-      <h1 className="text-2xl font-extrabold text-slate-900">Ana Sayfa Metinleri</h1>
-      <p className="text-sm text-slate-500">
+      <h1 className="text-2xl font-extrabold text-ink">Ana Sayfa Metinleri</h1>
+      <p className="text-sm text-muted">
         Ana sayfadaki başlık ve metinleri buradan düzenleyin. Boş bırakılan alanlar varsayılan metni gösterir.
       </p>
 
-      <form action={saveHomeTexts} className="mt-6 max-w-2xl space-y-4 rounded-lg bg-paper p-6 ring-1 ring-stone">
+      <form action={saveHomeTexts} className="mt-6 max-w-2xl space-y-4 bg-paper p-6 border border-stone">
         {FIELDS.map((f) => (
           <label key={f.key} className="block">
-            <span className="mb-1 block text-sm font-medium text-slate-700">{f.label}</span>
+            <span className="mb-1 block text-sm font-medium text-ink">{f.label}</span>
             {f.type === "textarea" ? (
               <textarea name={f.key} rows={3} defaultValue={map.get(f.key) ?? ""} className={inputCls} />
             ) : (
               <input name={f.key} defaultValue={map.get(f.key) ?? ""} className={inputCls} />
             )}
-            {f.hint && <span className="mt-1 block text-xs text-slate-400">{f.hint}</span>}
+            {f.hint && <span className="mt-1 block text-xs text-muted/70">{f.hint}</span>}
           </label>
         ))}
         <button className="rounded-lg bg-brand-700 px-6 py-3 font-bold text-white hover:bg-brand-800">

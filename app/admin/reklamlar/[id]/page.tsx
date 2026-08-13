@@ -12,12 +12,12 @@ export default async function EditPopup({ params }: { params: Promise<{ id: stri
 
   return (
     <div>
-      <nav className="mb-4 text-sm text-slate-500">
+      <nav className="mb-4 text-sm text-muted">
         <Link href="/admin/reklamlar" className="hover:text-brand-700">Reklamlar</Link>
         <span className="mx-2">/</span>
         <span>Düzenle</span>
       </nav>
-      <h1 className="mb-6 text-2xl font-extrabold text-slate-900">Reklamı Düzenle</h1>
+      <h1 className="mb-6 text-2xl font-extrabold text-ink">Reklamı Düzenle</h1>
       <PopupForm
         popup={{
           id: popup.id,

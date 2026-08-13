@@ -12,12 +12,12 @@ export default async function EditPage({ params }: { params: Promise<{ id: strin
 
   return (
     <div>
-      <nav className="mb-4 text-sm text-slate-500">
+      <nav className="mb-4 text-sm text-muted">
         <Link href="/admin/sayfalar" className="hover:text-brand-700">Sayfalar</Link>
         <span className="mx-2">/</span>
         <span>Düzenle</span>
       </nav>
-      <h1 className="mb-6 text-2xl font-extrabold text-slate-900">Sayfayı Düzenle</h1>
+      <h1 className="mb-6 text-2xl font-extrabold text-ink">Sayfayı Düzenle</h1>
       <PageForm
         page={{
           id: page.id,

@@ -31,20 +31,20 @@ export default async function AgentOpportunitiesPage() {
     /* tablo henüz yoksa */
   }
 
-  const inputCls = "w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-brand-500 focus:ring-1 focus:ring-brand-500 outline-none";
+  const inputCls = "w-full rounded-lg border border-stone px-3 py-2 text-sm focus:border-brand-500 focus:ring-1 focus:ring-brand-500 outline-none";
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-extrabold text-slate-900">Portföy Fırsatları</h1>
-          <p className="text-sm text-slate-500">Komisyon teklifinizi verin. En uygun teklif kazanır; kazanırsanız ilan size atanır.</p>
+          <h1 className="text-2xl font-extrabold text-ink">Portföy Fırsatları</h1>
+          <p className="text-sm text-muted">Komisyon teklifinizi verin. En uygun teklif kazanır; kazanırsanız ilan size atanır.</p>
         </div>
         <Link href="/emlakci/panel" className="inline-flex items-center gap-1 text-sm text-brand-700 hover:underline"><ArrowLeft className="h-4 w-4" />Panel</Link>
       </div>
 
       {opps.length === 0 ? (
-        <div className="rounded-lg bg-paper p-10 text-center text-sm text-slate-500 ring-1 ring-stone">
+        <div className="bg-paper p-10 text-center text-sm text-muted border border-stone">
           Şu an açık portföy fırsatı yok.
         </div>
       ) : (
@@ -52,9 +52,9 @@ export default async function AgentOpportunitiesPage() {
           {opps.map((o) => {
             const myBid = o.bids[0];
             return (
-              <div key={o.id} className="rounded-lg bg-paper p-5 ring-1 ring-stone">
-                <p className="font-semibold text-slate-900">{o.title}</p>
-                <p className="text-sm text-slate-500">
+              <div key={o.id} className="bg-paper p-5 border border-stone">
+                <p className="font-semibold text-ink">{o.title}</p>
+                <p className="text-sm text-muted">
                   {[
                     o.district,
                     o.propertyType ? PROPERTY_TYPE_LABELS[o.propertyType] || o.propertyType : null,
@@ -68,7 +68,7 @@ export default async function AgentOpportunitiesPage() {
                     Son teklif: {new Date(o.biddingEndsAt).toLocaleDateString("tr-TR", { day: "numeric", month: "long", year: "numeric" })}
                   </p>
                 )}
-                {o.description && <p className="mt-2 text-sm text-slate-600">{o.description}</p>}
+                {o.description && <p className="mt-2 text-sm text-muted">{o.description}</p>}
 
                 {myBid && (
                   <p className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-green-50 px-2.5 py-0.5 text-xs font-semibold text-green-700 ring-1 ring-green-200">
@@ -79,11 +79,11 @@ export default async function AgentOpportunitiesPage() {
                 <form action={submitBid} className="mt-3 flex flex-wrap items-end gap-2">
                   <input type="hidden" name="opportunityId" value={o.id} />
                   <label className="block">
-                    <span className="mb-1 block text-xs font-medium text-slate-600">Komisyon (%)</span>
+                    <span className="mb-1 block text-xs font-medium text-muted">Komisyon (%)</span>
                     <input name="commissionPct" type="number" step="0.1" min={0} max={100} required defaultValue={myBid?.commissionPct ?? ""} placeholder="2.5" className={`${inputCls} w-28`} />
                   </label>
                   <label className="block flex-1">
-                    <span className="mb-1 block text-xs font-medium text-slate-600">Not (opsiyonel)</span>
+                    <span className="mb-1 block text-xs font-medium text-muted">Not (opsiyonel)</span>
                     <input name="note" defaultValue={myBid?.note ?? ""} placeholder="Kısa not" className={inputCls} />
                   </label>
                   <button type="submit" className="rounded-lg bg-gold-500 px-4 py-2 text-sm font-bold text-brand-950 hover:bg-gold-400">

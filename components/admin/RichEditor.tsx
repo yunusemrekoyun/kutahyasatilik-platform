@@ -20,9 +20,7 @@ function Btn({
       type="button"
       title={title}
       onClick={onClick}
-      className={`grid h-8 w-8 place-items-center rounded-md transition ${
-        active ? "bg-brand-700 text-white" : "text-slate-600 hover:bg-slate-200"
-      }`}
+      className={`grid h-8 w-8 place-items-center rounded-md transition ${ active ? "bg-brand-700 text-white" : "text-muted hover:bg-stone" }`}
     >
       {children}
     </button>
@@ -100,30 +98,30 @@ export default function RichEditor({
   }, [editor]);
 
   if (!editor) {
-    return <div className="h-[340px] animate-pulse rounded-lg bg-slate-100" />;
+    return <div className="h-[340px] animate-pulse rounded-lg bg-canvas" />;
   }
 
   return (
-    <div className="overflow-hidden rounded-lg border border-slate-300 bg-paper">
+    <div className="overflow-hidden rounded-lg border border-stone bg-paper">
       {/* Araç çubuğu */}
       <div className="flex flex-wrap items-center gap-1 border-b border-stone bg-canvas p-1.5">
         <Btn title="Kalın" active={editor.isActive("bold")} onClick={() => editor.chain().focus().toggleBold().run()}><Bold className="h-4 w-4" /></Btn>
         <Btn title="İtalik" active={editor.isActive("italic")} onClick={() => editor.chain().focus().toggleItalic().run()}><Italic className="h-4 w-4" /></Btn>
-        <span className="mx-1 h-5 w-px bg-slate-300" />
+        <span className="mx-1 h-5 w-px bg-stone" />
         <Btn title="Başlık 2" active={editor.isActive("heading", { level: 2 })} onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}><Heading2 className="h-4 w-4" /></Btn>
         <Btn title="Başlık 3" active={editor.isActive("heading", { level: 3 })} onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()}><Heading3 className="h-4 w-4" /></Btn>
-        <span className="mx-1 h-5 w-px bg-slate-300" />
+        <span className="mx-1 h-5 w-px bg-stone" />
         <Btn title="Madde listesi" active={editor.isActive("bulletList")} onClick={() => editor.chain().focus().toggleBulletList().run()}><List className="h-4 w-4" /></Btn>
         <Btn title="Numaralı liste" active={editor.isActive("orderedList")} onClick={() => editor.chain().focus().toggleOrderedList().run()}><ListOrdered className="h-4 w-4" /></Btn>
         <Btn title="Alıntı" active={editor.isActive("blockquote")} onClick={() => editor.chain().focus().toggleBlockquote().run()}><Quote className="h-4 w-4" /></Btn>
         <Btn title="Ayraç" onClick={() => editor.chain().focus().setHorizontalRule().run()}><Minus className="h-4 w-4" /></Btn>
-        <span className="mx-1 h-5 w-px bg-slate-300" />
+        <span className="mx-1 h-5 w-px bg-stone" />
         <Btn title="Bağlantı" active={editor.isActive("link")} onClick={setLink}><Link2 className="h-4 w-4" /></Btn>
         <Btn title="Görsel ekle" onClick={() => fileRef.current?.click()}><ImageIcon className="h-4 w-4" /></Btn>
-        <span className="mx-1 h-5 w-px bg-slate-300" />
+        <span className="mx-1 h-5 w-px bg-stone" />
         <Btn title="Geri al" onClick={() => editor.chain().focus().undo().run()}><Undo2 className="h-4 w-4" /></Btn>
         <Btn title="Yinele" onClick={() => editor.chain().focus().redo().run()}><Redo2 className="h-4 w-4" /></Btn>
-        {uploading && <span className="ml-2 text-xs text-slate-500">Görsel yükleniyor...</span>}
+        {uploading && <span className="ml-2 text-xs text-muted">Görsel yükleniyor...</span>}
       </div>
 
       {/* Editör alanı */}

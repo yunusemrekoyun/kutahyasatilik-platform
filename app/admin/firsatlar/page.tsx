@@ -8,14 +8,14 @@ import { DISTRICTS, PROPERTY_TYPES } from "@/lib/constants";
 export const dynamic = "force-dynamic";
 
 const inputCls =
-  "w-full rounded-lg border border-slate-300 bg-paper px-3 py-2 text-sm text-slate-900 outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/30";
+  "w-full rounded-lg border border-stone bg-paper px-3 py-2 text-sm text-ink outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/30";
 
 const OPP_STATUS: Record<string, { label: string; cls: string }> = {
   open: { label: "Açık (teklif toplanıyor)", cls: "bg-blue-50 text-blue-700 ring-blue-200" },
   selecting: { label: "Seçim", cls: "bg-amber-50 text-amber-700 ring-amber-200" },
   awarded: { label: "Kazanan seçildi", cls: "bg-teal-50 text-teal-700 ring-teal-200" },
   listed: { label: "İlana dönüştü", cls: "bg-green-50 text-green-700 ring-green-200" },
-  closed: { label: "Kapatıldı", cls: "bg-slate-100 text-slate-500 ring-stone" },
+  closed: { label: "Kapatıldı", cls: "bg-canvas text-muted ring-stone" },
 };
 
 type BidRow = { id: string; commissionPct: number; note: string | null; status: string; agent: { name: string } | null };
@@ -50,15 +50,15 @@ export default async function AdminFirsatlarPage({
   return (
     <div className="mx-auto max-w-4xl">
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-slate-900">Portföy Fırsatları</h1>
-        <p className="mt-1 text-sm text-slate-500">
+        <h1 className="text-2xl font-bold text-ink">Portföy Fırsatları</h1>
+        <p className="mt-1 text-sm text-muted">
           Mülk sahibi talebi → fırsat → emlakçılar komisyon teklifi verir → kazananı seç → ilan otomatik oluşur (kazanan emlakçıya, onay bekler).
         </p>
       </div>
 
       {/* Yeni fırsat */}
-      <section className="mb-6 rounded-lg bg-paper p-6 ring-1 ring-stone">
-        <h2 className="font-bold text-slate-900">Yeni fırsat</h2>
+      <section className="mb-6 bg-paper p-6 border border-stone">
+        <h2 className="font-bold text-ink">Yeni fırsat</h2>
         <form action={createOpportunity} className="mt-4 grid gap-3 sm:grid-cols-2">
           <input name="title" required placeholder="Başlık (örn. 3+1 Daire · Merkez)" className={`${inputCls} sm:col-span-2`} />
           <textarea name="description" rows={2} placeholder="Açıklama (opsiyonel)" className={`${inputCls} sm:col-span-2`} />
@@ -81,18 +81,18 @@ export default async function AdminFirsatlarPage({
       </section>
 
       {opps.length === 0 ? (
-        <div className="rounded-lg bg-paper p-10 text-center text-sm text-slate-500 ring-1 ring-stone">Henüz fırsat yok.</div>
+        <div className="bg-paper p-10 text-center text-sm text-muted border border-stone">Henüz fırsat yok.</div>
       ) : (
         <div className="space-y-4">
           {opps.map((o) => {
             const s = OPP_STATUS[o.status] ?? OPP_STATUS.open;
             const canSelect = o.status === "open" || o.status === "selecting";
             return (
-              <div key={o.id} className="rounded-lg bg-paper p-5 ring-1 ring-stone">
+              <div key={o.id} className="bg-paper p-5 border border-stone">
                 <div className="flex flex-wrap items-start justify-between gap-3">
                   <div>
-                    <p className="font-semibold text-slate-900">{o.title}</p>
-                    <p className="text-sm text-slate-500">
+                    <p className="font-semibold text-ink">{o.title}</p>
+                    <p className="text-sm text-muted">
                       {[o.district, o.rooms, o.areaGross ? `${o.areaGross} m²` : null, o.estimatedPrice ? formatPrice(o.estimatedPrice, "TRY") : null].filter(Boolean).join(" · ")}
                     </p>
                   </div>
@@ -100,19 +100,19 @@ export default async function AdminFirsatlarPage({
                 </div>
 
                 <div className="mt-4 border-t border-stone pt-3">
-                  <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">Teklifler ({o.bids.length}) — düşük komisyon üstte</p>
+                  <p className="text-xs font-semibold uppercase tracking-wide text-muted/70">Teklifler ({o.bids.length}) — düşük komisyon üstte</p>
                   {o.bids.length === 0 ? (
-                    <p className="mt-2 text-sm text-slate-400">Henüz teklif yok.</p>
+                    <p className="mt-2 text-sm text-muted/70">Henüz teklif yok.</p>
                   ) : (
                     <ul className="mt-2 space-y-1.5">
                       {o.bids.map((b, idx) => (
                         <li key={b.id} className="flex flex-wrap items-center justify-between gap-2 rounded-lg bg-canvas px-3 py-2 text-sm">
                           <span className="flex items-center gap-2">
                             {idx === 0 && canSelect && <Star className="h-4 w-4 fill-current text-amber-500" />}
-                            <span className="font-medium text-slate-800">{b.agent?.name ?? "—"}</span>
-                            <span className="rounded bg-paper px-2 py-0.5 text-xs font-semibold text-brand-700 ring-1 ring-stone">%{b.commissionPct.toFixed(1)} komisyon</span>
+                            <span className="font-medium text-ink">{b.agent?.name ?? "—"}</span>
+                            <span className="rounded bg-paper px-2 py-0.5 text-xs font-semibold text-brand-700 border border-stone">%{b.commissionPct.toFixed(1)} komisyon</span>
                             {b.status === "won" && <span className="text-xs font-semibold text-green-600">Kazandı</span>}
-                            {b.note && <span className="text-xs text-slate-400">— {b.note}</span>}
+                            {b.note && <span className="text-xs text-muted/70">— {b.note}</span>}
                           </span>
                           {canSelect && (
                             <form action={selectWinningBid}>
@@ -136,7 +136,7 @@ export default async function AdminFirsatlarPage({
                   {canSelect && (
                     <form action={closeOpportunity}>
                       <input type="hidden" name="id" value={o.id} />
-                      <button type="submit" className="text-xs font-medium text-slate-400 hover:text-red-600">Kapat</button>
+                      <button type="submit" className="text-xs font-medium text-muted/70 hover:text-red-600">Kapat</button>
                     </form>
                   )}
                 </div>
@@ -148,13 +148,13 @@ export default async function AdminFirsatlarPage({
 
       {Math.ceil(totalCount / PER_PAGE) > 1 && (
         <div className="mt-4 flex items-center justify-between text-sm">
-          <span className="text-slate-500">Sayfa {page} / {Math.ceil(totalCount / PER_PAGE)} · {totalCount} kayıt</span>
+          <span className="text-muted">Sayfa {page} / {Math.ceil(totalCount / PER_PAGE)} · {totalCount} kayıt</span>
           <div className="flex gap-2">
             {page > 1 && (
-              <Link href={`/admin/firsatlar${page - 1 > 1 ? `?sayfa=${page - 1}` : ""}`} className="rounded-lg bg-paper px-3 py-1.5 font-medium text-slate-700 ring-1 ring-stone hover:ring-brand-300">‹ Önceki</Link>
+              <Link href={`/admin/firsatlar${page - 1 > 1 ? `?sayfa=${page - 1}` : ""}`} className="rounded-lg bg-paper px-3 py-1.5 font-medium text-ink border border-stone hover:border-brand-300">‹ Önceki</Link>
             )}
             {page < Math.ceil(totalCount / PER_PAGE) && (
-              <Link href={`/admin/firsatlar?sayfa=${page + 1}`} className="rounded-lg bg-paper px-3 py-1.5 font-medium text-slate-700 ring-1 ring-stone hover:ring-brand-300">Sonraki ›</Link>
+              <Link href={`/admin/firsatlar?sayfa=${page + 1}`} className="rounded-lg bg-paper px-3 py-1.5 font-medium text-ink border border-stone hover:border-brand-300">Sonraki ›</Link>
             )}
           </div>
         </div>

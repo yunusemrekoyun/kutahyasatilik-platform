@@ -18,8 +18,8 @@ type PopupData = {
 };
 
 const inputCls =
-  "w-full rounded-lg border border-slate-300 bg-paper px-3.5 py-2.5 text-[15px] text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/30";
-const labelCls = "block text-sm font-medium text-slate-700 mb-1";
+  "w-full rounded-lg border border-stone bg-paper px-3.5 py-2.5 text-[15px] text-ink outline-none transition placeholder:text-muted/70 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/30";
+const labelCls = "block text-sm font-medium text-ink mb-1";
 
 export default function PopupForm({ popup }: { popup?: PopupData }) {
   const [image, setImage] = useState(popup?.imageUrl ?? "");
@@ -47,8 +47,8 @@ export default function PopupForm({ popup }: { popup?: PopupData }) {
       {popup?.id && <input type="hidden" name="id" value={popup.id} />}
       <input type="hidden" name="imageUrl" value={image} />
 
-      <section className="rounded-lg bg-paper p-6 ring-1 ring-stone">
-        <h2 className="font-bold text-slate-900">Reklam İçeriği</h2>
+      <section className="bg-paper p-6 border border-stone">
+        <h2 className="font-bold text-ink">Reklam İçeriği</h2>
         <div className="mt-4 grid gap-4">
           <label className="block">
             <span className={labelCls}>Başlık *</span>
@@ -63,7 +63,7 @@ export default function PopupForm({ popup }: { popup?: PopupData }) {
           <div>
             <span className={labelCls}>Görsel (opsiyonel)</span>
             <div className="mt-1 flex items-center gap-4">
-              <div className="relative h-24 w-40 shrink-0 overflow-hidden rounded-lg bg-slate-100 ring-1 ring-stone">
+              <div className="relative h-24 w-40 shrink-0 overflow-hidden rounded-lg bg-canvas border border-stone">
                 {image && <Image src={image} alt="" fill sizes="160px" className="object-cover" />}
               </div>
               <div>
@@ -89,8 +89,8 @@ export default function PopupForm({ popup }: { popup?: PopupData }) {
         </div>
       </section>
 
-      <section className="rounded-lg bg-paper p-6 ring-1 ring-stone">
-        <h2 className="font-bold text-slate-900">Gösterim Ayarları</h2>
+      <section className="bg-paper p-6 border border-stone">
+        <h2 className="font-bold text-ink">Gösterim Ayarları</h2>
         <div className="mt-4 grid gap-4 sm:grid-cols-3">
           <label className="block">
             <span className={labelCls}>Gösterim Sıklığı</span>
@@ -104,8 +104,8 @@ export default function PopupForm({ popup }: { popup?: PopupData }) {
             <span className={labelCls}>Açılma Gecikmesi (sn)</span>
             <input name="delaySec" type="number" min={0} max={30} defaultValue={popup?.delaySec ?? 2} className={inputCls} />
           </label>
-          <label className="flex items-end gap-2 pb-2 text-sm text-slate-700">
-            <input type="checkbox" name="active" defaultChecked={popup?.active} className="h-4 w-4 rounded border-slate-300" />
+          <label className="flex items-end gap-2 pb-2 text-sm text-ink">
+            <input type="checkbox" name="active" defaultChecked={popup?.active} className="h-4 w-4 rounded border-stone" />
             Yayında (aktif)
           </label>
         </div>
@@ -115,7 +115,7 @@ export default function PopupForm({ popup }: { popup?: PopupData }) {
         <button type="submit" disabled={submitting || uploading} className="rounded-lg bg-brand-700 px-6 py-3 font-bold text-white hover:bg-brand-800 disabled:opacity-60">
           {submitting ? "Kaydediliyor..." : popup?.id ? "Değişiklikleri Kaydet" : "Reklamı Kaydet"}
         </button>
-        <Link href="/admin/reklamlar" className="rounded-lg px-6 py-3 font-medium text-slate-600 hover:bg-slate-100">İptal</Link>
+        <Link href="/admin/reklamlar" className="rounded-lg px-6 py-3 font-medium text-muted hover:bg-canvas">İptal</Link>
       </div>
     </form>
   );

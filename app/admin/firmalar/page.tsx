@@ -79,7 +79,7 @@ function AgencyFields({ agency }: { agency?: AgencyRow }) {
         <span className={adminLabel}>Firma tanıtımı</span>
         <textarea name="description" rows={4} defaultValue={agency?.description ?? ""} className={`${adminInput} h-auto py-3`} />
       </label>
-      <div className="mt-4 flex flex-wrap gap-x-6 gap-y-3 text-sm text-slate-700">
+      <div className="mt-4 flex flex-wrap gap-x-6 gap-y-3 text-sm text-ink">
         <label className="flex min-h-11 items-center gap-2">
           <input type="checkbox" name="published" defaultChecked={agency?.published ?? false} className="h-4 w-4 rounded" />
           Kamu dizininde yayınla
@@ -114,7 +114,7 @@ export default async function AdminAgenciesPage() {
       </div>
 
       <details className={`${adminCard} mb-8 p-5`}>
-        <summary className="cursor-pointer font-semibold text-slate-900">Yeni firma ekle</summary>
+        <summary className="cursor-pointer font-semibold text-ink">Yeni firma ekle</summary>
         <form action={saveAgency} className="mt-5">
           <AgencyFields />
           <button className={`${adminBtnPrimary} mt-5`}>Firmayı Kaydet</button>
@@ -124,8 +124,8 @@ export default async function AdminAgenciesPage() {
       <div className="space-y-4">
         {agencies.length === 0 && (
           <div className={`${adminCard} p-10 text-center`}>
-            <Building2 className="mx-auto h-8 w-8 text-slate-400" />
-            <p className="mt-3 font-medium text-slate-700">Henüz firma kaydı yok.</p>
+            <Building2 className="mx-auto h-8 w-8 text-muted/70" />
+            <p className="mt-3 font-medium text-ink">Henüz firma kaydı yok.</p>
           </div>
         )}
         {agencies.map((agency) => (
@@ -134,13 +134,13 @@ export default async function AdminAgenciesPage() {
               <div className="flex flex-wrap items-center justify-between gap-3">
                 <div>
                   <div className="flex items-center gap-2">
-                    <span className="font-semibold text-slate-900">{agency.name}</span>
+                    <span className="font-semibold text-ink">{agency.name}</span>
                     <StatusBadge tone={agency.published && agency.status === "approved" ? "success" : "neutral"}>
                       {agency.published && agency.status === "approved" ? "Yayında" : "Yayında değil"}
                     </StatusBadge>
                     {agency.verifiedAt && <StatusBadge tone="brand">Doğrulandı</StatusBadge>}
                   </div>
-                  <p className="mt-1 text-xs text-slate-500">{agency._count.listings} ilan · {agency._count.agents} danışman · /emlak-ofisi/{agency.slug}</p>
+                  <p className="mt-1 text-xs text-muted">{agency._count.listings} ilan · {agency._count.agents} danışman · /emlak-ofisi/{agency.slug}</p>
                 </div>
                 <span className="text-sm font-medium text-brand-700">Düzenle</span>
               </div>

@@ -24,8 +24,8 @@ function AdminLogo({ small = false, onNavigate }: { small?: boolean; onNavigate?
       <span className="grid h-9 w-9 shrink-0 place-items-center rounded-lg bg-brand-700 text-base font-bold text-white">K</span>
       {!small && (
         <span className="leading-tight">
-          <span className="block font-semibold text-slate-900">Yönetim</span>
-          <span className="block text-[11px] text-slate-500">Kütahya Satılık</span>
+          <span className="block font-semibold text-ink">Yönetim</span>
+          <span className="block text-[11px] text-muted">Kütahya Satılık</span>
         </span>
       )}
     </Link>
@@ -58,16 +58,14 @@ export default function AdminShell({
       <div className="mx-auto flex max-w-[1500px]">
         {/* Masaüstü sidebar */}
         <aside
-          className={`sticky top-0 hidden h-screen shrink-0 flex-col border-r border-stone bg-paper transition-[width] duration-200 md:flex ${
-            collapsed ? "w-[76px]" : "w-64"
-          }`}
+          className={`sticky top-0 hidden h-screen shrink-0 flex-col border-r border-stone bg-paper transition-[width] duration-200 md:flex ${ collapsed ? "w-[76px]" : "w-64" }`}
         >
           <div className={`flex h-16 items-center border-b border-stone ${collapsed ? "justify-center px-2" : "justify-between px-4"}`}>
             {!collapsed && <AdminLogo />}
             <button
               onClick={toggleCollapsed}
               aria-label={collapsed ? "Menüyü genişlet" : "Menüyü daralt"}
-              className="grid h-9 w-9 place-items-center rounded-lg text-slate-400 transition hover:bg-slate-100 hover:text-slate-700"
+              className="grid h-9 w-9 place-items-center rounded-lg text-muted/70 transition hover:bg-canvas hover:text-ink"
             >
               {collapsed ? <PanelLeftOpen className="h-5 w-5" /> : <PanelLeftClose className="h-5 w-5" />}
             </button>
@@ -77,12 +75,12 @@ export default function AdminShell({
 
           <div className={`border-t border-stone p-3 ${collapsed ? "flex justify-center" : ""}`}>
             {collapsed ? (
-              <span title={email} className="grid h-9 w-9 place-items-center rounded-full bg-slate-100 text-xs font-bold text-slate-600">
+              <span title={email} className="grid h-9 w-9 place-items-center rounded-full bg-canvas text-xs font-bold text-muted">
                 {email.slice(0, 1).toUpperCase()}
               </span>
             ) : (
               <div>
-                <p className="truncate text-xs font-medium text-slate-600">{email}</p>
+                <p className="truncate text-xs font-medium text-muted">{email}</p>
                 <Link href="/" className="mt-1 inline-flex items-center gap-1 text-xs text-brand-700 hover:underline">
                   <ExternalLink className="h-3 w-3" /> Siteye dön
                 </Link>
@@ -101,7 +99,7 @@ export default function AdminShell({
               <button
                 onClick={() => setMobileOpen(true)}
                 aria-label="Menüyü aç"
-                className="grid h-10 w-10 place-items-center rounded-lg border border-slate-300 text-slate-700"
+                className="grid h-10 w-10 place-items-center rounded-lg border border-stone text-ink"
               >
                 <Menu className="h-5 w-5" />
               </button>
@@ -123,13 +121,13 @@ export default function AdminShell({
           <div className="absolute inset-y-0 left-0 flex w-72 max-w-[85%] flex-col bg-paper shadow-xl">
             <div className="flex h-16 items-center justify-between border-b border-stone px-4">
               <AdminLogo onNavigate={() => setMobileOpen(false)} />
-              <button onClick={() => setMobileOpen(false)} aria-label="Kapat" className="grid h-9 w-9 place-items-center rounded-lg text-slate-400 hover:bg-slate-100">
+              <button onClick={() => setMobileOpen(false)} aria-label="Kapat" className="grid h-9 w-9 place-items-center rounded-lg text-muted/70 hover:bg-canvas">
                 <X className="h-5 w-5" />
               </button>
             </div>
             <AdminNav counts={counts} onNavigate={() => setMobileOpen(false)} />
             <div className="border-t border-stone p-4">
-              <p className="truncate text-xs font-medium text-slate-600">{email}</p>
+              <p className="truncate text-xs font-medium text-muted">{email}</p>
               <Link href="/" className="mt-1 inline-flex items-center gap-1 text-xs text-brand-700 hover:underline">
                 <ExternalLink className="h-3 w-3" /> Siteye dön
               </Link>

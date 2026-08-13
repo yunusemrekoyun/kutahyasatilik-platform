@@ -56,12 +56,12 @@ export default async function AdminBuyerAlerts({
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold tracking-tight text-slate-900">Alıcı Talepleri</h1>
-        <p className="text-sm text-slate-500">{total} talep · {activeCount} aktif · her talep için stoktaki uygun ilan sayısı gösterilir</p>
+        <h1 className="text-2xl font-bold tracking-tight text-ink">Alıcı Talepleri</h1>
+        <p className="text-sm text-muted">{total} talep · {activeCount} aktif · her talep için stoktaki uygun ilan sayısı gösterilir</p>
       </div>
 
       {total === 0 && (
-        <p className="rounded-lg bg-paper p-10 text-center text-slate-400 ring-1 ring-stone">
+        <p className="bg-paper p-10 text-center text-muted/70 border border-stone">
           Henüz alıcı talebi yok. /alici-talebi sayfasından gelen talepler burada listelenir.
         </p>
       )}
@@ -72,19 +72,19 @@ export default async function AdminBuyerAlerts({
             <div className="flex flex-wrap items-start justify-between gap-4">
               <div className="min-w-0">
                 <div className="flex items-center gap-2">
-                  <p className="font-bold text-slate-900">{a.name}</p>
-                  <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${a.status === "active" ? "bg-green-100 text-green-700" : "bg-slate-100 text-slate-500"}`}>
+                  <p className="font-bold text-ink">{a.name}</p>
+                  <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${a.status === "active" ? "bg-green-100 text-green-700" : "bg-canvas text-muted"}`}>
                     {a.status === "active" ? "Aktif" : "Kapalı"}
                   </span>
                 </div>
-                <p className="mt-1 text-sm text-slate-600">{a.phone}{a.email ? ` · ${a.email}` : ""}</p>
+                <p className="mt-1 text-sm text-muted">{a.phone}{a.email ? ` · ${a.email}` : ""}</p>
                 <p className="mt-1 flex items-center gap-1.5 text-sm font-medium text-brand-700"><Target className="h-4 w-4 shrink-0" />{criteriaText(a)}</p>
-                {a.note && <p className="mt-1 text-sm text-slate-500">“{a.note}”</p>}
-                <p className="mt-1 text-xs text-slate-400">{formatDate(a.createdAt)}</p>
+                {a.note && <p className="mt-1 text-sm text-muted">“{a.note}”</p>}
+                <p className="mt-1 text-xs text-muted/70">{formatDate(a.createdAt)}</p>
               </div>
 
               <div className="flex flex-col items-end gap-2">
-                <span className={`rounded-lg px-3 py-1.5 text-sm font-bold ${counts[i] > 0 ? "bg-green-50 text-green-700" : "bg-canvas text-slate-400"}`}>
+                <span className={`rounded-lg px-3 py-1.5 text-sm font-bold ${counts[i] > 0 ? "bg-green-50 text-green-700" : "bg-canvas text-muted/70"}`}>
                   {counts[i]} uygun ilan
                 </span>
                 {counts[i] > 0 && a.district && (
@@ -101,7 +101,7 @@ export default async function AdminBuyerAlerts({
               <form action={updateAlertStatus}>
                 <input type="hidden" name="id" value={a.id} />
                 <input type="hidden" name="status" value={a.status === "active" ? "closed" : "active"} />
-                <button className="rounded-lg px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100">
+                <button className="rounded-lg px-3 py-2 text-sm font-medium text-muted hover:bg-canvas">
                   {a.status === "active" ? "Kapat" : "Yeniden Aç"}
                 </button>
               </form>
@@ -116,13 +116,13 @@ export default async function AdminBuyerAlerts({
 
       {totalPages > 1 && (
         <div className="flex items-center justify-between text-sm">
-          <span className="text-slate-500">Sayfa {page} / {totalPages}</span>
+          <span className="text-muted">Sayfa {page} / {totalPages}</span>
           <div className="flex gap-2">
             {page > 1 && (
-              <Link href={`/admin/alici-talepleri?sayfa=${page - 1}`} className="rounded-lg bg-paper px-3 py-1.5 font-medium text-slate-700 ring-1 ring-stone hover:ring-brand-300">‹ Önceki</Link>
+              <Link href={`/admin/alici-talepleri?sayfa=${page - 1}`} className="rounded-lg bg-paper px-3 py-1.5 font-medium text-ink border border-stone hover:border-brand-300">‹ Önceki</Link>
             )}
             {page < totalPages && (
-              <Link href={`/admin/alici-talepleri?sayfa=${page + 1}`} className="rounded-lg bg-paper px-3 py-1.5 font-medium text-slate-700 ring-1 ring-stone hover:ring-brand-300">Sonraki ›</Link>
+              <Link href={`/admin/alici-talepleri?sayfa=${page + 1}`} className="rounded-lg bg-paper px-3 py-1.5 font-medium text-ink border border-stone hover:border-brand-300">Sonraki ›</Link>
             )}
           </div>
         </div>

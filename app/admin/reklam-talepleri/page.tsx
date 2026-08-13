@@ -36,36 +36,36 @@ export default async function AdminReklamTalepleriPage({
   return (
     <div className="mx-auto max-w-4xl">
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-slate-900">Reklam Talepleri</h1>
-        <p className="mt-1 text-sm text-slate-500">“Reklam Vermek İstiyorum” formundan gelen talepler.</p>
+        <h1 className="text-2xl font-bold text-ink">Reklam Talepleri</h1>
+        <p className="mt-1 text-sm text-muted">“Reklam Vermek İstiyorum” formundan gelen talepler.</p>
       </div>
 
       {rows.length === 0 ? (
-        <div className="rounded-lg bg-paper p-10 text-center text-sm text-slate-500 ring-1 ring-stone">Henüz reklam talebi yok.</div>
+        <div className="bg-paper p-10 text-center text-sm text-muted border border-stone">Henüz reklam talebi yok.</div>
       ) : (
         <div className="space-y-3">
           {rows.map((r) => {
             const s = STATUS[r.status] ?? STATUS.new;
             return (
-              <div key={r.id} className="rounded-lg bg-paper p-5 ring-1 ring-stone">
+              <div key={r.id} className="bg-paper p-5 border border-stone">
                 <div className="flex flex-wrap items-start justify-between gap-3">
                   <div>
-                    <p className="font-semibold text-slate-900">{r.name}{r.company ? ` · ${r.company}` : ""}</p>
-                    <p className="text-sm text-slate-500">{r.phone}{r.email ? ` · ${r.email}` : ""}</p>
+                    <p className="font-semibold text-ink">{r.name}{r.company ? ` · ${r.company}` : ""}</p>
+                    <p className="text-sm text-muted">{r.phone}{r.email ? ` · ${r.email}` : ""}</p>
                   </div>
                   <span className={`shrink-0 rounded-full px-2.5 py-0.5 text-xs font-semibold ring-1 ${s.cls}`}>{s.label}</span>
                 </div>
-                {r.message && <p className="mt-2 rounded-lg bg-canvas p-3 text-sm text-slate-600">{r.message}</p>}
+                {r.message && <p className="mt-2 rounded-lg bg-canvas p-3 text-sm text-muted">{r.message}</p>}
                 <div className="mt-3 flex items-center gap-2 border-t border-stone pt-3">
                   <form action={updateAdRequestStatus} className="flex items-center gap-1.5">
                     <input type="hidden" name="id" value={r.id} />
-                    <select name="status" defaultValue={r.status} className="rounded-md border border-slate-300 px-2 py-1 text-xs">
+                    <select name="status" defaultValue={r.status} className="rounded-md border border-stone px-2 py-1 text-xs">
                       <option value="new">Yeni</option>
                       <option value="contacted">Görüşüldü</option>
                       <option value="accepted">Kabul</option>
                       <option value="rejected">Red</option>
                     </select>
-                    <button type="submit" className="rounded-md bg-slate-100 px-2.5 py-1 text-xs font-medium text-slate-700 hover:bg-slate-200">Kaydet</button>
+                    <button type="submit" className="rounded-md bg-canvas px-2.5 py-1 text-xs font-medium text-ink hover:bg-stone">Kaydet</button>
                   </form>
                   <form action={deleteAdRequest} className="ml-auto">
                     <input type="hidden" name="id" value={r.id} />
@@ -80,13 +80,13 @@ export default async function AdminReklamTalepleriPage({
 
       {Math.ceil(totalCount / PER_PAGE) > 1 && (
         <div className="mt-4 flex items-center justify-between text-sm">
-          <span className="text-slate-500">Sayfa {page} / {Math.ceil(totalCount / PER_PAGE)} · {totalCount} kayıt</span>
+          <span className="text-muted">Sayfa {page} / {Math.ceil(totalCount / PER_PAGE)} · {totalCount} kayıt</span>
           <div className="flex gap-2">
             {page > 1 && (
-              <Link href={`/admin/reklam-talepleri${page - 1 > 1 ? `?sayfa=${page - 1}` : ""}`} className="rounded-lg bg-paper px-3 py-1.5 font-medium text-slate-700 ring-1 ring-stone hover:ring-brand-300">‹ Önceki</Link>
+              <Link href={`/admin/reklam-talepleri${page - 1 > 1 ? `?sayfa=${page - 1}` : ""}`} className="rounded-lg bg-paper px-3 py-1.5 font-medium text-ink border border-stone hover:border-brand-300">‹ Önceki</Link>
             )}
             {page < Math.ceil(totalCount / PER_PAGE) && (
-              <Link href={`/admin/reklam-talepleri?sayfa=${page + 1}`} className="rounded-lg bg-paper px-3 py-1.5 font-medium text-slate-700 ring-1 ring-stone hover:ring-brand-300">Sonraki ›</Link>
+              <Link href={`/admin/reklam-talepleri?sayfa=${page + 1}`} className="rounded-lg bg-paper px-3 py-1.5 font-medium text-ink border border-stone hover:border-brand-300">Sonraki ›</Link>
             )}
           </div>
         </div>

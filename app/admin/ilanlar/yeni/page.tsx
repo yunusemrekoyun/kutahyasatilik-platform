@@ -10,7 +10,7 @@ export default async function NewListingPage() {
   });
   return (
     <div>
-      <h1 className="mb-6 text-2xl font-extrabold text-slate-900">Yeni İlan Ekle</h1>
+      <h1 className="mb-6 text-2xl font-extrabold text-ink">Yeni İlan Ekle</h1>
       <ListingForm agencies={agencies} />
     </div>
   );

@@ -70,8 +70,8 @@ type ListingData = {
 };
 
 const inputCls =
-  "w-full rounded-lg border border-slate-300 bg-paper px-3.5 py-2.5 text-[15px] text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/30";
-const labelCls = "block text-sm font-medium text-slate-700 mb-1";
+  "w-full rounded-lg border border-stone bg-paper px-3.5 py-2.5 text-[15px] text-ink outline-none transition placeholder:text-muted/70 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/30";
+const labelCls = "block text-sm font-medium text-ink mb-1";
 
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
@@ -131,8 +131,8 @@ export default function ListingForm({
       <input type="hidden" name="imagesJson" value={JSON.stringify(images)} />
 
       {/* Temel bilgiler */}
-      <section className="rounded-lg bg-paper p-6 ring-1 ring-stone">
-        <h2 className="font-bold text-slate-900">Temel Bilgiler</h2>
+      <section className="bg-paper p-6 border border-stone">
+        <h2 className="font-bold text-ink">Temel Bilgiler</h2>
         <div className="mt-4 grid gap-4">
           <Field label="İlan Başlığı *">
             <input name="title" required defaultValue={listing?.title} className={inputCls} placeholder="Örn: Merkez'de 3+1 Sıfır Satılık Daire" />
@@ -194,12 +194,12 @@ export default function ListingForm({
       </section>
 
       {/* Görseller */}
-      <section className="rounded-lg bg-paper p-6 ring-1 ring-stone">
-        <h2 className="font-bold text-slate-900">Görseller</h2>
-        <p className="text-xs text-slate-500">İlk görsel kapak olarak kullanılır. Sürükle-bırak yerine okları kullanın.</p>
+      <section className="bg-paper p-6 border border-stone">
+        <h2 className="font-bold text-ink">Görseller</h2>
+        <p className="text-xs text-muted">İlk görsel kapak olarak kullanılır. Sürükle-bırak yerine okları kullanın.</p>
         <div className="mt-4 grid grid-cols-3 gap-3 sm:grid-cols-5">
           {images.map((url, i) => (
-            <div key={url} className="group relative aspect-square overflow-hidden rounded-lg ring-1 ring-stone">
+            <div key={url} className="group relative aspect-square overflow-hidden rounded-lg border border-stone">
               <Image src={url} alt="" fill sizes="120px" className="object-cover" />
               {i === 0 && <span className="absolute left-1 top-1 rounded bg-brand-700 px-1.5 py-0.5 text-[10px] font-bold text-white">Kapak</span>}
               <div className="absolute inset-x-0 bottom-0 flex justify-between bg-black/50 p-1 opacity-0 transition group-hover:opacity-100">
@@ -209,7 +209,7 @@ export default function ListingForm({
               </div>
             </div>
           ))}
-          <label className="grid aspect-square cursor-pointer place-items-center rounded-lg border-2 border-dashed border-slate-300 text-center text-xs text-slate-500 hover:border-brand-400 hover:text-brand-600">
+          <label className="grid aspect-square cursor-pointer place-items-center rounded-lg border-2 border-dashed border-stone text-center text-xs text-muted hover:border-brand-400 hover:text-brand-600">
             {uploading ? "Yükleniyor..." : "+ Görsel Ekle"}
             <input type="file" accept="image/*" multiple onChange={handleUpload} className="hidden" />
           </label>
@@ -217,9 +217,9 @@ export default function ListingForm({
       </section>
 
       {/* Medya: video / drone / sanal tur */}
-      <section className="rounded-lg bg-paper p-6 ring-1 ring-stone">
-        <h2 className="font-bold text-slate-900">Video & Sanal Tur</h2>
-        <p className="text-xs text-slate-500">Tanıtım videosunu doğrudan yükleyin (önerilen) ya da YouTube/Vimeo linki yapıştırın. Boş bırakılırsa ilgili bölüm gösterilmez.</p>
+      <section className="bg-paper p-6 border border-stone">
+        <h2 className="font-bold text-ink">Video & Sanal Tur</h2>
+        <p className="text-xs text-muted">Tanıtım videosunu doğrudan yükleyin (önerilen) ya da YouTube/Vimeo linki yapıştırın. Boş bırakılırsa ilgili bölüm gösterilmez.</p>
         <div className="mt-4 grid gap-4">
           <Field label="Tanıtım Videosu (yükle veya link)">
             <VideoUploadField name="videoUrl" defaultValue={listing?.videoUrl ?? ""} />
@@ -234,8 +234,8 @@ export default function ListingForm({
       </section>
 
       {/* Konut detayları */}
-      <section className="rounded-lg bg-paper p-6 ring-1 ring-stone">
-        <h2 className="font-bold text-slate-900">Detaylar</h2>
+      <section className="bg-paper p-6 border border-stone">
+        <h2 className="font-bold text-ink">Detaylar</h2>
         <div className="mt-4 grid grid-cols-2 gap-4 sm:grid-cols-4">
           <Field label="Brüt m² *"><input name="areaGross" type="number" required min={1} defaultValue={listing?.areaGross ?? ""} className={inputCls} /></Field>
           <Field label="Net m²"><input name="areaNet" type="number" defaultValue={listing?.areaNet ?? ""} className={inputCls} /></Field>
@@ -259,8 +259,8 @@ export default function ListingForm({
             { name: "featured", label: <span className="inline-flex items-center gap-1.5"><Star className="h-4 w-4 fill-current text-amber-500" /> Öne Çıkar</span>, val: listing?.featured },
             { name: "verified", label: <span className="inline-flex items-center gap-1.5"><Check className="h-4 w-4 text-green-600" /> Doğrulanmış (tapu/ekspertiz)</span>, val: listing?.verified },
           ].map((c) => (
-            <label key={c.name} className="flex items-center gap-2 text-sm text-slate-700">
-              <input type="checkbox" name={c.name} defaultChecked={c.val} className="h-4 w-4 rounded border-slate-300" />
+            <label key={c.name} className="flex items-center gap-2 text-sm text-ink">
+              <input type="checkbox" name={c.name} defaultChecked={c.val} className="h-4 w-4 rounded border-stone" />
               {c.label}
             </label>
           ))}
@@ -275,9 +275,9 @@ export default function ListingForm({
       <ProfessionalListingFields values={listing} propertyType={propertyType} inputClassName={inputCls} />
 
       {/* Konum ve yatırım verisi */}
-      <section className="rounded-lg bg-paper p-6 ring-1 ring-stone">
-        <h2 className="font-bold text-slate-900">Konum & Yatırım Verisi</h2>
-        <p className="mt-1 text-xs text-slate-500">Haritada tıklayarak veya pini sürükleyerek konumu işaretleyin; enlem/boylam otomatik dolar ve ilan haritada görünür.</p>
+      <section className="bg-paper p-6 border border-stone">
+        <h2 className="font-bold text-ink">Konum & Yatırım Verisi</h2>
+        <p className="mt-1 text-xs text-muted">Haritada tıklayarak veya pini sürükleyerek konumu işaretleyin; enlem/boylam otomatik dolar ve ilan haritada görünür.</p>
         <div className="mt-4">
           <LocationPicker initialLat={listing?.lat ?? null} initialLng={listing?.lng ?? null} />
         </div>
@@ -285,12 +285,12 @@ export default function ListingForm({
           <Field label="Yatırım Puanı (0-100)"><input name="investmentScore" type="number" min="0" max="100" defaultValue={listing?.investmentScore ?? ""} className={inputCls} /></Field>
           <Field label="Değer Artışı %"><input name="valueGrowthPct" type="number" defaultValue={listing?.valueGrowthPct ?? ""} className={inputCls} /></Field>
         </div>
-        <p className="mt-2 text-xs text-slate-400">Yatırım puanı / değer artışı boş bırakılırsa ilçe verisinden otomatik hesaplanır.</p>
+        <p className="mt-2 text-xs text-muted/70">Yatırım puanı / değer artışı boş bırakılırsa ilçe verisinden otomatik hesaplanır.</p>
       </section>
 
       {/* SEO */}
-      <section className="rounded-lg bg-paper p-6 ring-1 ring-stone">
-        <h2 className="font-bold text-slate-900">SEO (opsiyonel)</h2>
+      <section className="bg-paper p-6 border border-stone">
+        <h2 className="font-bold text-ink">SEO (opsiyonel)</h2>
         <div className="mt-4 grid gap-4">
           <Field label="Meta Başlık"><input name="metaTitle" defaultValue={listing?.metaTitle ?? ""} className={inputCls} /></Field>
           <Field label="Meta Açıklama"><textarea name="metaDescription" rows={2} defaultValue={listing?.metaDescription ?? ""} className={inputCls} /></Field>
@@ -301,7 +301,7 @@ export default function ListingForm({
         <button type="submit" disabled={submitting || uploading} className="rounded-lg bg-brand-700 px-6 py-3 font-bold text-white hover:bg-brand-800 disabled:opacity-60">
           {submitting ? "Kaydediliyor..." : listing?.id ? "Değişiklikleri Kaydet" : "İlanı Yayınla"}
         </button>
-        <Link href="/admin/ilanlar" className="rounded-lg px-6 py-3 font-medium text-slate-600 hover:bg-slate-100">İptal</Link>
+        <Link href="/admin/ilanlar" className="rounded-lg px-6 py-3 font-medium text-muted hover:bg-canvas">İptal</Link>
       </div>
     </form>
   );

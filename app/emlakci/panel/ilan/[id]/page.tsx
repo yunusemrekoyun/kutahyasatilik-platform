@@ -79,14 +79,14 @@ export default async function EditAgentListing({
 
   return (
     <div>
-      <nav className="mb-4 text-sm text-slate-500">
+      <nav className="mb-4 text-sm text-muted">
         <Link href="/emlakci/panel" className="hover:text-brand-700">Panel</Link>
         <span className="mx-2">/</span>
         <span>İlanı Düzenle</span>
       </nav>
       <div className="mb-6 flex flex-wrap items-center gap-3">
-        <h1 className="text-2xl font-extrabold text-slate-900">İlanı Düzenle</h1>
-        <span className="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-medium text-slate-600">
+        <h1 className="text-2xl font-extrabold text-ink">İlanı Düzenle</h1>
+        <span className="rounded-full bg-canvas px-2.5 py-1 text-xs font-medium text-muted">
           {MODERATION_STATUS_LABELS[listing.moderationStatus]}
         </span>
       </div>

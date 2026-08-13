@@ -12,12 +12,12 @@ export default async function EditPost({ params }: { params: Promise<{ id: strin
 
   return (
     <div>
-      <nav className="mb-4 text-sm text-slate-500">
+      <nav className="mb-4 text-sm text-muted">
         <Link href="/admin/blog" className="hover:text-brand-700">Blog</Link>
         <span className="mx-2">/</span>
         <span>Düzenle</span>
       </nav>
-      <h1 className="mb-6 text-2xl font-extrabold text-slate-900">Yazıyı Düzenle</h1>
+      <h1 className="mb-6 text-2xl font-extrabold text-ink">Yazıyı Düzenle</h1>
       <PostForm
         post={{
           id: post.id,

@@ -9,7 +9,7 @@ const statusBadge: Record<string, string> = {
   pending: "bg-amber-100 text-amber-700",
   approved: "bg-green-100 text-green-700",
   rejected: "bg-red-100 text-red-700",
-  suspended: "bg-slate-200 text-slate-600",
+  suspended: "bg-stone text-ink",
 };
 
 export default async function AdminAgents() {
@@ -25,8 +25,8 @@ export default async function AdminAgents() {
     <div className="space-y-8">
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-slate-900">Emlakçılar</h1>
-          <p className="text-sm text-slate-500">{agents.length} danışman</p>
+          <h1 className="text-2xl font-bold tracking-tight text-ink">Emlakçılar</h1>
+          <p className="text-sm text-muted">{agents.length} danışman</p>
         </div>
         <Link href="/admin/basvurular" className="rounded-lg bg-brand-50 px-3 py-2 text-sm font-semibold text-brand-700 hover:bg-brand-100">
           Yeni başvurular → Başvurular
@@ -35,12 +35,12 @@ export default async function AdminAgents() {
 
       {/* Tüm danışmanlar (onay bekleyenler de bu tabloda; yeni başvurular Başvurular sayfasında toplanır) */}
       <section>
-        <h2 className="mb-3 text-sm font-bold uppercase tracking-wide text-slate-500">Danışmanlar</h2>
-        <div className="overflow-hidden rounded-lg bg-paper ring-1 ring-stone">
+        <h2 className="mb-3 text-sm font-bold uppercase tracking-wide text-muted">Danışmanlar</h2>
+        <div className="overflow-hidden bg-paper border border-stone">
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-stone bg-canvas text-left text-xs text-slate-500">
+                <tr className="border-b border-stone bg-canvas text-left text-xs text-muted">
                   <th className="p-3">Danışman</th>
                   <th className="p-3">İletişim</th>
                   <th className="p-3 text-center">İlan</th>
@@ -51,35 +51,35 @@ export default async function AdminAgents() {
               </thead>
               <tbody>
                 {agents.length === 0 && (
-                  <tr><td colSpan={6} className="p-8 text-center text-slate-400">Henüz danışman yok.</td></tr>
+                  <tr><td colSpan={6} className="p-8 text-center text-muted/70">Henüz danışman yok.</td></tr>
                 )}
                 {agents.map((a) => (
-                  <tr key={a.id} className="border-b border-slate-50 hover:bg-canvas">
+                  <tr key={a.id} className="border-b border-stone/50 hover:bg-canvas">
                     <td className="p-3">
-                      <p className="font-medium text-slate-800">{a.name}</p>
-                      <p className="text-xs text-slate-500">{a.title || "Danışman"}{a.agencyRef?.name || a.agency ? ` · ${a.agencyRef?.name || a.agency}` : ""}</p>
+                      <p className="font-medium text-ink">{a.name}</p>
+                      <p className="text-xs text-muted">{a.title || "Danışman"}{a.agencyRef?.name || a.agency ? ` · ${a.agencyRef?.name || a.agency}` : ""}</p>
                     </td>
-                    <td className="p-3 text-slate-600">
+                    <td className="p-3 text-muted">
                       <p>{a.email}</p>
-                      <p className="text-xs text-slate-400">{a.phone || "-"}</p>
+                      <p className="text-xs text-muted/70">{a.phone || "-"}</p>
                     </td>
-                    <td className="p-3 text-center text-slate-600">{a._count.listings}</td>
+                    <td className="p-3 text-center text-muted">{a._count.listings}</td>
                     <td className="p-3">
                       <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${statusBadge[a.status]}`}>
                         {AGENT_STATUS_LABELS[a.status]}
                       </span>
-                      {a.note && <p className="mt-1 max-w-[160px] text-[11px] text-slate-400">{a.note}</p>}
+                      {a.note && <p className="mt-1 max-w-[160px] text-[11px] text-muted/70">{a.note}</p>}
                     </td>
                     <td className="p-3">
                       <form action={updateAgentDirectoryProfile} className="space-y-2">
                         <input type="hidden" name="id" value={a.id} />
-                        <select name="agencyId" defaultValue={a.agencyId ?? ""} className="h-9 w-full rounded-md border border-slate-300 bg-paper px-2 text-xs">
+                        <select name="agencyId" defaultValue={a.agencyId ?? ""} className="h-9 w-full rounded-md border border-stone bg-paper px-2 text-xs">
                           <option value="">Bağımsız / firma yok</option>
                           {agencies.map((agency) => (
                             <option key={agency.id} value={agency.id}>{agency.name}{agency.status !== "approved" ? " (onaysız)" : ""}</option>
                           ))}
                         </select>
-                        <div className="flex flex-wrap gap-x-3 gap-y-1 text-[11px] text-slate-600">
+                        <div className="flex flex-wrap gap-x-3 gap-y-1 text-[11px] text-muted">
                           <label className="flex items-center gap-1"><input type="checkbox" name="publicProfile" defaultChecked={a.publicProfile} /> Yayınla</label>
                           <label className="flex items-center gap-1"><input type="checkbox" name="showPhone" defaultChecked={a.showPhone} /> Telefon</label>
                           <label className="flex items-center gap-1"><input type="checkbox" name="showWhatsapp" defaultChecked={a.showWhatsapp} /> WhatsApp</label>

@@ -76,7 +76,7 @@ export default async function AdminLeads({
             <Link
               key={t.key}
               href={`/admin/talepler${qs.toString() ? `?${qs}` : ""}`}
-              className={`rounded-full px-4 py-1.5 text-sm font-medium ${active ? "bg-brand-700 text-white" : "bg-paper text-slate-700 ring-1 ring-stone hover:ring-brand-300"}`}
+              className={`rounded-full px-4 py-1.5 text-sm font-medium ${active ? "bg-brand-700 text-white" : "bg-paper text-ink border border-stone hover:border-brand-300"}`}
             >
               {t.label}
             </Link>
@@ -97,12 +97,12 @@ export default async function AdminLeads({
                   <div className="flex flex-wrap items-center gap-2">
                     <StatusBadge tone="brand">{LEAD_TYPE_LABELS[l.type] || l.type}</StatusBadge>
                     <StatusBadge tone={STATUS_TONE[l.status] || "neutral"}>{LEAD_STATUS_LABELS[l.status]}</StatusBadge>
-                    <span className="text-xs text-slate-400">{formatDateTime(l.createdAt)}</span>
+                    <span className="text-xs text-muted/70">{formatDateTime(l.createdAt)}</span>
                   </div>
-                  <h3 className="mt-2 text-lg font-semibold text-slate-900">{l.name}</h3>
-                  <div className="mt-1.5 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-slate-600">
+                  <h3 className="mt-2 text-lg font-semibold text-ink">{l.name}</h3>
+                  <div className="mt-1.5 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-muted">
                     <a href={`tel:${l.phone}`} className="inline-flex items-center gap-1.5 font-semibold text-brand-700 hover:underline"><Phone className="h-4 w-4" /> {l.phone}</a>
-                    {l.email && <span className="inline-flex items-center gap-1.5"><Mail className="h-4 w-4 text-slate-400" /> {l.email}</span>}
+                    {l.email && <span className="inline-flex items-center gap-1.5"><Mail className="h-4 w-4 text-muted/70" /> {l.email}</span>}
                     <a href={`https://wa.me/${l.phone.replace(/[^\d]/g, "")}`} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 text-green-600 hover:underline"><MessageCircle className="h-4 w-4" /> WhatsApp</a>
                   </div>
                 </div>
@@ -111,13 +111,13 @@ export default async function AdminLeads({
                   {/* Durum güncelle */}
                   <form action={updateLeadStatus} className="flex items-center gap-1">
                     <input type="hidden" name="id" value={l.id} />
-                    <select name="status" defaultValue={l.status} className="rounded-lg border border-slate-300 px-2 py-1.5 text-xs">
+                    <select name="status" defaultValue={l.status} className="rounded-lg border border-stone px-2 py-1.5 text-xs">
                       <option value="received">Alındı</option>
                       <option value="reviewing">İnceleniyor</option>
                       <option value="contacted">İletişim kuruldu</option>
                       <option value="resolved">Sonuçlandı</option>
                     </select>
-                    <button className="rounded-lg bg-slate-100 px-2.5 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-200">Kaydet</button>
+                    <button className="rounded-lg bg-canvas px-2.5 py-1.5 text-xs font-semibold text-ink hover:bg-stone">Kaydet</button>
                   </form>
                   {l.type === "seller" && (
                     <form action={promoteLeadToOpportunity}>
@@ -133,29 +133,29 @@ export default async function AdminLeads({
               </div>
 
               {/* Detaylar */}
-              <div className="mt-3 grid gap-x-6 gap-y-1 text-sm text-slate-600 sm:grid-cols-2 lg:grid-cols-3">
-                {l.district && <p><span className="text-slate-400">İlçe:</span> {l.district}</p>}
-                {l.neighborhood && <p><span className="text-slate-400">Mahalle:</span> {l.neighborhood}</p>}
-                {l.propertyType && <p><span className="text-slate-400">Mülk:</span> {l.propertyType}</p>}
-                {l.estimatedPrice && <p><span className="text-slate-400">İstenen Fiyat:</span> {l.estimatedPrice}</p>}
-                {l.preferredDate && <p><span className="text-slate-400">Tercih:</span> {l.preferredDate}</p>}
+              <div className="mt-3 grid gap-x-6 gap-y-1 text-sm text-muted sm:grid-cols-2 lg:grid-cols-3">
+                {l.district && <p><span className="text-muted/70">İlçe:</span> {l.district}</p>}
+                {l.neighborhood && <p><span className="text-muted/70">Mahalle:</span> {l.neighborhood}</p>}
+                {l.propertyType && <p><span className="text-muted/70">Mülk:</span> {l.propertyType}</p>}
+                {l.estimatedPrice && <p><span className="text-muted/70">İstenen Fiyat:</span> {l.estimatedPrice}</p>}
+                {l.preferredDate && <p><span className="text-muted/70">Tercih:</span> {l.preferredDate}</p>}
                 {l.lat != null && l.lng != null && (
                   <p>
-                    <span className="text-slate-400">Konum:</span>{" "}
+                    <span className="text-muted/70">Konum:</span>{" "}
                     <a href={`https://www.google.com/maps?q=${l.lat},${l.lng}`} target="_blank" rel="noopener noreferrer" className="text-brand-700 hover:underline">Haritada gör</a>
                   </p>
                 )}
-                {l.utmSource && <p><span className="text-slate-400">Kaynak:</span> {l.utmSource}</p>}
+                {l.utmSource && <p><span className="text-muted/70">Kaynak:</span> {l.utmSource}</p>}
                 {l.listing && (
                   <p className="lg:col-span-3">
-                    <span className="text-slate-400">İlan:</span>{" "}
+                    <span className="text-muted/70">İlan:</span>{" "}
                     <Link href={`/ilan/${l.listing.slug}`} target="_blank" className="text-brand-700 hover:underline">{l.listing.title}</Link>
                   </p>
                 )}
               </div>
 
               {l.message && (
-                <p className="mt-3 rounded-lg bg-canvas p-3 text-sm text-slate-700">{l.message}</p>
+                <p className="mt-3 rounded-lg bg-canvas p-3 text-sm text-ink">{l.message}</p>
               )}
 
               {photos.length > 0 && (
@@ -163,7 +163,7 @@ export default async function AdminLeads({
                   {photos.map((p, i) => (
                     <a key={i} href={p} target="_blank" rel="noopener noreferrer">
                       {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img src={p} alt="" className="h-20 w-20 rounded-lg object-cover ring-1 ring-stone" />
+                      <img src={p} alt="" className="h-20 w-20 rounded-lg object-cover border border-stone" />
                     </a>
                   ))}
                 </div>
@@ -175,13 +175,13 @@ export default async function AdminLeads({
 
       {totalPages > 1 && (
         <div className="mt-4 flex items-center justify-between text-sm">
-          <span className="text-slate-500">Sayfa {page} / {totalPages}</span>
+          <span className="text-muted">Sayfa {page} / {totalPages}</span>
           <div className="flex gap-2">
             {page > 1 && (
-              <Link href={`/admin/talepler${pageQs(page - 1)}`} className="rounded-lg bg-paper px-3 py-1.5 font-medium text-slate-700 ring-1 ring-stone hover:ring-brand-300">‹ Önceki</Link>
+              <Link href={`/admin/talepler${pageQs(page - 1)}`} className="rounded-lg bg-paper px-3 py-1.5 font-medium text-ink border border-stone hover:border-brand-300">‹ Önceki</Link>
             )}
             {page < totalPages && (
-              <Link href={`/admin/talepler${pageQs(page + 1)}`} className="rounded-lg bg-paper px-3 py-1.5 font-medium text-slate-700 ring-1 ring-stone hover:ring-brand-300">Sonraki ›</Link>
+              <Link href={`/admin/talepler${pageQs(page + 1)}`} className="rounded-lg bg-paper px-3 py-1.5 font-medium text-ink border border-stone hover:border-brand-300">Sonraki ›</Link>
             )}
           </div>
         </div>

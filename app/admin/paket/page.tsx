@@ -4,8 +4,8 @@ import { savePackage } from "@/app/admin/actions";
 export const dynamic = "force-dynamic";
 
 const inputCls =
-  "w-full rounded-lg border border-slate-300 bg-paper px-3.5 py-2.5 text-[15px] text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/30";
-const labelCls = "block text-sm font-medium text-slate-700 mb-1";
+  "w-full rounded-lg border border-stone bg-paper px-3.5 py-2.5 text-[15px] text-ink outline-none transition placeholder:text-muted/70 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/30";
+const labelCls = "block text-sm font-medium text-ink mb-1";
 
 export default async function AdminPackagePage() {
   let pkg: Awaited<ReturnType<typeof prisma.package.findFirst>> = null;
@@ -28,8 +28,8 @@ export default async function AdminPackagePage() {
   return (
     <div className="mx-auto max-w-3xl">
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-slate-900">Paket</h1>
-        <p className="mt-1 text-sm text-slate-500">
+        <h1 className="text-2xl font-bold text-ink">Paket</h1>
+        <p className="mt-1 text-sm text-muted">
           Tek emlakçı paketi. Alanları düzenleyebilirsiniz; yeni paket oluşturulmaz. Teklif
           oluşturulduğunda paketin adı/özellikleri/fiyatı teklife kopyalanır (snapshot).
         </p>
@@ -38,8 +38,8 @@ export default async function AdminPackagePage() {
       <form action={savePackage} className="space-y-6">
         {pkg && <input type="hidden" name="id" value={pkg.id} />}
 
-        <section className="rounded-lg bg-paper p-6 ring-1 ring-stone">
-          <h2 className="font-bold text-slate-900">Temel</h2>
+        <section className="bg-paper p-6 border border-stone">
+          <h2 className="font-bold text-ink">Temel</h2>
           <div className="mt-4 grid gap-4">
             <label className="block">
               <span className={labelCls}>Paket Adı</span>
@@ -58,8 +58,8 @@ export default async function AdminPackagePage() {
                   <option value="one_time">Tek seferlik</option>
                 </select>
               </label>
-              <label className="flex items-center gap-2 pt-7 text-sm text-slate-700">
-                <input type="checkbox" name="active" defaultChecked={pkg?.active ?? true} className="h-4 w-4 rounded border-slate-300" />
+              <label className="flex items-center gap-2 pt-7 text-sm text-ink">
+                <input type="checkbox" name="active" defaultChecked={pkg?.active ?? true} className="h-4 w-4 rounded border-stone" />
                 Aktif
               </label>
             </div>
@@ -70,8 +70,8 @@ export default async function AdminPackagePage() {
           </div>
         </section>
 
-        <section className="rounded-lg bg-paper p-6 ring-1 ring-stone">
-          <h2 className="font-bold text-slate-900">Kotalar & Özellikler</h2>
+        <section className="bg-paper p-6 border border-stone">
+          <h2 className="font-bold text-ink">Kotalar & Özellikler</h2>
           <div className="mt-4 grid gap-4">
             <div className="grid grid-cols-2 gap-4">
               <label className="block">

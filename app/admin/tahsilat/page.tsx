@@ -6,7 +6,7 @@ import { formatPrice } from "@/lib/format";
 export const dynamic = "force-dynamic";
 
 const inputCls =
-  "w-full rounded-lg border border-slate-300 bg-paper px-3 py-2 text-sm text-slate-900 outline-none transition focus:border-brand-500 focus:ring-2 focus:ring-brand-500/30";
+  "w-full rounded-lg border border-stone bg-paper px-3 py-2 text-sm text-ink outline-none transition focus:border-brand-500 focus:ring-2 focus:ring-brand-500/30";
 
 const STATUS: Record<string, { label: string; cls: string }> = {
   pending: { label: "Bekliyor", cls: "bg-amber-50 text-amber-700 ring-amber-200" },
@@ -64,8 +64,8 @@ export default async function AdminTahsilatPage({
   return (
     <div className="mx-auto max-w-5xl">
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-slate-900">Tahsilat</h1>
-        <p className="mt-1 text-sm text-slate-500">
+        <h1 className="text-2xl font-bold text-ink">Tahsilat</h1>
+        <p className="mt-1 text-sm text-muted">
           Ödeme entegrasyonu yok — havale/EFT/elden. Sistem yalnızca kayıt + takip tutar.
         </p>
       </div>
@@ -73,21 +73,21 @@ export default async function AdminTahsilatPage({
       {/* Özet */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
         {cards.map((c) => (
-          <div key={c.st} className="rounded-lg bg-paper p-5 ring-1 ring-stone">
+          <div key={c.st} className="bg-paper p-5 border border-stone">
             <span className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-semibold ring-1 ${STATUS[c.st].cls}`}>
               {STATUS[c.st].label}
             </span>
-            <p className="mt-3 text-2xl font-bold tabular-nums text-slate-900">{c.count}</p>
-            <p className="text-sm text-slate-500 tabular-nums">{formatPrice(c.total, "TRY")}</p>
+            <p className="mt-3 text-2xl font-bold tabular-nums text-ink">{c.count}</p>
+            <p className="text-sm text-muted tabular-nums">{formatPrice(c.total, "TRY")}</p>
           </div>
         ))}
       </div>
 
       {/* Yeni kayıt */}
-      <section className="mt-6 rounded-lg bg-paper p-6 ring-1 ring-stone">
-        <h2 className="font-bold text-slate-900">Yeni ödeme kaydı</h2>
+      <section className="mt-6 bg-paper p-6 border border-stone">
+        <h2 className="font-bold text-ink">Yeni ödeme kaydı</h2>
         {agents.length === 0 ? (
-          <p className="mt-3 text-sm text-slate-500">Önce emlakçı eklenmeli.</p>
+          <p className="mt-3 text-sm text-muted">Önce emlakçı eklenmeli.</p>
         ) : (
           <form action={savePayment} className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
             <select name="agentId" required className={`${inputCls} col-span-2`} defaultValue="">
@@ -119,13 +119,13 @@ export default async function AdminTahsilatPage({
       </section>
 
       {/* Defter */}
-      <section className="mt-6 overflow-hidden rounded-lg bg-paper ring-1 ring-stone">
+      <section className="mt-6 overflow-hidden bg-paper border border-stone">
         {payments.length === 0 ? (
-          <p className="p-6 text-center text-sm text-slate-500">Henüz ödeme kaydı yok.</p>
+          <p className="p-6 text-center text-sm text-muted">Henüz ödeme kaydı yok.</p>
         ) : (
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-stone text-left text-xs uppercase tracking-wide text-slate-400">
+              <tr className="border-b border-stone text-left text-xs uppercase tracking-wide text-muted/70">
                 <th className="px-4 py-3">Emlakçı</th>
                 <th className="px-4 py-3">Tutar</th>
                 <th className="px-4 py-3">Dönem</th>
@@ -136,20 +136,20 @@ export default async function AdminTahsilatPage({
             </thead>
             <tbody>
               {payments.map((p) => (
-                <tr key={p.id} className="border-b border-slate-50">
-                  <td className="px-4 py-3 font-medium text-slate-800">{p.agent?.name ?? "—"}</td>
+                <tr key={p.id} className="border-b border-stone/50">
+                  <td className="px-4 py-3 font-medium text-ink">{p.agent?.name ?? "—"}</td>
                   <td className="px-4 py-3 tabular-nums">{formatPrice(p.amount, p.currency)}</td>
-                  <td className="px-4 py-3 text-slate-600">{p.period ?? "—"}{p.method ? ` · ${p.method}` : ""}</td>
-                  <td className="px-4 py-3 text-slate-600">{PURPOSE[p.purpose] ?? p.purpose}</td>
+                  <td className="px-4 py-3 text-muted">{p.period ?? "—"}{p.method ? ` · ${p.method}` : ""}</td>
+                  <td className="px-4 py-3 text-muted">{PURPOSE[p.purpose] ?? p.purpose}</td>
                   <td className="px-4 py-3">
                     <form action={updatePaymentStatus} className="flex items-center gap-1.5">
                       <input type="hidden" name="id" value={p.id} />
-                      <select name="status" defaultValue={p.status} className="rounded-md border border-slate-300 px-2 py-1 text-xs">
+                      <select name="status" defaultValue={p.status} className="rounded-md border border-stone px-2 py-1 text-xs">
                         <option value="pending">Bekliyor</option>
                         <option value="paid">Ödendi</option>
                         <option value="overdue">Gecikti</option>
                       </select>
-                      <button type="submit" className="rounded-md bg-slate-100 px-2 py-1 text-xs font-medium text-slate-700 hover:bg-slate-200">Kaydet</button>
+                      <button type="submit" className="rounded-md bg-canvas px-2 py-1 text-xs font-medium text-ink hover:bg-stone">Kaydet</button>
                     </form>
                   </td>
                   <td className="px-4 py-3 text-right">
@@ -167,13 +167,13 @@ export default async function AdminTahsilatPage({
 
       {totalPages > 1 && (
         <div className="mt-4 flex items-center justify-between text-sm">
-          <span className="text-slate-500">Sayfa {page} / {totalPages} · {totalCount} kayıt</span>
+          <span className="text-muted">Sayfa {page} / {totalPages} · {totalCount} kayıt</span>
           <div className="flex gap-2">
             {page > 1 && (
-              <Link href={`/admin/tahsilat${page - 1 > 1 ? `?sayfa=${page - 1}` : ""}`} className="rounded-lg bg-paper px-3 py-1.5 font-medium text-slate-700 ring-1 ring-stone hover:ring-brand-300">‹ Önceki</Link>
+              <Link href={`/admin/tahsilat${page - 1 > 1 ? `?sayfa=${page - 1}` : ""}`} className="rounded-lg bg-paper px-3 py-1.5 font-medium text-ink border border-stone hover:border-brand-300">‹ Önceki</Link>
             )}
             {page < totalPages && (
-              <Link href={`/admin/tahsilat?sayfa=${page + 1}`} className="rounded-lg bg-paper px-3 py-1.5 font-medium text-slate-700 ring-1 ring-stone hover:ring-brand-300">Sonraki ›</Link>
+              <Link href={`/admin/tahsilat?sayfa=${page + 1}`} className="rounded-lg bg-paper px-3 py-1.5 font-medium text-ink border border-stone hover:border-brand-300">Sonraki ›</Link>
             )}
           </div>
         </div>
