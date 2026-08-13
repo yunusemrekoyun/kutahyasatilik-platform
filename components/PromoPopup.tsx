@@ -118,7 +118,7 @@ export default function PromoPopup({ popup }: { popup: PromoData }) {
         aria-modal="true"
         aria-labelledby="promo-popup-title"
         aria-describedby={popup.body ? "promo-popup-description" : undefined}
-        className="relative w-full max-w-md overflow-hidden rounded-2xl bg-white shadow-2xl animate-fade-up"
+        className="relative w-full max-w-md overflow-hidden rounded-lg bg-paper shadow-2xl animate-fade-up"
         onClick={(e) => e.stopPropagation()}
       >
         <button

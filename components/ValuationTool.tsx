@@ -90,7 +90,7 @@ export default function ValuationTool({
     "w-full h-12 rounded-[10px] border border-slate-300 bg-paper px-3.5 text-base text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/30";
 
   return (
-    <div className="overflow-hidden rounded-2xl bg-white shadow-prestige ring-1 ring-slate-200">
+    <div className="overflow-hidden rounded-lg bg-paper shadow-prestige ring-1 ring-stone">
       <div className="grid md:grid-cols-2">
         {/* SOL: Form */}
         <div className="p-6 sm:p-8">

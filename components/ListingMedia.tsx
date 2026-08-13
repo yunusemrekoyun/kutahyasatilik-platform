@@ -46,7 +46,7 @@ export default function ListingMedia({
   if (!video && !localVideo && !drone && !tour) return null;
 
   return (
-    <section className="rounded-2xl bg-white p-6 ring-1 ring-slate-200">
+    <section className="rounded-lg bg-paper p-6 ring-1 ring-stone">
       <div className="flex items-center gap-2">
         <span className="grid h-9 w-9 place-items-center rounded-lg bg-brand-100 text-brand-700">
           <Video className="h-5 w-5" />

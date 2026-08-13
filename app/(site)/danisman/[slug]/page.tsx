@@ -92,7 +92,7 @@ export default async function AgentProfilePage({
         </nav>
       </div>
 
-      <header className="relative mt-5 overflow-hidden bg-brand-950">
+      <header className="relative mt-5 overflow-hidden border-y border-stone bg-brand-950">
         <div className="ceramic-grid absolute inset-0 opacity-50" />
         <div className="relative mx-auto grid max-w-7xl gap-8 px-5 py-10 sm:px-6 md:grid-cols-[auto_1fr] md:items-center md:py-14">
           <div className="grid h-36 w-36 place-items-center overflow-hidden rounded-lg border-4 border-paper bg-paper text-brand-800 sm:h-44 sm:w-44">
@@ -124,7 +124,7 @@ export default async function AgentProfilePage({
       <main className="mx-auto max-w-7xl px-5 pb-20 pt-10 sm:px-6">
         <section className="grid gap-8 lg:grid-cols-12">
           <div className="lg:col-span-8">
-            <div className="grid grid-cols-2 divide-x divide-slate-200 overflow-hidden rounded-xl bg-white ring-1 ring-slate-200 sm:grid-cols-3">
+            <div className="grid grid-cols-2 divide-x divide-stone border-y border-stone bg-paper sm:grid-cols-3">
               <div className="px-4 py-5 sm:px-6">
                 <p className="text-xs font-semibold uppercase tracking-wider text-muted">Aktif ilan</p>
                 <p className="mt-1 font-display text-3xl font-semibold tabular-nums text-brand-950">{agent.listingCount}</p>
@@ -183,7 +183,7 @@ export default async function AgentProfilePage({
           </div>
 
           <aside className="lg:col-span-4">
-            <div className="rounded-2xl border-t-[3px] border-t-gold-600 bg-white p-6 shadow-card ring-1 ring-slate-200 lg:sticky lg:top-28">
+            <div className="border border-stone border-t-[3px] border-t-gold-700 bg-paper p-6 lg:sticky lg:top-24">
               <p className="eyebrow">Danışmana ulaşın</p>
               <h2 className="mt-2 font-display text-2xl font-semibold text-brand-950">{agent.name}</h2>
               <p className="mt-3 text-sm leading-6 text-muted">

@@ -29,7 +29,7 @@ export default async function ContactPage() {
       <div className="mt-8 grid gap-8 lg:grid-cols-2">
         <div className="space-y-3.5">
           {c.phoneRaw && (
-            <a href={telLink(c.phoneRaw)} className="flex items-center gap-4 rounded-xl bg-white p-5 ring-1 ring-slate-200 transition hover:shadow-card hover:ring-brand-300">
+            <a href={telLink(c.phoneRaw)} className="flex items-center gap-4 rounded-lg bg-paper p-5 ring-1 ring-stone transition hover:ring-brand-300">
               <span className="grid h-11 w-11 shrink-0 place-items-center rounded-lg bg-brand-50 text-brand-700"><Phone className="h-5 w-5" /></span>
               <div>
                 <p className="text-sm text-slate-500">Telefon</p>
@@ -38,7 +38,7 @@ export default async function ContactPage() {
             </a>
           )}
           {c.whatsapp && (
-            <a href={whatsappLink(c.whatsapp, "Merhaba, bilgi almak istiyorum.")} target="_blank" rel="noopener noreferrer" className="flex items-center gap-4 rounded-xl bg-white p-5 ring-1 ring-slate-200 transition hover:shadow-card hover:ring-green-300">
+            <a href={whatsappLink(c.whatsapp, "Merhaba, bilgi almak istiyorum.")} target="_blank" rel="noopener noreferrer" className="flex items-center gap-4 rounded-lg bg-paper p-5 ring-1 ring-stone transition hover:ring-green-300">
               <span className="grid h-11 w-11 shrink-0 place-items-center rounded-lg bg-green-50 text-green-600"><MessageCircle className="h-5 w-5" /></span>
               <div>
                 <p className="text-sm text-slate-500">WhatsApp</p>
@@ -47,7 +47,7 @@ export default async function ContactPage() {
             </a>
           )}
           {c.email && (
-            <div className="flex items-center gap-4 rounded-xl bg-white p-5 ring-1 ring-slate-200">
+            <div className="flex items-center gap-4 rounded-lg bg-paper p-5 ring-1 ring-stone">
               <span className="grid h-11 w-11 shrink-0 place-items-center rounded-lg bg-slate-100 text-slate-500"><Mail className="h-5 w-5" /></span>
               <div>
                 <p className="text-sm text-slate-500">E-posta</p>
@@ -56,7 +56,7 @@ export default async function ContactPage() {
             </div>
           )}
           {c.address && (
-            <div className="flex items-center gap-4 rounded-xl bg-white p-5 ring-1 ring-slate-200">
+            <div className="flex items-center gap-4 rounded-lg bg-paper p-5 ring-1 ring-stone">
               <span className="grid h-11 w-11 shrink-0 place-items-center rounded-lg bg-slate-100 text-slate-500"><MapPin className="h-5 w-5" /></span>
               <div>
                 <p className="text-sm text-slate-500">Adres</p>
@@ -66,7 +66,7 @@ export default async function ContactPage() {
           )}
         </div>
 
-        <div className="rounded-2xl bg-white p-6 ring-1 ring-slate-200">
+        <div className="rounded-lg bg-paper p-6 ring-1 ring-stone">
           <h2 className="font-display text-lg font-bold text-slate-900">Bize Yazın</h2>
           <p className="mt-1 text-sm text-slate-500">Formu doldurun, en kısa sürede dönüş yapalım.</p>
           <div className="mt-4">

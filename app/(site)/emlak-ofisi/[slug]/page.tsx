@@ -103,7 +103,7 @@ export default async function AgencyProfilePage({
       </div>
 
       <header className="mx-auto mt-5 max-w-7xl px-5 sm:px-6">
-        <div className="relative min-h-56 overflow-hidden rounded-2xl bg-brand-950 ring-1 ring-slate-200 sm:min-h-72">
+        <div className="relative min-h-56 overflow-hidden border border-stone bg-brand-950 sm:min-h-72">
           {cover ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img src={cover} alt="" className="absolute inset-0 h-full w-full object-cover opacity-55" />
@@ -151,7 +151,7 @@ export default async function AgencyProfilePage({
       <main className="mx-auto max-w-7xl px-5 pb-20 pt-8 sm:px-6 sm:pt-10">
         <section className="grid gap-8 lg:grid-cols-12">
           <div className="lg:col-span-8">
-            <div className="grid grid-cols-2 divide-x divide-slate-200 overflow-hidden rounded-xl bg-white ring-1 ring-slate-200 sm:grid-cols-3">
+            <div className="grid grid-cols-2 divide-x divide-stone border-y border-stone bg-paper sm:grid-cols-3">
               <div className="px-4 py-5 sm:px-6">
                 <p className="text-xs font-semibold uppercase tracking-wider text-muted">Aktif portföy</p>
                 <p className="mt-1 font-display text-3xl font-semibold tabular-nums text-brand-950">{agency.listingCount}</p>
@@ -195,7 +195,7 @@ export default async function AgencyProfilePage({
           </div>
 
           <aside className="lg:col-span-4">
-            <div className="rounded-2xl border-t-[3px] border-t-gold-600 bg-white p-6 shadow-card ring-1 ring-slate-200 lg:sticky lg:top-28">
+            <div className="border border-stone border-t-[3px] border-t-gold-700 bg-paper p-6 lg:sticky lg:top-24">
               <p className="eyebrow">Doğrudan iletişim</p>
               <h2 className="mt-2 font-display text-2xl font-semibold text-brand-950">{agency.name}</h2>
               <p className="mt-3 text-sm leading-6 text-muted">

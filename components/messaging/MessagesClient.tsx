@@ -54,9 +54,6 @@ export default function MessagesClient({ basePath }: { basePath: string }) {
   const [offerAmount, setOfferAmount] = useState("");
   const [busy, setBusy] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
-  const publicShell = basePath === "/hesabim/mesajlar"
-    ? "rounded-xl bg-white ring-slate-200"
-    : "rounded-lg bg-paper ring-stone";
 
   const loadList = useCallback(async () => {
     const res = await fetch("/api/messages");
@@ -144,7 +141,7 @@ export default function MessagesClient({ basePath }: { basePath: string }) {
   return (
     <div className="grid gap-4 lg:grid-cols-[320px_1fr]">
       {/* Sohbet listesi */}
-      <div className={`${activeId ? "hidden lg:block" : "block"} ${publicShell} ring-1`}>
+      <div className={`${activeId ? "hidden lg:block" : "block"} rounded-lg bg-paper ring-1 ring-stone`}>
         <div className="border-b border-slate-100 p-4">
           <h2 className="font-bold text-slate-900">Mesajlar</h2>
         </div>
@@ -178,7 +175,7 @@ export default function MessagesClient({ basePath }: { basePath: string }) {
       </div>
 
       {/* Sohbet penceresi */}
-      <div className={`${activeId ? "block" : "hidden lg:block"} ${publicShell} flex min-h-[60vh] flex-col ring-1`}>
+      <div className={`${activeId ? "block" : "hidden lg:block"} flex min-h-[60vh] flex-col rounded-lg bg-paper ring-1 ring-stone`}>
         {!activeId || !detail ? (
           <div className="flex flex-1 flex-col items-center justify-center text-center text-slate-400">
             <MessageSquare className="h-10 w-10" />

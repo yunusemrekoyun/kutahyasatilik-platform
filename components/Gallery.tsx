@@ -79,7 +79,7 @@ export default function Gallery({
   return (
     <div>
       {/* Mobil: kaydırmalı galeri — TÜM fotoğraflar parmakla gezilir, kırpılmadan (contain) gösterilir */}
-      <div role="region" aria-label={`${title} fotoğraf galerisi`} className="relative overflow-hidden rounded-xl ring-1 ring-slate-200 md:hidden">
+      <div role="region" aria-label={`${title} fotoğraf galerisi`} className="relative md:hidden">
         <div
           className="no-scrollbar flex h-[340px] snap-x snap-mandatory overflow-x-auto bg-brand-950"
           onScroll={(e) => {
@@ -120,7 +120,7 @@ export default function Gallery({
       </div>
 
       {/* Masaüstü: bento galeri */}
-      <div className="hidden gap-1.5 overflow-hidden rounded-2xl ring-1 ring-slate-200 md:grid md:h-[540px] md:grid-cols-4 md:grid-rows-3">
+      <div className="hidden gap-1.5 overflow-hidden border border-stone md:grid md:h-[540px] md:grid-cols-4 md:grid-rows-3">
         <button
           type="button"
           onClick={() => openAt(0)}

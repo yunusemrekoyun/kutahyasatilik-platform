@@ -21,7 +21,7 @@ export default function AdRequestPage() {
           seçeneklerini ve fiyatları sizinle paylaşalım.
         </p>
       </div>
-      <div className="mt-8 rounded-2xl bg-white p-6 ring-1 ring-slate-200 sm:p-8">
+      <div className="mt-8 rounded-lg border border-stone bg-paper p-6 sm:p-8">
         <AdRequestForm />
       </div>
     </div>

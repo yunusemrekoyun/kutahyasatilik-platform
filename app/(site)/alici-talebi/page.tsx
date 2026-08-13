@@ -20,7 +20,7 @@ export default function BuyerAlertPage() {
       <PageIntro eyebrow="Alıcı talebi" title="Aradığınız mülkü birlikte bulalım" intro="Kriterlerinizi paylaşın; mevcut portföyü eşleştirelim ve uygun yeni bir ilan geldiğinde size haber verelim." />
 
       <section className="mx-auto max-w-3xl px-4 py-10">
-        <div className="rounded-2xl bg-white p-6 ring-1 ring-slate-200 sm:p-8">
+        <div className="border border-stone bg-paper p-6 sm:p-8">
           <Suspense fallback={<div className="h-96" />}>
             <BuyerAlertForm />
           </Suspense>
