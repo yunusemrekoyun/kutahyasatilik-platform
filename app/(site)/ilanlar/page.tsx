@@ -11,6 +11,7 @@ import ListingSort from "@/components/ListingSort";
 import Pagination from "@/components/Pagination";
 import NotFoundCTA from "@/components/NotFoundCTA";
 import TrackView from "@/components/TrackView";
+import ViewSwitcher from "@/components/ViewSwitcher";
 import { getPublicListingOwner } from "@/lib/publicDirectory";
 
 export const dynamic = "force-dynamic";
@@ -102,72 +103,87 @@ export default async function ListingsPage({
         ? `${category.label} İlanları`
         : "Tüm İlanlar";
 
+  // Görünüm URL'den okunuyor (ViewSwitcher yazıyor); varsayılan yoğun liste.
+  const gallery = get("gorunum") === "galeri";
+
   const flatParams: Record<string, string | undefined> = {};
   Object.entries(sp).forEach(([k, v]) => { if (typeof v === "string") flatParams[k] = v; });
 
   return (
-    <div className="mx-auto max-w-7xl px-5 py-10 sm:px-6 sm:py-14">
+    <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6">
       <TrackView />
-      <nav aria-label="Sayfa yolu" className="mb-2 text-sm text-slate-500">
+      <nav aria-label="Sayfa yolu" className="mb-1.5 text-[13px] text-muted">
         <Link href="/" className="hover:text-brand-700">Ana Sayfa</Link>
-        <span className="mx-2 text-slate-300">/</span>
-        <span className="text-slate-700">{pageTitle}</span>
+        <span className="mx-1.5 text-stone">/</span>
+        <span className="text-ink">{pageTitle}</span>
       </nav>
-      <div className="mb-8 flex flex-col gap-5 border-b border-stone pb-7 sm:flex-row sm:items-end sm:justify-between">
-        <div>
-          <p className="eyebrow">Kütahya portföyü</p>
-          <h1 className="mt-2 font-display text-4xl font-semibold tracking-tight text-brand-950 sm:text-5xl">
-            {pageTitle}
-          </h1>
-          {owner ? (
-            <Link
-              href={agencySlug ? `/emlak-ofisi/${owner.slug}` : `/danisman/${owner.slug}`}
-              className="mt-3 inline-flex text-sm font-semibold text-brand-700 hover:underline"
-            >
-              {agencySlug ? "Ofis profiline dön" : "Danışman profiline dön"}
-            </Link>
-          ) : null}
-          <p className="mt-3 text-muted">
-            Sizin için <strong className="font-semibold text-slate-700 tabular-nums">{total}</strong> sonuç bulundu.
-          </p>
-        </div>
-        <Suspense fallback={<div className="h-11 w-44 rounded-lg bg-paper ring-1 ring-stone" />}>
-          <ListingSort />
-        </Suspense>
+      <div className="mb-4">
+        <h1 className="text-xl font-bold tracking-tight text-ink sm:text-2xl">{pageTitle}</h1>
+        {owner ? (
+          <Link
+            href={agencySlug ? `/emlak-ofisi/${owner.slug}` : `/danisman/${owner.slug}`}
+            className="mt-1 inline-flex text-[13px] font-semibold text-brand-700 hover:underline"
+          >
+            {agencySlug ? "Ofis profiline dön" : "Danışman profiline dön"}
+          </Link>
+        ) : null}
       </div>
 
       {/* Ofis/danışman portföyü emlağa özgü olduğu için orada kategori yok */}
       {!owner && (
-        <Suspense fallback={<div className="mb-8 h-12 border-b border-stone" />}>
+        <Suspense fallback={<div className="mb-4 h-11 border-b border-stone" />}>
           <CategoryTabs />
         </Suspense>
       )}
 
-      <div className="grid grid-cols-1 gap-8 lg:grid-cols-12">
-        <div className="lg:col-span-3">
-          <Suspense fallback={<div className="h-24 rounded-lg bg-paper ring-1 ring-stone" />}>
-            <ListingFilters />
-          </Suspense>
-        </div>
+      <div className="grid grid-cols-1 gap-5 lg:grid-cols-12 lg:gap-6">
+        <aside className="lg:col-span-3">
+          {/* Ray masaüstünde yapışkan: uzun listede filtreler ekranda kalır. */}
+          <div className="lg:sticky lg:top-4">
+            <Suspense fallback={<div className="h-24 rounded-card border border-stone bg-paper" />}>
+              <ListingFilters />
+            </Suspense>
+          </div>
+        </aside>
 
         <div className="lg:col-span-9">
+          {/* Araç çubuğu: sonuç sayısı + görünüm + sıralama tek satırda. */}
+          <div className="mb-3 flex flex-wrap items-center justify-between gap-2 rounded-card border border-stone bg-paper px-3 py-2">
+            <p className="text-[13px] text-muted">
+              <strong className="font-semibold tabular-nums text-ink">{total}</strong> sonuç
+            </p>
+            <div className="flex items-center gap-2">
+              <Suspense fallback={<div className="h-10 w-20 rounded-control border border-stone" />}>
+                <ViewSwitcher />
+              </Suspense>
+              <Suspense fallback={<div className="h-10 w-40 rounded-control border border-stone" />}>
+                <ListingSort />
+              </Suspense>
+            </div>
+          </div>
+
           {items.length > 0 ? (
             <>
-              <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-3">
+              <div className={gallery ? "grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3" : "flex flex-col gap-3"}>
                 {items.map((l, index) => (
-                  <ListingCard key={l.slug} listing={l} priority={index < 3} />
+                  <ListingCard
+                    key={l.slug}
+                    listing={l}
+                    priority={index < 3}
+                    variant={gallery ? "standard" : "row"}
+                  />
                 ))}
               </div>
               <Pagination page={page} totalPages={totalPages} searchParams={flatParams} />
             </>
           ) : (
-            <div className="ceramic-grid border-y border-stone bg-paper p-12 text-center">
-              <span className="mx-auto grid h-14 w-14 place-items-center rounded-lg border border-stone bg-canvas text-slate-500">
-                <SearchX className="h-7 w-7" />
+            <div className="rounded-card border border-stone bg-paper p-10 text-center">
+              <span className="mx-auto grid h-12 w-12 place-items-center rounded-control border border-stone bg-canvas text-muted">
+                <SearchX className="h-6 w-6" />
               </span>
-              <h2 className="mt-4 font-display text-lg font-bold text-slate-800">Bu kriterlere uygun ilan bulunamadı</h2>
-              <p className="mx-auto mt-1.5 max-w-md text-slate-500">Filtreleri biraz gevşetin ya da talebinizi bırakın; portföyümüzdeki diğer seçenekleri size sunalım.</p>
-              <Link href="/alici-talebi" className="mt-5 inline-flex items-center justify-center rounded-lg bg-brand-700 px-5 py-3 text-sm font-semibold text-white transition hover:bg-brand-800">
+              <h2 className="mt-3 text-base font-bold text-ink">Bu kriterlere uygun ilan bulunamadı</h2>
+              <p className="mx-auto mt-1.5 max-w-md text-sm text-muted">Filtreleri biraz gevşetin ya da talebinizi bırakın; portföyümüzdeki diğer seçenekleri size sunalım.</p>
+              <Link href="/alici-talebi" className="mt-4 inline-flex items-center justify-center rounded-control bg-brand-700 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-brand-800">
                 Talep Bırak
               </Link>
             </div>
@@ -175,7 +191,7 @@ export default async function ListingsPage({
         </div>
       </div>
 
-      <div className="mt-14">
+      <div className="mt-10">
         <NotFoundCTA />
       </div>
     </div>

@@ -1,6 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
-import { MapPin, BedDouble, Maximize, Star, ArrowRight, Gem, Flame, Sparkles } from "lucide-react";
+import { MapPin, BedDouble, Maximize, Star, Gem, Flame, Sparkles } from "lucide-react";
 import { formatPrice } from "@/lib/format";
 import { getSubTypeLabel } from "@/lib/categories";
 import { publicImageUrl, thumbUrl } from "@/lib/media";
@@ -35,6 +35,15 @@ export type ListingCardData = {
   agentLogo?: string | null;
 };
 
+/**
+ * Varyantlar:
+ * - `row`       yoğun liste satırı (/ilanlar liste görünümü) — görsel solda
+ * - `standard`  ızgara kartı (varsayılan)
+ * - `editorial` büyük vitrin kartı (ana sayfa ilk kart)
+ * - `compact`   dar yatay kart (yan listeler)
+ */
+type Variant = "row" | "standard" | "editorial" | "compact";
+
 export default function ListingCard({
   listing,
   priority = false,
@@ -42,7 +51,7 @@ export default function ListingCard({
 }: {
   listing: ListingCardData;
   priority?: boolean;
-  variant?: "editorial" | "standard" | "compact";
+  variant?: Variant;
 }) {
   const safeCover = publicImageUrl(listing.coverImage);
   const cover = safeCover ? thumbUrl(safeCover) : "/placeholder-listing.webp";
@@ -51,81 +60,119 @@ export default function ListingCard({
   const isRealEstate = !listing.category || listing.category === "emlak";
   const isLand = listing.propertyType === "arsa" || listing.propertyType === "tarla";
   const isSold = listing.status === "sold";
+  const horizontal = variant === "row" || variant === "compact";
   const location = `${listing.neighborhood ? `${listing.neighborhood}, ` : ""}${listing.district}`;
   const titleId = `listing-${listing.slug}-title`;
 
+  const mediaCls =
+    variant === "editorial"
+      ? "aspect-[16/10]"
+      : variant === "compact"
+      ? "w-36 shrink-0 sm:w-44"
+      : variant === "row"
+      ? "w-32 shrink-0 sm:w-52"
+      : "aspect-[4/3]";
+
+  const titleCls =
+    variant === "editorial"
+      ? "text-xl sm:text-2xl"
+      : variant === "compact"
+      ? "text-[15px]"
+      : variant === "row"
+      ? "text-base sm:text-lg"
+      : "text-lg";
+
   return (
-    <article aria-labelledby={titleId} className={`group flex overflow-hidden border border-stone bg-paper transition duration-200 hover:border-brand-300 ${
-      variant === "compact" ? "flex-row" : "flex-col"
-    }`}>
-      <div className={`relative overflow-hidden bg-slate-100 ${
-        variant === "editorial" ? "aspect-[16/10]" : variant === "compact" ? "w-36 shrink-0 sm:w-44" : "aspect-[4/3]"
-      }`}>
+    <article
+      aria-labelledby={titleId}
+      className={`group flex overflow-hidden rounded-card border border-stone bg-paper transition duration-200 hover:border-brand-300 hover:shadow-card ${
+        horizontal ? "flex-row" : "flex-col"
+      }`}
+    >
+      <div className={`relative overflow-hidden bg-canvas ${mediaCls}`}>
         <CardActions listing={listing} />
-        <Link href={`/ilan/${listing.slug}`} aria-label={`${listing.title} ilanını incele`} className="relative block h-full w-full">
+        <Link
+          href={`/ilan/${listing.slug}`}
+          aria-label={`${listing.title} ilanını incele`}
+          className="relative block h-full w-full"
+        >
           <Image
             src={cover}
             alt={listing.title}
             fill
-            sizes="(max-width: 768px) 100vw, 33vw"
+            sizes={horizontal ? "208px" : "(max-width: 768px) 100vw, 33vw"}
             loading={priority ? "eager" : "lazy"}
             fetchPriority={priority ? "high" : "auto"}
-            className="object-cover transition duration-500 group-hover:scale-[1.02]"
+            className="object-cover transition duration-300 group-hover:scale-[1.03]"
           />
         </Link>
         {/* Tek durum işareti: Satıldıda gizli (SATILDI overlay var) — yoksa Öne çıkan > Doğrulanmış > Satılık */}
-        <div className="pointer-events-none absolute left-3 top-3">
-          {!isSold && (listing.featured ? (
-            <span className="inline-flex items-center gap-1 rounded-md bg-paper/95 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wide text-gold-800">
-              <Star aria-hidden="true" className="h-3.5 w-3.5 fill-current" /> Vitrinde
-            </span>
-          ) : listing.verified ? (
-            <span className="inline-flex items-center gap-1 rounded-md bg-green-700 px-2.5 py-1 text-[11px] font-semibold text-white">
-              Doğrulanmış
-            </span>
-          ) : (
-            <span className="rounded-md bg-brand-950/85 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wide text-white">
-              Satılık
-            </span>
-          ))}
+        <div className="pointer-events-none absolute left-2.5 top-2.5">
+          {!isSold &&
+            (listing.featured ? (
+              <span className="inline-flex items-center gap-1 rounded-control bg-gold-500 px-2 py-0.5 text-[11px] font-bold text-brand-950">
+                <Star aria-hidden="true" className="h-3 w-3 fill-current" /> Vitrin
+              </span>
+            ) : listing.verified ? (
+              <span className="inline-flex items-center gap-1 rounded-control bg-green-700 px-2 py-0.5 text-[11px] font-semibold text-white">
+                Doğrulanmış
+              </span>
+            ) : null)}
         </div>
         {isSold && (
           <div className="absolute inset-0 grid place-items-center bg-brand-950/55">
-            <span className="rounded-md bg-red-600 px-4 py-1.5 text-sm font-bold tracking-wide text-white">SATILDI</span>
+            <span className="rounded-control bg-red-600 px-3 py-1 text-xs font-bold tracking-wide text-white">
+              SATILDI
+            </span>
           </div>
         )}
       </div>
 
-      <div className={`flex min-w-0 flex-grow flex-col ${variant === "editorial" ? "p-5 sm:p-6" : "p-4"}`}>
+      <div
+        className={`flex min-w-0 flex-grow flex-col ${
+          variant === "editorial" ? "p-5" : variant === "row" ? "p-3 sm:p-4" : "p-3.5"
+        }`}
+      >
         <Link href={`/ilan/${listing.slug}`} className="block">
-          <span className="eyebrow mb-2 block line-clamp-1">
+          <p className="mb-1 line-clamp-1 text-xs font-medium text-muted">
             {getSubTypeLabel(listing.category, listing.propertyType)} · {location}
-          </span>
-          <h3 id={titleId} className={`line-clamp-2 font-display font-semibold leading-snug text-ink transition-colors group-hover:text-brand-700 ${variant === "editorial" ? "text-2xl sm:text-3xl" : variant === "compact" ? "text-base" : "text-xl"}`}>
+          </p>
+          <h3
+            id={titleId}
+            className={`line-clamp-2 font-semibold leading-snug text-ink transition-colors group-hover:text-brand-700 ${titleCls}`}
+          >
             {listing.title}
           </h3>
         </Link>
 
-        <div className={`mt-3 flex flex-wrap items-center gap-x-4 gap-y-1 text-[13px] font-medium text-muted ${variant === "compact" ? "hidden sm:flex" : ""}`}>
+        <div
+          className={`mt-2 flex flex-wrap items-center gap-x-3.5 gap-y-1 text-[13px] text-muted ${
+            variant === "compact" ? "hidden sm:flex" : ""
+          }`}
+        >
           {isRealEstate ? (
             <>
               {!isLand && listing.rooms && (
-                <span className="inline-flex items-center gap-1.5"><BedDouble aria-hidden="true" className="h-[18px] w-[18px] text-slate-400" /> {listing.rooms}</span>
+                <span className="inline-flex items-center gap-1">
+                  <BedDouble aria-hidden="true" className="h-4 w-4 text-muted/70" /> {listing.rooms}
+                </span>
               )}
               {listing.areaGross && (
-                <span className="inline-flex items-center gap-1.5"><Maximize aria-hidden="true" className="h-[18px] w-[18px] text-slate-400" /> {listing.areaGross} m²</span>
+                <span className="inline-flex items-center gap-1">
+                  <Maximize aria-hidden="true" className="h-4 w-4 text-muted/70" /> {listing.areaGross} m²
+                </span>
               )}
             </>
           ) : (
             listing.attributeSummary?.map((text) => <span key={text}>{text}</span>)
           )}
-          <span className="inline-flex items-center gap-1.5">
-            <MapPin aria-hidden="true" className="h-[18px] w-[18px] text-slate-400" /> {listing.district}
+          <span className="inline-flex items-center gap-1">
+            <MapPin aria-hidden="true" className="h-4 w-4 text-muted/70" /> {listing.district}
           </span>
         </div>
 
         {!isSold && listing.badges && listing.badges.length > 0 && (
-          <div className="mt-3 flex flex-wrap gap-1.5">
+          <div className="mt-2 flex flex-wrap gap-1.5">
             {listing.badges.map((b, i) => {
               const Icon = b.tone === "deal" ? Gem : b.tone === "hot" ? Flame : Sparkles;
               const cls =
@@ -135,7 +182,10 @@ export default function ListingCard({
                   ? "bg-red-50 text-red-700 ring-red-200"
                   : "bg-green-50 text-green-700 ring-green-200";
               return (
-                <span key={i} className={`inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-[11px] font-semibold ring-1 ${cls}`}>
+                <span
+                  key={i}
+                  className={`inline-flex items-center gap-1 rounded-control px-1.5 py-0.5 text-[11px] font-semibold ring-1 ${cls}`}
+                >
                   <Icon aria-hidden="true" className="h-3 w-3" /> {b.text}
                 </span>
               );
@@ -143,35 +193,34 @@ export default function ListingCard({
           </div>
         )}
 
-        {listing.agentName && variant !== "compact" && (
-          <div className="mt-3 flex items-center gap-2">
+        {listing.agentName && variant !== "compact" && variant !== "row" && (
+          <div className="mt-2.5 flex items-center gap-2">
             {agentLogo ? (
               // eslint-disable-next-line @next/next/no-img-element
-              <img
-                src={agentLogo}
-                alt=""
-                className="h-7 w-7 shrink-0 rounded-full object-cover"
-              />
+              <img src={agentLogo} alt="" className="h-6 w-6 shrink-0 rounded-full object-cover" />
             ) : (
-              <span aria-hidden="true" className="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-brand-50 text-xs font-bold text-brand-700">
+              <span
+                aria-hidden="true"
+                className="grid h-6 w-6 shrink-0 place-items-center rounded-full bg-brand-50 text-[11px] font-bold text-brand-700"
+              >
                 {listing.agentName.charAt(0).toUpperCase()}
               </span>
             )}
-            <span className="truncate text-xs font-semibold text-slate-600">{listing.agentName}</span>
+            <span className="truncate text-xs text-muted">{listing.agentName}</span>
           </div>
         )}
 
-        <div className="mt-auto flex items-end justify-between gap-2 border-t border-stone pt-4">
-          <span className={`${variant === "editorial" ? "text-2xl" : "text-lg"} font-bold tabular-nums text-gold-800`}>
+        {/* Fiyat: standart arayüzlerde sayfanın en yüksek sesli öğesi.
+            Editoryal dilde düz altın metindi; nötr yüzeyde okunurluk için
+            lacivert taşıyıcıya alındı, altın vurgu rozetlerde kaldı. */}
+        <div className="mt-auto flex items-end justify-between gap-2 pt-3">
+          <span
+            className={`font-bold tabular-nums text-brand-800 ${
+              variant === "editorial" ? "text-xl sm:text-2xl" : variant === "compact" ? "text-base" : "text-lg"
+            }`}
+          >
             {formatPrice(listing.price, listing.currency)}
           </span>
-          <Link
-            href={`/ilan/${listing.slug}`}
-            aria-label={`${listing.title} ilanını incele`}
-            className={`min-h-11 shrink-0 items-center gap-1 text-sm font-semibold text-brand-700 transition-colors hover:text-brand-900 ${variant === "compact" ? "hidden sm:inline-flex" : "inline-flex"}`}
-          >
-            İncele <ArrowRight aria-hidden="true" className="h-[18px] w-[18px]" />
-          </Link>
         </div>
       </div>
     </article>

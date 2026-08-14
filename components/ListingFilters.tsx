@@ -137,15 +137,15 @@ export default function ListingFilters() {
   const activeChips = CHIP_KEYS.map((k) => ({ k, v: sp.get(k) })).filter((c) => c.v) as { k: string; v: string }[];
 
   const fieldCls =
-    "h-11 w-full rounded-lg border border-stone bg-paper px-3.5 text-[15px] text-ink outline-none transition focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20";
+    "h-11 w-full rounded-control border border-stone bg-paper px-3.5 text-[15px] text-ink outline-none transition focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20";
   const sectionCls = "border-t border-stone pt-5";
-  const headCls = "mb-3 text-sm font-semibold text-slate-900";
+  const headCls = "mb-3 text-sm font-semibold text-ink";
 
   const content = (
     <>
       {/* Başlık */}
       <div className="mb-4 flex items-center justify-between border-b border-stone pb-4">
-        <h2 id="listing-filter-title" className="font-display text-lg font-bold text-brand-900">Filtreler</h2>
+        <h2 id="listing-filter-title" className="text-base font-bold text-ink">Filtreler</h2>
         <div className="flex items-center gap-3">
           {activeCount > 0 && (
             <button
@@ -157,12 +157,12 @@ export default function ListingFilters() {
                 const query = owner.toString();
                 router.push(`/ilanlar${query ? `?${query}` : ""}`);
               }}
-              className="min-h-11 px-1 text-sm font-medium text-slate-500 transition hover:text-brand-700"
+              className="min-h-11 px-1 text-sm font-medium text-muted transition hover:text-brand-700"
             >
               Temizle
             </button>
           )}
-          <button ref={closeButtonRef} type="button" onClick={() => setOpen(false)} aria-label="Filtreleri kapat" className="grid h-11 w-11 place-items-center text-slate-400 hover:text-slate-700 lg:hidden">
+          <button ref={closeButtonRef} type="button" onClick={() => setOpen(false)} aria-label="Filtreleri kapat" className="grid h-11 w-11 place-items-center text-muted/70 hover:text-ink lg:hidden">
             <X aria-hidden="true" className="h-5 w-5" />
           </button>
         </div>
@@ -171,7 +171,7 @@ export default function ListingFilters() {
       <div className="space-y-5">
         {/* Arama */}
         <div className="relative">
-          <Search aria-hidden="true" className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+          <Search aria-hidden="true" className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted/70" />
           <input
             id="listing-filter-search"
             type="search"
@@ -198,9 +198,9 @@ export default function ListingFilters() {
                   type="button"
                   onClick={() => update("tur", on ? "" : p.value)}
                   aria-pressed={on}
-                  className={`flex min-h-11 w-full items-center gap-3 rounded-lg px-2.5 py-2 text-left text-[15px] transition ${on ? "bg-brand-50 font-semibold text-brand-700" : "text-slate-700 hover:bg-slate-50"}`}
+                  className={`flex min-h-11 w-full items-center gap-3 rounded-control px-2.5 py-2 text-left text-[15px] transition ${on ? "bg-brand-50 font-semibold text-brand-700" : "text-ink hover:bg-canvas"}`}
                 >
-                  <span aria-hidden="true" className={`grid h-5 w-5 shrink-0 place-items-center rounded border ${on ? "border-brand-600 bg-brand-600 text-white" : "border-slate-300"}`}>
+                  <span aria-hidden="true" className={`grid h-5 w-5 shrink-0 place-items-center rounded border ${on ? "border-brand-600 bg-brand-600 text-white" : "border-stone"}`}>
                     {on && <Check className="h-3.5 w-3.5" strokeWidth={3} />}
                   </span>
                   {p.label}
@@ -225,7 +225,7 @@ export default function ListingFilters() {
           <h3 id="price-filter-title" className={headCls}>Fiyat Aralığı (₺)</h3>
           <div className="flex items-center gap-2">
             <ThousandsInput key={sp.get("min") || "min"} defaultValue={sp.get("min") || ""} onCommit={(raw) => update("min", raw)} placeholder="Min" ariaLabel="Minimum fiyat" className={fieldCls} />
-            <span aria-hidden="true" className="text-slate-400">–</span>
+            <span aria-hidden="true" className="text-muted/70">–</span>
             <ThousandsInput key={sp.get("max") || "max"} defaultValue={sp.get("max") || ""} onCommit={(raw) => update("max", raw)} placeholder="Max" ariaLabel="Maksimum fiyat" className={fieldCls} />
           </div>
         </div>
@@ -245,7 +245,7 @@ export default function ListingFilters() {
                   type="button"
                   onClick={() => update("oda", on ? "" : r)}
                   aria-pressed={on}
-                  className={`min-h-11 rounded-lg border py-2 text-sm font-medium transition ${on ? "border-brand-600 bg-brand-50 text-brand-700" : "border-slate-300 text-slate-600 hover:border-brand-300"}`}
+                  className={`min-h-11 rounded-control border py-2 text-sm font-medium transition ${on ? "border-brand-600 bg-brand-50 text-brand-700" : "border-stone text-muted hover:border-brand-300"}`}
                 >
                   {r}
                 </button>
@@ -265,12 +265,12 @@ export default function ListingFilters() {
             <input aria-label={`Minimum alan (${unitLabel})`} key={`minAlan-${sp.get("minAlan") || ""}`} defaultValue={sp.get("minAlan") || ""} onBlur={(e) => update("minAlan", e.target.value)} onKeyDown={(e) => { if (e.key === "Enter") update("minAlan", (e.target as HTMLInputElement).value); }} type="number" min={0} inputMode="numeric" placeholder="Min" className={fieldCls} />
             <input aria-label={`Maksimum alan (${unitLabel})`} key={`maxAlan-${sp.get("maxAlan") || ""}`} defaultValue={sp.get("maxAlan") || ""} onBlur={(e) => update("maxAlan", e.target.value)} onKeyDown={(e) => { if (e.key === "Enter") update("maxAlan", (e.target as HTMLInputElement).value); }} type="number" min={0} inputMode="numeric" placeholder="Max" className={fieldCls} />
           </div>
-          {birim === "donum" && <p className="mt-1.5 text-[11px] text-slate-400">1 dönüm = 1.000 m²</p>}
+          {birim === "donum" && <p className="mt-1.5 text-[11px] text-muted/70">1 dönüm = 1.000 m²</p>}
         </div>
 
         {/* İmar (arsa/tarla) */}
         <div className={sectionCls}>
-          <label htmlFor="listing-filter-zoning" className={headCls}>İmar Durumu <span className="font-normal text-slate-400">(arsa/tarla)</span></label>
+          <label htmlFor="listing-filter-zoning" className={headCls}>İmar Durumu <span className="font-normal text-muted/70">(arsa/tarla)</span></label>
           <input id="listing-filter-zoning" key={sp.get("imar") || "imar"} defaultValue={sp.get("imar") || ""} onBlur={(e) => update("imar", e.target.value)} onKeyDown={(e) => { if (e.key === "Enter") update("imar", (e.target as HTMLInputElement).value); }} placeholder="Konut, Ticari..." className={fieldCls} />
         </div>
 
@@ -286,7 +286,7 @@ export default function ListingFilters() {
                   type="button"
                   onClick={() => toggle(a.key)}
                   aria-pressed={on}
-                  className={`min-h-11 rounded-full px-3.5 py-1.5 text-sm font-medium transition ${on ? "bg-brand-700 text-white" : "bg-slate-100 text-slate-600 hover:bg-slate-200"}`}
+                  className={`min-h-11 rounded-full px-3.5 py-1.5 text-sm font-medium transition ${on ? "bg-brand-700 text-white" : "bg-canvas text-muted hover:bg-stone"}`}
                 >
                   {a.label}
                 </button>
@@ -334,7 +334,7 @@ export default function ListingFilters() {
                   aria-label={`Minimum ${field.label}`}
                   className={fieldCls}
                 />
-                <span aria-hidden="true" className="text-slate-400">–</span>
+                <span aria-hidden="true" className="text-muted/70">–</span>
                 <input
                   key={`${field.key}_max-${sp.get(`${field.key}_max`) || ""}`}
                   defaultValue={sp.get(`${field.key}_max`) || ""}
@@ -376,14 +376,14 @@ export default function ListingFilters() {
       <button
         type="button"
         onClick={saveSearch}
-        className="mt-5 flex w-full items-center justify-center gap-2 rounded-lg border border-brand-200 bg-brand-50 px-4 py-3 text-sm font-semibold text-brand-700 transition hover:bg-brand-100"
+        className="mt-5 flex w-full items-center justify-center gap-2 rounded-control border border-brand-200 bg-brand-50 px-4 py-3 text-sm font-semibold text-brand-700 transition hover:bg-brand-100"
       >
         <BellRing aria-hidden="true" className="h-4 w-4" /> Bu aramayı kaydet, uygun ilan gelince haber ver
       </button>
 
       {/* Mobil: sonuçları gör (sheet'i kapatır; filtreler zaten anında uygulanır) */}
       <div className="mt-6 lg:hidden">
-        <button type="button" onClick={() => setOpen(false)} className="min-h-11 w-full rounded-lg bg-brand-700 px-4 py-3 text-base font-semibold text-white transition hover:bg-brand-800">
+        <button type="button" onClick={() => setOpen(false)} className="min-h-11 w-full rounded-control bg-brand-700 px-4 py-3 text-base font-semibold text-white transition hover:bg-brand-800">
           Sonuçları Gör
         </button>
       </div>
@@ -400,7 +400,7 @@ export default function ListingFilters() {
         aria-controls="listing-filters"
         aria-expanded={open}
         aria-label={activeCount > 0 ? `Filtreleri aç, ${activeCount} aktif filtre` : "Filtreleri aç"}
-        className="mb-4 flex w-full items-center justify-center gap-2 rounded-lg border border-slate-300 bg-paper px-4 py-3 text-[15px] font-medium text-slate-700 lg:hidden"
+        className="mb-4 flex w-full items-center justify-center gap-2 rounded-control border border-stone bg-paper px-4 py-3 text-[15px] font-medium text-ink lg:hidden"
       >
         <SlidersHorizontal aria-hidden="true" className="h-5 w-5" /> Filtrele
         {activeCount > 0 && <span aria-hidden="true" className="rounded-full bg-brand-600 px-2 py-0.5 text-xs font-semibold text-white">{activeCount}</span>}
