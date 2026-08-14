@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma";
+import { ADMIN_LIST_CAP } from "@/components/admin/ListCap";
 import { saveTestimonial, deleteTestimonial } from "../actions";
 
 export const dynamic = "force-dynamic";
@@ -8,7 +9,8 @@ const inputCls =
 
 export default async function AdminTestimonials() {
   const items = await prisma.testimonial.findMany({
-    orderBy: [{ sortOrder: "asc" }, { createdAt: "desc" }],
+    orderBy: [{ sortOrder: "asc" }, { createdAt: "desc" }],,
+    take: ADMIN_LIST_CAP,
   });
 
   return (

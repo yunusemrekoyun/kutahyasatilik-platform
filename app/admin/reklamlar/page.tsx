@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { ADMIN_LIST_CAP } from "@/components/admin/ListCap";
 import Image from "next/image";
 import { prisma } from "@/lib/prisma";
 import { formatDate } from "@/lib/format";
@@ -13,7 +14,7 @@ const FREQ_LABEL: Record<string, string> = {
 };
 
 export default async function AdminPopups() {
-  const popups = await prisma.popup.findMany({ orderBy: { updatedAt: "desc" } });
+  const popups = await prisma.popup.findMany({ orderBy: { updatedAt: "desc" }, take: ADMIN_LIST_CAP });
   const activeCount = popups.filter((p) => p.active).length;
 
   return (

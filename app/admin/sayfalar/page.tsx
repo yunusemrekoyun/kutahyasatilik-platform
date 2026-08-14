@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { ADMIN_LIST_CAP } from "@/components/admin/ListCap";
 import { Check } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { formatDate } from "@/lib/format";
@@ -7,7 +8,7 @@ import { deletePage } from "../actions";
 export const dynamic = "force-dynamic";
 
 export default async function AdminPages() {
-  const pages = await prisma.page.findMany({ orderBy: [{ menuOrder: "asc" }, { createdAt: "desc" }] });
+  const pages = await prisma.page.findMany({ orderBy: [{ menuOrder: "asc" }, { createdAt: "desc" }], take: ADMIN_LIST_CAP });
 
   return (
     <div>

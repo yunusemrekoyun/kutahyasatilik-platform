@@ -1,4 +1,5 @@
 import { Building2, ShieldCheck } from "lucide-react";
+import { ADMIN_LIST_CAP } from "@/components/admin/ListCap";
 import { prisma } from "@/lib/prisma";
 import { parseJsonArray } from "@/lib/format";
 import { PageHeader, StatusBadge, adminBtnGhost, adminBtnPrimary, adminCard, adminInput, adminLabel } from "@/components/admin/ui";
@@ -11,7 +12,8 @@ type AgencyRow = Awaited<ReturnType<typeof getAgencies>>[number];
 async function getAgencies() {
   return prisma.agency.findMany({
     orderBy: [{ published: "desc" }, { name: "asc" }],
-    include: { _count: { select: { agents: true, listings: true } } },
+    include: { _count: { select: { agents: true, listings: true } } },,
+    take: ADMIN_LIST_CAP,
   });
 }
 

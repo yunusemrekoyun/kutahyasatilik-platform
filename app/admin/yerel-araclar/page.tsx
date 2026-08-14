@@ -1,4 +1,5 @@
 import { ExternalLink, Landmark } from "lucide-react";
+import { ADMIN_LIST_CAP } from "@/components/admin/ListCap";
 import { prisma } from "@/lib/prisma";
 import { LOCAL_RESOURCE_TYPES } from "@/lib/localResources";
 import { PageHeader, StatusBadge, adminBtnGhost, adminBtnPrimary, adminCard, adminInput, adminLabel } from "@/components/admin/ui";
@@ -9,7 +10,7 @@ export const dynamic = "force-dynamic";
 type ResourceRow = Awaited<ReturnType<typeof getResources>>[number];
 
 async function getResources() {
-  return prisma.localResource.findMany({ orderBy: [{ active: "desc" }, { sortOrder: "asc" }, { title: "asc" }] });
+  return prisma.localResource.findMany({ orderBy: [{ active: "desc" }, { sortOrder: "asc" }, { title: "asc" }], take: ADMIN_LIST_CAP });
 }
 
 function ResourceFields({ resource }: { resource?: ResourceRow }) {

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { ADMIN_LIST_CAP } from "@/components/admin/ListCap";
 import Image from "next/image";
 import { PlusCircle, Eye, ExternalLink, Pencil, Trash2 } from "lucide-react";
 import { prisma } from "@/lib/prisma";
@@ -9,7 +10,7 @@ import { PageHeader, StatusBadge, adminCard, adminBtnPrimary } from "@/component
 export const dynamic = "force-dynamic";
 
 export default async function AdminBlog() {
-  const posts = await prisma.post.findMany({ orderBy: { createdAt: "desc" } });
+  const posts = await prisma.post.findMany({ orderBy: { createdAt: "desc" }, take: ADMIN_LIST_CAP });
 
   return (
     <div>
