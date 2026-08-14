@@ -56,7 +56,7 @@ export default function PostForm({ post }: { post?: PostData }) {
       {post?.id && <input type="hidden" name="id" value={post.id} />}
       <input type="hidden" name="coverImage" value={cover} />
 
-      <section className="bg-paper p-6 border border-stone">
+      <section className="rounded-card bg-paper p-6 border border-stone">
         <h2 className="font-bold text-ink">Yazı Bilgileri</h2>
         <div className="mt-4 grid gap-4">
           <label className="block">
@@ -94,7 +94,7 @@ export default function PostForm({ post }: { post?: PostData }) {
       </section>
 
       {/* Kapak görseli */}
-      <section className="bg-paper p-6 border border-stone">
+      <section className="rounded-card bg-paper p-6 border border-stone">
         <h2 className="font-bold text-ink">Kapak Görseli</h2>
         <div className="mt-4 flex items-center gap-4">
           <div className="relative h-28 w-44 shrink-0 overflow-hidden rounded-control bg-canvas border border-stone">
@@ -115,13 +115,13 @@ export default function PostForm({ post }: { post?: PostData }) {
       </section>
 
       {/* İçerik (WYSIWYG) */}
-      <section className="bg-paper p-6 border border-stone">
+      <section className="rounded-card bg-paper p-6 border border-stone">
         <h2 className="mb-3 font-bold text-ink">İçerik</h2>
         <RichEditor name="content" defaultValue={post?.content ?? ""} />
       </section>
 
       {/* SEO */}
-      <section className="bg-paper p-6 border border-stone">
+      <section className="rounded-card bg-paper p-6 border border-stone">
         <h2 className="font-bold text-ink">SEO (opsiyonel)</h2>
         <div className="mt-4 grid gap-4">
           <label className="block">

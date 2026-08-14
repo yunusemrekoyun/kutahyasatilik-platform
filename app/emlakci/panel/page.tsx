@@ -101,7 +101,7 @@ export default async function AgentDashboard() {
           { l: "Onay Bekleyen", v: counts.pending, c: "text-amber-600" },
           { l: "Reddedilen", v: counts.rejected, c: "text-red-600" },
         ].map((s) => (
-          <div key={s.l} className="bg-paper p-4 text-center border border-stone">
+          <div key={s.l} className="rounded-card bg-paper p-4 text-center border border-stone">
             <p className={`text-3xl font-black ${s.c}`}>{s.v}</p>
             <p className="mt-1 text-xs font-medium text-muted">{s.l}</p>
           </div>
@@ -115,7 +115,7 @@ export default async function AgentDashboard() {
           { l: "Favori", v: engagement.favorites, Icon: Heart, c: "text-rose-600" },
           { l: "Talep", v: engagement.leads, Icon: Mail, c: "text-green-600" },
         ].map((s) => (
-          <div key={s.l} className="flex items-center gap-3 bg-paper p-4 border border-stone">
+          <div key={s.l} className="rounded-card flex items-center gap-3 bg-paper p-4 border border-stone">
             <span className={`grid h-10 w-10 shrink-0 place-items-center rounded-control bg-canvas ${s.c}`}><s.Icon className="h-5 w-5" /></span>
             <div>
               <p className={`text-2xl font-black leading-none ${s.c}`}>{s.v}</p>
@@ -128,7 +128,7 @@ export default async function AgentDashboard() {
       {/* İlan listesi */}
       <div>
         <h2 className="text-lg font-bold text-ink">İlanlarım</h2>
-        <div className="mt-3 overflow-hidden bg-paper border border-stone">
+        <div className="rounded-card mt-3 overflow-hidden bg-paper border border-stone">
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
@@ -201,7 +201,7 @@ export default async function AgentDashboard() {
       <div>
         <h2 className="text-lg font-bold text-ink">Danışman Profilim</h2>
         <p className="text-sm text-muted">Kamu dizininde ve ilanlarınızda gösterilecek profesyonel bilgileriniz.</p>
-        <form action={updateAgentProfile} className="mt-3 bg-paper p-6 border border-stone">
+        <form action={updateAgentProfile} className="rounded-card mt-3 bg-paper p-6 border border-stone">
           <div className="mb-5">
             <span className="mb-2 block text-sm font-medium text-ink">Logo / Avatar</span>
             <AgentLogoUpload initialLogo={agent.logo} />

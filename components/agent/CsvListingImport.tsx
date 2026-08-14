@@ -68,7 +68,7 @@ export default function CsvListingImport() {
 
   return (
     <div className="space-y-6">
-      <section className="border border-stone bg-paper p-6">
+      <section className="rounded-card border border-stone bg-paper p-6">
         <div className="flex items-start gap-3">
           <span className="grid h-11 w-11 shrink-0 place-items-center rounded-control bg-brand-50 text-brand-700">
             <FileSpreadsheet className="h-5 w-5" />
@@ -86,7 +86,7 @@ export default function CsvListingImport() {
         </div>
       </section>
 
-      <section className="border border-stone bg-paper p-6">
+      <section className="rounded-card border border-stone bg-paper p-6">
         <label className="flex min-h-40 cursor-pointer flex-col items-center justify-center border border-dashed border-brand-300 bg-canvas px-6 text-center transition hover:border-brand-600">
           <Upload className="h-7 w-7 text-brand-700" />
           <span className="mt-3 font-semibold text-ink">CSV dosyası seçin</span>
@@ -115,7 +115,7 @@ export default function CsvListingImport() {
       </section>
 
       {result?.rows && (
-        <section className="border border-stone bg-paper p-6">
+        <section className="rounded-card border border-stone bg-paper p-6">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div>
               <h2 className="text-xl font-semibold text-ink">Aktarım sonucu</h2>
@@ -152,7 +152,7 @@ export default function CsvListingImport() {
         </section>
       )}
 
-      <details className="border border-stone bg-paper p-6">
+      <details className="rounded-card border border-stone bg-paper p-6">
         <summary className="cursor-pointer font-semibold text-ink">Özellik anahtarlarını göster</summary>
         <p className="mt-2 text-sm text-muted">Birden fazla değeri dik çizgiyle ayırın: elevator|security|city_view</p>
         <div className="mt-4 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">

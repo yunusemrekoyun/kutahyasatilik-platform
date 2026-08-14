@@ -41,13 +41,13 @@ export default async function AdminReklamTalepleriPage({
       </div>
 
       {rows.length === 0 ? (
-        <div className="bg-paper p-10 text-center text-sm text-muted border border-stone">Henüz reklam talebi yok.</div>
+        <div className="rounded-card bg-paper p-10 text-center text-sm text-muted border border-stone">Henüz reklam talebi yok.</div>
       ) : (
         <div className="space-y-3">
           {rows.map((r) => {
             const s = STATUS[r.status] ?? STATUS.new;
             return (
-              <div key={r.id} className="bg-paper p-5 border border-stone">
+              <div key={r.id} className="rounded-card bg-paper p-5 border border-stone">
                 <div className="flex flex-wrap items-start justify-between gap-3">
                   <div>
                     <p className="font-semibold text-ink">{r.name}{r.company ? ` · ${r.company}` : ""}</p>

@@ -34,7 +34,7 @@ export default function PageForm({ page }: { page?: PageData }) {
     <form action={savePage} onSubmit={() => setSubmitting(true)} className="space-y-6">
       {page?.id && <input type="hidden" name="id" value={page.id} />}
 
-      <section className="bg-paper p-6 border border-stone">
+      <section className="rounded-card bg-paper p-6 border border-stone">
         <h2 className="font-bold text-ink">Sayfa Bilgileri</h2>
         <div className="mt-4 grid gap-4">
           <label className="block">
@@ -68,13 +68,13 @@ export default function PageForm({ page }: { page?: PageData }) {
       </section>
 
       {/* İçerik (WYSIWYG) */}
-      <section className="bg-paper p-6 border border-stone">
+      <section className="rounded-card bg-paper p-6 border border-stone">
         <h2 className="mb-3 font-bold text-ink">İçerik</h2>
         <RichEditor name="content" defaultValue={page?.content ?? ""} />
       </section>
 
       {/* SEO */}
-      <section className="bg-paper p-6 border border-stone">
+      <section className="rounded-card bg-paper p-6 border border-stone">
         <h2 className="font-bold text-ink">SEO (opsiyonel)</h2>
         <div className="mt-4 grid gap-4">
           <label className="block">

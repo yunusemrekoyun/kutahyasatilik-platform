@@ -150,7 +150,7 @@ export default function ListingForm({
       <input type="hidden" name="imagesJson" value={JSON.stringify(images)} />
 
       {/* Temel bilgiler */}
-      <section className="bg-paper p-6 border border-stone">
+      <section className="rounded-card bg-paper p-6 border border-stone">
         <h2 className="font-bold text-ink">Temel Bilgiler</h2>
         <div className="mt-4 grid gap-4">
           <Field label="İlan Başlığı *">
@@ -223,7 +223,7 @@ export default function ListingForm({
       </section>
 
       {/* Görseller */}
-      <section className="bg-paper p-6 border border-stone">
+      <section className="rounded-card bg-paper p-6 border border-stone">
         <h2 className="font-bold text-ink">Görseller</h2>
         <p className="text-xs text-muted">İlk görsel kapak olarak kullanılır. Sürükle-bırak yerine okları kullanın.</p>
         <div className="mt-4 grid grid-cols-3 gap-3 sm:grid-cols-5">
@@ -246,7 +246,7 @@ export default function ListingForm({
       </section>
 
       {/* Medya: video / drone / sanal tur */}
-      <section className="bg-paper p-6 border border-stone">
+      <section className="rounded-card bg-paper p-6 border border-stone">
         <h2 className="font-bold text-ink">Video & Sanal Tur</h2>
         <p className="text-xs text-muted">Tanıtım videosunu doğrudan yükleyin (önerilen) ya da YouTube/Vimeo linki yapıştırın. Boş bırakılırsa ilgili bölüm gösterilmez.</p>
         <div className="mt-4 grid gap-4">
@@ -264,7 +264,7 @@ export default function ListingForm({
 
       {/* Kategoriye özel nitelikler — kayıttan üretilir; emlakta kayıt boş döner */}
       {!isRealEstate && definition.fields.length > 0 && (
-        <section className="bg-paper p-6 border border-stone">
+        <section className="rounded-card bg-paper p-6 border border-stone">
           <h2 className="font-bold text-ink">{definition.label} bilgileri</h2>
           <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-3">
             {definition.fields.map((field) => {
@@ -299,7 +299,7 @@ export default function ListingForm({
 
       {/* Konut detayları — gayrimenkule özgü, emlak dışında hiç gösterilmez */}
       {isRealEstate && (
-      <section className="bg-paper p-6 border border-stone">
+      <section className="rounded-card bg-paper p-6 border border-stone">
         <h2 className="font-bold text-ink">Detaylar</h2>
         <div className="mt-4 grid grid-cols-2 gap-4 sm:grid-cols-4">
           <Field label="Brüt m² *"><input name="areaGross" type="number" required min={1} defaultValue={listing?.areaGross ?? ""} className={inputCls} /></Field>
@@ -344,7 +344,7 @@ export default function ListingForm({
       )}
 
       {/* Konum ve yatırım verisi */}
-      <section className="bg-paper p-6 border border-stone">
+      <section className="rounded-card bg-paper p-6 border border-stone">
         <h2 className="font-bold text-ink">Konum & Yatırım Verisi</h2>
         <p className="mt-1 text-xs text-muted">Haritada tıklayarak veya pini sürükleyerek konumu işaretleyin; enlem/boylam otomatik dolar ve ilan haritada görünür.</p>
         <div className="mt-4">
@@ -358,7 +358,7 @@ export default function ListingForm({
       </section>
 
       {/* SEO */}
-      <section className="bg-paper p-6 border border-stone">
+      <section className="rounded-card bg-paper p-6 border border-stone">
         <h2 className="font-bold text-ink">SEO (opsiyonel)</h2>
         <div className="mt-4 grid gap-4">
           <Field label="Meta Başlık"><input name="metaTitle" defaultValue={listing?.metaTitle ?? ""} className={inputCls} /></Field>

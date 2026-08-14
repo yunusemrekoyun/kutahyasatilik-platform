@@ -21,7 +21,7 @@ export default async function AdminPages() {
         </Link>
       </div>
 
-      <div className="mt-6 overflow-hidden bg-paper border border-stone">
+      <div className="rounded-card mt-6 overflow-hidden bg-paper border border-stone">
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-stone bg-canvas text-left text-xs text-muted">

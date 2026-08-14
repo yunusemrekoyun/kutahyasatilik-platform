@@ -51,7 +51,7 @@ export default async function AdminModeration({
       </div>
 
       {listings.length === 0 && (
-        <div className="flex items-center justify-center gap-2 bg-paper p-10 text-center text-muted/70 border border-stone">
+        <div className="rounded-card flex items-center justify-center gap-2 bg-paper p-10 text-center text-muted/70 border border-stone">
           <CheckCircle2 className="h-5 w-5 text-green-600" /> Onay bekleyen ilan yok.
         </div>
       )}

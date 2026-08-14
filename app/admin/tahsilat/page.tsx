@@ -73,7 +73,7 @@ export default async function AdminTahsilatPage({
       {/* Özet */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
         {cards.map((c) => (
-          <div key={c.st} className="bg-paper p-5 border border-stone">
+          <div key={c.st} className="rounded-card bg-paper p-5 border border-stone">
             <span className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-semibold ring-1 ${STATUS[c.st].cls}`}>
               {STATUS[c.st].label}
             </span>
@@ -84,7 +84,7 @@ export default async function AdminTahsilatPage({
       </div>
 
       {/* Yeni kayıt */}
-      <section className="mt-6 bg-paper p-6 border border-stone">
+      <section className="rounded-card mt-6 bg-paper p-6 border border-stone">
         <h2 className="font-bold text-ink">Yeni ödeme kaydı</h2>
         {agents.length === 0 ? (
           <p className="mt-3 text-sm text-muted">Önce emlakçı eklenmeli.</p>
@@ -119,7 +119,7 @@ export default async function AdminTahsilatPage({
       </section>
 
       {/* Defter */}
-      <section className="mt-6 overflow-hidden bg-paper border border-stone">
+      <section className="rounded-card mt-6 overflow-hidden bg-paper border border-stone">
         {payments.length === 0 ? (
           <p className="p-6 text-center text-sm text-muted">Henüz ödeme kaydı yok.</p>
         ) : (

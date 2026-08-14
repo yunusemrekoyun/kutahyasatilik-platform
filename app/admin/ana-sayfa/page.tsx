@@ -29,7 +29,7 @@ export default async function AdminHomeTexts() {
         Ana sayfadaki başlık ve metinleri buradan düzenleyin. Boş bırakılan alanlar varsayılan metni gösterir.
       </p>
 
-      <form action={saveHomeTexts} className="mt-6 max-w-2xl space-y-4 bg-paper p-6 border border-stone">
+      <form action={saveHomeTexts} className="rounded-card mt-6 max-w-2xl space-y-4 bg-paper p-6 border border-stone">
         {FIELDS.map((f) => (
           <label key={f.key} className="block">
             <span className="mb-1 block text-sm font-medium text-ink">{f.label}</span>

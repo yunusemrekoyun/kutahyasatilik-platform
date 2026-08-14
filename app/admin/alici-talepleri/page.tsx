@@ -61,7 +61,7 @@ export default async function AdminBuyerAlerts({
       </div>
 
       {total === 0 && (
-        <p className="bg-paper p-10 text-center text-muted/70 border border-stone">
+        <p className="rounded-card bg-paper p-10 text-center text-muted/70 border border-stone">
           Henüz alıcı talebi yok. /alici-talebi sayfasından gelen talepler burada listelenir.
         </p>
       )}

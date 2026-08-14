@@ -24,7 +24,7 @@ export default async function SettingsPage() {
       <h1 className="text-2xl font-extrabold text-ink">Ayarlar</h1>
       <p className="text-sm text-muted">İletişim ve marka bilgileri</p>
 
-      <form action={saveSettings} className="mt-6 space-y-4 bg-paper p-6 border border-stone">
+      <form action={saveSettings} className="rounded-card mt-6 space-y-4 bg-paper p-6 border border-stone">
         <label className="block">
           <span className="mb-1 block text-sm font-medium text-ink">Telefon (görünen)</span>
           <input name="phone" defaultValue={s.phone || SITE.phone} className={inputCls} />

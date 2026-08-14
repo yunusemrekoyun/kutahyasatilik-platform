@@ -57,7 +57,7 @@ export default async function AdminFirsatlarPage({
       </div>
 
       {/* Yeni fırsat */}
-      <section className="mb-6 bg-paper p-6 border border-stone">
+      <section className="rounded-card mb-6 bg-paper p-6 border border-stone">
         <h2 className="font-bold text-ink">Yeni fırsat</h2>
         <form action={createOpportunity} className="mt-4 grid gap-3 sm:grid-cols-2">
           <input name="title" required placeholder="Başlık (örn. 3+1 Daire · Merkez)" className={`${inputCls} sm:col-span-2`} />
@@ -81,14 +81,14 @@ export default async function AdminFirsatlarPage({
       </section>
 
       {opps.length === 0 ? (
-        <div className="bg-paper p-10 text-center text-sm text-muted border border-stone">Henüz fırsat yok.</div>
+        <div className="rounded-card bg-paper p-10 text-center text-sm text-muted border border-stone">Henüz fırsat yok.</div>
       ) : (
         <div className="space-y-4">
           {opps.map((o) => {
             const s = OPP_STATUS[o.status] ?? OPP_STATUS.open;
             const canSelect = o.status === "open" || o.status === "selecting";
             return (
-              <div key={o.id} className="bg-paper p-5 border border-stone">
+              <div key={o.id} className="rounded-card bg-paper p-5 border border-stone">
                 <div className="flex flex-wrap items-start justify-between gap-3">
                   <div>
                     <p className="font-semibold text-ink">{o.title}</p>

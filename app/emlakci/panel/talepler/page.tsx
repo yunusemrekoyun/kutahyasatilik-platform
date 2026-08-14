@@ -44,14 +44,14 @@ export default async function AgentLeads({
       </div>
 
       {leads.length === 0 && (
-        <div className="bg-paper p-8 text-center text-sm text-muted/70 border border-stone">
+        <div className="rounded-card bg-paper p-8 text-center text-sm text-muted/70 border border-stone">
           Henüz ilanlarınıza gelen bir talep yok.
         </div>
       )}
 
       <div className="space-y-3">
         {leads.map((l) => (
-          <div key={l.id} className="bg-paper p-5 border border-stone">
+          <div key={l.id} className="rounded-card bg-paper p-5 border border-stone">
             <div className="flex flex-wrap items-start justify-between gap-3">
               <div>
                 <div className="flex flex-wrap items-center gap-2">

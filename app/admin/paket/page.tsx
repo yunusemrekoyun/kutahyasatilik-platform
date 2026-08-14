@@ -38,7 +38,7 @@ export default async function AdminPackagePage() {
       <form action={savePackage} className="space-y-6">
         {pkg && <input type="hidden" name="id" value={pkg.id} />}
 
-        <section className="bg-paper p-6 border border-stone">
+        <section className="rounded-card bg-paper p-6 border border-stone">
           <h2 className="font-bold text-ink">Temel</h2>
           <div className="mt-4 grid gap-4">
             <label className="block">
@@ -70,7 +70,7 @@ export default async function AdminPackagePage() {
           </div>
         </section>
 
-        <section className="bg-paper p-6 border border-stone">
+        <section className="rounded-card bg-paper p-6 border border-stone">
           <h2 className="font-bold text-ink">Kotalar & Özellikler</h2>
           <div className="mt-4 grid gap-4">
             <div className="grid grid-cols-2 gap-4">

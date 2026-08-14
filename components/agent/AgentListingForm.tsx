@@ -137,7 +137,7 @@ export default function AgentListingForm({ listing }: { listing?: ListingData })
       </div>
 
       {/* Temel bilgiler */}
-      <section className="bg-paper p-6 border border-stone">
+      <section className="rounded-card bg-paper p-6 border border-stone">
         <h2 className="font-bold text-ink">Temel Bilgiler</h2>
         <div className="mt-4 grid gap-4">
           <Field label="İlan Başlığı *">
@@ -199,7 +199,7 @@ export default function AgentListingForm({ listing }: { listing?: ListingData })
       </section>
 
       {/* Görseller */}
-      <section className="bg-paper p-6 border border-stone">
+      <section className="rounded-card bg-paper p-6 border border-stone">
         <h2 className="font-bold text-ink">Görseller</h2>
         <p className="text-xs text-muted">İlk görsel kapak olarak kullanılır. Sıralamak için okları kullanın.</p>
         <div className="mt-4 grid grid-cols-3 gap-3 sm:grid-cols-5">
@@ -222,7 +222,7 @@ export default function AgentListingForm({ listing }: { listing?: ListingData })
       </section>
 
       {/* Medya: video / drone / sanal tur */}
-      <section className="bg-paper p-6 border border-stone">
+      <section className="rounded-card bg-paper p-6 border border-stone">
         <h2 className="font-bold text-ink">Video & Sanal Tur (opsiyonel)</h2>
         <p className="text-xs text-muted">Tanıtım videosunu doğrudan yükleyin (önerilen) ya da YouTube/Vimeo linki yapıştırın. Sanal tur için Matterport/360 linki kullanın.</p>
         <div className="mt-4 grid gap-4">
@@ -240,7 +240,7 @@ export default function AgentListingForm({ listing }: { listing?: ListingData })
 
       {/* Kategoriye özel nitelikler — kayıttan üretilir; emlakta kayıt boş döner */}
       {!isRealEstate && definition.fields.length > 0 && (
-        <section className="bg-paper p-6 border border-stone">
+        <section className="rounded-card bg-paper p-6 border border-stone">
           <h2 className="font-bold text-ink">{definition.label} bilgileri</h2>
           <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-3">
             {definition.fields.map((field) => {
@@ -275,7 +275,7 @@ export default function AgentListingForm({ listing }: { listing?: ListingData })
 
       {/* Detaylar — gayrimenkule özgü, emlak dışında hiç gösterilmez */}
       {isRealEstate && (
-      <section className="bg-paper p-6 border border-stone">
+      <section className="rounded-card bg-paper p-6 border border-stone">
         <h2 className="font-bold text-ink">Detaylar</h2>
         <div className="mt-4 grid grid-cols-2 gap-4 sm:grid-cols-4">
           <Field label="Brüt m² *"><input name="areaGross" type="number" required min={1} defaultValue={listing?.areaGross ?? ""} className={inputCls} /></Field>
@@ -318,7 +318,7 @@ export default function AgentListingForm({ listing }: { listing?: ListingData })
       )}
 
       {/* Konum */}
-      <section className="bg-paper p-6 border border-stone">
+      <section className="rounded-card bg-paper p-6 border border-stone">
         <h2 className="font-bold text-ink">Konum (opsiyonel)</h2>
         <p className="mt-1 text-xs text-muted">Haritada tıklayarak veya pini sürükleyerek konumu işaretleyin; ilan haritada görünür.</p>
         <div className="mt-4">

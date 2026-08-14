@@ -70,7 +70,7 @@ export default async function AdminBasvurularPage({
       </div>
 
       {apps.length === 0 ? (
-        <div className="bg-paper p-10 text-center text-sm text-muted border border-stone">
+        <div className="rounded-card bg-paper p-10 text-center text-sm text-muted border border-stone">
           Henüz başvuru yok.
         </div>
       ) : (
@@ -78,7 +78,7 @@ export default async function AdminBasvurularPage({
           {apps.map((a) => {
             const s = STATUS[a.status] ?? STATUS.applied;
             return (
-              <div key={a.id} className="bg-paper p-5 border border-stone">
+              <div key={a.id} className="rounded-card bg-paper p-5 border border-stone">
                 <div className="flex flex-wrap items-start justify-between gap-3">
                   <div>
                     <p className="font-semibold text-ink">{a.name}</p>

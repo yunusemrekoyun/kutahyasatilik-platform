@@ -41,7 +41,7 @@ export default function DistrictForm({ district }: { district?: DistrictData }) 
       {district?.id && <input type="hidden" name="id" value={district.id} />}
 
       {/* Temel bilgiler — ad/slug/konum sabit (Kütahya'nın 13 ilçesi); yalnızca analiz verisi düzenlenir */}
-      <section className="bg-paper p-6 border border-stone">
+      <section className="rounded-card bg-paper p-6 border border-stone">
         <h2 className="font-bold text-ink">İlçe Bilgileri</h2>
         <p className="mt-1 text-sm text-muted">İlçe adı ve konumu sabittir; yalnızca aşağıdaki analiz verilerini ve sıralamayı düzenleyebilirsiniz.</p>
         <div className="mt-4 grid gap-4">
@@ -73,7 +73,7 @@ export default function DistrictForm({ district }: { district?: DistrictData }) 
       </section>
 
       {/* Bölge analizi puanları */}
-      <section className="bg-paper p-6 border border-stone">
+      <section className="rounded-card bg-paper p-6 border border-stone">
         <h2 className="font-bold text-ink">Bölge Analizi Puanları</h2>
         <p className="mt-1 text-sm text-muted">Boş bırakılan alan sitede gösterilmez.</p>
         <div className="mt-4 grid gap-4 sm:grid-cols-3">
@@ -101,7 +101,7 @@ export default function DistrictForm({ district }: { district?: DistrictData }) 
       </section>
 
       {/* Açıklama & notlar */}
-      <section className="bg-paper p-6 border border-stone">
+      <section className="rounded-card bg-paper p-6 border border-stone">
         <h2 className="font-bold text-ink">Açıklama & Notlar</h2>
         <div className="mt-4 grid gap-4">
           <label className="block">
@@ -116,7 +116,7 @@ export default function DistrictForm({ district }: { district?: DistrictData }) 
       </section>
 
       {/* Yakın kurumlar */}
-      <section className="bg-paper p-6 border border-stone">
+      <section className="rounded-card bg-paper p-6 border border-stone">
         <h2 className="font-bold text-ink">Yakın Kurumlar</h2>
         <p className="mt-1 text-sm text-muted">Her satıra bir kurum yazın.</p>
         <div className="mt-4 grid gap-4 sm:grid-cols-2">

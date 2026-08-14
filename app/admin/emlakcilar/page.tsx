@@ -36,7 +36,7 @@ export default async function AdminAgents() {
       {/* Tüm danışmanlar (onay bekleyenler de bu tabloda; yeni başvurular Başvurular sayfasında toplanır) */}
       <section>
         <h2 className="mb-3 text-sm font-bold uppercase tracking-wide text-muted">Danışmanlar</h2>
-        <div className="overflow-hidden bg-paper border border-stone">
+        <div className="rounded-card overflow-hidden bg-paper border border-stone">
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>

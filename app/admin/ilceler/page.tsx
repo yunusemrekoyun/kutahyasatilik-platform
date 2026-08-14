@@ -19,7 +19,7 @@ export default async function AdminDistricts() {
       </div>
 
       {/* Global toggle */}
-      <form action={setAnalysisScores} className="mt-6 flex flex-wrap items-center justify-between gap-4 bg-paper p-4 border border-stone">
+      <form action={setAnalysisScores} className="rounded-card mt-6 flex flex-wrap items-center justify-between gap-4 bg-paper p-4 border border-stone">
         <label className="flex items-center gap-3 text-sm font-medium text-ink">
           <input type="checkbox" name="show" defaultChecked={scoresVisible} className="h-4 w-4 rounded border-stone" />
           Bölge analizi puanlarını sitede göster
@@ -29,7 +29,7 @@ export default async function AdminDistricts() {
         </button>
       </form>
 
-      <div className="mt-6 overflow-hidden bg-paper border border-stone">
+      <div className="rounded-card mt-6 overflow-hidden bg-paper border border-stone">
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-stone bg-canvas text-left text-xs text-muted">

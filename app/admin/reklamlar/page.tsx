@@ -30,7 +30,7 @@ export default async function AdminPopups() {
 
       <div className="mt-6 space-y-3">
         {popups.length === 0 && (
-          <p className="bg-paper p-10 text-center text-muted/70 border border-stone">
+          <p className="rounded-card bg-paper p-10 text-center text-muted/70 border border-stone">
             Henüz reklam yok. Kampanya/duyuru pop-up&apos;ı oluşturun.
           </p>
         )}

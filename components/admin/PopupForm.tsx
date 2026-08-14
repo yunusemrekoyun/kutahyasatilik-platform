@@ -47,7 +47,7 @@ export default function PopupForm({ popup }: { popup?: PopupData }) {
       {popup?.id && <input type="hidden" name="id" value={popup.id} />}
       <input type="hidden" name="imageUrl" value={image} />
 
-      <section className="bg-paper p-6 border border-stone">
+      <section className="rounded-card bg-paper p-6 border border-stone">
         <h2 className="font-bold text-ink">Reklam İçeriği</h2>
         <div className="mt-4 grid gap-4">
           <label className="block">
@@ -89,7 +89,7 @@ export default function PopupForm({ popup }: { popup?: PopupData }) {
         </div>
       </section>
 
-      <section className="bg-paper p-6 border border-stone">
+      <section className="rounded-card bg-paper p-6 border border-stone">
         <h2 className="font-bold text-ink">Gösterim Ayarları</h2>
         <div className="mt-4 grid gap-4 sm:grid-cols-3">
           <label className="block">
