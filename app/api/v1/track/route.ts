@@ -56,6 +56,17 @@ export async function POST(req: NextRequest) {
         sessionId: data.sessionId || null,
       },
     });
+
+    // Listing.viewCount web ikizinde (/api/track) burada artıyor; mobilde ise
+    // ilan DETAY ROTASINDA her istekte artıyordu. TanStack Query'nin her
+    // refetch'i (odaklanma, yeniden bağlanma, geri dönüş) sayacı şişiriyordu.
+    // Sayaç artık her iki platformda da gerçek ziyaretin kaydedildiği tek yerde.
+    if (data.type === "view" && listingId) {
+      await prisma.listing
+        .update({ where: { id: listingId }, data: { viewCount: { increment: 1 } } })
+        .catch(() => {});
+    }
+
     return NextResponse.json({ ok: true });
   } catch {
     return NextResponse.json({ ok: false }, { status: 500 });

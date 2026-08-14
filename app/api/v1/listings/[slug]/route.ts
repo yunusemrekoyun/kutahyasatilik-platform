@@ -46,10 +46,6 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ slug
     return NextResponse.json({ ok: false, error: "İlan bulunamadı" }, { status: 404 });
   }
 
-  // Görüntülenme sayacını artır (web server-component paritesi) — fire-and-forget.
-  // Emlakçı metriği mobil trafiği de saysın.
-  prisma.listing.update({ where: { id: l.id }, data: { viewCount: { increment: 1 } } }).catch(() => {});
-
   const origin = requestOrigin(req);
   const [district, scoresSetting, similarRaw] = await Promise.all([
     prisma.district.findFirst({ where: { name: l.district } }),
