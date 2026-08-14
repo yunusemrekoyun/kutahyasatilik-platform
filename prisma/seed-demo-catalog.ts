@@ -24,6 +24,7 @@ import path from "path";
 import { PrismaClient } from "../app/generated/prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { getUploadDir } from "../lib/uploads";
+import { listingAmenityRows } from "../lib/listingAmenities";
 
 const prisma = new PrismaClient({
   adapter: new PrismaPg({ connectionString: process.env.DATABASE_URL }),
@@ -49,6 +50,10 @@ const pick = <T,>(list: readonly T[]): T => list[Math.floor(rng() * list.length)
 const ri = (min: number, max: number) => Math.floor(rng() * (max - min + 1)) + min;
 const chance = (p: number) => rng() < p;
 
+// Yıl hesapları sabit yazılırsa katalogda hiç güncel model olmaz ve gelecek
+// yıl fiyat/yaş hesabı sessizce kayar (kategori kaydı zaten dinamik).
+const CURRENT_YEAR = new Date().getFullYear();
+
 // ---------------------------------------------------------------------------
 // Kütahya coğrafyası
 // ---------------------------------------------------------------------------
@@ -58,6 +63,37 @@ const DISTRICT_WEIGHTS: [string, number][] = [
   ["Domaniç", 4], ["Hisarcık", 4], ["Altıntaş", 4], ["Aslanapa", 3],
   ["Dumlupınar", 2], ["Çavdarhisar", 2], ["Pazarlar", 2], ["Şaphane", 2],
 ];
+// İlçe merkezleri — emlak ilanlarına gerçekçi bir koordinat vermek için.
+// prisma/seed.ts'teki District kayıtlarıyla aynı değerler.
+const DISTRICT_COORDS: Record<string, [number, number]> = {
+  Merkez: [39.4242, 29.9833], Tavşanlı: [39.5469, 29.4936], Simav: [39.0894, 28.9783],
+  Gediz: [39.0411, 29.4144], Emet: [39.3447, 29.2603], Domaniç: [39.8003, 29.6042],
+  Hisarcık: [39.2503, 29.2331], Altıntaş: [39.0686, 30.1108], Aslanapa: [39.2167, 29.8667],
+  Dumlupınar: [39.0667, 29.95], Çavdarhisar: [39.2089, 29.6164], Pazarlar: [39.2667, 29.3667],
+  Şaphane: [39.0322, 29.215],
+};
+
+/** İlçe merkezine ~2-3 km sapma. Konum "yaklaşık" gösterildiği için yeterli. */
+function coordsFor(district: string): { lat: number; lng: number } {
+  const [lat, lng] = DISTRICT_COORDS[district] ?? DISTRICT_COORDS.Merkez;
+  return {
+    lat: Number((lat + (rng() - 0.5) * 0.05).toFixed(6)),
+    lng: Number((lng + (rng() - 0.5) * 0.05).toFixed(6)),
+  };
+}
+
+// S10: "Tavşanlı'de" gibi hatalar yüzlerce ilanın son cümlesinde görünüyordu.
+const BACK_VOWELS = "aıou";
+const VOICELESS = "fstkçşhp";
+/** Türkçe bulunma hâli eki: Merkez'de, Tavşanlı'da, Emet'te, Hisarcık'ta. */
+function locative(name: string): string {
+  const letters = [...name.toLocaleLowerCase("tr-TR")];
+  const lastVowel = letters.reverse().find((c) => "aeıioöuü".includes(c)) ?? "a";
+  const back = BACK_VOWELS.includes(lastVowel);
+  const hard = VOICELESS.includes(name.slice(-1).toLocaleLowerCase("tr-TR"));
+  return `${name}'${hard ? "t" : "d"}${back ? "a" : "e"}`;
+}
+
 function weightedDistrict(): string {
   const total = DISTRICT_WEIGHTS.reduce((s, [, w]) => s + w, 0);
   let r = rng() * total;
@@ -96,7 +132,15 @@ const IMAGE_TOPICS: Record<string, string> = {
   konsol: "videogame,console",
   kamera: "camera,photography",
 };
-const IMAGES_PER_TOPIC = 6;
+// Emlakta 6 görsel yeter (daireler birbirine benzer, kullanıcı beklentisi de o).
+// Vasıta ve teknolojide görsel ÜRÜNÜN KENDİSİ: ~54 otomobil ilanının aynı 6
+// fotoğrafı paylaşması katalogun sahteliğini ilk bakışta ele veriyordu.
+const IMAGES_PER_TOPIC: Record<string, number> = {
+  daire: 8, villa: 6, mustakil: 6, arsa: 6, tarla: 6, isyeri: 6,
+  otomobil: 28, motosiklet: 16, ticari: 14, traktor: 12,
+  telefon: 20, bilgisayar: 18, tablet: 12, konsol: 12, kamera: 12,
+};
+const imagesFor = (topic: string) => IMAGES_PER_TOPIC[topic] ?? 6;
 
 /** Konu başına birkaç görsel indirir; dosya varsa atlar. Ağ yoksa sessizce boş döner. */
 async function ensureImages(): Promise<Record<string, string[]>> {
@@ -106,7 +150,7 @@ async function ensureImages(): Promise<Record<string, string[]>> {
 
   for (const [topic, keywords] of Object.entries(IMAGE_TOPICS)) {
     pools[topic] = [];
-    for (let i = 0; i < IMAGES_PER_TOPIC; i++) {
+    for (let i = 0; i < imagesFor(topic); i++) {
       const name = `demo-${topic}-${i}.jpg`;
       const full = path.join(dir, name);
       const url = `/uploads/${name}`;
@@ -143,10 +187,52 @@ async function ensureImages(): Promise<Record<string, string[]>> {
 // ---------------------------------------------------------------------------
 // Emlak
 // ---------------------------------------------------------------------------
-const ROOMS = ["1+1", "2+1", "3+1", "4+1", "5+1"];
+/** Alana uyan oda sayısı — sınırda iki seçenekten biri, hep aynı olmasın diye. */
+function roomsForArea(area: number): string {
+  if (area < 75) return pick(["1+0", "1+1", "2+1"]);
+  if (area < 110) return pick(["2+1", "3+1"]);
+  if (area < 165) return pick(["3+1", "4+1"]);
+  if (area < 240) return pick(["4+1", "4+2"]);
+  return pick(["4+2", "5+1"]);
+}
+
 const HEATING = ["Doğalgaz kombi", "Merkezi", "Yerden ısıtma", "Klima", "Soba"];
 const ZONING = ["Konut", "Ticari", "Konut + Ticari", "İmara açık", "Tarla vasfında"];
 const DEED = ["Kat mülkiyeti", "Kat irtifakı", "Arsa tapulu", "Müstakil tapu"];
+
+// Olanaklar alt türe göre: bir iş yerinde "Ebeveyn banyosu", bir arsada
+// "Asansör" seçili olamaz. Anahtarlar lib/listingAmenities.ts kaydından.
+const AMENITY_POOL: Record<string, string[]> = {
+  daire: [
+    "built_in_kitchen", "ensuite_bathroom", "pantry", "air_conditioning", "thermal_insulation",
+    "fiber_internet", "elevator", "closed_parking", "security", "playground",
+    "public_transport", "school", "market", "city_center", "city_view",
+  ],
+  villa: [
+    "built_in_kitchen", "ensuite_bathroom", "dressing_room", "fireplace", "underfloor_heating",
+    "fiber_internet", "swimming_pool", "closed_parking", "security", "generator",
+    "nature_view", "city_view", "school",
+  ],
+  mustakil: [
+    "built_in_kitchen", "fireplace", "pantry", "air_conditioning", "thermal_insulation",
+    "closed_parking", "nature_view", "school", "market",
+  ],
+  isyeri: [
+    "air_conditioning", "fiber_internet", "sound_insulation", "elevator", "closed_parking",
+    "security", "generator", "public_transport", "city_center", "accessible_entrance",
+  ],
+};
+
+/** Havuzdan 4-9 olanak; her ilan aynı listeyi taşımasın diye sayı da değişiyor. */
+function pickAmenities(subType: string): string[] {
+  const pool = AMENITY_POOL[subType] ?? AMENITY_POOL.daire;
+  const shuffled = [...pool];
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(rng() * (i + 1));
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+  }
+  return shuffled.slice(0, ri(4, 9));
+}
 
 function realEstate() {
   const subType = pick(["daire", "daire", "daire", "villa", "mustakil", "arsa", "tarla", "isyeri"]);
@@ -157,7 +243,9 @@ function realEstate() {
   const central = district === "Merkez";
 
   const area = isLand ? ri(500, 12000) : subType === "villa" ? ri(180, 420) : isCommercial ? ri(45, 400) : ri(65, 210);
-  const rooms = isLand || isCommercial ? null : pick(ROOMS);
+  // Oda sayısı ALANA bağlı: bağımsız seçildiğinde "203 m² 1+1 daire" gibi
+  // kendi içinde saçma ilanlar çıkıyordu.
+  const rooms = isLand || isCommercial ? null : roomsForArea(area);
   // Fiyat: m² birim fiyatı × alan, merkez primi ve tür katsayısıyla.
   const unit = isLand ? ri(400, 2200) : isCommercial ? ri(14000, 32000) : ri(16000, 38000);
   const price = Math.round((area * unit * (central ? 1.25 : 1)) / 1000) * 1000;
@@ -186,7 +274,11 @@ function realEstate() {
     subType,
     district,
     neighborhood,
-    title: `${district}${central ? "" : ""} ${neighborhood} Mahallesi'nde ${label} | ${isLand ? `${area} m²` : `${area} m²`} — ${flavour}`.slice(0, 140),
+    ...coordsFor(district),
+    // Olanaklar (ListingAmenity) yalnız yapılı taşınmazda anlamlı: bir tarlada
+    // "Ankastre mutfak" seçili olamaz.
+    amenities: isLand ? [] : pickAmenities(subType),
+    title: `${district} ${neighborhood} Mahallesi'nde ${label} | ${area} m² — ${flavour}`.slice(0, 140),
     price: Math.max(price, 150_000),
     areaGross: area,
     areaNet: isLand ? null : Math.round(area * 0.86),
@@ -198,7 +290,7 @@ function realEstate() {
     zoningStatus: isLand ? pick(ZONING) : null,
     deedStatus: pick(DEED),
     description:
-      `${district} ${neighborhood} Mahallesi'nde ${label.toLowerCase()}. ${flavour}. ` +
+      `Kütahya ${locative(district)}, ${neighborhood} Mahallesi'nde ${label.toLowerCase()}. ${flavour}. ` +
       `Toplam ${area} m² kullanım alanı. Ulaşım, market ve okullara yakın konumda. ` +
       `Detaylı bilgi ve yerinde inceleme için iletişime geçebilirsiniz.`,
     attributes: null,
@@ -234,7 +326,8 @@ const TRACTORS: [string, string[]][] = [
   ["New Holland", ["TD 75D Çift Çeker", "TT 55 Bahçe", "T4.75"]],
   ["Massey Ferguson", ["MF 265 S", "MF 3060", "MF 5709"]],
   ["John Deere", ["5075E", "6110B"]],
-  ["Türk Traktör", ["Fiat 480", "Tümosan 8075"]],
+  ["Türk Traktör", ["Fiat 480", "TT 4110", "Fiat 54C"]],
+  ["Tümosan", ["8075", "8095", "9110"]],
 ];
 const COLORS = ["Beyaz", "Siyah", "Gri", "Gümüş", "Kırmızı", "Lacivert", "Mavi"];
 
@@ -243,8 +336,8 @@ function vehicle() {
   const table = subType === "otomobil" ? CARS : subType === "motosiklet" ? BIKES : subType === "ticari" ? VANS : TRACTORS;
   const [marka, models] = pick(table);
   const model = pick(models);
-  const yil = subType === "traktor" ? ri(1995, 2024) : ri(2008, 2025);
-  const age = Math.max(0, 2026 - yil);
+  const yil = subType === "traktor" ? ri(CURRENT_YEAR - 30, CURRENT_YEAR) : ri(CURRENT_YEAR - 18, CURRENT_YEAR);
+  const age = Math.max(0, CURRENT_YEAR - yil);
   const kilometre = subType === "motosiklet" ? ri(500, 60_000) : subType === "traktor" ? ri(800, 12_000) : ri(15_000, 320_000);
 
   const base =
@@ -264,25 +357,36 @@ function vehicle() {
   const renk = pick(COLORS);
   const district = weightedDistrict();
 
-  const flavour = pick([
-    "Tek elden, bakımları yetkili serviste",
-    "Değişensiz, hatasız",
+  // Başlık ile nitelik ÇELİŞMEMELİ: hasar kaydı olan bir araca "Değişensiz,
+  // hatasız" demek vasıtada en kritik alanda yalan söylemek olur. Havuz hasar
+  // değerine göre daraltılıyor.
+  const NEUTRAL_FLAVOURS = [
     "Zamanı gelen bakımları yapıldı",
-    "Garaj arabası, az kullanılmış",
     "Takas olur, kredi kullanılabilir",
     "Muayenesi yeni yapıldı",
-  ]);
+    "Tek elden, bakımları yetkili serviste",
+  ];
+  const flavour =
+    hasar === "hasarsiz"
+      ? pick([...NEUTRAL_FLAVOURS, "Değişensiz, hatasız", "Garaj arabası, az kullanılmış"])
+      : hasar === "boyali"
+        ? pick([...NEUTRAL_FLAVOURS, "Lokal boyalı, kaza kaydı yok"])
+        : hasar === "degisen"
+          ? pick([...NEUTRAL_FLAVOURS, "Değişen parçalar ilanda belirtilmiştir"])
+          : pick([...NEUTRAL_FLAVOURS, "Hasar kaydı vardır, fiyatına yansıtılmıştır"]);
 
   return {
     subType,
     district,
-    neighborhood: neighborhoodFor(district),
+    // Taşınabilir bir üründe mahalle bilgisi hem gereksiz hem yanıltıcı
+    // ("Mahalle: Cedit" + aynı ilanda "kargo yapılabilir").
+    neighborhood: null,
     title: `${yil} ${marka} ${model} — ${flavour}`.slice(0, 140),
     price,
     description:
       `${yil} model ${marka} ${model}. ${kilometre.toLocaleString("tr-TR")} km'de, ${renk.toLowerCase()} renk. ` +
       `${flavour}. Görüşmeye açık, ilanda yazan fiyat üzerinden pazarlık payı vardır. ` +
-      `Aracı Kütahya ${district}'de yerinde görebilirsiniz.`,
+      `Aracı Kütahya ${locative(district)} yerinde görebilirsiniz.`,
     attributes: { marka, model, yil, kilometre, yakit, vites, renk, hasar },
   };
 }
@@ -290,31 +394,36 @@ function vehicle() {
 // ---------------------------------------------------------------------------
 // Teknoloji
 // ---------------------------------------------------------------------------
-const PHONES: [string, string[], number][] = [
-  ["Apple", ["iPhone 13 128 GB", "iPhone 14 Pro 256 GB", "iPhone 15 128 GB", "iPhone 12 64 GB"], 38_000],
-  ["Samsung", ["Galaxy S23 256 GB", "Galaxy A54 128 GB", "Galaxy S22 Ultra 256 GB"], 26_000],
-  ["Xiaomi", ["Redmi Note 13 Pro 256 GB", "Poco X6 256 GB", "13T 256 GB"], 14_000],
+// Taban fiyat MARKA değil MODEL başına: marka başına tek taban, sıfır bir
+// iPhone 12 ile sıfır bir iPhone 14 Pro'yu aynı fiyata koyuyordu — katalogda
+// fiyat sıralaması tersine dönüyordu.
+type TechTable = [marka: string, models: [ad: string, taban: number][]][];
+
+const PHONES: TechTable = [
+  ["Apple", [["iPhone 12 64 GB", 21_000], ["iPhone 13 128 GB", 29_000], ["iPhone 15 128 GB", 47_000], ["iPhone 14 Pro 256 GB", 58_000]]],
+  ["Samsung", [["Galaxy A54 128 GB", 16_000], ["Galaxy S23 256 GB", 34_000], ["Galaxy S22 Ultra 256 GB", 38_000]]],
+  ["Xiaomi", [["Poco X6 256 GB", 12_000], ["Redmi Note 13 Pro 256 GB", 15_000], ["13T 256 GB", 22_000]]],
 ];
-const COMPUTERS: [string, string[], number][] = [
-  ["Apple", ["MacBook Air M2 8/256", "MacBook Pro 14 M3 16/512"], 48_000],
-  ["Lenovo", ["ThinkPad E14 Gen 5", "IdeaPad Gaming 3 RTX 3050"], 26_000],
-  ["Asus", ["TUF Gaming F15 RTX 4060", "Vivobook 15 i5"], 28_000],
-  ["HP", ["Victus 15 RTX 3050", "Pavilion 14 i5"], 24_000],
+const COMPUTERS: TechTable = [
+  ["Apple", [["MacBook Air M2 8/256", 44_000], ["MacBook Pro 14 M3 16/512", 78_000]]],
+  ["Lenovo", [["IdeaPad Gaming 3 RTX 3050", 24_000], ["ThinkPad E14 Gen 5", 31_000]]],
+  ["Asus", [["Vivobook 15 i5", 22_000], ["TUF Gaming F15 RTX 4060", 42_000]]],
+  ["HP", [["Pavilion 14 i5", 21_000], ["Victus 15 RTX 3050", 27_000]]],
 ];
-const TABLETS: [string, string[], number][] = [
-  ["Apple", ["iPad 10. Nesil 64 GB", "iPad Air M1 64 GB"], 22_000],
-  ["Samsung", ["Galaxy Tab S9 FE 128 GB", "Galaxy Tab A9+ 64 GB"], 14_000],
-  ["Xiaomi", ["Redmi Pad SE 128 GB"], 8_000],
+const TABLETS: TechTable = [
+  ["Apple", [["iPad 10. Nesil 64 GB", 19_000], ["iPad Air M1 64 GB", 27_000]]],
+  ["Samsung", [["Galaxy Tab A9+ 64 GB", 9_500], ["Galaxy Tab S9 FE 128 GB", 18_000]]],
+  ["Xiaomi", [["Redmi Pad SE 128 GB", 8_000]]],
 ];
-const CONSOLES: [string, string[], number][] = [
-  ["Sony", ["PlayStation 5 Slim 1 TB", "PlayStation 4 Pro 1 TB"], 26_000],
-  ["Microsoft", ["Xbox Series S 512 GB", "Xbox Series X 1 TB"], 20_000],
-  ["Nintendo", ["Switch OLED", "Switch Lite"], 14_000],
+const CONSOLES: TechTable = [
+  ["Sony", [["PlayStation 4 Pro 1 TB", 12_000], ["PlayStation 5 Slim 1 TB", 28_000]]],
+  ["Microsoft", [["Xbox Series S 512 GB", 14_000], ["Xbox Series X 1 TB", 26_000]]],
+  ["Nintendo", [["Switch Lite", 9_000], ["Switch OLED", 16_000]]],
 ];
-const CAMERAS: [string, string[], number][] = [
-  ["Canon", ["EOS R10 + 18-45 mm", "EOS 250D + 18-55 mm"], 32_000],
-  ["Nikon", ["Z50 + 16-50 mm", "D5600 + 18-140 mm"], 30_000],
-  ["Sony", ["Alpha A6400 + 16-50 mm", "ZV-E10 Body"], 34_000],
+const CAMERAS: TechTable = [
+  ["Canon", [["EOS 250D + 18-55 mm", 24_000], ["EOS R10 + 18-45 mm", 38_000]]],
+  ["Nikon", [["D5600 + 18-140 mm", 26_000], ["Z50 + 16-50 mm", 34_000]]],
+  ["Sony", [["ZV-E10 Body", 29_000], ["Alpha A6400 + 16-50 mm", 40_000]]],
 ];
 
 function tech() {
@@ -325,13 +434,14 @@ function tech() {
     : subType === "tablet" ? TABLETS
     : subType === "konsol" ? CONSOLES
     : CAMERAS;
-  const [marka, models, base] = pick(table);
-  const model = pick(models);
+  const [marka, models] = pick(table);
+  const [model, base] = pick(models);
   const durum = chance(0.28) ? "sifir" : "ikinci_el";
   const garanti = durum === "sifir" ? "var" : chance(0.45) ? "var" : "yok";
-  const kutu = chance(0.6) ? "tam" : "eksik";
+  // Sıfırda bile ufak bir sapma: aynı modelin her ilanı kuruşu kuruşuna aynı
+  // fiyattaysa liste üretilmiş gibi görünüyor.
   const price = Math.max(
-    Math.round((base * (durum === "sifir" ? 1 : ri(58, 88) / 100)) / 500) * 500,
+    Math.round((base * (durum === "sifir" ? ri(97, 103) / 100 : ri(58, 88) / 100)) / 500) * 500,
     3_000,
   );
   const district = weightedDistrict();
@@ -349,17 +459,23 @@ function tech() {
       ? pick(["Kutusu açılmamış, faturalı", "Sıfır ürün, Türkiye garantili"])
       : pick(USED_FLAVOURS[subType] ?? USED_FLAVOURS.telefon);
 
+  // `kutu` bağımsız zar atışıyken başlık "Kutusu açılmamış" derken nitelik
+  // "Kutusu yok" diyebiliyordu — ilan kendi içinde çelişiyordu. Artık türetiliyor.
+  const claimsBox = durum === "sifir" || /kutu/i.test(flavour);
+  const kutu = claimsBox ? "tam" : chance(0.45) ? "tam" : "eksik";
+
   return {
     subType,
     district,
-    neighborhood: neighborhoodFor(district),
+    // Teknoloji ürünü taşınabilir: mahalle bilgisi yanıltıcı.
+    neighborhood: null,
     title: `${marka} ${model} — ${flavour}`.slice(0, 140),
     price,
     description:
       `${marka} ${model}. ${durum === "sifir" ? "Sıfır ürün" : "İkinci el"}, ${flavour.toLowerCase()}. ` +
       `${garanti === "var" ? "Garantisi devam ediyor." : "Garanti süresi dolmuştur."} ` +
       `${kutu === "tam" ? "Kutusu ve aksesuarları tam." : "Kutusu yok, temel aksesuarlar mevcut."} ` +
-      `Kütahya ${district}'de elden teslim, kargo da yapılabilir.`,
+      `Kütahya ${locative(district)} elden teslim, kargo da yapılabilir.`,
     attributes: { marka, model, durum, garanti, kutu },
   };
 }
@@ -480,6 +596,106 @@ async function ensureOwners() {
 }
 
 // ---------------------------------------------------------------------------
+// Katalog dışı içerik — "tutarlı veri" yalnız ilan demek değil
+//
+// /blog, ana sayfadaki referans şeridi, hesabım > mesajlar ve favoriler
+// tamamen boştu. Bir sunumda boş bir sayfa "yapılmamış" diye okunur; bu bölüm
+// o yüzeyleri katalogla TUTARLI biçimde dolduruyor (mesajlar gerçek ilanlara,
+// referanslar gerçek ilçelere bağlı).
+// ---------------------------------------------------------------------------
+
+const TESTIMONIALS = [
+  { name: "Serkan A.", role: "Daire sahibi · Merkez", text: "İlanı akşam verdim, ertesi gün üç ayrı alıcı aradı. Fotoğrafları ve ilan metnini birlikte düzenlediğimiz için gelen sorular da ciddiydi." },
+  { name: "Nurten K.", role: "Alıcı · Tavşanlı", text: "Aradığım kriterleri kaydettim, uygun ilan girildiğinde bildirim geldi. İlanı ilk gören ben oldum, hafta içinde anlaştık." },
+  { name: "Emrah T.", role: "Araç satıcısı · Simav", text: "Aracı ilçeden satmak zordur, buradan iki haftada sattım. Alıcıyla mesajlaşıp fiyatta anlaştıktan sonra buluştuk." },
+  { name: "Hatice Y.", role: "Arsa yatırımcısı · Altıntaş", text: "Bölge analizi sayfasındaki m² fiyatları karar verirken çok işime yaradı. Aynı parseli iki ay önce görseydim daha ucuza alırdım." },
+  { name: "Onur B.", role: "Emlak danışmanı · Merkez", text: "Portföyümü tek yerden yönetiyorum, gelen talepler doğrudan panele düşüyor. Telefonla not tutmaktan kurtuldum." },
+];
+
+const POSTS = [
+  {
+    title: "Kütahya'da satılık daire alırken kontrol edilmesi gereken 8 şey",
+    excerpt: "Tapu kaydından iskân belgesine, aidat geçmişinden bina yaşına: sözleşmeden önce sorulması gereken sorular.",
+    tags: "emlak,rehber,daire",
+    content: `<p>Kütahya'da konut alım sürecinde en sık atlanan konu, ilan üzerinde görünmeyen belgelerdir. Aşağıdaki başlıklar, sözleşme masasına oturmadan önce netleştirilmelidir.</p>
+<h2>1. Tapu kaydı ve tapu türü</h2><p>Kat mülkiyeti mi kat irtifakı mı? Kat irtifakı olan bir binada iskân alınmamış olabilir; bu, krediye uygunluğu doğrudan etkiler.</p>
+<h2>2. İskân (yapı kullanma izin belgesi)</h2><p>İskânı olmayan bir dairede aboneliklerin ticari tarifeden açılması gerekebilir.</p>
+<h2>3. Bina yaşı ve deprem yönetmeliği</h2><p>2000 öncesi yapılarda taşıyıcı sistem raporu istemek makul bir taleptir.</p>
+<h2>4. Aidat ve site yönetimi</h2><p>Aidatın neyi kapsadığı (ısınma, güvenlik, havuz) bütçeyi ciddi biçimde değiştirir.</p>
+<h2>5. Isıtma sistemi</h2><p>Doğalgaz kombi, merkezi sistem ve pay ölçer arasındaki fark yıllık gider olarak yüzde onlarla ifade edilir.</p>
+<h2>6. Ortak alan ve otopark</h2><p>Otoparkın tapuda eklenti olup olmadığı sonradan sorun çıkaran konuların başında gelir.</p>
+<h2>7. Kiracı durumu</h2><p>Kiracılı satın alınan konutta tahliye süreci mevzuata bağlıdır; teslim tarihi sözleşmede yazmalıdır.</p>
+<h2>8. Ekspertiz</h2><p>Kredi kullanılmasa bile bağımsız ekspertiz, pazarlık masasında en güçlü belgedir.</p>`,
+  },
+  {
+    title: "Kütahya ilçelerinde arsa yatırımı: nereye, neden bakılır?",
+    excerpt: "Merkez, Altıntaş ve Tavşanlı hattında imar durumu, ulaşım yatırımları ve m² fiyatlarının seyri.",
+    tags: "emlak,arsa,yatırım",
+    content: `<p>Arsa yatırımında getiriyi belirleyen şey konumdan çok <strong>imar durumu</strong> ve <strong>zamanlama</strong>dır.</p>
+<h2>İmar durumunu resmî kaynaktan doğrulayın</h2><p>İlanda yazan "imarlı" ifadesi tek başına yeterli değildir; belediyeden imar çapı alınmalıdır.</p>
+<h2>Hisseli tapudan kaçının</h2><p>Hisseli tapu ucuz görünür, ancak satış ve kredi süreçlerinde diğer hissedarların onayı gerekir.</p>
+<h2>Yol cephesi ve altyapı</h2><p>Elektrik, su ve yol cephesi olmayan bir parselin bugünkü fiyatı, altyapı geldiğinde hızla değişir.</p>
+<h2>Bölge analizini kullanın</h2><p>Sitedeki bölge analizi sayfası ilçe bazında m² fiyatlarını ve üç yıllık değer artışını gösterir; karşılaştırma yaparken başlangıç noktası olarak kullanılabilir.</p>`,
+  },
+  {
+    title: "İkinci el araç alırken ilanın hangi satırına bakmalı?",
+    excerpt: "Hasar kaydı, kilometre tutarlılığı ve muayene tarihi: ilanda yazanla gerçeği ayıran detaylar.",
+    tags: "vasıta,rehber",
+    content: `<p>İkinci el araçta pazarlığın tamamı üç veriye dayanır: <strong>hasar kaydı</strong>, <strong>kilometre</strong> ve <strong>bakım geçmişi</strong>.</p>
+<h2>Hasar kaydı</h2><p>"Değişensiz" ifadesi ile "boyasız" aynı şey değildir. Ekspertiz raporu olmadan ikisi de doğrulanamaz.</p>
+<h2>Kilometre tutarlılığı</h2><p>Yıllık ortalama 15.000-20.000 km'dir. Çok düşük kilometre her zaman avantaj değildir; uzun süre kullanılmayan araçlarda ayrı sorunlar çıkar.</p>
+<h2>Muayene ve sigorta</h2><p>Muayene tarihi ve kasko hasar kaydı, satıcının anlattığı hikâyeyi doğrulamanın en hızlı yoludur.</p>
+<h2>Buluşma yeri</h2><p>Görüşmeyi gündüz ve kalabalık bir yerde yapın; kaparo öncesi ekspertize götürmeyi teklif edin.</p>`,
+  },
+  {
+    title: "İkinci el telefon ve bilgisayar satarken ilanı nasıl yazmalı?",
+    excerpt: "Kutu, fatura, garanti ve batarya sağlığı: alıcının ilk sorduğu dört soruyu ilana yazın.",
+    tags: "teknoloji,rehber",
+    content: `<p>Teknoloji ilanlarında satış hızını belirleyen şey fiyat değil, <strong>belirsizliğin azaltılması</strong>dır.</p>
+<h2>Dört soruyu baştan yanıtlayın</h2><p>Kutusu var mı, faturası var mı, garantisi devam ediyor mu, cihaz servis gördü mü? Bu dördü ilan metninde yoksa alıcı mesaj atmak yerine bir sonraki ilana geçiyor.</p>
+<h2>Fotoğrafı ürünün kendisinden çekin</h2><p>İnternetten alınmış ürün görseli güven kaybının en hızlı yoludur. Açık ekranda, gerçek ortamda çekilmiş üç fotoğraf yeterlidir.</p>
+<h2>Fiyatı gerekçelendirin</h2><p>"Pazarlık payı vardır" yerine cihazın yaşını, kullanım durumunu ve varsa kusurunu yazın.</p>`,
+  },
+  {
+    title: "İlanınız neden görüntülenmiyor? Sık yapılan 5 hata",
+    excerpt: "Başlık, fotoğraf sırası, fiyat aralığı ve kategori seçimi ilanınızın görünürlüğünü doğrudan belirliyor.",
+    tags: "rehber,ilan",
+    content: `<p>Aynı mahallede, aynı fiyata iki ilan farklı sayıda görüntülenir. Fark genellikle şu beş başlıkta toplanır.</p>
+<h2>1. Kapak fotoğrafı</h2><p>Listeleme ekranında görülen tek görsel kapaktır. Karanlık ya da dağınık bir kapak, ilanın tıklanma oranını yarıya indirir.</p>
+<h2>2. Başlık</h2><p>Başlık ilanın kendisini anlatmalı: tür, alan ve ayırt edici bir özellik. Büyük harf ve ünlem işaretleri güven vermiyor.</p>
+<h2>3. Yanlış kategori veya alt tür</h2><p>Yanlış alt türe konan bir ilan, filtreleyerek arayan kullanıcıya hiç görünmez.</p>
+<h2>4. Piyasa dışı fiyat</h2><p>Fiyat aralığı filtresi dışında kalan ilan listede hiç çıkmaz. Bölge ortalamasını bölge analizi sayfasından kontrol edin.</p>
+<h2>5. Eksik alanlar</h2><p>Oda sayısı, alan, yıl, kilometre gibi alanlar hem filtreleri hem de arama sonuçlarını besliyor.</p>`,
+  },
+];
+
+async function ensureContent() {
+  for (const [index, testimonial] of TESTIMONIALS.entries()) {
+    const existing = await prisma.testimonial.findFirst({ where: { name: testimonial.name } });
+    if (existing) continue;
+    await prisma.testimonial.create({ data: { ...testimonial, stars: 5, published: true, sortOrder: index } });
+  }
+
+  for (const [index, post] of POSTS.entries()) {
+    const slug = slugify(post.title);
+    await prisma.post.upsert({
+      where: { slug },
+      update: {},
+      create: {
+        ...post,
+        slug,
+        author: "Kütahya Satılık",
+        status: "published",
+        metaDescription: post.excerpt,
+        viewCount: ri(120, 2400),
+        publishedAt: new Date(Date.now() - (index + 1) * ri(4, 12) * 86_400_000),
+      },
+    });
+  }
+  console.log(`İçerik: ${TESTIMONIALS.length} referans · ${POSTS.length} blog yazısı`);
+}
+
+// ---------------------------------------------------------------------------
 function slugify(input: string): string {
   const map: Record<string, string> = { ç: "c", ğ: "g", ı: "i", ö: "o", ş: "s", ü: "u", İ: "i" };
   return input
@@ -513,9 +729,10 @@ async function main() {
   const nTeknoloji = TOTAL - nEmlak - nVasita;
 
   const rows: {
-    category: string; subType: string; district: string; neighborhood: string;
+    category: string; subType: string; district: string; neighborhood: string | null;
     title: string; price: number; description: string;
     attributes: Record<string, string | number> | null;
+    lat?: number; lng?: number; amenities?: string[];
     areaGross?: number | null; areaNet?: number | null; rooms?: string | null;
     floor?: string | null; totalFloors?: number | null; buildingAge?: string | null;
     heating?: string | null; zoningStatus?: string | null; deedStatus?: string | null;
@@ -546,6 +763,11 @@ async function main() {
     const agent = row.category === "emlak" ? owners.agents[index % owners.agents.length] : null;
     const seller = agent ? null : owners.sellers[index % owners.sellers.length];
 
+    // İlanların bir kısmında fiyat düşmüş olsun: PriceHistory boşken detay
+    // sayfasındaki "Fiyat geçmişi" kartı hiç görünmüyor.
+    const priceDrop = row.category === "emlak" && chance(0.22);
+    const createdAt = new Date(Date.now() - ri(0, 90) * 86_400_000);
+
     await prisma.listing.create({
       data: {
         slug,
@@ -569,28 +791,206 @@ async function main() {
         heating: row.heating ?? null,
         zoningStatus: row.zoningStatus ?? null,
         deedStatus: row.deedStatus ?? null,
-        locationVisibility: "approximate",
+        // Konum yalnız emlakta: taşınabilir bir üründe koordinat hem yanlış
+        // hem de satıcının ev adresini ima ediyor.
+        lat: row.lat ?? null,
+        lng: row.lng ?? null,
+        locationVisibility: row.category === "emlak" ? "approximate" : "hidden",
         featured,
-        verified: chance(0.25),
+        // "Doğrulanmış" rozetinin tanımı tapu/ekspertiz doğrulaması
+        // (admin/ListingForm.tsx). Emlak dışında karşılığı olmayan bir güven
+        // işareti vermek rozeti değersizleştirir.
+        verified: row.category === "emlak" ? chance(0.25) : false,
         attributes: row.attributes ?? undefined,
         agentId: agent?.id ?? null,
         agencyId: agent?.agencyId ?? null,
         userId: seller?.id ?? null,
         // createdAt dağılımı: "yeni" rozeti hepsinde çıkmasın diye son 90 güne yayılıyor.
-        createdAt: new Date(Date.now() - ri(0, 90) * 86_400_000),
+        createdAt,
         images: images.length
           ? { create: images.map((url, sortOrder) => ({ url, sortOrder })) }
           : undefined,
+        amenities: row.amenities?.length
+          ? { create: listingAmenityRows(row.amenities) }
+          : undefined,
+        priceHistory: {
+          create: priceDrop
+            ? [
+                { price: Math.round((row.price * 1.08) / 1000) * 1000, createdAt },
+                { price: row.price, createdAt: new Date(Date.now() - ri(0, 20) * 86_400_000) },
+              ]
+            : [{ price: row.price, createdAt }],
+        },
       },
     });
     created++;
     if (created % 50 === 0) process.stdout.write(`  ${created}/${rows.length}\n`);
   }
 
+  await ensureContent();
+  await ensureActivity(owners);
+
   const dist = await prisma.listing.groupBy({ by: ["category"], _count: { _all: true } });
   console.log(`\n${created} ilan oluşturuldu.`);
   console.log("Kategori dağılımı:");
   for (const d of dist) console.log(`  ${d.category}: ${d._count._all}`);
+}
+
+/**
+ * Alıcı tarafı etkinliği: favoriler, mesajlaşma, talepler ve kayıtlı aramalar.
+ *
+ * Bunlar ilan verisi DEĞİL ama ürünün yarısı: hesabım > mesajlar, favoriler ve
+ * yönetim panelindeki talep listesi bunlar olmadan boş görünüyor. Her kayıt
+ * gerçek bir ilana ve gerçek bir kullanıcıya bağlanıyor.
+ */
+async function ensureActivity(owners: Awaited<ReturnType<typeof ensureOwners>>) {
+  const listings = await prisma.listing.findMany({
+    where: { status: "active" },
+    select: { id: true, title: true, price: true, category: true, district: true, agentId: true, userId: true },
+  });
+  if (!listings.length) return;
+
+  // Alıcı, kendi ilanını favorileyip kendine mesaj atmasın.
+  const buyerFor = (listing: (typeof listings)[number], offset: number) => {
+    for (let i = 0; i < owners.sellers.length; i++) {
+      const candidate = owners.sellers[(offset + i) % owners.sellers.length];
+      if (candidate.id !== listing.userId) return candidate;
+    }
+    return owners.sellers[0];
+  };
+
+  let favorites = 0;
+  for (const [index, listing] of listings.entries()) {
+    if (!chance(0.18)) continue;
+    const buyer = buyerFor(listing, index);
+    await prisma.favorite.upsert({
+      where: { userId_listingId: { userId: buyer.id, listingId: listing.id } },
+      update: {},
+      create: { userId: buyer.id, listingId: listing.id },
+    });
+    favorites++;
+  }
+
+  const OPENERS = [
+    "Merhaba, ilan hâlâ güncel mi?",
+    "Merhaba, hafta sonu yerinde görebilir miyim?",
+    "İlgileniyorum, fiyatta esneklik var mı?",
+    "Merhaba, detaylı bilgi alabilir miyim?",
+  ];
+  const REPLIES = [
+    "Merhaba, ilan güncel. Hafta içi her saat müsaidim.",
+    "Merhaba, ilgilendiğiniz için teşekkürler. Yerinde görmek için uygun olduğunuz günü yazabilirsiniz.",
+    "Fiyat büyük ölçüde net, ciddi alıcıya küçük bir esneklik olabilir.",
+  ];
+
+  let conversations = 0;
+  for (const [index, listing] of listings.entries()) {
+    if (!chance(0.1)) continue;
+    const buyer = buyerFor(listing, index + 7);
+    const existing = await prisma.conversation.findFirst({
+      where: { listingId: listing.id, userId: buyer.id },
+      select: { id: true },
+    });
+    if (existing) continue;
+
+    const startedAt = new Date(Date.now() - ri(1, 30) * 86_400_000);
+    const replyAt = new Date(startedAt.getTime() + ri(1, 20) * 3_600_000);
+    // Muhatap ilanın sahibi: emlakta danışman, diğerlerinde bireysel satıcı.
+    const isAgentListing = !!listing.agentId;
+    const withOffer = chance(0.35);
+
+    await prisma.conversation.create({
+      data: {
+        listingId: listing.id,
+        userId: buyer.id,
+        agentId: listing.agentId,
+        ownerUserId: isAgentListing ? null : listing.userId,
+        createdAt: startedAt,
+        lastMessageAt: replyAt,
+        userReadAt: chance(0.6) ? replyAt : startedAt,
+        agentReadAt: startedAt,
+        messages: {
+          create: [
+            { senderRole: "user", type: "text", body: pick(OPENERS), createdAt: startedAt },
+            {
+              senderRole: isAgentListing ? "agent" : "owner",
+              type: "text",
+              body: pick(REPLIES),
+              createdAt: replyAt,
+            },
+            ...(withOffer
+              ? [{
+                  senderRole: "user",
+                  type: "offer",
+                  offerAmount: Math.round((listing.price * ri(88, 97) / 100) / 1000) * 1000,
+                  offerCurrency: "TRY",
+                  offerStatus: "pending",
+                  createdAt: new Date(replyAt.getTime() + ri(1, 12) * 3_600_000),
+                }]
+              : []),
+          ],
+        },
+      },
+    });
+    conversations++;
+  }
+
+  // Talepler (yönetim panelindeki "Talepler" listesi) — emlak ilanlarına bağlı.
+  const LEAD_TYPES = ["appointment", "expertise", "price_offer", "contact"];
+  const realEstate = listings.filter((l) => l.category === "emlak");
+  let leads = 0;
+  if (!(await prisma.lead.count())) {
+    for (let i = 0; i < 24 && realEstate.length; i++) {
+      const listing = realEstate[(i * 7) % realEstate.length];
+      const buyer = buyerFor(listing, i + 3);
+      const user = await prisma.user.findUnique({ where: { id: buyer.id }, select: { name: true, phone: true, email: true } });
+      await prisma.lead.create({
+        data: {
+          type: LEAD_TYPES[i % LEAD_TYPES.length],
+          name: user?.name ?? "Ziyaretçi",
+          phone: user?.phone ?? demoPhone(i),
+          email: user?.email ?? null,
+          message: pick(["Hafta sonu müsait misiniz?", "Kredi kullanabilir miyim?", "Fiyatta pazarlık payı var mı?", "Detaylı bilgi rica ediyorum."]),
+          district: listing.district,
+          listingId: listing.id,
+          userId: buyer.id,
+          status: pick(["received", "received", "reviewing", "contacted", "closed"]),
+          createdAt: new Date(Date.now() - ri(0, 45) * 86_400_000),
+        },
+      });
+      leads++;
+    }
+  }
+
+  // Kayıtlı aramalar — yeni emlak ilanı onaylandığında eşleşme bildirimi gider.
+  let alerts = 0;
+  if (!(await prisma.buyerAlert.count())) {
+    const criteria = [
+      { propertyType: "daire", district: "Merkez", rooms: "3+1", maxPrice: 3_500_000 },
+      { propertyType: "daire", district: "Tavşanlı", maxPrice: 2_200_000 },
+      { propertyType: "arsa", district: "Altıntaş", maxPrice: 1_500_000, minArea: 1000 },
+      { propertyType: "villa", district: "Merkez", minPrice: 4_000_000 },
+      { propertyType: "isyeri", district: "Merkez", maxPrice: 5_000_000 },
+    ];
+    for (const [index, c] of criteria.entries()) {
+      const buyer = owners.sellers[index % owners.sellers.length];
+      const user = await prisma.user.findUnique({ where: { id: buyer.id }, select: { name: true, phone: true, email: true } });
+      await prisma.buyerAlert.create({
+        data: {
+          ...c,
+          name: user?.name ?? "Alıcı",
+          phone: user?.phone ?? demoPhone(index),
+          email: user?.email ?? null,
+          userId: buyer.id,
+          listingType: "sale",
+          status: "active",
+        },
+      });
+      alerts++;
+    }
+  }
+
+  console.log(`Etkinlik: ${favorites} favori · ${conversations} mesajlaşma · ${leads} talep · ${alerts} kayıtlı arama`);
 }
 
 main()
