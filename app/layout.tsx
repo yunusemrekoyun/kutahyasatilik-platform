@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Geist, Source_Serif_4 } from "next/font/google";
+import { Geist } from "next/font/google";
 import "./globals.css";
 import { SITE } from "@/lib/site";
 import StoreProvider from "@/components/store/StoreProvider";
@@ -9,13 +9,6 @@ import AnalyticsConsent from "@/components/AnalyticsConsent";
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
-});
-
-const display = Source_Serif_4({
-  variable: "--font-display",
-  subsets: ["latin"],
-  weight: ["500", "600", "700"],
-  display: "swap",
 });
 
 export const metadata: Metadata = {
@@ -64,8 +57,8 @@ export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="tr" className={`${geistSans.variable} ${display.variable} h-full`}>
-      <body className="min-h-full flex flex-col bg-[var(--background)] text-slate-900 antialiased">
+    <html lang="tr" className={`${geistSans.variable} h-full`}>
+      <body className="min-h-full flex flex-col bg-[var(--background)] text-ink antialiased">
         <AnalyticsConsent gaId={SITE.gaId} gtagId={SITE.gtagId} />
         <StoreProvider>
           {children}
