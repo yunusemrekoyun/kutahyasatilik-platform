@@ -20,7 +20,8 @@ type ConvItem = {
 };
 type Msg = {
   id: string;
-  senderRole: "user" | "agent";
+  // "user" alıcı · "agent" danışman satıcı · "owner" bireysel satıcı
+  senderRole: "user" | "agent" | "owner";
   type: "text" | "offer";
   body: string | null;
   offerAmount: number | null;
@@ -45,7 +46,10 @@ const OFFER_STATUS: Record<string, { label: string; cls: string }> = {
 export default function MessagesClient({ basePath }: { basePath: string }) {
   const sp = useSearchParams();
   const [items, setItems] = useState<ConvItem[]>([]);
-  const [myRole, setMyRole] = useState<"user" | "agent">("user");
+  // Taraf sohbet başına değişir: aynı kullanıcı bir sohbette alıcı, başkasında
+  // (kendi ilanında) satıcı olabilir. Balonun "benim" olup olmadığı role değil
+  // TARAFA bakar; rol karşılaştırması bireysel sohbette yanlış taraf çizerdi.
+  const [mySide, setMySide] = useState<"buyer" | "seller">("buyer");
   const [activeId, setActiveId] = useState<string | null>(() => sp.get("c"));
   const [detail, setDetail] = useState<ConvDetail | null>(null);
   const [messages, setMessages] = useState<Msg[]>([]);
@@ -60,7 +64,7 @@ export default function MessagesClient({ basePath }: { basePath: string }) {
     const data = await res.json();
     if (data.ok) {
       setItems(data.items);
-      setMyRole(data.myRole);
+      if (data.mySide) setMySide(data.mySide);
     }
   }, []);
 
@@ -68,7 +72,7 @@ export default function MessagesClient({ basePath }: { basePath: string }) {
     const res = await fetch(`/api/messages?conversationId=${id}`);
     const data = await res.json();
     if (data.ok) {
-      setMyRole(data.myRole);
+      if (data.mySide) setMySide(data.mySide);
       setDetail(data.conversation);
       setMessages(data.messages);
     }
@@ -199,7 +203,9 @@ export default function MessagesClient({ basePath }: { basePath: string }) {
             {/* Mesajlar */}
             <div ref={scrollRef} className="flex-1 space-y-2 overflow-y-auto p-4">
               {messages.map((m) => {
-                const mine = m.senderRole === myRole;
+                const mine = mySide === "seller"
+                  ? m.senderRole === "agent" || m.senderRole === "owner"
+                  : m.senderRole === "user";
                 if (m.type === "offer") {
                   const st = OFFER_STATUS[m.offerStatus || "pending"];
                   const canRespond = !mine && m.offerStatus === "pending";
