@@ -43,7 +43,7 @@ export default function AgentRegisterForm() {
 
   if (status === "ok") {
     return (
-      <div role="status" className="rounded-lg border border-stone bg-paper p-8 text-center">
+      <div role="status" className="rounded-control border border-stone bg-paper p-8 text-center">
         <div className="flex justify-center">
           <CheckCircle2 aria-hidden="true" className="h-12 w-12 text-green-600" />
         </div>
@@ -55,7 +55,7 @@ export default function AgentRegisterForm() {
         </p>
         <Link
           href="/"
-          className="mt-5 inline-flex items-center gap-1 rounded-lg bg-brand-700 px-5 py-3 font-bold text-white hover:bg-brand-800"
+          className="mt-5 inline-flex items-center gap-1 rounded-control bg-brand-700 px-5 py-3 font-bold text-white hover:bg-brand-800"
         >
           Ana sayfaya dön
           <ArrowRight aria-hidden="true" className="h-4 w-4" />
@@ -65,7 +65,7 @@ export default function AgentRegisterForm() {
   }
 
   const inputCls =
-    "w-full rounded-lg border border-stone px-3.5 py-3 text-sm focus:border-brand-500 focus:ring-1 focus:ring-brand-500 outline-none";
+    "w-full rounded-control border border-stone px-3.5 py-3 text-sm focus:border-brand-500 focus:ring-1 focus:ring-brand-500 outline-none";
 
   return (
     <form onSubmit={handleSubmit} aria-busy={status === "loading"} aria-describedby={error ? "agent-register-error" : undefined} className="space-y-3.5">
@@ -105,7 +105,7 @@ export default function AgentRegisterForm() {
       <button
         type="submit"
         disabled={status === "loading"}
-        className="flex w-full items-center justify-center gap-1 rounded-lg bg-brand-800 px-4 py-3.5 text-base font-bold text-white transition hover:bg-brand-900 disabled:opacity-60"
+        className="flex w-full items-center justify-center gap-1 rounded-control bg-brand-800 px-4 py-3.5 text-base font-bold text-white transition hover:bg-brand-900 disabled:opacity-60"
       >
         {status === "loading" ? (
           "Gönderiliyor..."

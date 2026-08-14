@@ -18,11 +18,11 @@ export default function AgentPanelHeader({ name }: { name: string }) {
     <header className="sticky top-0 z-30 border-b border-stone bg-paper">
       <div className="mx-auto flex max-w-5xl items-center justify-between gap-4 px-4 py-3">
         <Link href="/emlakci/panel" className="flex items-center gap-2.5">
-          <span className="grid h-9 w-9 place-items-center rounded-lg bg-gradient-to-br from-brand-700 to-brand-900 text-gold-300 font-display text-lg font-bold">
+          <span className="grid h-9 w-9 place-items-center rounded-control bg-gradient-to-br from-brand-700 to-brand-900 text-gold-300 text-lg font-bold">
             K
           </span>
           <span className="leading-tight">
-            <span className="block font-display font-bold text-brand-900">Danışman Paneli</span>
+            <span className="block font-bold text-brand-900">Danışman Paneli</span>
             <span className="block text-[10px] uppercase tracking-wider text-muted/70">Kütahya Satılık</span>
           </span>
         </Link>
@@ -37,7 +37,7 @@ export default function AgentPanelHeader({ name }: { name: string }) {
           </Link>
           <button
             onClick={logout}
-            className="inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-medium text-red-600 hover:bg-red-50"
+            className="inline-flex items-center gap-1.5 rounded-control px-3 py-1.5 text-sm font-medium text-red-600 hover:bg-red-50"
           >
             <LogOut className="h-4 w-4" />
             Çıkış

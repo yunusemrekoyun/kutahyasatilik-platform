@@ -23,10 +23,10 @@ export default function AdminError({
 }) {
   return (
     <div className={`${adminCard} mx-auto max-w-lg p-8 text-center`}>
-      <span className="mx-auto grid h-12 w-12 place-items-center rounded-lg bg-amber-50 text-amber-600 ring-1 ring-amber-200">
+      <span className="mx-auto grid h-12 w-12 place-items-center rounded-control bg-amber-50 text-amber-600 ring-1 ring-amber-200">
         <AlertTriangle className="h-6 w-6" />
       </span>
-      <h1 className="mt-4 font-display text-xl font-semibold text-ink">İşlem tamamlanamadı</h1>
+      <h1 className="mt-4 text-xl font-semibold text-ink">İşlem tamamlanamadı</h1>
       <p className="mt-2 text-sm text-muted">
         Kaydetme sırasında bir hata oluştu. Girdiğiniz bilgileri kontrol edip tekrar deneyin.
       </p>

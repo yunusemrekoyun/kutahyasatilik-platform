@@ -70,7 +70,7 @@ export default async function AdminLocalResourcesPage() {
     <div>
       <PageHeader title="Resmî Yerel Araçlar" description="Belediye, imar, parsel ve e-Devlet bağlantılarını yönetin" />
 
-      <div className="mb-6 rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
+      <div className="mb-6 rounded-control border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
         Yalnız doğruladığınız resmî kurum adreslerini ekleyin. Site, kullanıcıyı harici kuruma yönlendirdiğini açıkça belirtir ve hiçbir tapu ya da kimlik bilgisini kendi içinde toplamaz.
       </div>
 

@@ -40,7 +40,7 @@ export default function AgentLogoUpload({ initialLogo }: { initialLogo?: string 
         )}
       </div>
       <div className="flex flex-col gap-1.5">
-        <label className="inline-flex w-fit cursor-pointer items-center rounded-lg border border-stone px-3 py-1.5 text-xs font-semibold text-ink hover:border-brand-400 hover:text-brand-600">
+        <label className="inline-flex w-fit cursor-pointer items-center rounded-control border border-stone px-3 py-1.5 text-xs font-semibold text-ink hover:border-brand-400 hover:text-brand-600">
           {uploading ? "Yükleniyor..." : logo ? "Değiştir" : "Logo Yükle"}
           <input type="file" accept="image/*" onChange={handleUpload} className="hidden" />
         </label>

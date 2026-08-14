@@ -78,11 +78,11 @@ export default function OfferView() {
 
   if (phase === "done") {
     return (
-      <div className="rounded-lg border border-green-200 bg-green-50 p-8 text-center">
+      <div className="rounded-control border border-green-200 bg-green-50 p-8 text-center">
         <span className="mx-auto grid h-14 w-14 place-items-center rounded-full bg-paper text-green-600 ring-1 ring-green-200">
           <CheckCircle2 className="h-8 w-8" />
         </span>
-        <h2 className="mt-4 font-display text-xl font-bold text-green-800">Teklif kabul edildi</h2>
+        <h2 className="mt-4 text-xl font-bold text-green-800">Teklif kabul edildi</h2>
         <p className="mt-2 text-sm text-green-700">
           Ödeme bilgileri için sizinle iletişime geçeceğiz. Ödeme onaylandıktan sonra hesabınız aktifleşir.
         </p>
@@ -93,10 +93,10 @@ export default function OfferView() {
   if (phase === "offer" && offer) {
     return (
       <div className="space-y-5">
-        <div className="overflow-hidden rounded-lg border border-stone">
+        <div className="overflow-hidden rounded-control border border-stone">
           <div className="bg-brand-950 px-6 py-5 text-white">
             <p className="text-xs uppercase tracking-wider text-gold-300">Teklif v{offer.version}</p>
-            <h2 className="mt-1 font-display text-xl font-bold">{offer.name}</h2>
+            <h2 className="mt-1 text-xl font-bold">{offer.name}</h2>
             <p className="mt-1 text-2xl font-bold">
               {formatPrice(offer.price, "TRY")}<span className="text-base font-normal text-brand-200">{intervalLabel(offer.interval)}</span>
             </p>
@@ -115,7 +115,7 @@ export default function OfferView() {
         <button
           onClick={accept}
           disabled={loading}
-          className="w-full rounded-lg bg-brand-800 px-4 py-3.5 text-base font-bold text-white transition hover:bg-brand-900 disabled:opacity-60"
+          className="w-full rounded-control bg-brand-800 px-4 py-3.5 text-base font-bold text-white transition hover:bg-brand-900 disabled:opacity-60"
         >
           {loading ? "İşleniyor..." : "Teklifi Kabul Et"}
         </button>

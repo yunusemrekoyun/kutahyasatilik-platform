@@ -68,7 +68,7 @@ export default async function AdminBuyerAlerts({
 
       <div className="space-y-3">
         {alerts.map((a, i) => (
-          <div key={a.id} className={`rounded-lg bg-paper p-5 ring-1 ${counts[i] > 0 ? "ring-green-200" : "ring-stone"}`}>
+          <div key={a.id} className={`rounded-control bg-paper p-5 ring-1 ${counts[i] > 0 ? "ring-green-200" : "ring-stone"}`}>
             <div className="flex flex-wrap items-start justify-between gap-4">
               <div className="min-w-0">
                 <div className="flex items-center gap-2">
@@ -84,7 +84,7 @@ export default async function AdminBuyerAlerts({
               </div>
 
               <div className="flex flex-col items-end gap-2">
-                <span className={`rounded-lg px-3 py-1.5 text-sm font-bold ${counts[i] > 0 ? "bg-green-50 text-green-700" : "bg-canvas text-muted/70"}`}>
+                <span className={`rounded-control px-3 py-1.5 text-sm font-bold ${counts[i] > 0 ? "bg-green-50 text-green-700" : "bg-canvas text-muted/70"}`}>
                   {counts[i]} uygun ilan
                 </span>
                 {counts[i] > 0 && a.district && (
@@ -96,18 +96,18 @@ export default async function AdminBuyerAlerts({
             </div>
 
             <div className="mt-4 flex flex-wrap items-center gap-2 border-t border-stone pt-4">
-              <a href={`tel:${a.phone.replace(/[^\d+]/g, "")}`} className="rounded-lg bg-brand-700 px-3.5 py-2 text-sm font-semibold text-white hover:bg-brand-800">Ara</a>
-              <a href={waLink(a.phone, a.name)} target="_blank" rel="noopener noreferrer" className="rounded-lg bg-green-600 px-3.5 py-2 text-sm font-semibold text-white hover:bg-green-700">WhatsApp</a>
+              <a href={`tel:${a.phone.replace(/[^\d+]/g, "")}`} className="rounded-control bg-brand-700 px-3.5 py-2 text-sm font-semibold text-white hover:bg-brand-800">Ara</a>
+              <a href={waLink(a.phone, a.name)} target="_blank" rel="noopener noreferrer" className="rounded-control bg-green-600 px-3.5 py-2 text-sm font-semibold text-white hover:bg-green-700">WhatsApp</a>
               <form action={updateAlertStatus}>
                 <input type="hidden" name="id" value={a.id} />
                 <input type="hidden" name="status" value={a.status === "active" ? "closed" : "active"} />
-                <button className="rounded-lg px-3 py-2 text-sm font-medium text-muted hover:bg-canvas">
+                <button className="rounded-control px-3 py-2 text-sm font-medium text-muted hover:bg-canvas">
                   {a.status === "active" ? "Kapat" : "Yeniden Aç"}
                 </button>
               </form>
               <form action={deleteAlert} className="ml-auto">
                 <input type="hidden" name="id" value={a.id} />
-                <button className="rounded-lg px-3 py-2 text-sm text-red-600 hover:bg-red-50">Sil</button>
+                <button className="rounded-control px-3 py-2 text-sm text-red-600 hover:bg-red-50">Sil</button>
               </form>
             </div>
           </div>
@@ -119,10 +119,10 @@ export default async function AdminBuyerAlerts({
           <span className="text-muted">Sayfa {page} / {totalPages}</span>
           <div className="flex gap-2">
             {page > 1 && (
-              <Link href={`/admin/alici-talepleri?sayfa=${page - 1}`} className="rounded-lg bg-paper px-3 py-1.5 font-medium text-ink border border-stone hover:border-brand-300">‹ Önceki</Link>
+              <Link href={`/admin/alici-talepleri?sayfa=${page - 1}`} className="rounded-control bg-paper px-3 py-1.5 font-medium text-ink border border-stone hover:border-brand-300">‹ Önceki</Link>
             )}
             {page < totalPages && (
-              <Link href={`/admin/alici-talepleri?sayfa=${page + 1}`} className="rounded-lg bg-paper px-3 py-1.5 font-medium text-ink border border-stone hover:border-brand-300">Sonraki ›</Link>
+              <Link href={`/admin/alici-talepleri?sayfa=${page + 1}`} className="rounded-control bg-paper px-3 py-1.5 font-medium text-ink border border-stone hover:border-brand-300">Sonraki ›</Link>
             )}
           </div>
         </div>

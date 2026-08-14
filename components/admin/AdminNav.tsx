@@ -96,7 +96,7 @@ export default function AdminNav({
                   onClick={onNavigate}
                   title={collapsed ? it.label : undefined}
                   aria-current={active ? "page" : undefined}
-                  className={`group relative flex items-center rounded-lg text-sm font-medium transition ${ collapsed ? "justify-center px-0 py-2.5" : "gap-3 px-3 py-2.5" } ${active ? "bg-brand-700 text-white" : "text-muted hover:bg-canvas hover:text-ink"}`}
+                  className={`group relative flex items-center rounded-control text-sm font-medium transition ${ collapsed ? "justify-center px-0 py-2.5" : "gap-3 px-3 py-2.5" } ${active ? "bg-brand-700 text-white" : "text-muted hover:bg-canvas hover:text-ink"}`}
                 >
                   {active && !collapsed && (
                     <span className="absolute left-0 top-1/2 h-5 w-1 -translate-y-1/2 rounded-r-full bg-gold-400" />
@@ -123,7 +123,7 @@ export default function AdminNav({
       <button
         onClick={logout}
         title={collapsed ? "Çıkış" : undefined}
-        className={`mt-auto flex items-center rounded-lg text-sm font-medium text-red-600 transition hover:bg-red-50 ${ collapsed ? "justify-center px-0 py-2.5" : "gap-3 px-3 py-2.5" }`}
+        className={`mt-auto flex items-center rounded-control text-sm font-medium text-red-600 transition hover:bg-red-50 ${ collapsed ? "justify-center px-0 py-2.5" : "gap-3 px-3 py-2.5" }`}
       >
         <LogOut className="h-[18px] w-[18px] shrink-0" strokeWidth={2} />
         {!collapsed && "Çıkış"}

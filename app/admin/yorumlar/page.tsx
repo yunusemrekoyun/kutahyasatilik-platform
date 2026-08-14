@@ -4,7 +4,7 @@ import { saveTestimonial, deleteTestimonial } from "../actions";
 export const dynamic = "force-dynamic";
 
 const inputCls =
-  "w-full rounded-lg border border-stone px-3 py-2 text-sm focus:border-brand-500 focus:ring-1 focus:ring-brand-500 outline-none";
+  "w-full rounded-control border border-stone px-3 py-2 text-sm focus:border-brand-500 focus:ring-1 focus:ring-brand-500 outline-none";
 
 export default async function AdminTestimonials() {
   const items = await prisma.testimonial.findMany({
@@ -29,19 +29,19 @@ export default async function AdminTestimonials() {
         <div className="mt-3 flex flex-wrap items-center gap-4">
           <label className="flex items-center gap-2 text-sm text-ink">
             Yıldız
-            <select name="stars" defaultValue="5" className="rounded-lg border border-stone px-2 py-1.5 text-sm">
+            <select name="stars" defaultValue="5" className="rounded-control border border-stone px-2 py-1.5 text-sm">
               {[5, 4, 3, 2, 1].map((s) => <option key={s} value={s}>{s} Yıldız</option>)}
             </select>
           </label>
           <label className="flex items-center gap-2 text-sm text-ink">
             Sıra
-            <input name="sortOrder" type="number" defaultValue={0} className="w-20 rounded-lg border border-stone px-2 py-1.5 text-sm" />
+            <input name="sortOrder" type="number" defaultValue={0} className="w-20 rounded-control border border-stone px-2 py-1.5 text-sm" />
           </label>
           <label className="flex items-center gap-2 text-sm text-ink">
             <input type="checkbox" name="published" defaultChecked className="h-4 w-4 rounded border-stone" />
             Yayında
           </label>
-          <button className="ml-auto rounded-lg bg-brand-700 px-5 py-2 text-sm font-bold text-white hover:bg-brand-800">
+          <button className="ml-auto rounded-control bg-brand-700 px-5 py-2 text-sm font-bold text-white hover:bg-brand-800">
             + Ekle
           </button>
         </div>
@@ -63,23 +63,23 @@ export default async function AdminTestimonials() {
             <div className="mt-3 flex flex-wrap items-center gap-4">
               <label className="flex items-center gap-2 text-sm text-ink">
                 Yıldız
-                <select name="stars" defaultValue={String(t.stars)} className="rounded-lg border border-stone px-2 py-1.5 text-sm">
+                <select name="stars" defaultValue={String(t.stars)} className="rounded-control border border-stone px-2 py-1.5 text-sm">
                   {[5, 4, 3, 2, 1].map((s) => <option key={s} value={s}>{s} Yıldız</option>)}
                 </select>
               </label>
               <label className="flex items-center gap-2 text-sm text-ink">
                 Sıra
-                <input name="sortOrder" type="number" defaultValue={t.sortOrder} className="w-20 rounded-lg border border-stone px-2 py-1.5 text-sm" />
+                <input name="sortOrder" type="number" defaultValue={t.sortOrder} className="w-20 rounded-control border border-stone px-2 py-1.5 text-sm" />
               </label>
               <label className="flex items-center gap-2 text-sm text-ink">
                 <input type="checkbox" name="published" defaultChecked={t.published} className="h-4 w-4 rounded border-stone" />
                 Yayında
               </label>
               <div className="ml-auto flex items-center gap-2">
-                <button className="rounded-lg bg-brand-800 px-4 py-2 text-sm font-bold text-white hover:bg-brand-900">Kaydet</button>
+                <button className="rounded-control bg-brand-800 px-4 py-2 text-sm font-bold text-white hover:bg-brand-900">Kaydet</button>
                 <button
                   formAction={deleteTestimonial}
-                  className="rounded-lg px-3 py-2 text-sm font-semibold text-red-600 hover:bg-red-50"
+                  className="rounded-control px-3 py-2 text-sm font-semibold text-red-600 hover:bg-red-50"
                 >
                   Sil
                 </button>

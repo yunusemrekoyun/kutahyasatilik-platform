@@ -44,9 +44,9 @@ export default function SettingImageField({
           value={url}
           onChange={(e) => setUrl(e.target.value)}
           placeholder="/uploads/... veya https://..."
-          className="w-full rounded-lg border border-stone px-3 py-2.5 text-sm outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500"
+          className="w-full rounded-control border border-stone px-3 py-2.5 text-sm outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500"
         />
-        <label className="inline-flex shrink-0 cursor-pointer items-center justify-center gap-2 rounded-lg bg-brand-700 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-brand-800">
+        <label className="inline-flex shrink-0 cursor-pointer items-center justify-center gap-2 rounded-control bg-brand-700 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-brand-800">
           <Upload className="h-4 w-4" /> {busy ? "Yükleniyor..." : "Görsel Seç"}
           <input type="file" accept="image/*" className="hidden" onChange={onPick} disabled={busy} />
         </label>
@@ -57,7 +57,7 @@ export default function SettingImageField({
       {url && (
         <div className="relative mt-2 inline-block">
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={url} alt="Önizleme" className="h-28 w-full rounded-lg object-cover border border-stone sm:w-72" />
+          <img src={url} alt="Önizleme" className="h-28 w-full rounded-control object-cover border border-stone sm:w-72" />
           <button
             type="button"
             onClick={() => setUrl("")}

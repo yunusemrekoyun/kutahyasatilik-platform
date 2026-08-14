@@ -16,7 +16,7 @@ export default async function AdminPages() {
           <h1 className="text-2xl font-bold tracking-tight text-ink">Sayfalar</h1>
           <p className="text-sm text-muted">{pages.length} içerik sayfası</p>
         </div>
-        <Link href="/admin/sayfalar/yeni" className="rounded-lg bg-brand-700 px-4 py-2 text-sm font-bold text-white hover:bg-brand-800">
+        <Link href="/admin/sayfalar/yeni" className="rounded-control bg-brand-700 px-4 py-2 text-sm font-bold text-white hover:bg-brand-800">
           + Yeni Sayfa
         </Link>
       </div>
@@ -51,12 +51,12 @@ export default async function AdminPages() {
                 <td className="p-3">
                   <div className="flex items-center justify-end gap-2">
                     {p.status === "published" && (
-                      <Link href={`/sayfa/${p.slug}`} target="_blank" className="rounded-md px-2 py-1 text-xs text-muted hover:bg-canvas">Gör</Link>
+                      <Link href={`/sayfa/${p.slug}`} target="_blank" className="rounded-control px-2 py-1 text-xs text-muted hover:bg-canvas">Gör</Link>
                     )}
-                    <Link href={`/admin/sayfalar/${p.id}`} className="rounded-md bg-brand-50 px-2.5 py-1 text-xs font-semibold text-brand-700 hover:bg-brand-100">Düzenle</Link>
+                    <Link href={`/admin/sayfalar/${p.id}`} className="rounded-control bg-brand-50 px-2.5 py-1 text-xs font-semibold text-brand-700 hover:bg-brand-100">Düzenle</Link>
                     <form action={deletePage}>
                       <input type="hidden" name="id" value={p.id} />
-                      <button className="rounded-md px-2 py-1 text-xs text-red-600 hover:bg-red-50">Sil</button>
+                      <button className="rounded-control px-2 py-1 text-xs text-red-600 hover:bg-red-50">Sil</button>
                     </form>
                   </div>
                 </td>

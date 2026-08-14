@@ -24,7 +24,7 @@ export default async function AdminDistricts() {
           <input type="checkbox" name="show" defaultChecked={scoresVisible} className="h-4 w-4 rounded border-stone" />
           Bölge analizi puanlarını sitede göster
         </label>
-        <button type="submit" className="rounded-lg bg-brand-800 px-4 py-2 text-sm font-semibold text-white hover:bg-brand-900">
+        <button type="submit" className="rounded-control bg-brand-800 px-4 py-2 text-sm font-semibold text-white hover:bg-brand-900">
           Kaydet
         </button>
       </form>
@@ -52,7 +52,7 @@ export default async function AdminDistricts() {
                 <td className="p-3 text-muted">{d.valueGrowth5yPct != null ? `%${d.valueGrowth5yPct}` : "—"}</td>
                 <td className="p-3">
                   <div className="flex items-center justify-end gap-2">
-                    <Link href={`/admin/ilceler/${d.id}`} className="rounded-md bg-brand-50 px-2.5 py-1 text-xs font-semibold text-brand-700 hover:bg-brand-100">Düzenle</Link>
+                    <Link href={`/admin/ilceler/${d.id}`} className="rounded-control bg-brand-50 px-2.5 py-1 text-xs font-semibold text-brand-700 hover:bg-brand-100">Düzenle</Link>
                   </div>
                 </td>
               </tr>

@@ -8,7 +8,7 @@ import { savePage } from "@/app/admin/actions";
 // TipTap (ProseMirror) ağır; admin form bundle'ına girmemesi için lazy-load.
 const RichEditor = dynamic(() => import("./RichEditor"), {
   ssr: false,
-  loading: () => <div className="h-[340px] animate-pulse rounded-lg bg-canvas" />,
+  loading: () => <div className="h-[340px] animate-pulse rounded-control bg-canvas" />,
 });
 
 type PageData = {
@@ -24,7 +24,7 @@ type PageData = {
 };
 
 const inputCls =
-  "w-full rounded-lg border border-stone bg-paper px-3.5 py-2.5 text-[15px] text-ink outline-none transition placeholder:text-muted/70 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/30";
+  "w-full rounded-control border border-stone bg-paper px-3.5 py-2.5 text-[15px] text-ink outline-none transition placeholder:text-muted/70 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/30";
 const labelCls = "block text-sm font-medium text-ink mb-1";
 
 export default function PageForm({ page }: { page?: PageData }) {
@@ -61,7 +61,7 @@ export default function PageForm({ page }: { page?: PageData }) {
             </label>
             <label className="flex items-center gap-2 text-sm text-ink">
               Menü sırası
-              <input type="number" name="menuOrder" defaultValue={page?.menuOrder ?? 0} className="w-20 rounded-lg border border-stone px-2 py-1.5 text-sm outline-none" />
+              <input type="number" name="menuOrder" defaultValue={page?.menuOrder ?? 0} className="w-20 rounded-control border border-stone px-2 py-1.5 text-sm outline-none" />
             </label>
           </div>
         </div>
@@ -89,10 +89,10 @@ export default function PageForm({ page }: { page?: PageData }) {
       </section>
 
       <div className="flex items-center gap-3">
-        <button type="submit" disabled={submitting} className="rounded-lg bg-brand-700 px-6 py-3 font-bold text-white hover:bg-brand-800 disabled:opacity-60">
+        <button type="submit" disabled={submitting} className="rounded-control bg-brand-700 px-6 py-3 font-bold text-white hover:bg-brand-800 disabled:opacity-60">
           {submitting ? "Kaydediliyor..." : page?.id ? "Değişiklikleri Kaydet" : "Sayfayı Kaydet"}
         </button>
-        <Link href="/admin/sayfalar" className="rounded-lg px-6 py-3 font-medium text-muted hover:bg-canvas">İptal</Link>
+        <Link href="/admin/sayfalar" className="rounded-control px-6 py-3 font-medium text-muted hover:bg-canvas">İptal</Link>
       </div>
     </form>
   );

@@ -108,7 +108,7 @@ export default async function AdminAgenciesPage() {
     <div>
       <PageHeader title="Firmalar" description={`${agencies.length} firma · kamu dizini ve portföy sahipliği`} />
 
-      <div className="mb-6 flex gap-3 rounded-lg border border-blue-200 bg-blue-50 p-4 text-sm text-blue-900">
+      <div className="mb-6 flex gap-3 rounded-control border border-blue-200 bg-blue-50 p-4 text-sm text-blue-900">
         <ShieldCheck className="mt-0.5 h-5 w-5 shrink-0" />
         <p>Bir profil yalnız <strong>Onaylı</strong> ve <strong>Kamu dizininde yayınla</strong> seçenekleri birlikte açıkken görünür. İletişim bilgileri ayrıca açık izin gerektirir.</p>
       </div>

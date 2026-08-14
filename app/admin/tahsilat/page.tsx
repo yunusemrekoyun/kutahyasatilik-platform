@@ -6,7 +6,7 @@ import { formatPrice } from "@/lib/format";
 export const dynamic = "force-dynamic";
 
 const inputCls =
-  "w-full rounded-lg border border-stone bg-paper px-3 py-2 text-sm text-ink outline-none transition focus:border-brand-500 focus:ring-2 focus:ring-brand-500/30";
+  "w-full rounded-control border border-stone bg-paper px-3 py-2 text-sm text-ink outline-none transition focus:border-brand-500 focus:ring-2 focus:ring-brand-500/30";
 
 const STATUS: Record<string, { label: string; cls: string }> = {
   pending: { label: "Bekliyor", cls: "bg-amber-50 text-amber-700 ring-amber-200" },
@@ -111,7 +111,7 @@ export default async function AdminTahsilatPage({
               <option value="listing">İlan</option>
               <option value="featured">Öne çıkarma</option>
             </select>
-            <button type="submit" className="col-span-2 rounded-lg bg-brand-700 px-4 py-2 text-sm font-semibold text-white hover:bg-brand-800 sm:col-span-1">
+            <button type="submit" className="col-span-2 rounded-control bg-brand-700 px-4 py-2 text-sm font-semibold text-white hover:bg-brand-800 sm:col-span-1">
               Ekle
             </button>
           </form>
@@ -144,12 +144,12 @@ export default async function AdminTahsilatPage({
                   <td className="px-4 py-3">
                     <form action={updatePaymentStatus} className="flex items-center gap-1.5">
                       <input type="hidden" name="id" value={p.id} />
-                      <select name="status" defaultValue={p.status} className="rounded-md border border-stone px-2 py-1 text-xs">
+                      <select name="status" defaultValue={p.status} className="rounded-control border border-stone px-2 py-1 text-xs">
                         <option value="pending">Bekliyor</option>
                         <option value="paid">Ödendi</option>
                         <option value="overdue">Gecikti</option>
                       </select>
-                      <button type="submit" className="rounded-md bg-canvas px-2 py-1 text-xs font-medium text-ink hover:bg-stone">Kaydet</button>
+                      <button type="submit" className="rounded-control bg-canvas px-2 py-1 text-xs font-medium text-ink hover:bg-stone">Kaydet</button>
                     </form>
                   </td>
                   <td className="px-4 py-3 text-right">
@@ -170,10 +170,10 @@ export default async function AdminTahsilatPage({
           <span className="text-muted">Sayfa {page} / {totalPages} · {totalCount} kayıt</span>
           <div className="flex gap-2">
             {page > 1 && (
-              <Link href={`/admin/tahsilat${page - 1 > 1 ? `?sayfa=${page - 1}` : ""}`} className="rounded-lg bg-paper px-3 py-1.5 font-medium text-ink border border-stone hover:border-brand-300">‹ Önceki</Link>
+              <Link href={`/admin/tahsilat${page - 1 > 1 ? `?sayfa=${page - 1}` : ""}`} className="rounded-control bg-paper px-3 py-1.5 font-medium text-ink border border-stone hover:border-brand-300">‹ Önceki</Link>
             )}
             {page < totalPages && (
-              <Link href={`/admin/tahsilat?sayfa=${page + 1}`} className="rounded-lg bg-paper px-3 py-1.5 font-medium text-ink border border-stone hover:border-brand-300">Sonraki ›</Link>
+              <Link href={`/admin/tahsilat?sayfa=${page + 1}`} className="rounded-control bg-paper px-3 py-1.5 font-medium text-ink border border-stone hover:border-brand-300">Sonraki ›</Link>
             )}
           </div>
         </div>

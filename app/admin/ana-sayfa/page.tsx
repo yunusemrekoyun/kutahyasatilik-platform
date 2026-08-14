@@ -20,7 +20,7 @@ export default async function AdminHomeTexts() {
   const map = new Map(rows.map((r) => [r.key, r.value]));
 
   const inputCls =
-    "w-full rounded-lg border border-stone bg-paper px-3.5 py-2.5 text-[15px] text-ink outline-none transition placeholder:text-muted/70 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/30";
+    "w-full rounded-control border border-stone bg-paper px-3.5 py-2.5 text-[15px] text-ink outline-none transition placeholder:text-muted/70 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/30";
 
   return (
     <div>
@@ -41,7 +41,7 @@ export default async function AdminHomeTexts() {
             {f.hint && <span className="mt-1 block text-xs text-muted/70">{f.hint}</span>}
           </label>
         ))}
-        <button className="rounded-lg bg-brand-700 px-6 py-3 font-bold text-white hover:bg-brand-800">
+        <button className="rounded-control bg-brand-700 px-6 py-3 font-bold text-white hover:bg-brand-800">
           Metinleri Kaydet
         </button>
       </form>

@@ -20,7 +20,7 @@ function Btn({
       type="button"
       title={title}
       onClick={onClick}
-      className={`grid h-8 w-8 place-items-center rounded-md transition ${ active ? "bg-brand-700 text-white" : "text-muted hover:bg-stone" }`}
+      className={`grid h-8 w-8 place-items-center rounded-control transition ${ active ? "bg-brand-700 text-white" : "text-muted hover:bg-stone" }`}
     >
       {children}
     </button>
@@ -98,11 +98,11 @@ export default function RichEditor({
   }, [editor]);
 
   if (!editor) {
-    return <div className="h-[340px] animate-pulse rounded-lg bg-canvas" />;
+    return <div className="h-[340px] animate-pulse rounded-control bg-canvas" />;
   }
 
   return (
-    <div className="overflow-hidden rounded-lg border border-stone bg-paper">
+    <div className="overflow-hidden rounded-control border border-stone bg-paper">
       {/* Araç çubuğu */}
       <div className="flex flex-wrap items-center gap-1 border-b border-stone bg-canvas p-1.5">
         <Btn title="Kalın" active={editor.isActive("bold")} onClick={() => editor.chain().focus().toggleBold().run()}><Bold className="h-4 w-4" /></Btn>

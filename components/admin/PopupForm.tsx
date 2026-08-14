@@ -18,7 +18,7 @@ type PopupData = {
 };
 
 const inputCls =
-  "w-full rounded-lg border border-stone bg-paper px-3.5 py-2.5 text-[15px] text-ink outline-none transition placeholder:text-muted/70 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/30";
+  "w-full rounded-control border border-stone bg-paper px-3.5 py-2.5 text-[15px] text-ink outline-none transition placeholder:text-muted/70 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/30";
 const labelCls = "block text-sm font-medium text-ink mb-1";
 
 export default function PopupForm({ popup }: { popup?: PopupData }) {
@@ -63,11 +63,11 @@ export default function PopupForm({ popup }: { popup?: PopupData }) {
           <div>
             <span className={labelCls}>Görsel (opsiyonel)</span>
             <div className="mt-1 flex items-center gap-4">
-              <div className="relative h-24 w-40 shrink-0 overflow-hidden rounded-lg bg-canvas border border-stone">
+              <div className="relative h-24 w-40 shrink-0 overflow-hidden rounded-control bg-canvas border border-stone">
                 {image && <Image src={image} alt="" fill sizes="160px" className="object-cover" />}
               </div>
               <div>
-                <label className="inline-block cursor-pointer rounded-lg bg-brand-50 px-4 py-2.5 text-sm font-semibold text-brand-700 hover:bg-brand-100">
+                <label className="inline-block cursor-pointer rounded-control bg-brand-50 px-4 py-2.5 text-sm font-semibold text-brand-700 hover:bg-brand-100">
                   {uploading ? "Yükleniyor..." : image ? "Değiştir" : "Görsel Yükle"}
                   <input type="file" accept="image/*" onChange={uploadImage} className="hidden" />
                 </label>
@@ -112,10 +112,10 @@ export default function PopupForm({ popup }: { popup?: PopupData }) {
       </section>
 
       <div className="flex items-center gap-3">
-        <button type="submit" disabled={submitting || uploading} className="rounded-lg bg-brand-700 px-6 py-3 font-bold text-white hover:bg-brand-800 disabled:opacity-60">
+        <button type="submit" disabled={submitting || uploading} className="rounded-control bg-brand-700 px-6 py-3 font-bold text-white hover:bg-brand-800 disabled:opacity-60">
           {submitting ? "Kaydediliyor..." : popup?.id ? "Değişiklikleri Kaydet" : "Reklamı Kaydet"}
         </button>
-        <Link href="/admin/reklamlar" className="rounded-lg px-6 py-3 font-medium text-muted hover:bg-canvas">İptal</Link>
+        <Link href="/admin/reklamlar" className="rounded-control px-6 py-3 font-medium text-muted hover:bg-canvas">İptal</Link>
       </div>
     </form>
   );

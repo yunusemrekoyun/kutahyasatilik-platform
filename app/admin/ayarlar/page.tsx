@@ -14,7 +14,7 @@ async function getSettings() {
 }
 
 const inputCls =
-  "w-full rounded-lg border border-stone px-3 py-2.5 text-sm focus:border-brand-500 focus:ring-1 focus:ring-brand-500 outline-none";
+  "w-full rounded-control border border-stone px-3 py-2.5 text-sm focus:border-brand-500 focus:ring-1 focus:ring-brand-500 outline-none";
 
 export default async function SettingsPage() {
   const s = await getSettings();
@@ -60,10 +60,10 @@ export default async function SettingsPage() {
             Mülkünü Sat sayfasının üst (lacivert) alanında silik arka plan olarak görünür. Boş bırakılırsa düz lacivert kullanılır.
           </span>
         </div>
-        <button className="rounded-lg bg-brand-700 px-6 py-2.5 font-bold text-white hover:bg-brand-800">Kaydet</button>
+        <button className="rounded-control bg-brand-700 px-6 py-2.5 font-bold text-white hover:bg-brand-800">Kaydet</button>
       </form>
 
-      <div className="mt-6 rounded-lg bg-amber-50 p-5 text-sm text-amber-800 ring-1 ring-amber-200">
+      <div className="mt-6 rounded-control bg-amber-50 p-5 text-sm text-amber-800 ring-1 ring-amber-200">
         <p className="flex items-center gap-1.5 font-semibold"><Info className="h-4 w-4" />Not</p>
         <p className="mt-1">
           Buraya girdiğiniz telefon, WhatsApp, e-posta ve adres <strong>sitedeki tüm butonlarda ve

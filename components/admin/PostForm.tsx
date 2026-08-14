@@ -9,7 +9,7 @@ import { savePost } from "@/app/admin/actions";
 // TipTap (ProseMirror) ağır; admin form bundle'ına girmemesi için lazy-load.
 const RichEditor = dynamic(() => import("./RichEditor"), {
   ssr: false,
-  loading: () => <div className="h-[340px] animate-pulse rounded-lg bg-canvas" />,
+  loading: () => <div className="h-[340px] animate-pulse rounded-control bg-canvas" />,
 });
 
 type PostData = {
@@ -27,7 +27,7 @@ type PostData = {
 };
 
 const inputCls =
-  "w-full rounded-lg border border-stone bg-paper px-3.5 py-2.5 text-[15px] text-ink outline-none transition placeholder:text-muted/70 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/30";
+  "w-full rounded-control border border-stone bg-paper px-3.5 py-2.5 text-[15px] text-ink outline-none transition placeholder:text-muted/70 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/30";
 const labelCls = "block text-sm font-medium text-ink mb-1";
 
 export default function PostForm({ post }: { post?: PostData }) {
@@ -97,11 +97,11 @@ export default function PostForm({ post }: { post?: PostData }) {
       <section className="bg-paper p-6 border border-stone">
         <h2 className="font-bold text-ink">Kapak Görseli</h2>
         <div className="mt-4 flex items-center gap-4">
-          <div className="relative h-28 w-44 shrink-0 overflow-hidden rounded-lg bg-canvas border border-stone">
+          <div className="relative h-28 w-44 shrink-0 overflow-hidden rounded-control bg-canvas border border-stone">
             {cover && <Image src={cover} alt="" fill sizes="176px" className="object-cover" />}
           </div>
           <div>
-            <label className="inline-block cursor-pointer rounded-lg bg-brand-50 px-4 py-2.5 text-sm font-semibold text-brand-700 hover:bg-brand-100">
+            <label className="inline-block cursor-pointer rounded-control bg-brand-50 px-4 py-2.5 text-sm font-semibold text-brand-700 hover:bg-brand-100">
               {uploading ? "Yükleniyor..." : cover ? "Görseli Değiştir" : "Görsel Yükle"}
               <input type="file" accept="image/*" onChange={uploadCover} className="hidden" />
             </label>
@@ -136,10 +136,10 @@ export default function PostForm({ post }: { post?: PostData }) {
       </section>
 
       <div className="flex items-center gap-3">
-        <button type="submit" disabled={submitting || uploading} className="rounded-lg bg-brand-700 px-6 py-3 font-bold text-white hover:bg-brand-800 disabled:opacity-60">
+        <button type="submit" disabled={submitting || uploading} className="rounded-control bg-brand-700 px-6 py-3 font-bold text-white hover:bg-brand-800 disabled:opacity-60">
           {submitting ? "Kaydediliyor..." : post?.id ? "Değişiklikleri Kaydet" : "Yazıyı Kaydet"}
         </button>
-        <Link href="/admin/blog" className="rounded-lg px-6 py-3 font-medium text-muted hover:bg-canvas">İptal</Link>
+        <Link href="/admin/blog" className="rounded-control px-6 py-3 font-medium text-muted hover:bg-canvas">İptal</Link>
       </div>
     </form>
   );

@@ -70,11 +70,11 @@ export default function CsvListingImport() {
     <div className="space-y-6">
       <section className="border border-stone bg-paper p-6">
         <div className="flex items-start gap-3">
-          <span className="grid h-11 w-11 shrink-0 place-items-center rounded-lg bg-brand-50 text-brand-700">
+          <span className="grid h-11 w-11 shrink-0 place-items-center rounded-control bg-brand-50 text-brand-700">
             <FileSpreadsheet className="h-5 w-5" />
           </span>
           <div>
-            <h2 className="font-display text-xl font-semibold text-ink">CSV dosyanızı hazırlayın</h2>
+            <h2 className="text-xl font-semibold text-ink">CSV dosyanızı hazırlayın</h2>
             <p className="mt-1 max-w-3xl text-sm leading-6 text-muted">
               Her satır bir ilan olmalıdır. <strong>externalId</strong>, firmanızdaki değişmeyen ilan numarasıdır;
               aynı numara yeniden aktarılırsa mevcut ilan güncellenir. Aktarılan ilanlar doğrudan yayınlanmaz, yönetim onayına düşer.
@@ -91,7 +91,7 @@ export default function CsvListingImport() {
           <Upload className="h-7 w-7 text-brand-700" />
           <span className="mt-3 font-semibold text-ink">CSV dosyası seçin</span>
           <span className="mt-1 text-sm text-muted">En fazla 250 ilan ve 2 MB</span>
-          {fileName && <span className="mt-3 rounded-md bg-brand-50 px-3 py-1 text-sm font-medium text-brand-800">{fileName}</span>}
+          {fileName && <span className="mt-3 rounded-control bg-brand-50 px-3 py-1 text-sm font-medium text-brand-800">{fileName}</span>}
           <input type="file" accept=".csv,text/csv" className="sr-only" onChange={(event) => chooseFile(event.target.files?.[0])} />
         </label>
 
@@ -102,11 +102,11 @@ export default function CsvListingImport() {
         )}
 
         <div className="mt-5 flex flex-wrap gap-3">
-          <button type="button" disabled={!csv || loading} onClick={() => submit(false)} className="min-h-11 rounded-lg bg-brand-800 px-5 text-sm font-bold text-white disabled:opacity-50">
+          <button type="button" disabled={!csv || loading} onClick={() => submit(false)} className="min-h-11 rounded-control bg-brand-800 px-5 text-sm font-bold text-white disabled:opacity-50">
             {loading ? "Kontrol ediliyor..." : "Dosyayı Kontrol Et"}
           </button>
           {canCommit && (
-            <button type="button" disabled={loading} onClick={() => submit(true)} className="min-h-11 rounded-lg bg-green-700 px-5 text-sm font-bold text-white disabled:opacity-50">
+            <button type="button" disabled={loading} onClick={() => submit(true)} className="min-h-11 rounded-control bg-green-700 px-5 text-sm font-bold text-white disabled:opacity-50">
               {loading ? "Aktarılıyor..." : `${result?.total} İlanı Onaya Gönder`}
             </button>
           )}
@@ -118,7 +118,7 @@ export default function CsvListingImport() {
         <section className="border border-stone bg-paper p-6">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div>
-              <h2 className="font-display text-xl font-semibold text-ink">Aktarım sonucu</h2>
+              <h2 className="text-xl font-semibold text-ink">Aktarım sonucu</h2>
               <p className="mt-1 text-sm text-muted">
                 {result.preview
                   ? `${result.valid ?? 0} geçerli, ${result.invalid ?? 0} hatalı satır.`
@@ -139,7 +139,7 @@ export default function CsvListingImport() {
                     <td className="p-3 font-medium text-ink">{row.externalId || "—"}</td>
                     <td className="max-w-xs p-3 text-ink">{row.title || "—"}</td>
                     <td className="p-3">
-                      <span className={`rounded-md px-2 py-1 text-xs font-semibold ${row.status === "invalid" ? "bg-red-50 text-red-700" : row.status === "update" ? "bg-amber-50 text-amber-700" : "bg-green-50 text-green-700"}`}>
+                      <span className={`rounded-control px-2 py-1 text-xs font-semibold ${row.status === "invalid" ? "bg-red-50 text-red-700" : row.status === "update" ? "bg-amber-50 text-amber-700" : "bg-green-50 text-green-700"}`}>
                         {row.status === "invalid" ? "Hatalı" : row.status === "update" ? "Güncellenecek" : "Yeni"}
                       </span>
                     </td>
@@ -156,7 +156,7 @@ export default function CsvListingImport() {
         <summary className="cursor-pointer font-semibold text-ink">Özellik anahtarlarını göster</summary>
         <p className="mt-2 text-sm text-muted">Birden fazla değeri dik çizgiyle ayırın: elevator|security|city_view</p>
         <div className="mt-4 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
-          {LISTING_AMENITIES.map((item) => <code key={item.key} className="rounded-md bg-canvas px-3 py-2 text-xs text-brand-800">{item.key} — {item.label}</code>)}
+          {LISTING_AMENITIES.map((item) => <code key={item.key} className="rounded-control bg-canvas px-3 py-2 text-xs text-brand-800">{item.key} — {item.label}</code>)}
         </div>
       </details>
     </div>

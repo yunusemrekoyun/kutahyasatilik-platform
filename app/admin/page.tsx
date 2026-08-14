@@ -97,7 +97,7 @@ export default async function AdminDashboard() {
           <div className="mt-4 space-y-2">
             {topListings.length === 0 && <p className="text-sm text-muted/70">Henüz veri yok.</p>}
             {topListings.map((l) => (
-              <Link key={l.id} href={`/ilan/${l.slug}`} className="flex items-center justify-between rounded-lg px-2 py-2 hover:bg-canvas">
+              <Link key={l.id} href={`/ilan/${l.slug}`} className="flex items-center justify-between rounded-control px-2 py-2 hover:bg-canvas">
                 <span className="line-clamp-1 text-sm text-ink">{l.title}</span>
                 <span className="ml-2 inline-flex shrink-0 items-center gap-1 rounded-full bg-brand-50 px-2.5 py-0.5 text-xs font-semibold text-brand-700">
                   <Eye className="h-3.5 w-3.5" /> {l.viewCount}
@@ -116,7 +116,7 @@ export default async function AdminDashboard() {
               const listing = listingMap.get(l.listingId!);
               if (!listing) return null;
               return (
-                <Link key={l.listingId} href={`/ilan/${listing.slug}`} className="flex items-center justify-between rounded-lg px-2 py-2 hover:bg-canvas">
+                <Link key={l.listingId} href={`/ilan/${listing.slug}`} className="flex items-center justify-between rounded-control px-2 py-2 hover:bg-canvas">
                   <span className="line-clamp-1 text-sm text-ink">{listing.title}</span>
                   <span className="ml-2 inline-flex shrink-0 items-center gap-1 rounded-full bg-gold-100 px-2.5 py-0.5 text-xs font-semibold text-gold-700">
                     <Inbox className="h-3.5 w-3.5" /> {l._count.listingId}
@@ -134,7 +134,7 @@ export default async function AdminDashboard() {
           <div className="mt-4 space-y-2">
             {analytics.bySource.length === 0 && <p className="text-sm text-muted/70">Henüz dönüşüm verisi yok.</p>}
             {analytics.bySource.map((s) => (
-              <div key={s.source} className="flex items-center justify-between rounded-lg bg-canvas px-3 py-2">
+              <div key={s.source} className="flex items-center justify-between rounded-control bg-canvas px-3 py-2">
                 <span className="text-sm font-medium text-ink">{s.source}</span>
                 <span className="text-sm font-bold text-brand-700">{s.count}</span>
               </div>

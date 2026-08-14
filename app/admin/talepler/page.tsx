@@ -111,23 +111,23 @@ export default async function AdminLeads({
                   {/* Durum güncelle */}
                   <form action={updateLeadStatus} className="flex items-center gap-1">
                     <input type="hidden" name="id" value={l.id} />
-                    <select name="status" defaultValue={l.status} className="rounded-lg border border-stone px-2 py-1.5 text-xs">
+                    <select name="status" defaultValue={l.status} className="rounded-control border border-stone px-2 py-1.5 text-xs">
                       <option value="received">Alındı</option>
                       <option value="reviewing">İnceleniyor</option>
                       <option value="contacted">İletişim kuruldu</option>
                       <option value="resolved">Sonuçlandı</option>
                     </select>
-                    <button className="rounded-lg bg-canvas px-2.5 py-1.5 text-xs font-semibold text-ink hover:bg-stone">Kaydet</button>
+                    <button className="rounded-control bg-canvas px-2.5 py-1.5 text-xs font-semibold text-ink hover:bg-stone">Kaydet</button>
                   </form>
                   {l.type === "seller" && (
                     <form action={promoteLeadToOpportunity}>
                       <input type="hidden" name="id" value={l.id} />
-                      <button className="rounded-lg bg-indigo-600 px-2.5 py-1.5 text-xs font-semibold text-white hover:bg-indigo-700">Fırsata Dönüştür</button>
+                      <button className="rounded-control bg-indigo-600 px-2.5 py-1.5 text-xs font-semibold text-white hover:bg-indigo-700">Fırsata Dönüştür</button>
                     </form>
                   )}
                   <form action={deleteLead}>
                     <input type="hidden" name="id" value={l.id} />
-                    <button className="rounded-lg px-2.5 py-1.5 text-xs text-red-600 hover:bg-red-50">Sil</button>
+                    <button className="rounded-control px-2.5 py-1.5 text-xs text-red-600 hover:bg-red-50">Sil</button>
                   </form>
                 </div>
               </div>
@@ -155,7 +155,7 @@ export default async function AdminLeads({
               </div>
 
               {l.message && (
-                <p className="mt-3 rounded-lg bg-canvas p-3 text-sm text-ink">{l.message}</p>
+                <p className="mt-3 rounded-control bg-canvas p-3 text-sm text-ink">{l.message}</p>
               )}
 
               {photos.length > 0 && (
@@ -163,7 +163,7 @@ export default async function AdminLeads({
                   {photos.map((p, i) => (
                     <a key={i} href={p} target="_blank" rel="noopener noreferrer">
                       {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img src={p} alt="" className="h-20 w-20 rounded-lg object-cover border border-stone" />
+                      <img src={p} alt="" className="h-20 w-20 rounded-control object-cover border border-stone" />
                     </a>
                   ))}
                 </div>
@@ -178,10 +178,10 @@ export default async function AdminLeads({
           <span className="text-muted">Sayfa {page} / {totalPages}</span>
           <div className="flex gap-2">
             {page > 1 && (
-              <Link href={`/admin/talepler${pageQs(page - 1)}`} className="rounded-lg bg-paper px-3 py-1.5 font-medium text-ink border border-stone hover:border-brand-300">‹ Önceki</Link>
+              <Link href={`/admin/talepler${pageQs(page - 1)}`} className="rounded-control bg-paper px-3 py-1.5 font-medium text-ink border border-stone hover:border-brand-300">‹ Önceki</Link>
             )}
             {page < totalPages && (
-              <Link href={`/admin/talepler${pageQs(page + 1)}`} className="rounded-lg bg-paper px-3 py-1.5 font-medium text-ink border border-stone hover:border-brand-300">Sonraki ›</Link>
+              <Link href={`/admin/talepler${pageQs(page + 1)}`} className="rounded-control bg-paper px-3 py-1.5 font-medium text-ink border border-stone hover:border-brand-300">Sonraki ›</Link>
             )}
           </div>
         </div>

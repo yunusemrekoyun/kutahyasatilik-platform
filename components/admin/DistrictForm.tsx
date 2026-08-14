@@ -24,10 +24,10 @@ type DistrictData = {
 };
 
 const inputCls =
-  "w-full rounded-lg border border-stone bg-paper px-3.5 py-2.5 text-[15px] text-ink outline-none transition placeholder:text-muted/70 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/30";
+  "w-full rounded-control border border-stone bg-paper px-3.5 py-2.5 text-[15px] text-ink outline-none transition placeholder:text-muted/70 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/30";
 // Kimlik alanları (ad/slug/konum) sabit — salt-okunur; değer yine gönderilir (readOnly, disabled değil).
 const roInputCls =
-  "w-full rounded-lg border border-stone bg-canvas px-3.5 py-2.5 text-[15px] text-muted outline-none cursor-not-allowed";
+  "w-full rounded-control border border-stone bg-canvas px-3.5 py-2.5 text-[15px] text-muted outline-none cursor-not-allowed";
 const labelCls = "block text-sm font-medium text-ink mb-1";
 
 export default function DistrictForm({ district }: { district?: DistrictData }) {
@@ -132,10 +132,10 @@ export default function DistrictForm({ district }: { district?: DistrictData }) 
       </section>
 
       <div className="flex items-center gap-3">
-        <button type="submit" disabled={submitting} className="rounded-lg bg-brand-700 px-6 py-3 font-bold text-white hover:bg-brand-800 disabled:opacity-60">
+        <button type="submit" disabled={submitting} className="rounded-control bg-brand-700 px-6 py-3 font-bold text-white hover:bg-brand-800 disabled:opacity-60">
           {submitting ? "Kaydediliyor..." : district?.id ? "Değişiklikleri Kaydet" : "İlçeyi Kaydet"}
         </button>
-        <Link href="/admin/ilceler" className="rounded-lg px-6 py-3 font-medium text-muted hover:bg-canvas">İptal</Link>
+        <Link href="/admin/ilceler" className="rounded-control px-6 py-3 font-medium text-muted hover:bg-canvas">İptal</Link>
       </div>
     </form>
   );

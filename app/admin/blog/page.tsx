@@ -38,7 +38,7 @@ export default async function AdminBlog() {
               <tr key={p.id} className="border-b border-stone/50 hover:bg-canvas">
                 <td className="p-3">
                   <div className="flex items-center gap-3">
-                    <div className="relative h-12 w-16 shrink-0 overflow-hidden rounded-md bg-canvas">
+                    <div className="relative h-12 w-16 shrink-0 overflow-hidden rounded-control bg-canvas">
                       {p.coverImage && <Image src={p.coverImage} alt="" fill sizes="64px" className="object-cover" />}
                     </div>
                     <span className="line-clamp-2 max-w-[280px] font-medium text-ink">{p.title}</span>
@@ -54,12 +54,12 @@ export default async function AdminBlog() {
                 <td className="p-3">
                   <div className="flex items-center justify-end gap-1">
                     {p.status === "published" && (
-                      <Link href={`/blog/${p.slug}`} target="_blank" title="Görüntüle" className="grid h-8 w-8 place-items-center rounded-md text-muted hover:bg-canvas hover:text-ink"><ExternalLink className="h-4 w-4" /></Link>
+                      <Link href={`/blog/${p.slug}`} target="_blank" title="Görüntüle" className="grid h-8 w-8 place-items-center rounded-control text-muted hover:bg-canvas hover:text-ink"><ExternalLink className="h-4 w-4" /></Link>
                     )}
-                    <Link href={`/admin/blog/${p.id}`} title="Düzenle" className="grid h-8 w-8 place-items-center rounded-md text-brand-700 hover:bg-brand-50"><Pencil className="h-4 w-4" /></Link>
+                    <Link href={`/admin/blog/${p.id}`} title="Düzenle" className="grid h-8 w-8 place-items-center rounded-control text-brand-700 hover:bg-brand-50"><Pencil className="h-4 w-4" /></Link>
                     <form action={deletePost}>
                       <input type="hidden" name="id" value={p.id} />
-                      <button title="Sil" className="grid h-8 w-8 place-items-center rounded-md text-red-600 hover:bg-red-50"><Trash2 className="h-4 w-4" /></button>
+                      <button title="Sil" className="grid h-8 w-8 place-items-center rounded-control text-red-600 hover:bg-red-50"><Trash2 className="h-4 w-4" /></button>
                     </form>
                   </div>
                 </td>

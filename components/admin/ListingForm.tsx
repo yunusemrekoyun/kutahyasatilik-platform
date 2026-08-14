@@ -74,7 +74,7 @@ type ListingData = {
 };
 
 const inputCls =
-  "w-full rounded-lg border border-stone bg-paper px-3.5 py-2.5 text-[15px] text-ink outline-none transition placeholder:text-muted/70 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/30";
+  "w-full rounded-control border border-stone bg-paper px-3.5 py-2.5 text-[15px] text-ink outline-none transition placeholder:text-muted/70 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/30";
 const labelCls = "block text-sm font-medium text-ink mb-1";
 
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
@@ -228,7 +228,7 @@ export default function ListingForm({
         <p className="text-xs text-muted">İlk görsel kapak olarak kullanılır. Sürükle-bırak yerine okları kullanın.</p>
         <div className="mt-4 grid grid-cols-3 gap-3 sm:grid-cols-5">
           {images.map((url, i) => (
-            <div key={url} className="group relative aspect-square overflow-hidden rounded-lg border border-stone">
+            <div key={url} className="group relative aspect-square overflow-hidden rounded-control border border-stone">
               <Image src={url} alt="" fill sizes="120px" className="object-cover" />
               {i === 0 && <span className="absolute left-1 top-1 rounded bg-brand-700 px-1.5 py-0.5 text-[10px] font-bold text-white">Kapak</span>}
               <div className="absolute inset-x-0 bottom-0 flex justify-between bg-black/50 p-1 opacity-0 transition group-hover:opacity-100">
@@ -238,7 +238,7 @@ export default function ListingForm({
               </div>
             </div>
           ))}
-          <label className="grid aspect-square cursor-pointer place-items-center rounded-lg border-2 border-dashed border-stone text-center text-xs text-muted hover:border-brand-400 hover:text-brand-600">
+          <label className="grid aspect-square cursor-pointer place-items-center rounded-control border-2 border-dashed border-stone text-center text-xs text-muted hover:border-brand-400 hover:text-brand-600">
             {uploading ? "Yükleniyor..." : "+ Görsel Ekle"}
             <input type="file" accept="image/*" multiple onChange={handleUpload} className="hidden" />
           </label>
@@ -367,10 +367,10 @@ export default function ListingForm({
       </section>
 
       <div className="flex items-center gap-3">
-        <button type="submit" disabled={submitting || uploading} className="rounded-lg bg-brand-700 px-6 py-3 font-bold text-white hover:bg-brand-800 disabled:opacity-60">
+        <button type="submit" disabled={submitting || uploading} className="rounded-control bg-brand-700 px-6 py-3 font-bold text-white hover:bg-brand-800 disabled:opacity-60">
           {submitting ? "Kaydediliyor..." : listing?.id ? "Değişiklikleri Kaydet" : "İlanı Yayınla"}
         </button>
-        <Link href="/admin/ilanlar" className="rounded-lg px-6 py-3 font-medium text-muted hover:bg-canvas">İptal</Link>
+        <Link href="/admin/ilanlar" className="rounded-control px-6 py-3 font-medium text-muted hover:bg-canvas">İptal</Link>
       </div>
     </form>
   );

@@ -55,17 +55,17 @@ export default async function AdminReklamTalepleriPage({
                   </div>
                   <span className={`shrink-0 rounded-full px-2.5 py-0.5 text-xs font-semibold ring-1 ${s.cls}`}>{s.label}</span>
                 </div>
-                {r.message && <p className="mt-2 rounded-lg bg-canvas p-3 text-sm text-muted">{r.message}</p>}
+                {r.message && <p className="mt-2 rounded-control bg-canvas p-3 text-sm text-muted">{r.message}</p>}
                 <div className="mt-3 flex items-center gap-2 border-t border-stone pt-3">
                   <form action={updateAdRequestStatus} className="flex items-center gap-1.5">
                     <input type="hidden" name="id" value={r.id} />
-                    <select name="status" defaultValue={r.status} className="rounded-md border border-stone px-2 py-1 text-xs">
+                    <select name="status" defaultValue={r.status} className="rounded-control border border-stone px-2 py-1 text-xs">
                       <option value="new">Yeni</option>
                       <option value="contacted">Görüşüldü</option>
                       <option value="accepted">Kabul</option>
                       <option value="rejected">Red</option>
                     </select>
-                    <button type="submit" className="rounded-md bg-canvas px-2.5 py-1 text-xs font-medium text-ink hover:bg-stone">Kaydet</button>
+                    <button type="submit" className="rounded-control bg-canvas px-2.5 py-1 text-xs font-medium text-ink hover:bg-stone">Kaydet</button>
                   </form>
                   <form action={deleteAdRequest} className="ml-auto">
                     <input type="hidden" name="id" value={r.id} />
@@ -83,10 +83,10 @@ export default async function AdminReklamTalepleriPage({
           <span className="text-muted">Sayfa {page} / {Math.ceil(totalCount / PER_PAGE)} · {totalCount} kayıt</span>
           <div className="flex gap-2">
             {page > 1 && (
-              <Link href={`/admin/reklam-talepleri${page - 1 > 1 ? `?sayfa=${page - 1}` : ""}`} className="rounded-lg bg-paper px-3 py-1.5 font-medium text-ink border border-stone hover:border-brand-300">‹ Önceki</Link>
+              <Link href={`/admin/reklam-talepleri${page - 1 > 1 ? `?sayfa=${page - 1}` : ""}`} className="rounded-control bg-paper px-3 py-1.5 font-medium text-ink border border-stone hover:border-brand-300">‹ Önceki</Link>
             )}
             {page < Math.ceil(totalCount / PER_PAGE) && (
-              <Link href={`/admin/reklam-talepleri?sayfa=${page + 1}`} className="rounded-lg bg-paper px-3 py-1.5 font-medium text-ink border border-stone hover:border-brand-300">Sonraki ›</Link>
+              <Link href={`/admin/reklam-talepleri?sayfa=${page + 1}`} className="rounded-control bg-paper px-3 py-1.5 font-medium text-ink border border-stone hover:border-brand-300">Sonraki ›</Link>
             )}
           </div>
         </div>

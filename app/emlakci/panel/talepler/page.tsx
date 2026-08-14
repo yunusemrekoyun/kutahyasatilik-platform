@@ -55,7 +55,7 @@ export default async function AgentLeads({
             <div className="flex flex-wrap items-start justify-between gap-3">
               <div>
                 <div className="flex flex-wrap items-center gap-2">
-                  <span className="rounded-md bg-brand-50 px-2 py-0.5 text-xs font-semibold text-brand-700">{LEAD_TYPE_LABELS[l.type] || l.type}</span>
+                  <span className="rounded-control bg-brand-50 px-2 py-0.5 text-xs font-semibold text-brand-700">{LEAD_TYPE_LABELS[l.type] || l.type}</span>
                   <span className="text-xs text-muted/70">{formatDateTime(l.createdAt)}</span>
                 </div>
                 <h3 className="mt-2 font-semibold text-ink">{l.name}</h3>
@@ -74,17 +74,17 @@ export default async function AgentLeads({
               {/* Durum güncelle */}
               <form action={updateAgentLeadStatus} className="flex items-center gap-1">
                 <input type="hidden" name="id" value={l.id} />
-                <select name="status" defaultValue={l.status} className="rounded-lg border border-stone px-2 py-1.5 text-xs">
+                <select name="status" defaultValue={l.status} className="rounded-control border border-stone px-2 py-1.5 text-xs">
                   <option value="received">Alındı</option>
                   <option value="reviewing">İnceleniyor</option>
                   <option value="contacted">İletişim kuruldu</option>
                   <option value="resolved">Sonuçlandı</option>
                 </select>
-                <button className="rounded-lg bg-brand-800 px-2.5 py-1.5 text-xs font-semibold text-white hover:bg-brand-900">Kaydet</button>
+                <button className="rounded-control bg-brand-800 px-2.5 py-1.5 text-xs font-semibold text-white hover:bg-brand-900">Kaydet</button>
               </form>
             </div>
 
-            {l.message && <p className="mt-3 rounded-lg bg-canvas p-3 text-sm text-ink">{l.message}</p>}
+            {l.message && <p className="mt-3 rounded-control bg-canvas p-3 text-sm text-ink">{l.message}</p>}
 
             <div className="mt-4 border-t border-stone pt-4">
               <RequestStatusStepper status={l.status} />
@@ -98,10 +98,10 @@ export default async function AgentLeads({
           <span className="text-muted">Sayfa {page} / {totalPages}</span>
           <div className="flex gap-2">
             {page > 1 && (
-              <Link href={`/emlakci/panel/talepler${page - 1 > 1 ? `?sayfa=${page - 1}` : ""}`} className="rounded-lg bg-paper px-3 py-1.5 font-medium text-ink border border-stone hover:border-brand-300">‹ Önceki</Link>
+              <Link href={`/emlakci/panel/talepler${page - 1 > 1 ? `?sayfa=${page - 1}` : ""}`} className="rounded-control bg-paper px-3 py-1.5 font-medium text-ink border border-stone hover:border-brand-300">‹ Önceki</Link>
             )}
             {page < totalPages && (
-              <Link href={`/emlakci/panel/talepler?sayfa=${page + 1}`} className="rounded-lg bg-paper px-3 py-1.5 font-medium text-ink border border-stone hover:border-brand-300">Sonraki ›</Link>
+              <Link href={`/emlakci/panel/talepler?sayfa=${page + 1}`} className="rounded-control bg-paper px-3 py-1.5 font-medium text-ink border border-stone hover:border-brand-300">Sonraki ›</Link>
             )}
           </div>
         </div>

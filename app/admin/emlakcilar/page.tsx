@@ -28,7 +28,7 @@ export default async function AdminAgents() {
           <h1 className="text-2xl font-bold tracking-tight text-ink">Emlakçılar</h1>
           <p className="text-sm text-muted">{agents.length} danışman</p>
         </div>
-        <Link href="/admin/basvurular" className="rounded-lg bg-brand-50 px-3 py-2 text-sm font-semibold text-brand-700 hover:bg-brand-100">
+        <Link href="/admin/basvurular" className="rounded-control bg-brand-50 px-3 py-2 text-sm font-semibold text-brand-700 hover:bg-brand-100">
           Yeni başvurular → Başvurular
         </Link>
       </div>
@@ -73,7 +73,7 @@ export default async function AdminAgents() {
                     <td className="p-3">
                       <form action={updateAgentDirectoryProfile} className="space-y-2">
                         <input type="hidden" name="id" value={a.id} />
-                        <select name="agencyId" defaultValue={a.agencyId ?? ""} className="h-9 w-full rounded-md border border-stone bg-paper px-2 text-xs">
+                        <select name="agencyId" defaultValue={a.agencyId ?? ""} className="h-9 w-full rounded-control border border-stone bg-paper px-2 text-xs">
                           <option value="">Bağımsız / firma yok</option>
                           {agencies.map((agency) => (
                             <option key={agency.id} value={agency.id}>{agency.name}{agency.status !== "approved" ? " (onaysız)" : ""}</option>
@@ -84,7 +84,7 @@ export default async function AdminAgents() {
                           <label className="flex items-center gap-1"><input type="checkbox" name="showPhone" defaultChecked={a.showPhone} /> Telefon</label>
                           <label className="flex items-center gap-1"><input type="checkbox" name="showWhatsapp" defaultChecked={a.showWhatsapp} /> WhatsApp</label>
                         </div>
-                        <button className="rounded-md bg-brand-50 px-2.5 py-1 text-xs font-semibold text-brand-700 hover:bg-brand-100">Dizini kaydet</button>
+                        <button className="rounded-control bg-brand-50 px-2.5 py-1 text-xs font-semibold text-brand-700 hover:bg-brand-100">Dizini kaydet</button>
                       </form>
                     </td>
                     <td className="p-3">
@@ -92,18 +92,18 @@ export default async function AdminAgents() {
                         {a.status !== "approved" && (
                           <form action={approveAgent}>
                             <input type="hidden" name="id" value={a.id} />
-                            <button className="rounded-md bg-green-50 px-2.5 py-1 text-xs font-semibold text-green-700 hover:bg-green-100">Onayla</button>
+                            <button className="rounded-control bg-green-50 px-2.5 py-1 text-xs font-semibold text-green-700 hover:bg-green-100">Onayla</button>
                           </form>
                         )}
                         {a.status === "approved" && (
                           <form action={suspendAgent}>
                             <input type="hidden" name="id" value={a.id} />
-                            <button className="rounded-md bg-amber-50 px-2.5 py-1 text-xs font-semibold text-amber-700 hover:bg-amber-100">Askıya Al</button>
+                            <button className="rounded-control bg-amber-50 px-2.5 py-1 text-xs font-semibold text-amber-700 hover:bg-amber-100">Askıya Al</button>
                           </form>
                         )}
                         <form action={deleteAgent}>
                           <input type="hidden" name="id" value={a.id} />
-                          <button className="rounded-md px-2 py-1 text-xs text-red-600 hover:bg-red-50">Sil</button>
+                          <button className="rounded-control px-2 py-1 text-xs text-red-600 hover:bg-red-50">Sil</button>
                         </form>
                       </div>
                     </td>

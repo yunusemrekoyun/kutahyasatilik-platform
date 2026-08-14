@@ -89,7 +89,7 @@ export default async function AdminBasvurularPage({
                   </div>
                   <span className={`shrink-0 rounded-full px-2.5 py-0.5 text-xs font-semibold ring-1 ${s.cls}`}>{s.label}</span>
                 </div>
-                {a.experience && <p className="mt-2 rounded-lg bg-canvas p-3 text-sm text-muted">{a.experience}</p>}
+                {a.experience && <p className="mt-2 rounded-control bg-canvas p-3 text-sm text-muted">{a.experience}</p>}
 
                 {a.offers.length > 0 && (
                   <div className="mt-3 space-y-1.5">
@@ -112,7 +112,7 @@ export default async function AdminBasvurularPage({
                 {a.status !== "activated" && (
                   <form action={createOffer} className="mt-3">
                     <input type="hidden" name="id" value={a.id} />
-                    <button type="submit" className="rounded-lg bg-indigo-600 px-3 py-2 text-sm font-semibold text-white hover:bg-indigo-700">
+                    <button type="submit" className="rounded-control bg-indigo-600 px-3 py-2 text-sm font-semibold text-white hover:bg-indigo-700">
                       {a.offers.some((o) => o.status === "active") ? "Yeni Teklif Sürümü" : "Teklif Oluştur"}
                     </button>
                   </form>
@@ -124,7 +124,7 @@ export default async function AdminBasvurularPage({
                     <form action={updateApplicationStatus} className="flex flex-col gap-2">
                       <input type="hidden" name="id" value={a.id} />
                       <div className="flex gap-2">
-                        <select name="status" defaultValue={a.status} className="flex-1 rounded-lg border border-stone px-2.5 py-2 text-sm">
+                        <select name="status" defaultValue={a.status} className="flex-1 rounded-control border border-stone px-2.5 py-2 text-sm">
                           <option value="applied">Başvurdu</option>
                           <option value="reviewing">İnceleniyor</option>
                           <option value="meeting">Görüşme</option>
@@ -133,18 +133,18 @@ export default async function AdminBasvurularPage({
                           <option value="awaiting_payment">Ödeme bekleniyor</option>
                           <option value="rejected">Reddedildi</option>
                         </select>
-                        <button type="submit" className="rounded-lg bg-canvas px-3 py-2 text-sm font-medium text-ink hover:bg-stone">Durum</button>
+                        <button type="submit" className="rounded-control bg-canvas px-3 py-2 text-sm font-medium text-ink hover:bg-stone">Durum</button>
                       </div>
-                      <input name="adminNote" defaultValue={a.adminNote ?? ""} placeholder="Admin notu" className="rounded-lg border border-stone px-2.5 py-2 text-sm" />
+                      <input name="adminNote" defaultValue={a.adminNote ?? ""} placeholder="Admin notu" className="rounded-control border border-stone px-2.5 py-2 text-sm" />
                     </form>
 
                     {/* Aktivasyon */}
-                    <form action={activateApplication} className="flex flex-col gap-2 rounded-lg bg-green-50/50 p-3 ring-1 ring-green-100">
+                    <form action={activateApplication} className="flex flex-col gap-2 rounded-control bg-green-50/50 p-3 ring-1 ring-green-100">
                       <input type="hidden" name="id" value={a.id} />
                       <p className="text-xs font-medium text-muted">Hesabı aktive et (parola belirle)</p>
                       <div className="flex gap-2">
-                        <input name="password" type="password" autoComplete="new-password" minLength={PASSWORD_MIN_LENGTH} maxLength={PASSWORD_MAX_LENGTH} required placeholder={`Geçici parola (${PASSWORD_REQUIREMENT})`} className="flex-1 rounded-lg border border-stone px-2.5 py-2 text-sm" />
-                        <button type="submit" className="rounded-lg bg-green-600 px-3 py-2 text-sm font-semibold text-white hover:bg-green-700">Aktive Et</button>
+                        <input name="password" type="password" autoComplete="new-password" minLength={PASSWORD_MIN_LENGTH} maxLength={PASSWORD_MAX_LENGTH} required placeholder={`Geçici parola (${PASSWORD_REQUIREMENT})`} className="flex-1 rounded-control border border-stone px-2.5 py-2 text-sm" />
+                        <button type="submit" className="rounded-control bg-green-600 px-3 py-2 text-sm font-semibold text-white hover:bg-green-700">Aktive Et</button>
                       </div>
                       <p className="text-[11px] text-muted/70">Parolayı danışmana güvenli şekilde iletin. Teklif/OTP/ödeme adımları yukarıdaki &ldquo;Teklif Oluştur&rdquo; akışında yönetilir.</p>
                     </form>
@@ -161,10 +161,10 @@ export default async function AdminBasvurularPage({
           <span className="text-muted">Sayfa {page} / {Math.ceil(totalCount / PER_PAGE)} · {totalCount} kayıt</span>
           <div className="flex gap-2">
             {page > 1 && (
-              <Link href={`/admin/basvurular${page - 1 > 1 ? `?sayfa=${page - 1}` : ""}`} className="rounded-lg bg-paper px-3 py-1.5 font-medium text-ink border border-stone hover:border-brand-300">‹ Önceki</Link>
+              <Link href={`/admin/basvurular${page - 1 > 1 ? `?sayfa=${page - 1}` : ""}`} className="rounded-control bg-paper px-3 py-1.5 font-medium text-ink border border-stone hover:border-brand-300">‹ Önceki</Link>
             )}
             {page < Math.ceil(totalCount / PER_PAGE) && (
-              <Link href={`/admin/basvurular?sayfa=${page + 1}`} className="rounded-lg bg-paper px-3 py-1.5 font-medium text-ink border border-stone hover:border-brand-300">Sonraki ›</Link>
+              <Link href={`/admin/basvurular?sayfa=${page + 1}`} className="rounded-control bg-paper px-3 py-1.5 font-medium text-ink border border-stone hover:border-brand-300">Sonraki ›</Link>
             )}
           </div>
         </div>

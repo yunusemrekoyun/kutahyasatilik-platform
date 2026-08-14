@@ -31,7 +31,7 @@ export default async function AgentOpportunitiesPage() {
     /* tablo henüz yoksa */
   }
 
-  const inputCls = "w-full rounded-lg border border-stone px-3 py-2 text-sm focus:border-brand-500 focus:ring-1 focus:ring-brand-500 outline-none";
+  const inputCls = "w-full rounded-control border border-stone px-3 py-2 text-sm focus:border-brand-500 focus:ring-1 focus:ring-brand-500 outline-none";
 
   return (
     <div className="space-y-6">
@@ -86,7 +86,7 @@ export default async function AgentOpportunitiesPage() {
                     <span className="mb-1 block text-xs font-medium text-muted">Not (opsiyonel)</span>
                     <input name="note" defaultValue={myBid?.note ?? ""} placeholder="Kısa not" className={inputCls} />
                   </label>
-                  <button type="submit" className="rounded-lg bg-gold-500 px-4 py-2 text-sm font-bold text-brand-950 hover:bg-gold-400">
+                  <button type="submit" className="rounded-control bg-gold-500 px-4 py-2 text-sm font-bold text-brand-950 hover:bg-gold-400">
                     {myBid ? "Teklifi Güncelle" : "Teklif Ver"}
                   </button>
                 </form>

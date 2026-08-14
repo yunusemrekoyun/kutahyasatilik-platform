@@ -4,7 +4,7 @@ import { savePackage } from "@/app/admin/actions";
 export const dynamic = "force-dynamic";
 
 const inputCls =
-  "w-full rounded-lg border border-stone bg-paper px-3.5 py-2.5 text-[15px] text-ink outline-none transition placeholder:text-muted/70 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/30";
+  "w-full rounded-control border border-stone bg-paper px-3.5 py-2.5 text-[15px] text-ink outline-none transition placeholder:text-muted/70 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/30";
 const labelCls = "block text-sm font-medium text-ink mb-1";
 
 export default async function AdminPackagePage() {
@@ -95,7 +95,7 @@ export default async function AdminPackagePage() {
           </div>
         </section>
 
-        <button type="submit" className="rounded-lg bg-brand-700 px-6 py-3 font-bold text-white hover:bg-brand-800">
+        <button type="submit" className="rounded-control bg-brand-700 px-6 py-3 font-bold text-white hover:bg-brand-800">
           Kaydet
         </button>
       </form>

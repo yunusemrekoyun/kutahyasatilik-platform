@@ -87,7 +87,7 @@ export default async function AdminListings({
                 <tr key={l.id} className="border-b border-stone/50 hover:bg-canvas">
                   <td className="p-3">
                     <div className="flex items-center gap-3">
-                      <div className="relative h-12 w-16 shrink-0 overflow-hidden rounded-md bg-canvas">
+                      <div className="relative h-12 w-16 shrink-0 overflow-hidden rounded-control bg-canvas">
                         {l.images[0] && (
                           <Image src={l.images[0].url} alt={l.title} fill sizes="64px" className="object-cover" />
                         )}
@@ -111,7 +111,7 @@ export default async function AdminListings({
                       </span>
                       {/* Onay durumu: yalnız yayında DEĞİLse göster (onay bekleyen/reddedilen 'Aktif' sanılmasın) */}
                       {l.moderationStatus !== "approved" && (
-                        <span className={`rounded-md px-2 py-0.5 text-[11px] font-semibold ring-1 ${l.moderationStatus === "rejected" ? "bg-red-50 text-red-700 ring-red-200" : "bg-amber-50 text-amber-700 ring-amber-200"}`}>
+                        <span className={`rounded-control px-2 py-0.5 text-[11px] font-semibold ring-1 ${l.moderationStatus === "rejected" ? "bg-red-50 text-red-700 ring-red-200" : "bg-amber-50 text-amber-700 ring-amber-200"}`}>
                           {MODERATION_STATUS_LABELS[l.moderationStatus] || l.moderationStatus}
                         </span>
                       )}
@@ -122,11 +122,11 @@ export default async function AdminListings({
                   <td className="p-3 text-center tabular-nums text-muted">{l._count.leads}</td>
                   <td className="p-3">
                     <div className="flex items-center justify-end gap-1">
-                      <Link href={`/ilan/${l.slug}`} target="_blank" title="Görüntüle" className="grid h-8 w-8 place-items-center rounded-md text-muted hover:bg-canvas hover:text-ink"><ExternalLink className="h-4 w-4" /></Link>
-                      <Link href={`/admin/ilanlar/${l.id}`} title="Düzenle" className="grid h-8 w-8 place-items-center rounded-md text-brand-700 hover:bg-brand-50"><Pencil className="h-4 w-4" /></Link>
+                      <Link href={`/ilan/${l.slug}`} target="_blank" title="Görüntüle" className="grid h-8 w-8 place-items-center rounded-control text-muted hover:bg-canvas hover:text-ink"><ExternalLink className="h-4 w-4" /></Link>
+                      <Link href={`/admin/ilanlar/${l.id}`} title="Düzenle" className="grid h-8 w-8 place-items-center rounded-control text-brand-700 hover:bg-brand-50"><Pencil className="h-4 w-4" /></Link>
                       <form action={deleteListing}>
                         <input type="hidden" name="id" value={l.id} />
-                        <button title="Sil" className="grid h-8 w-8 place-items-center rounded-md text-red-600 hover:bg-red-50"><Trash2 className="h-4 w-4" /></button>
+                        <button title="Sil" className="grid h-8 w-8 place-items-center rounded-control text-red-600 hover:bg-red-50"><Trash2 className="h-4 w-4" /></button>
                       </form>
                     </div>
                   </td>
@@ -142,10 +142,10 @@ export default async function AdminListings({
           <span className="text-muted">Sayfa {page} / {totalPages}</span>
           <div className="flex gap-2">
             {page > 1 && (
-              <Link href={`/admin/ilanlar?${qPrefix}sayfa=${page - 1}`} className="rounded-lg bg-paper px-3 py-1.5 font-medium text-ink border border-stone hover:border-brand-300">‹ Önceki</Link>
+              <Link href={`/admin/ilanlar?${qPrefix}sayfa=${page - 1}`} className="rounded-control bg-paper px-3 py-1.5 font-medium text-ink border border-stone hover:border-brand-300">‹ Önceki</Link>
             )}
             {page < totalPages && (
-              <Link href={`/admin/ilanlar?${qPrefix}sayfa=${page + 1}`} className="rounded-lg bg-paper px-3 py-1.5 font-medium text-ink border border-stone hover:border-brand-300">Sonraki ›</Link>
+              <Link href={`/admin/ilanlar?${qPrefix}sayfa=${page + 1}`} className="rounded-control bg-paper px-3 py-1.5 font-medium text-ink border border-stone hover:border-brand-300">Sonraki ›</Link>
             )}
           </div>
         </div>

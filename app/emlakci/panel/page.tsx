@@ -44,7 +44,7 @@ export default async function AgentDashboard() {
   };
 
   const inputCls =
-    "w-full rounded-lg border border-stone px-3 py-2.5 text-sm focus:border-brand-500 focus:ring-1 focus:ring-brand-500 outline-none";
+    "w-full rounded-control border border-stone px-3 py-2.5 text-sm focus:border-brand-500 focus:ring-1 focus:ring-brand-500 outline-none";
 
   return (
     <div className="space-y-8">
@@ -62,31 +62,31 @@ export default async function AgentDashboard() {
         <div className="flex items-center gap-2">
           <Link
             href="/emlakci/panel/mesajlar"
-            className="rounded-lg bg-paper px-4 py-2.5 text-sm font-semibold text-brand-700 ring-1 ring-brand-200 hover:bg-brand-50"
+            className="rounded-control bg-paper px-4 py-2.5 text-sm font-semibold text-brand-700 ring-1 ring-brand-200 hover:bg-brand-50"
           >
             Mesajlar
           </Link>
           <Link
             href="/emlakci/panel/talepler"
-            className="rounded-lg bg-paper px-4 py-2.5 text-sm font-semibold text-brand-700 ring-1 ring-brand-200 hover:bg-brand-50"
+            className="rounded-control bg-paper px-4 py-2.5 text-sm font-semibold text-brand-700 ring-1 ring-brand-200 hover:bg-brand-50"
           >
             Gelen Talepler
           </Link>
           <Link
             href="/emlakci/panel/firsatlar"
-            className="rounded-lg bg-paper px-4 py-2.5 text-sm font-semibold text-brand-700 ring-1 ring-brand-200 hover:bg-brand-50"
+            className="rounded-control bg-paper px-4 py-2.5 text-sm font-semibold text-brand-700 ring-1 ring-brand-200 hover:bg-brand-50"
           >
             Portföy Fırsatları
           </Link>
           <Link
             href="/emlakci/panel/ilan/ice-aktar"
-            className="rounded-lg bg-paper px-4 py-2.5 text-sm font-semibold text-brand-700 ring-1 ring-brand-200 hover:bg-brand-50"
+            className="rounded-control bg-paper px-4 py-2.5 text-sm font-semibold text-brand-700 ring-1 ring-brand-200 hover:bg-brand-50"
           >
             CSV ile Aktar
           </Link>
           <Link
             href="/emlakci/panel/ilan/yeni"
-            className="rounded-lg bg-brand-700 px-4 py-2.5 text-sm font-bold text-white hover:bg-brand-800"
+            className="rounded-control bg-brand-700 px-4 py-2.5 text-sm font-bold text-white hover:bg-brand-800"
           >
             + Yeni İlan Ekle
           </Link>
@@ -116,7 +116,7 @@ export default async function AgentDashboard() {
           { l: "Talep", v: engagement.leads, Icon: Mail, c: "text-green-600" },
         ].map((s) => (
           <div key={s.l} className="flex items-center gap-3 bg-paper p-4 border border-stone">
-            <span className={`grid h-10 w-10 shrink-0 place-items-center rounded-lg bg-canvas ${s.c}`}><s.Icon className="h-5 w-5" /></span>
+            <span className={`grid h-10 w-10 shrink-0 place-items-center rounded-control bg-canvas ${s.c}`}><s.Icon className="h-5 w-5" /></span>
             <div>
               <p className={`text-2xl font-black leading-none ${s.c}`}>{s.v}</p>
               <p className="mt-1 text-xs font-medium text-muted">{s.l}</p>
@@ -155,7 +155,7 @@ export default async function AgentDashboard() {
                   <tr key={l.id} className="border-b border-stone/50 hover:bg-canvas">
                     <td className="p-3">
                       <div className="flex items-center gap-3">
-                        <div className="relative h-12 w-16 shrink-0 overflow-hidden rounded-md bg-canvas">
+                        <div className="relative h-12 w-16 shrink-0 overflow-hidden rounded-control bg-canvas">
                           {l.images[0] && (
                             <Image src={l.images[0].url} alt={l.title} fill sizes="64px" className="object-cover" />
                           )}
@@ -180,12 +180,12 @@ export default async function AgentDashboard() {
                     <td className="p-3">
                       <div className="flex items-center justify-end gap-2">
                         {l.moderationStatus === "approved" && (
-                          <Link href={`/ilan/${l.slug}`} target="_blank" className="rounded-md px-2 py-1 text-xs text-muted hover:bg-canvas">Gör</Link>
+                          <Link href={`/ilan/${l.slug}`} target="_blank" className="rounded-control px-2 py-1 text-xs text-muted hover:bg-canvas">Gör</Link>
                         )}
-                        <Link href={`/emlakci/panel/ilan/${l.id}`} className="rounded-md bg-brand-50 px-2.5 py-1 text-xs font-semibold text-brand-700 hover:bg-brand-100">Düzenle</Link>
+                        <Link href={`/emlakci/panel/ilan/${l.id}`} className="rounded-control bg-brand-50 px-2.5 py-1 text-xs font-semibold text-brand-700 hover:bg-brand-100">Düzenle</Link>
                         <form action={deleteAgentListing}>
                           <input type="hidden" name="id" value={l.id} />
-                          <button className="rounded-md px-2 py-1 text-xs text-red-600 hover:bg-red-50">Sil</button>
+                          <button className="rounded-control px-2 py-1 text-xs text-red-600 hover:bg-red-50">Sil</button>
                         </form>
                       </div>
                     </td>
@@ -247,7 +247,7 @@ export default async function AgentDashboard() {
             <span className="mb-1 block text-sm font-medium text-ink">Kısa özgeçmiş</span>
             <textarea name="bio" rows={5} maxLength={2000} defaultValue={agent.bio ?? ""} className={`${inputCls} h-auto py-3`} />
           </label>
-          <div className="mt-4 rounded-lg bg-canvas p-4 text-sm text-ink border border-stone">
+          <div className="mt-4 rounded-control bg-canvas p-4 text-sm text-ink border border-stone">
             <p className="font-semibold">İletişim görünürlüğü</p>
             <p className="mt-1 text-xs text-muted">Profilinizin yayına alınması yönetim onayına bağlıdır. Aşağıdaki izinleri dilediğiniz zaman kapatabilirsiniz.</p>
             <div className="mt-3 flex flex-wrap gap-5">
@@ -256,7 +256,7 @@ export default async function AgentDashboard() {
             </div>
             <p className="mt-2 text-xs font-medium text-muted">Kamu profili: {agent.publicProfile ? "Yayına açık" : "Yönetim onayı bekliyor / kapalı"}</p>
           </div>
-          <button className="mt-4 rounded-lg bg-brand-800 px-5 py-2.5 text-sm font-bold text-white hover:bg-brand-900">
+          <button className="mt-4 rounded-control bg-brand-800 px-5 py-2.5 text-sm font-bold text-white hover:bg-brand-900">
             Profili Kaydet
           </button>
         </form>

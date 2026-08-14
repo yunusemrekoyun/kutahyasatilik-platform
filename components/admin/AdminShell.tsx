@@ -21,7 +21,7 @@ function subscribeSidebar(onStoreChange: () => void) {
 function AdminLogo({ small = false, onNavigate }: { small?: boolean; onNavigate?: () => void }) {
   return (
     <Link href="/admin" className="flex items-center gap-2.5" onClick={onNavigate}>
-      <span className="grid h-9 w-9 shrink-0 place-items-center rounded-lg bg-brand-700 text-base font-bold text-white">K</span>
+      <span className="grid h-9 w-9 shrink-0 place-items-center rounded-control bg-brand-700 text-base font-bold text-white">K</span>
       {!small && (
         <span className="leading-tight">
           <span className="block font-semibold text-ink">Yönetim</span>
@@ -65,7 +65,7 @@ export default function AdminShell({
             <button
               onClick={toggleCollapsed}
               aria-label={collapsed ? "Menüyü genişlet" : "Menüyü daralt"}
-              className="grid h-9 w-9 place-items-center rounded-lg text-muted/70 transition hover:bg-canvas hover:text-ink"
+              className="grid h-9 w-9 place-items-center rounded-control text-muted/70 transition hover:bg-canvas hover:text-ink"
             >
               {collapsed ? <PanelLeftOpen className="h-5 w-5" /> : <PanelLeftClose className="h-5 w-5" />}
             </button>
@@ -99,7 +99,7 @@ export default function AdminShell({
               <button
                 onClick={() => setMobileOpen(true)}
                 aria-label="Menüyü aç"
-                className="grid h-10 w-10 place-items-center rounded-lg border border-stone text-ink"
+                className="grid h-10 w-10 place-items-center rounded-control border border-stone text-ink"
               >
                 <Menu className="h-5 w-5" />
               </button>
@@ -121,7 +121,7 @@ export default function AdminShell({
           <div className="absolute inset-y-0 left-0 flex w-72 max-w-[85%] flex-col bg-paper shadow-xl">
             <div className="flex h-16 items-center justify-between border-b border-stone px-4">
               <AdminLogo onNavigate={() => setMobileOpen(false)} />
-              <button onClick={() => setMobileOpen(false)} aria-label="Kapat" className="grid h-9 w-9 place-items-center rounded-lg text-muted/70 hover:bg-canvas">
+              <button onClick={() => setMobileOpen(false)} aria-label="Kapat" className="grid h-9 w-9 place-items-center rounded-control text-muted/70 hover:bg-canvas">
                 <X className="h-5 w-5" />
               </button>
             </div>

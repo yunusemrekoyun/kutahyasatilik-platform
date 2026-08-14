@@ -8,7 +8,7 @@ import { DISTRICTS, PROPERTY_TYPES } from "@/lib/constants";
 export const dynamic = "force-dynamic";
 
 const inputCls =
-  "w-full rounded-lg border border-stone bg-paper px-3 py-2 text-sm text-ink outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/30";
+  "w-full rounded-control border border-stone bg-paper px-3 py-2 text-sm text-ink outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/30";
 
 const OPP_STATUS: Record<string, { label: string; cls: string }> = {
   open: { label: "Açık (teklif toplanıyor)", cls: "bg-blue-50 text-blue-700 ring-blue-200" },
@@ -74,7 +74,7 @@ export default async function AdminFirsatlarPage({
           <input name="areaGross" type="number" min={0} placeholder="m²" className={inputCls} />
           <input name="rooms" placeholder="Oda (3+1)" className={inputCls} />
           <input name="biddingDays" type="number" min={1} defaultValue={7} placeholder="Teklif süresi (gün)" className={inputCls} />
-          <button type="submit" className="rounded-lg bg-brand-700 px-4 py-2 text-sm font-semibold text-white hover:bg-brand-800 sm:col-span-2">
+          <button type="submit" className="rounded-control bg-brand-700 px-4 py-2 text-sm font-semibold text-white hover:bg-brand-800 sm:col-span-2">
             Fırsat Oluştur
           </button>
         </form>
@@ -106,7 +106,7 @@ export default async function AdminFirsatlarPage({
                   ) : (
                     <ul className="mt-2 space-y-1.5">
                       {o.bids.map((b, idx) => (
-                        <li key={b.id} className="flex flex-wrap items-center justify-between gap-2 rounded-lg bg-canvas px-3 py-2 text-sm">
+                        <li key={b.id} className="flex flex-wrap items-center justify-between gap-2 rounded-control bg-canvas px-3 py-2 text-sm">
                           <span className="flex items-center gap-2">
                             {idx === 0 && canSelect && <Star className="h-4 w-4 fill-current text-amber-500" />}
                             <span className="font-medium text-ink">{b.agent?.name ?? "—"}</span>
@@ -118,7 +118,7 @@ export default async function AdminFirsatlarPage({
                             <form action={selectWinningBid}>
                               <input type="hidden" name="opportunityId" value={o.id} />
                               <input type="hidden" name="bidId" value={b.id} />
-                              <button type="submit" className="rounded-md bg-green-600 px-2.5 py-1 text-xs font-semibold text-white hover:bg-green-700">Kazanan Seç</button>
+                              <button type="submit" className="rounded-control bg-green-600 px-2.5 py-1 text-xs font-semibold text-white hover:bg-green-700">Kazanan Seç</button>
                             </form>
                           )}
                         </li>
@@ -151,10 +151,10 @@ export default async function AdminFirsatlarPage({
           <span className="text-muted">Sayfa {page} / {Math.ceil(totalCount / PER_PAGE)} · {totalCount} kayıt</span>
           <div className="flex gap-2">
             {page > 1 && (
-              <Link href={`/admin/firsatlar${page - 1 > 1 ? `?sayfa=${page - 1}` : ""}`} className="rounded-lg bg-paper px-3 py-1.5 font-medium text-ink border border-stone hover:border-brand-300">‹ Önceki</Link>
+              <Link href={`/admin/firsatlar${page - 1 > 1 ? `?sayfa=${page - 1}` : ""}`} className="rounded-control bg-paper px-3 py-1.5 font-medium text-ink border border-stone hover:border-brand-300">‹ Önceki</Link>
             )}
             {page < Math.ceil(totalCount / PER_PAGE) && (
-              <Link href={`/admin/firsatlar?sayfa=${page + 1}`} className="rounded-lg bg-paper px-3 py-1.5 font-medium text-ink border border-stone hover:border-brand-300">Sonraki ›</Link>
+              <Link href={`/admin/firsatlar?sayfa=${page + 1}`} className="rounded-control bg-paper px-3 py-1.5 font-medium text-ink border border-stone hover:border-brand-300">Sonraki ›</Link>
             )}
           </div>
         </div>
