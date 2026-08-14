@@ -142,8 +142,9 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ slug
       virtualTourUrl: l.virtualTourUrl,
       featured: l.featured,
       verified: l.verified,
-      // increment fire-and-forget çalıştığı için okunan değer 1 geride kalır; +1 ile telafi.
-      viewCount: l.viewCount + 1,
+      // Sayaç artık bu rotada değil /api/v1/track'te artıyor (web ikiziyle aynı),
+      // dolayısıyla okunan değer gerçek: eski "+1 telafisi" kaldırıldı.
+      viewCount: l.viewCount,
       createdAt: l.createdAt,
       images: l.images.map((im) => ({ url: absolutize(im.url, origin), alt: im.alt })),
       // Emlakçı logosu mobil için mutlak URL'e çevrilir.
