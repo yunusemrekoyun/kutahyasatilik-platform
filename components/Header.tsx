@@ -167,8 +167,8 @@ export default function Header() {
           <Link href={account ? "/hesabim" : "/giris"} aria-current={isActive(account ? "/hesabim" : "/giris") ? "page" : undefined} className="hidden h-11 items-center gap-2 px-2 text-sm font-semibold text-ink hover:text-brand-900 sm:inline-flex">
             <User aria-hidden="true" className="h-4 w-4" /> {account ? firstName : "Giriş"}
           </Link>
-          <Link href="/satici" className="ml-1 hidden rounded-control bg-brand-700 px-4 py-3 text-sm font-semibold text-white hover:bg-brand-800 sm:inline-flex">
-            Mülkünü Sat
+          <Link href="/ilan-ver" className="ml-1 hidden rounded-control bg-gold-500 px-4 py-3 text-sm font-bold text-brand-950 transition hover:bg-gold-400 sm:inline-flex">
+            İlan Ver
           </Link>
           <button
             ref={mobileButtonRef}
@@ -202,7 +202,8 @@ export default function Header() {
             <Link href={account ? "/hesabim" : "/giris"} onClick={() => setMobileOpen(false)} className="flex min-h-11 items-center justify-center rounded-control border border-brand-200 text-sm font-semibold text-brand-800">
               {account ? firstName : "Giriş Yap"}
             </Link>
-            <Link href="/satici" onClick={() => setMobileOpen(false)} className="flex min-h-11 items-center justify-center rounded-control bg-brand-700 text-sm font-semibold text-white">Mülkünü Sat</Link>
+            <Link href="/ilan-ver" onClick={() => setMobileOpen(false)} className="flex min-h-11 items-center justify-center rounded-control bg-gold-500 text-sm font-bold text-brand-950">İlan Ver</Link>
+            <Link href="/satici" onClick={() => setMobileOpen(false)} className="flex min-h-11 items-center justify-center rounded-control border border-brand-200 text-sm font-semibold text-brand-800">Mülkünü Sat</Link>
           </div>
           {(contact.phoneRaw || contact.whatsapp) && (
             <div className="mt-6 flex flex-wrap gap-4 border-t border-stone pt-5 text-sm font-semibold">

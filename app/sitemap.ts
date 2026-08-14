@@ -18,6 +18,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${base}/ilanlar`, priority: 0.9, changeFrequency: "daily" },
     { url: `${base}/harita`, priority: 0.7, changeFrequency: "weekly" },
     { url: `${base}/satici`, priority: 0.8, changeFrequency: "monthly" },
+    { url: `${base}/ilan-ver`, priority: 0.8, changeFrequency: "monthly" },
     { url: `${base}/degerleme`, priority: 0.8, changeFrequency: "monthly" },
     { url: `${base}/bolge-analizi`, priority: 0.7, changeFrequency: "weekly" },
     { url: `${base}/alici-talebi`, priority: 0.7, changeFrequency: "monthly" },

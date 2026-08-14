@@ -56,6 +56,17 @@ export async function proxy(req: NextRequest) {
     return NextResponse.next();
   }
 
+  // /ilan-ver oturumlu: sayfanın kendi kontrolü vardı ama kenar katmanı yoktu.
+  // Aynı desen /hesabim ile birebir — giriş sonrası ilan verme formuna dönülür.
+  if (pathname === "/ilan-ver") {
+    if (!(await hasValidToken(req, "ks_user", "userId"))) {
+      const url = new URL("/giris", req.url);
+      url.searchParams.set("next", pathname);
+      return NextResponse.redirect(url);
+    }
+    return NextResponse.next();
+  }
+
   // --- Emlakçı paneli (ks_agent) ---
   if (pathname.startsWith("/emlakci/panel")) {
     if (!(await hasValidToken(req, "ks_agent", "agentId"))) {
@@ -98,6 +109,7 @@ export const config = {
     "/emlakci/:path*",
     "/hesabim",
     "/hesabim/:path*",
+    "/ilan-ver",
     "/giris",
     "/kayit",
   ],
