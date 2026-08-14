@@ -34,7 +34,7 @@ const FALLBACK = `<p>Kütahya'nın dijital emlak ofisi olarak alım, satım ve y
 
 export default async function AboutPage() {
   const page = await getPage();
-  const title = page?.title || "Kütahya'nın Dijital Emlak Ofisi";
+  const title = page?.title || "Kütahya'nın Yerel İlan Platformu";
   const content = page?.content || FALLBACK;
   const c = await getSiteContact();
 

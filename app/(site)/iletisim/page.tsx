@@ -12,7 +12,7 @@ export const revalidate = 300;
 
 export const metadata: Metadata = {
   title: "İletişim",
-  description: "Kütahya Satılık - Dijital Emlak Ofisi ile iletişime geçin. Telefon, WhatsApp veya form ile bize ulaşın.",
+  description: "Kütahya Satılık ile iletişime geçin. Telefon, WhatsApp veya form ile bize ulaşın.",
   alternates: { canonical: "/iletisim" },
 };
 

@@ -43,13 +43,15 @@ export default async function Home() {
   ]);
 
   const t = (key: string, fallback: string) => texts.get(key) || fallback;
-  const heroTitle = t("home_hero_title", "Kütahya'da doğru gayrimenkul,");
-  const heroHighlight = t("home_hero_highlight", "yerel bilgiyle");
+  // Sloganlar genel ilan diline çekildi: "gayrimenkul" ve "mülk" ifadeleri
+  // vasıta/teknoloji ilanlarıyla çelişiyordu. CMS (Setting) hâlâ ezebilir.
+  const heroTitle = t("home_hero_title", "Kütahya'da alınır satılır ne varsa,");
+  const heroHighlight = t("home_hero_highlight", "tek yerde");
   const heroSubtitle = t(
     "home_hero_subtitle",
-    `Merkez ve tüm ilçelerde ${marketplaceStats.activeListings} güncel ilanı, bölgesel verileri ve yerel danışmanlığı tek yerde keşfedin.`,
+    `Emlak, vasıta ve teknoloji — merkez ve tüm ilçelerde ${marketplaceStats.activeListings} güncel ilan. Kategori seçin, aradığınıza dakikalar içinde ulaşın.`,
   );
-  const whyTitle = t("home_why_title", "Yerel pazarı yakından tanıyoruz");
+  const whyTitle = t("home_why_title", "Kütahya'yı yakından tanıyoruz");
   const categoryCoverByType = new Map<string, string>();
   for (const listing of featured) {
     if (listing.coverImage && !categoryCoverByType.has(listing.propertyType)) categoryCoverByType.set(listing.propertyType, listing.coverImage);
@@ -132,7 +134,7 @@ export default async function Home() {
               <p className="eyebrow">Güncel seçki</p>
               <h2 className="mt-2 text-2xl font-bold tracking-tight text-ink sm:text-3xl">Öne çıkan ilanlar</h2>
             </div>
-            <Link href="/ilanlar" className="inline-flex shrink-0 items-center gap-2 text-sm font-semibold text-brand-700 hover:text-brand-900">Tüm portföy <ArrowRight className="h-4 w-4" /></Link>
+            <Link href="/ilanlar" className="inline-flex shrink-0 items-center gap-2 text-sm font-semibold text-brand-700 hover:text-brand-900">Kategorilere göz at <ArrowRight className="h-4 w-4" /></Link>
           </div>
           {featured.length > 0 ? (
             <div className="mt-9 grid gap-5 sm:grid-cols-2 lg:grid-cols-12">
@@ -153,9 +155,9 @@ export default async function Home() {
           <div className="flex flex-col justify-between bg-canvas p-8 sm:p-12 lg:col-span-4 lg:border-r lg:border-stone">
             <div>
               <div className="mb-6 h-1 w-12 bg-gold-600" />
-              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-brand-700">Kütahya portföy haritası</p>
-              <h2 className="mt-4 max-w-sm font-sans text-3xl font-semibold leading-tight tracking-[-0.025em] text-brand-950">İlanı, bulunduğu çevreyle birlikte değerlendirin.</h2>
-              <p className="mt-5 max-w-sm leading-7 text-muted">İlçeyi seçin; güncel portföyü ve ilanların Kütahya içindeki dağılımını tek bakışta görün.</p>
+              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-brand-700">Kütahya ilan haritası</p>
+              <h2 className="mt-4 max-w-sm text-2xl font-bold leading-tight tracking-tight text-ink sm:text-3xl">İlanı, bulunduğu çevreyle birlikte değerlendirin.</h2>
+              <p className="mt-5 max-w-sm leading-7 text-muted">İlçeyi seçin; emlak ilanlarının Kütahya içindeki dağılımını tek bakışta görün.</p>
             </div>
             <Link href="/harita" className="mt-8 inline-flex items-center gap-2 text-sm font-semibold text-brand-800 hover:text-brand-950">Tam ekran haritayı aç <ArrowRight className="h-4 w-4" /></Link>
           </div>
@@ -171,9 +173,9 @@ export default async function Home() {
           </div>
           <div className="border-t border-stone lg:col-span-8">
             {[
-              ["01", "Veriyi okuyun", "İlçe fiyatları, yatırım puanı ve gelişim potansiyelini kararınıza bağlayın."],
-              ["02", "Portföyü karşılaştırın", "İlanları kaydedin, karşılaştırın ve gerçekten uygun olan seçenekleri ayırın."],
-              ["03", "Yerel ekiple ilerleyin", "Randevu, ön değerleme ve satış sürecinde doğrudan Kütahya ekibiyle iletişim kurun."],
+              ["01", "Kategorinizi seçin", "Emlak, vasıta ya da teknoloji — filtreler seçtiğiniz kategoriye göre açılır."],
+              ["02", "Karşılaştırın", "İlanları kaydedin, yan yana koyun ve gerçekten uygun olanları ayırın."],
+              ["03", "Satıcıyla doğrudan görüşün", "Mesaj gönderin ya da telefonu görün; aracı beklemeden iletişime geçin."],
             ].map(([number, title, text]) => (
               <div key={number} className="grid gap-3 border-b border-stone py-6 sm:grid-cols-[4rem_14rem_1fr] sm:items-start">
                 <span className="font-semibold text-gold-700">{number}</span>
@@ -202,12 +204,19 @@ export default async function Home() {
       <section className="bg-brand-950 text-white">
         <div className="ceramic-grid mx-auto grid max-w-7xl gap-8 px-5 py-14 sm:px-6 sm:py-16 lg:grid-cols-12 lg:items-center">
           <div className="lg:col-span-8">
-            <p className="eyebrow !text-gold-300">Satış yolculuğu</p>
-            <h2 className="mt-2 text-2xl font-bold sm:text-3xl">Mülkünüzün piyasadaki yerini birlikte belirleyelim.</h2>
-            <p className="mt-4 max-w-2xl leading-7 text-brand-100">Bölgesel ön değerleme, portföy hazırlığı ve şeffaf satış süreci için talebinizi bırakın.</p>
+            <p className="eyebrow !text-gold-300">Satmak mı istiyorsunuz?</p>
+            <h2 className="mt-2 text-2xl font-bold sm:text-3xl">İlanınızı dakikalar içinde yayına alın.</h2>
+            <p className="mt-4 max-w-2xl leading-7 text-brand-100">Aracınızı ya da teknoloji ürününüzü ücretsiz yayımlayın. Emlak için bölgesel ön değerleme ve satış desteği de veriyoruz.</p>
           </div>
           <div className="lg:col-span-4 lg:text-right">
-            <Link href="/satici" className="inline-flex min-h-12 items-center justify-center gap-2 rounded-control bg-paper px-6 font-semibold text-brand-900 hover:bg-paper">Satış talebi oluştur <ArrowRight className="h-4 w-4" /></Link>
+            <div className="flex flex-wrap gap-2 lg:justify-end">
+              <Link href="/ilan-ver" className="inline-flex min-h-12 items-center justify-center gap-2 rounded-control bg-gold-500 px-6 font-bold text-brand-950 transition hover:bg-gold-400">
+                Ücretsiz ilan ver <ArrowRight className="h-4 w-4" />
+              </Link>
+              <Link href="/satici" className="inline-flex min-h-12 items-center justify-center gap-2 rounded-control border border-brand-700 px-6 font-semibold text-white transition hover:bg-brand-900">
+                Emlak satış talebi
+              </Link>
+            </div>
           </div>
         </div>
       </section>

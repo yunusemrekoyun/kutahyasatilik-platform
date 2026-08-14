@@ -19,7 +19,7 @@ import { getPublicListingOwner } from "@/lib/publicDirectory";
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
-  title: "Tüm İlanlar - Kütahya Satılık Emlak, Vasıta, Teknoloji",
+  title: "İlanlar - Kütahya Satılık Emlak, Vasıta, Teknoloji",
   description:
     "Kütahya ve ilçelerinde güncel satılık ilanlar: daire, arsa, villa, otomobil ve teknoloji ürünleri. Kategori, ilçe ve fiyata göre filtreleyin.",
   alternates: { canonical: "/ilanlar" },
@@ -49,7 +49,7 @@ export default async function ListingsPage({
   const maxAlan = maxAlanRaw !== undefined ? maxAlanRaw * areaFactor : undefined;
 
   // Kategori seçilmediyse TÜM kategoriler listelenir: burası genel ilan sitesinin
-  // ana listesi, emlağa daraltmak "Tüm İlanlar" başlığıyla çelişirdi.
+  // ana listesi; kategori seçilmeden liste değil kategori seçimi gösterilir.
   const categoryParam = get("kategori");
   const category = isCategoryKey(categoryParam) ? getCategory(categoryParam) : null;
 
@@ -105,7 +105,7 @@ export default async function ListingsPage({
       ? `${get("ilce")} İlanları`
       : category
         ? `${category.label} İlanları`
-        : "Tüm İlanlar";
+        : "İlanlar";
 
   // Görünüm URL'den okunuyor (ViewSwitcher yazıyor); varsayılan yoğun liste.
   const gallery = get("gorunum") === "galeri";
@@ -201,7 +201,7 @@ export default async function ListingsPage({
                 <SearchX className="h-6 w-6" />
               </span>
               <h2 className="mt-3 text-base font-bold text-ink">Bu kriterlere uygun ilan bulunamadı</h2>
-              <p className="mx-auto mt-1.5 max-w-md text-sm text-muted">Filtreleri biraz gevşetin ya da talebinizi bırakın; portföyümüzdeki diğer seçenekleri size sunalım.</p>
+              <p className="mx-auto mt-1.5 max-w-md text-sm text-muted">Filtreleri biraz gevşetin ya da talebinizi bırakın; uygun ilan geldiğinde haber verelim.</p>
               <Link href="/alici-talebi" className="mt-4 inline-flex items-center justify-center rounded-control bg-brand-700 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-brand-800">
                 Talep Bırak
               </Link>
