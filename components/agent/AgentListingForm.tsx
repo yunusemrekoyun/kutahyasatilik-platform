@@ -4,7 +4,8 @@ import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { submitAgentListing } from "@/app/emlakci/panel/actions";
-import { DISTRICTS, PROPERTY_TYPES } from "@/lib/constants";
+import { DISTRICTS } from "@/lib/constants";
+import { CATEGORIES, CATEGORY_LIST, isCategoryKey, type CategoryKey } from "@/lib/categories";
 import LocationPicker from "@/components/LocationPicker";
 import VideoUploadField from "@/components/admin/VideoUploadField";
 import ThousandsInput from "@/components/ThousandsInput";
@@ -15,6 +16,9 @@ type ListingData = {
   id?: string;
   title?: string;
   description?: string;
+  category?: string;
+  /** Emlak dışı kategorilerin JSONB nitelikleri (lib/categories.ts kaydına göre). */
+  attributes?: Record<string, unknown> | null;
   propertyType?: string;
   listingType?: string;
   status?: string;
@@ -77,8 +81,20 @@ export default function AgentListingForm({ listing }: { listing?: ListingData })
   const [images, setImages] = useState<string[]>(listing?.images?.map((i) => i.url) ?? []);
   const [uploading, setUploading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
-  const [propertyType, setPropertyType] = useState(listing?.propertyType || "daire");
-  const isLand = propertyType === "arsa" || propertyType === "tarla";
+  // Alt türler ve nitelik alanları kategori kaydından; admin formuyla aynı desen.
+  const initialCategory: CategoryKey = isCategoryKey(listing?.category) ? listing.category : "emlak";
+  const [category, setCategory] = useState<CategoryKey>(initialCategory);
+  const definition = CATEGORIES[category];
+  const isRealEstate = category === "emlak";
+  const [propertyType, setPropertyType] = useState(
+    listing?.propertyType || definition.subTypes[0]?.value || "daire"
+  );
+  const isLand = isRealEstate && (propertyType === "arsa" || propertyType === "tarla");
+
+  function switchCategory(next: CategoryKey) {
+    setCategory(next);
+    setPropertyType(CATEGORIES[next].subTypes[0]?.value ?? "");
+  }
 
   async function handleUpload(e: React.ChangeEvent<HTMLInputElement>) {
     const files = Array.from(e.target.files || []);
@@ -131,9 +147,19 @@ export default function AgentListingForm({ listing }: { listing?: ListingData })
             <textarea name="description" rows={5} defaultValue={listing?.description} className={inputCls} placeholder="İlan detaylı açıklaması..." />
           </Field>
           <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
-            <Field label="Mülk Türü *">
+            <Field label="Kategori *">
+              <select
+                name="category"
+                value={category}
+                onChange={(e) => switchCategory(e.target.value as CategoryKey)}
+                className={inputCls}
+              >
+                {CATEGORY_LIST.map((c) => <option key={c.key} value={c.key}>{c.label}</option>)}
+              </select>
+            </Field>
+            <Field label={isRealEstate ? "Mülk Türü *" : "Tür *"}>
               <select name="propertyType" value={propertyType} onChange={(e) => setPropertyType(e.target.value)} className={inputCls}>
-                {PROPERTY_TYPES.map((p) => <option key={p.value} value={p.value}>{p.label}</option>)}
+                {definition.subTypes.map((p) => <option key={p.value} value={p.value}>{p.label}</option>)}
               </select>
             </Field>
             <input type="hidden" name="listingType" value="sale" />
@@ -212,7 +238,43 @@ export default function AgentListingForm({ listing }: { listing?: ListingData })
         </div>
       </section>
 
-      {/* Detaylar */}
+      {/* Kategoriye özel nitelikler — kayıttan üretilir; emlakta kayıt boş döner */}
+      {!isRealEstate && definition.fields.length > 0 && (
+        <section className="bg-paper p-6 border border-stone">
+          <h2 className="font-bold text-ink">{definition.label} bilgileri</h2>
+          <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-3">
+            {definition.fields.map((field) => {
+              const id = `attr_${field.key}`;
+              const current = listing?.attributes?.[field.key];
+              return (
+                <Field key={`${category}-${field.key}`} label={`${field.label}${field.unit ? ` (${field.unit})` : ""}${field.required ? " *" : ""}`}>
+                  {field.type === "select" ? (
+                    <select name={id} required={field.required} defaultValue={String(current ?? "")} className={inputCls}>
+                      <option value="" disabled={field.required}>Seçin</option>
+                      {field.options?.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
+                    </select>
+                  ) : (
+                    <input
+                      name={id}
+                      required={field.required}
+                      type={field.type === "number" ? "number" : "text"}
+                      min={field.min}
+                      max={field.max}
+                      maxLength={field.maxLength}
+                      placeholder={field.placeholder}
+                      defaultValue={String(current ?? "")}
+                      className={inputCls}
+                    />
+                  )}
+                </Field>
+              );
+            })}
+          </div>
+        </section>
+      )}
+
+      {/* Detaylar — gayrimenkule özgü, emlak dışında hiç gösterilmez */}
+      {isRealEstate && (
       <section className="bg-paper p-6 border border-stone">
         <h2 className="font-bold text-ink">Detaylar</h2>
         <div className="mt-4 grid grid-cols-2 gap-4 sm:grid-cols-4">
@@ -249,7 +311,11 @@ export default function AgentListingForm({ listing }: { listing?: ListingData })
         </div>
       </section>
 
-      <ProfessionalListingFields values={listing} propertyType={propertyType} inputClassName={inputCls} />
+      )}
+
+      {isRealEstate && (
+        <ProfessionalListingFields values={listing} propertyType={propertyType} inputClassName={inputCls} />
+      )}
 
       {/* Konum */}
       <section className="bg-paper p-6 border border-stone">

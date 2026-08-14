@@ -3,7 +3,8 @@ import Image from "next/image";
 import { PlusCircle, Search, Eye, Heart, Inbox, Star, ExternalLink, Pencil, Trash2 } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { formatPrice } from "@/lib/format";
-import { PROPERTY_TYPE_LABELS, LISTING_STATUS_LABELS, MODERATION_STATUS_LABELS } from "@/lib/constants";
+import { LISTING_STATUS_LABELS, MODERATION_STATUS_LABELS } from "@/lib/constants";
+import { CATEGORY_LABELS, getSubTypeLabel } from "@/lib/categories";
 import { deleteListing } from "../actions";
 import { PageHeader, StatusBadge, adminCard, adminBtnPrimary, adminInput } from "@/components/admin/ui";
 
@@ -94,7 +95,12 @@ export default async function AdminListings({
                       <span className="line-clamp-2 max-w-[220px] font-medium text-ink">{l.title}</span>
                     </div>
                   </td>
-                  <td className="p-3 text-muted">{PROPERTY_TYPE_LABELS[l.propertyType] || l.propertyType}</td>
+                  {/* PROPERTY_TYPE_LABELS yalnız emlak alt türlerini tanıyor; vasıta
+                      ve teknoloji ilanlarında ham değer ("otomobil") görünüyordu.
+                      /admin/onay'ın zaten doğru yaptığı çift buraya taşındı. */}
+                  <td className="p-3 text-muted">
+                    {CATEGORY_LABELS[l.category] ?? l.category} · {getSubTypeLabel(l.category, l.propertyType)}
+                  </td>
                   <td className="p-3 text-muted">{l.district}</td>
                   <td className="p-3 font-semibold text-ink whitespace-nowrap">{formatPrice(l.price, l.currency)}</td>
                   <td className="p-3">

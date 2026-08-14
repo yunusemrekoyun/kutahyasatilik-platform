@@ -32,6 +32,10 @@ export default async function EditAgentListing({
     id: listing.id,
     title: listing.title,
     description: listing.description,
+    category: listing.category,
+    // Prisma JsonValue -> form tipi. Kayıt (lib/categories.ts) tanımsız
+    // anahtarları parseAttributes'ta zaten atıyor.
+    attributes: (listing.attributes ?? null) as Record<string, unknown> | null,
     propertyType: listing.propertyType,
     listingType: listing.listingType,
     status: listing.status,
