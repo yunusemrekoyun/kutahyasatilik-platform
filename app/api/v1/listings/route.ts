@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getListingsPaged, type ListingFilter } from "@/lib/listings";
+import { getListingsPaged, getShowcaseListings, type ListingFilter } from "@/lib/listings";
 import { absolutizeUrl } from "@/lib/apiMedia";
 import { getFilterableFields, getSubTypeLabel } from "@/lib/categories";
 
@@ -20,6 +20,25 @@ function str(v: string | null): string | undefined {
 
 export async function GET(req: NextRequest) {
   const sp = req.nextUrl.searchParams;
+
+  // Vitrin modu: mobil ana ekranın kare karo ızgarası. Görselsiz ilanlar elenir
+  // ve seçki karıştırılır — web ana sayfasıyla AYNI fonksiyon, ikizlik yok.
+  if (sp.get("showcase") === "1") {
+    const take = Math.min(Math.max(Number(sp.get("perPage")) || 12, 1), 24);
+    const items = await getShowcaseListings(take);
+    return NextResponse.json({
+      ok: true,
+      items: items.map((item) => ({
+        ...item,
+        subTypeLabel: getSubTypeLabel(item.category, item.propertyType),
+        coverImage: absolutizeUrl(item.coverImage ?? null, req),
+      })),
+      total: items.length,
+      page: 1,
+      perPage: take,
+      totalPages: 1,
+    });
+  }
 
   // Kategoriye özel nitelik filtreleri. Web'deki /ilanlar ile aynı sözleşme:
   // seçim alanları `?yakit=dizel`, sayı alanları `?yil_min=2015&yil_max=2020`.
