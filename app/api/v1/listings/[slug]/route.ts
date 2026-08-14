@@ -4,6 +4,7 @@ import { parseJsonArray } from "@/lib/format";
 import { requestOrigin } from "@/lib/apiMedia";
 import { buildAnalysis } from "@/lib/analysis";
 import { CATEGORY_LABELS, describeAttributes, getSubTypeLabel } from "@/lib/categories";
+import { PUBLIC_ACTIVE_LISTING, PUBLIC_VISIBLE_LISTING } from "@/lib/listingFilters";
 
 // Mobil ilan detayı — web detay sayfasıyla (app/(site)/ilan/[slug]) aynı veri kaynağı.
 // Onaylı + pasif olmayan ilan; görseller mobil için mutlak URL'e çevrilir.
@@ -19,21 +20,21 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ slug
   const { slug } = await params;
 
   const l = await prisma.listing.findFirst({
-    where: { slug, moderationStatus: "approved", status: { not: "passive" } },
+    where: { slug, ...PUBLIC_VISIBLE_LISTING },
     include: {
       images: { orderBy: { sortOrder: "asc" }, select: { url: true, alt: true } },
       agent: {
         select: {
           name: true, title: true, agency: true, logo: true, slug: true, phone: true,
           publicProfile: true, showPhone: true, showWhatsapp: true, status: true,
-          _count: { select: { listings: { where: { status: "active", moderationStatus: "approved" } } } },
+          _count: { select: { listings: { where: PUBLIC_ACTIVE_LISTING } } },
         },
       },
       agencyRef: {
         select: {
           name: true, slug: true, logo: true, phone: true, whatsapp: true, verifiedAt: true,
           status: true, published: true, showPhone: true, showWhatsapp: true,
-          _count: { select: { listings: { where: { status: "active", moderationStatus: "approved" } } } },
+          _count: { select: { listings: { where: PUBLIC_ACTIVE_LISTING } } },
         },
       },
       amenities: { orderBy: { sortOrder: "asc" }, select: { key: true, label: true, group: true } },

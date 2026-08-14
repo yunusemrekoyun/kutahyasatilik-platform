@@ -3,13 +3,13 @@ import { prisma } from "./prisma";
 import type { ListingCardData } from "@/components/ListingCard";
 import { getDistrictStats } from "./districtStats";
 import { computeBadges } from "./badges";
-import { buildOrderBy, buildWhere, type ListingFilter } from "./listingFilters";
+import { buildOrderBy, buildWhere, PUBLIC_VISIBLE_LISTING, type ListingFilter } from "./listingFilters";
 import { summarizeAttributes } from "./categories";
 
-export { buildOrderBy, buildWhere } from "./listingFilters";
+export { buildOrderBy, buildWhere, PUBLIC_VISIBLE_LISTING, PUBLIC_ACTIVE_LISTING } from "./listingFilters";
 export type { ListingFilter } from "./listingFilters";
 
-const cardSelect = {
+export const cardSelect = {
   id: true,
   slug: true,
   title: true,
@@ -30,7 +30,7 @@ const cardSelect = {
   agent: { select: { name: true, title: true, logo: true } },
 };
 
-type RawCard = {
+export type RawCard = {
   id: string;
   slug: string;
   title: string;
@@ -72,7 +72,8 @@ const getRecentViewsMap = unstable_cache(
 );
 
 // Ham satırları rozetlerle birlikte kart verisine çevirir.
-async function decorate(rows: RawCard[]): Promise<ListingCardData[]> {
+// Dışa açık: her kart yüzeyi aynı rozet/özet mantığından geçmelidir.
+export async function decorate(rows: RawCard[]): Promise<ListingCardData[]> {
   const [stats, views] = await Promise.all([
     getDistrictStats(),
     getRecentViewsMap(),
@@ -151,7 +152,7 @@ export async function getListingsPaged(
 
 export async function getFeaturedListings(take = 6): Promise<ListingCardData[]> {
   const rows = await prisma.listing.findMany({
-    where: { status: "active", moderationStatus: "approved" },
+    where: PUBLIC_VISIBLE_LISTING,
     orderBy: [{ featured: "desc" }, { createdAt: "desc" }],
     take,
     select: cardSelect,

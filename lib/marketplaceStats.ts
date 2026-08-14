@@ -1,5 +1,6 @@
 import { unstable_cache } from "next/cache";
 import { prisma } from "@/lib/prisma";
+import { PUBLIC_ACTIVE_LISTING } from "@/lib/listingFilters";
 
 export type MarketplaceStats = {
   activeListings: number;
@@ -21,8 +22,11 @@ export const getMarketplaceStats = unstable_cache(
     } as const;
 
     const [categories, districts, soldListings, approvedAgencies, publicAgents] = await Promise.all([
+      // `propertyType` ile gruplanıyordu: daire, otomobil ve telefon aynı düzlemde
+      // sayılıyor, "Kategoriler" başlığı altında alt türler listeleniyordu. Artık
+      // gerçek kategori kırılımı — ana sayfa kategori girişleri bunu tüketecek.
       prisma.listing.groupBy({
-        by: ["propertyType"],
+        by: ["category"],
         where: { ...publicListingWhere, status: "active" },
         _count: { _all: true },
       }),
@@ -38,14 +42,14 @@ export const getMarketplaceStats = unstable_cache(
         where: {
           status: "approved",
           published: true,
-          listings: { some: { moderationStatus: "approved", status: "active" } },
+          listings: { some: PUBLIC_ACTIVE_LISTING },
         },
       }),
       prisma.agent.count({
         where: {
           status: "approved",
           publicProfile: true,
-          listings: { some: { moderationStatus: "approved", status: "active" } },
+          listings: { some: PUBLIC_ACTIVE_LISTING },
           OR: [
             { agencyId: null },
             { agencyRef: { is: { status: "approved", published: true } } },
@@ -55,7 +59,7 @@ export const getMarketplaceStats = unstable_cache(
     ]);
 
     const categoryCounts = Object.fromEntries(
-      categories.map((category) => [category.propertyType, category._count._all]),
+      categories.map((category) => [category.category, category._count._all]),
     );
     const activeListings = categories.reduce((total, category) => total + category._count._all, 0);
 

@@ -29,11 +29,34 @@ export type ListingFilter = {
   agentSlug?: string;
 };
 
+/**
+ * Kamu görünürlük değişmezi — TEK KAYNAK.
+ *
+ * Bu öneki taşımayan her sorgu yolu, onay bekleyen (`moderationStatus: "pending"`)
+ * bireysel ilanları anında yayına düşürür. Kural daha önce beş ayrı yerde elle
+ * tekrarlanıyordu: buildWhere, getFeaturedListings, publicDirectory, matching ve
+ * /api/v1/listings/[slug]. Yeni bir sorgu yolu açarken bunlardan birini kullan.
+ *
+ * İki varyant bilinçli olarak ayrı:
+ * - VISIBLE: satılmış ilanlar da görünür (yalnız pasife alınanlar düşer).
+ * - ACTIVE : yalnız satıştakiler. Dizin/profil **uygunluk kapısı** için —
+ *   "en az bir yayında ilanı var mı" sorusunun cevabı satılmış ilanla verilemez.
+ *
+ * Nesne literali olarak tutuluyor (fonksiyon değil) ki Prisma iç içe filtrelerde
+ * (`listings: { some: ... }`) tipi çıkarabilsin.
+ */
+export const PUBLIC_VISIBLE_LISTING = {
+  status: { not: "passive" },
+  moderationStatus: "approved",
+} as const;
+
+export const PUBLIC_ACTIVE_LISTING = {
+  status: "active",
+  moderationStatus: "approved",
+} as const;
+
 export function buildWhere(filter: ListingFilter) {
-  const where: Record<string, unknown> = {
-    status: { not: "passive" },
-    moderationStatus: "approved",
-  };
+  const where: Record<string, unknown> = { ...PUBLIC_VISIBLE_LISTING };
   if (filter.category) where.category = filter.category;
   if (filter.propertyType) where.propertyType = filter.propertyType;
   if (filter.listingType) where.listingType = filter.listingType;

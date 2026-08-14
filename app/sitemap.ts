@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { SITE } from "@/lib/site";
 import { LANDING_PAGES } from "@/lib/constants";
 import { getPublicDirectorySlugs } from "@/lib/publicDirectory";
+import { PUBLIC_VISIBLE_LISTING } from "@/lib/listingFilters";
 
 export const dynamic = "force-dynamic";
 
@@ -37,7 +38,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   let listingPages: MetadataRoute.Sitemap = [];
   try {
     const listings = await prisma.listing.findMany({
-      where: { status: { not: "passive" }, moderationStatus: "approved" },
+      where: PUBLIC_VISIBLE_LISTING,
       select: { slug: true, updatedAt: true },
     });
     listingPages = listings.map((l) => ({
