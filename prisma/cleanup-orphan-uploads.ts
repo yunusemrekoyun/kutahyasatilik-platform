@@ -8,10 +8,13 @@
  * GÜVENLİK TASARIMI — bu script dosya siler, geri dönüşü yok:
  *
  * 1. Varsayılan KURU KOŞU. Silmek için açıkça `--apply` gerekir.
- * 2. Referans toplarken kolon kolon saymıyoruz. Bir kolonu atlamak canlı görseli
- *    silmek demek; onun yerine ilgili modellerin SATIRLARININ TAMAMI serileştirilip
- *    `/uploads/...` deseni aranıyor. Böylece CMS HTML gövdeleri, JSON dizileri
- *    (Lead.photos) ve serbest ayar değerleri (Setting.value) kendiliğinden kapsanıyor.
+ * 2. Referans toplarken NE KOLON NE DE MODEL listesi elle tutuluyor. İlk sürümde
+ *    modeller elle sayılmıştı ve 34 modelin 24'ü (District, AgentApplication,
+ *    AdRequest, PortfolioOpportunity, Testimonial, Offer, Bid, Message...) hiç
+ *    taranmıyordu — kuru koşu 27 gerçek yüklemeyi "yetim" gösterdi. Artık model
+ *    listesi Prisma DMMF'inden geliyor ve her satır serileştirilip `/uploads/...`
+ *    deseni aranıyor: CMS HTML gövdeleri, JSON dizileri ve serbest ayar değerleri
+ *    kendiliğinden kapsanıyor.
  * 3. Yaş eşiği (varsayılan 48 saat) — az önce yüklenmiş, formu henüz gönderilmemiş
  *    dosyalar korunuyor.
  * 4. Emniyet supabı: hiç referans bulunamazsa script hata verip çıkar. Boş bir
@@ -29,7 +32,7 @@
 import "dotenv/config";
 import { readdir, stat, unlink } from "fs/promises";
 import path from "path";
-import { PrismaClient } from "../app/generated/prisma/client";
+import { PrismaClient, Prisma } from "../app/generated/prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { getUploadDir } from "../lib/uploads";
 
@@ -43,29 +46,40 @@ const args = process.argv.slice(2);
 const APPLY = args.includes("--apply");
 const HOURS = Number(args.find((a) => a.startsWith("--hours="))?.split("=")[1] ?? 48);
 
-/** Satırların tamamı taranıyor — kolon listesi tutmak hataya açık. */
+/**
+ * Yüksek hacimli, upload referansı taşımayan zaman serileri. ATLANANLAR AÇIKÇA
+ * LOGLANIR — sessiz kapsam daraltması, "hepsini taradık" yanılsaması yaratır.
+ */
+const SKIPPED_MODELS = new Set(["AnalyticsEvent", "AnalyticsDaily", "PushDelivery"]);
+
+/** Model listesi DMMF'ten: elle tutulan liste bir modeli atlamaya açıktı. */
 async function collectReferencedFiles(): Promise<Set<string>> {
   const rows: unknown[] = [];
-  const push = async <T>(label: string, run: () => Promise<T[]>) => {
-    const result = await run();
-    rows.push(...result);
-    return `${label}:${result.length}`;
-  };
-
-  // Sırayla: connection pooler'a on eşzamanlı sorgu açmaya gerek yok, bu bir
-  // bakım scripti. Paralel çalıştırmak pooler limitine takılabiliyor.
   const counts: string[] = [];
-  counts.push(await push("listing", () => prisma.listing.findMany()));
-  counts.push(await push("listingImage", () => prisma.listingImage.findMany()));
-  counts.push(await push("agent", () => prisma.agent.findMany()));
-  counts.push(await push("agency", () => prisma.agency.findMany()));
-  counts.push(await push("lead", () => prisma.lead.findMany()));
-  counts.push(await push("post", () => prisma.post.findMany()));
-  counts.push(await push("page", () => prisma.page.findMany()));
-  counts.push(await push("popup", () => prisma.popup.findMany()));
-  counts.push(await push("setting", () => prisma.setting.findMany()));
-  counts.push(await push("localResource", () => prisma.localResource.findMany()));
-  console.log("Taranan kayıtlar:", counts.join(" "));
+  const skipped: string[] = [];
+
+  // Prisma 7'nin prisma-client generator'ında `Prisma.dmmf` YOK; model listesi
+  // `Prisma.ModelName` sabitinden geliyor (34 model).
+  for (const modelName of Object.keys(Prisma.ModelName)) {
+    if (SKIPPED_MODELS.has(modelName)) {
+      skipped.push(modelName);
+      continue;
+    }
+    // Delegate adı modelin baş harfi küçük hâli (Prisma sözleşmesi).
+    const key = modelName.charAt(0).toLowerCase() + modelName.slice(1);
+    const delegate = (prisma as unknown as Record<string, { findMany?: () => Promise<unknown[]> }>)[key];
+    if (!delegate?.findMany) {
+      skipped.push(`${modelName}(delegate yok)`);
+      continue;
+    }
+    // Sırayla: pooler'a onlarca eşzamanlı sorgu açmaya gerek yok.
+    const result = await delegate.findMany();
+    rows.push(...result);
+    counts.push(`${key}:${result.length}`);
+  }
+
+  console.log(`Taranan model: ${counts.length}  Atlanan: ${skipped.join(", ") || "yok"}`);
+  console.log("Kayıtlar:", counts.join(" "));
 
   const referenced = new Set<string>();
   const pattern = /\/uploads\/([A-Za-z0-9._-]+)/g;
@@ -116,6 +130,8 @@ async function main() {
   const orphans: { name: string; bytes: number; ageHours: number }[] = [];
 
   for (const name of entries) {
+    // Gizli dosyalar (.gitkeep gibi) dizin iskeletidir, içerik değil.
+    if (name.startsWith(".")) continue;
     if (referenced.has(name)) continue;
     const full = path.join(dir, name);
     let info;
