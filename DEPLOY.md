@@ -35,7 +35,8 @@ restart etmeyin.
   otomatik silmeyin veya stash'e taşımayın; önce nedenini inceleyin.
 - `/var/www/kutahyasatilik.com/app/.env` bulunmalı ve dosya izni `0600` olmalıdır.
 - `.env` içindeki `UPLOAD_DIR`, `/var/www/kutahyasatilik.com/uploads` olmalıdır.
-- Proje bekleme/test dönemindeyken `.env` içinde `PUSH_ENABLED=false` kalmalıdır.
+- `.env` içinde `PUSH_ENABLED` **açıkça** `true` ya da `false` olmalıdır (eksik
+  bırakılmamalı). Push açılacaksa önce "Push'u açma" bölümüne bakın.
 - Kullanıcı trafiği açılmadan önce veritabanı yedeği ve geri yükleme tatbikatı
   ayrıca doğrulanmalıdır.
 - Production'da `seed`, `setup:demo`, `seed:bulk`, `seed:media` veya `db:reset`
@@ -94,8 +95,17 @@ test -f "$APP/.env" || fail "Production .env bulunamadı"
 test "$(stat -c '%a' "$APP/.env")" = "600" || fail ".env izni 0600 değil"
 grep -Eq '^UPLOAD_DIR="?/var/www/kutahyasatilik\.com/uploads"?[[:space:]]*$' "$APP/.env" \
   || fail "UPLOAD_DIR kalıcı dizini göstermiyor"
-grep -Eq '^PUSH_ENABLED="?false"?[[:space:]]*$' "$APP/.env" \
-  || fail "Bekleme döneminde PUSH_ENABLED false olmalı"
+# PUSH_ENABLED bilinçli bir karar olmalı; kapı "false" dayatmıyor çünkü push
+# açıldığı gün bu satır deploy'u kilitliyordu.
+grep -Eq '^PUSH_ENABLED="?(true|false)"?[[:space:]]*$' "$APP/.env" \
+  || fail "PUSH_ENABLED açıkça true ya da false olmalı"
+# Push açıksa worker'ın kimliği ve zamanlayıcısı da yerinde olmalı.
+if grep -Eq '^PUSH_ENABLED="?true"?[[:space:]]*$' "$APP/.env"; then
+  grep -Eq '^CRON_SECRET=".{32,}"[[:space:]]*$' "$APP/.env" \
+    || fail "PUSH_ENABLED=true ama CRON_SECRET yok/kısa (en az 32 karakter)"
+  systemctl is-enabled --quiet kutahyasatilik-push.timer \
+    || fail "PUSH_ENABLED=true ama kutahyasatilik-push.timer etkin değil"
+fi
 
 cd "$APP"
 test "$(git branch --show-current)" = "main" || fail "Aktif branch main değil"
@@ -165,6 +175,8 @@ Kontrol listesi:
 - Giriş ve yalnız yetkili kullanıcıya açık ekranlar doğru davranıyor.
 - `/api/health` hem localhost hem public URL üzerinden HTTP 200 dönüyor.
 - `PUSH_ENABLED=false` olduğu sürece push worker gerçek gönderim yapmıyor.
+- Push açıksa: `systemctl list-timers kutahyasatilik-push.timer` bir sonraki
+  tetiklemeyi gösteriyor ve `journalctl -u kutahyasatilik-push -n 20` temiz.
 
 Logları paylaşmadan önce erişim belirteci, e-posta, telefon ve diğer kişisel
 verileri ayıklayın.
@@ -206,3 +218,45 @@ curl --fail --silent --show-error --max-time 15 \
 Olay giderildikten sonra tekrar `main` branch'ine dönün ve normal deploy akışını
 uygulayın. Upload dizinini veya diğer VPS projelerini rollback kapsamında
 değiştirmeyin.
+
+## Push'u açma
+
+Push altyapısının tamamı (outbox, retry, receipt, deep link) yazılı ve testli;
+uzun süre eksik olan tek şey **tetikleyiciydi**. Sıra önemli:
+
+1. **Kuyruğu kontrol et.** `PUSH_ENABLED` uzun süre kapalı kaldıysa outbox
+   birikmiştir. `PUSH_MAX_QUEUE_AGE_HOURS` (varsayılan 72) bundan eski
+   teslimatları göndermeden `failed` yapar. Açmadan önce bekleyen sayısına bak:
+
+   ```sql
+   SELECT count(*), min("createdAt") FROM "PushDelivery" WHERE status = 'pending';
+   ```
+
+   Bu filtre olmadan açmak, aylar öncesine ait bildirimleri kullanıcılara gönderir.
+
+2. **Env değerlerini gir** (`.env`, `0600`):
+   `CRON_SECRET` (≥32 karakter), `EXPO_ACCESS_TOKEN`, `PUSH_MAX_QUEUE_AGE_HOURS`,
+   ve deep link için `APPLE_TEAM_ID` + `ANDROID_APP_LINK_SHA256_CERT_FINGERPRINTS`.
+   Bunlar boşken `.well-known` dosyaları 404 döner ve bildirime tıklama
+   universal link olarak çalışmaz (yalnız uygulama içi yönlendirme).
+
+3. **Zamanlayıcıyı kur:**
+
+   ```bash
+   cp deploy/kutahyasatilik-push.* /etc/systemd/system/
+   systemctl daemon-reload
+   systemctl enable --now kutahyasatilik-push.timer
+   systemctl list-timers kutahyasatilik-push.timer
+   ```
+
+4. **`PUSH_ENABLED=true`** yap ve servisi yeniden başlat.
+
+5. **Doğrula:** worker kimliksiz çağrıda 401 dönmeli, kimlikli çağrıda sayaç:
+
+   ```bash
+   curl -s -o /dev/null -w '%{http_code}\n' -X POST \
+     http://127.0.0.1:3003/api/internal/push/dispatch          # 401 bekleniyor
+   ```
+
+6. **Fiziksel cihazda** foreground / background / killed tıklama, izin reddi,
+   çıkış ve geçersiz token senaryolarını çalıştır.
