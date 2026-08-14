@@ -21,6 +21,34 @@ export async function POST(req: NextRequest) {
   if (!authorized) {
     return NextResponse.json({ ok: false, error: "Yetkisiz" }, { status: 401 });
   }
-  const [dispatch, receipts] = await Promise.all([dispatchPendingPushes(), checkPushReceipts()]);
-  return NextResponse.json({ ok: true, dispatch, receipts, enabled: process.env.PUSH_ENABLED === "true" });
+
+  // İki iş birbirinden BAĞIMSIZ: gönderim ve makbuz kontrolü.
+  // Promise.all kullanıldığında biri throw ettiğinde öbürünün sonucu da
+  // kayboluyor ve route 500 dönüyordu — zamanlayıcı da hatayı "iş yapılmadı"
+  // diye değil "uç bozuk" diye görüyordu. allSettled ikisini ayırıyor.
+  const [dispatch, receipts] = await Promise.allSettled([
+    dispatchPendingPushes(),
+    checkPushReceipts(),
+  ]);
+
+  const errors: string[] = [];
+  if (dispatch.status === "rejected") {
+    errors.push(`dispatch: ${dispatch.reason instanceof Error ? dispatch.reason.message : String(dispatch.reason)}`);
+  }
+  if (receipts.status === "rejected") {
+    errors.push(`receipts: ${receipts.reason instanceof Error ? receipts.reason.message : String(receipts.reason)}`);
+  }
+
+  return NextResponse.json(
+    {
+      // Kısmi başarı da başarıdır: biri çalıştıysa zamanlayıcı yeniden denemesin.
+      ok: errors.length === 0,
+      dispatch: dispatch.status === "fulfilled" ? dispatch.value : null,
+      receipts: receipts.status === "fulfilled" ? receipts.value : null,
+      errors: errors.length ? errors : undefined,
+      enabled: process.env.PUSH_ENABLED === "true",
+    },
+    // Her ikisi de düştüyse 500: zamanlayıcı/izleme bunu görsün.
+    { status: errors.length === 2 ? 500 : 200 },
+  );
 }

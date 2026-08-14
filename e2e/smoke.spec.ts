@@ -48,15 +48,31 @@ test("marketplace directories and official local tools keep their public contrac
   }
 });
 
-test("unconfigured app-link manifests fail closed and the push worker is private", async ({ request }) => {
+test("app-link manifests are consistent and the push worker is private", async ({ request }) => {
+  // Manifest'ler YAPILANDIRILDIĞINDA 200 döner. Test eskiden koşulsuz 404
+  // bekliyordu; yani push/deep link açıldığı gün CI kırmızıya dönerdi ve
+  // sebebi bir regresyon değil, işin BİTMESİ olurdu.
   const aasa = await request.get("/.well-known/apple-app-site-association");
-  expect(aasa.status()).toBe(404);
-  expect(aasa.headers()["cache-control"]).toBe("no-store");
+  if (aasa.status() === 404) {
+    expect(aasa.headers()["cache-control"]).toBe("no-store");
+  } else {
+    expect(aasa.status()).toBe(200);
+    const body = await aasa.json();
+    expect(body.applinks.details.length).toBeGreaterThan(0);
+  }
 
   const assetLinks = await request.get("/.well-known/assetlinks.json");
-  expect(assetLinks.status()).toBe(404);
-  expect(assetLinks.headers()["cache-control"]).toBe("no-store");
+  if (assetLinks.status() === 404) {
+    expect(assetLinks.headers()["cache-control"]).toBe("no-store");
+  } else {
+    expect(assetLinks.status()).toBe(200);
+    const body = await assetLinks.json();
+    expect(Array.isArray(body)).toBe(true);
+    expect(body.length).toBeGreaterThan(0);
+  }
 
+  // Worker HER ZAMAN gizli kalmalı — push açık olsun olmasın.
+  // Bu sözleşme yapılandırmadan bağımsız, koşulsuz kontrol edilir.
   const worker = await request.post("/api/internal/push/dispatch");
   expect(worker.status()).toBe(401);
 });

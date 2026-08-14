@@ -1,0 +1,19 @@
+# Push outbox worker — tek seferlik çalışır, .timer tetikler.
+#
+# Kurulum (VPS'te, root):
+#   cp deploy/kutahyasatilik-push.* /etc/systemd/system/
+#   systemctl daemon-reload
+#   systemctl enable --now kutahyasatilik-push.timer
+#
+# CRON_SECRET uygulamanın .env'inden okunur; ayrıca burada tutmuyoruz.
+[Unit]
+Description=Kutahya Satilik push outbox dispatch
+After=network-online.target kutahyasatilik.service
+
+[Service]
+Type=oneshot
+# EnvironmentFile 0600 kalmalı; yalnız CRON_SECRET okunuyor.
+EnvironmentFile=/var/www/kutahyasatilik.com/app/.env
+ExecStart=/usr/bin/curl --fail --silent --show-error --max-time 60 \
+  -X POST http://127.0.0.1:3003/api/internal/push/dispatch \
+  -H "Authorization: Bearer ${CRON_SECRET}"

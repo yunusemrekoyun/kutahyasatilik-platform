@@ -1,0 +1,20 @@
+# Push worker zamanlayıcısı.
+#
+# Repoda ne cron, ne systemd timer, ne de scheduled GitHub Action vardı:
+# outbox, retry, receipt ve deep link katmanlarının tamamı yazılmıştı ama
+# worker'ı çağıran hiçbir şey yoktu — yani hiçbir kullanıcı push almıyordu.
+#
+# Dakikada bir yeterli: dispatch turu 100 teslimat alıyor, makbuz kontrolü
+# 15 dakikalık pencereyle çalışıyor.
+[Unit]
+Description=Run the Kutahya Satilik push dispatch every minute
+
+[Timer]
+OnBootSec=2min
+OnUnitActiveSec=1min
+# Servis çalışmıyorken biriken tetiklemeler tek seferde kapatılsın.
+Persistent=false
+Unit=kutahyasatilik-push.service
+
+[Install]
+WantedBy=timers.target
