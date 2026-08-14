@@ -1,11 +1,26 @@
-export const LISTING_IMPORT_HEADERS = [
-  "externalId", "title", "description", "propertyType", "listingType", "status", "price", "currency",
+import { CATEGORY_KEYS, CATEGORY_LIST } from "./categories";
+
+/**
+ * Nitelik kolonları kayıttan üretilir: her kategorinin her alanı için `attr_<key>`.
+ * marka/model gibi birden çok kategoride geçen alanlar tekilleştirilir.
+ *
+ * Değerler burada DOĞRULANMAZ; ham string olarak geçilir ve upsertAgentListing
+ * içinde `parseAttributes` tarafından kategoriye göre ayrıştırılır. Böylece CSV
+ * yolu kendi nitelik doğrulama kopyasını taşımaz.
+ */
+const ATTRIBUTE_HEADERS: readonly string[] = [
+  ...new Set(CATEGORY_LIST.flatMap((c) => c.fields.map((f) => `attr_${f.key}`))),
+];
+
+export const LISTING_IMPORT_HEADERS: readonly string[] = [
+  "externalId", "title", "description", "category", "propertyType", "listingType", "status", "price", "currency",
   "district", "neighborhood", "address", "areaGross", "areaNet", "rooms", "floor", "totalFloors",
   "buildingAge", "heating", "furnished", "inSite", "balcony", "parking", "creditEligible", "usageStatus", "propertyCondition", "bathroomCount",
   "dues", "exchangeEligible", "deedStatus", "deedType", "zoningStatus", "adaNo", "parselNo",
   "kaks", "occupancyPermit", "validUntil", "locationVisibility", "parcelVisibility", "features",
   "amenities", "images",
-] as const;
+  ...ATTRIBUTE_HEADERS,
+];
 
 type ImportInput = Record<string, unknown>;
 
@@ -33,6 +48,7 @@ const LIST_FIELDS = new Set([
 ]);
 
 const LOWERCASE_FIELDS = new Set([
+  "category",
   "propertyType",
   "listingType",
   "status",
@@ -45,6 +61,7 @@ const LOWERCASE_FIELDS = new Set([
 ]);
 
 const ENUM_VALUES: Record<string, ReadonlySet<string>> = {
+  category: new Set(CATEGORY_KEYS),
   listingType: new Set(["sale"]), // portföy yalnız satılık
   status: new Set(["active", "sold", "passive"]),
   currency: new Set(["TRY", "USD", "EUR"]),

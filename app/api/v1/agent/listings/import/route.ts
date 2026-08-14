@@ -3,7 +3,8 @@ import { prisma } from "@/lib/prisma";
 import { resolveApiAgent } from "@/lib/apiAgent";
 import { AgentListingError, upsertAgentListing } from "@/lib/apiAgentListing";
 import { CsvError, parseCsv } from "@/lib/csv";
-import { DISTRICTS, PROPERTY_TYPES } from "@/lib/constants";
+import { DISTRICTS } from "@/lib/constants";
+import { getCategory, isCategoryKey } from "@/lib/categories";
 import { LISTING_AMENITIES } from "@/lib/listingAmenities";
 import { notifyAdmins } from "@/lib/notify";
 import { listingImportKey, parseListingImportRow } from "@/lib/listingImport";
@@ -20,6 +21,7 @@ type ExistingListing = {
   id: string;
   agentId: string | null;
   title: string;
+  category: string;
   propertyType: string;
   listingType: string;
   status: string;
@@ -36,6 +38,7 @@ const existingSelect = {
   id: true,
   agentId: true,
   title: true,
+  category: true,
   propertyType: true,
   listingType: true,
   status: true,
@@ -79,12 +82,15 @@ function effective<T>(input: ListingInput, key: string, existing: T | null | und
 
 function validationErrors(input: ListingInput, existing: ExistingListing | null, parseErrors: string[]) {
   const errors = [...parseErrors];
-  const propertyTypes = new Set(PROPERTY_TYPES.map((item) => item.value));
   const districts = new Set(DISTRICTS.map((item) => item.name));
   const amenities = new Set(LISTING_AMENITIES.map((item) => item.key));
 
   const externalId = String(input.externalId ?? "");
   const title = effective(input, "title", existing?.title, "");
+  // Kategori: CSV taşımıyorsa mevcut değer, yeni satırda emlak (kolon varsayılanı).
+  const category = effective(input, "category", existing?.category, "emlak");
+  const categoryDef = isCategoryKey(category) ? getCategory(category) : null;
+  const isRealEstate = category === "emlak";
   const propertyType = effective(input, "propertyType", existing?.propertyType, "");
   const listingType = effective(input, "listingType", existing?.listingType, "sale");
   const price = effective(input, "price", existing?.price, 0);
@@ -97,15 +103,21 @@ function validationErrors(input: ListingInput, existing: ExistingListing | null,
 
   if (!externalId || externalId.length > 100) errors.push("externalId zorunludur ve 100 karakteri aşamaz");
   if (!title) errors.push("title zorunludur");
-  if (!propertyTypes.has(propertyType)) errors.push("propertyType geçersiz");
+  if (!categoryDef) errors.push("category geçersiz");
+  // Alt tür artık kategoriye göre doğrulanıyor: PROPERTY_TYPES sabit listesi yalnız
+  // emlak alt türlerini tanıdığı için vasıta/teknoloji satırları hep reddediliyordu.
+  else if (!categoryDef.subTypes.some((s) => s.value === propertyType)) errors.push("propertyType geçersiz");
   if (listingType !== "sale") errors.push("listingType yalnız sale olabilir");
   if (!price || price <= 0) errors.push("price pozitif olmalıdır");
   if (!["TRY", "USD", "EUR"].includes(currency)) errors.push("currency geçersiz");
   if (!districts.has(district)) errors.push("district geçersiz");
-  if (!areaGross || areaGross <= 0) errors.push("areaGross pozitif olmalıdır");
-  const isLand = propertyType === "arsa" || propertyType === "tarla";
-  if (!isLand && !rooms) errors.push("konut ve işyeri için rooms zorunludur");
-  if (isLand && !zoningStatus) errors.push("arsa ve tarla için zoningStatus zorunludur");
+  // m² / oda / imar gayrimenkule özgü — emlak dışı satırlarda dayatılmaz.
+  const isLand = isRealEstate && (propertyType === "arsa" || propertyType === "tarla");
+  if (isRealEstate) {
+    if (!areaGross || areaGross <= 0) errors.push("areaGross pozitif olmalıdır");
+    if (!isLand && !rooms) errors.push("konut ve işyeri için rooms zorunludur");
+    if (isLand && !zoningStatus) errors.push("arsa ve tarla için zoningStatus zorunludur");
+  }
   if (!["hidden", "approximate", "exact"].includes(locationVisibility)) errors.push("locationVisibility geçersiz");
   if (typeof input.areaNet === "number" && input.areaNet <= 0) errors.push("areaNet pozitif olmalıdır");
   if (typeof input.totalFloors === "number" && input.totalFloors <= 0) errors.push("totalFloors pozitif olmalıdır");
