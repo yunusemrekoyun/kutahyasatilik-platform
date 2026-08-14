@@ -1,24 +1,19 @@
 import type { Metadata } from "next";
-import Image from "next/image";
 import Link from "next/link";
-import { ArrowRight, BarChart3, Check, MapPin, Phone } from "lucide-react";
+import { ArrowRight, BarChart3, Check, MapPin } from "lucide-react";
 import HomeJsonLd from "@/components/HomeJsonLd";
 import HomeSearch from "@/components/HomeSearch";
 import ListingCard from "@/components/ListingCard";
 import ListingsMap from "@/components/ListingsMap";
 import NotFoundCTA from "@/components/NotFoundCTA";
 import TrackView from "@/components/TrackView";
-import { getSiteContact } from "@/lib/contact";
-import { DISTRICTS, LANDING_PAGES } from "@/lib/constants";
+import { DISTRICTS } from "@/lib/constants";
 import { CATEGORY_LIST } from "@/lib/categories";
-import { getFeaturedListings, getMapPoints } from "@/lib/listings";
+import { getFeaturedListings, getMapPoints, getShowcaseListings } from "@/lib/listings";
 import { getMarketplaceStats } from "@/lib/marketplaceStats";
-import { mediaUrl } from "@/lib/media";
 import { prisma } from "@/lib/prisma";
-import { SITE, telLink } from "@/lib/site";
 
 // Emlak zaten LANDING_PAGES üzerinden mülk türü kırılımıyla listeleniyor.
-const NON_PROPERTY_CATEGORIES = CATEGORY_LIST.filter((c) => c.key !== "emlak");
 
 export const revalidate = 300;
 export const metadata: Metadata = { alternates: { canonical: "/" } };
@@ -38,13 +33,13 @@ async function getHomeTexts() {
 }
 
 export default async function Home() {
-  const [featured, points, marketplaceStats, texts, testimonials, contact] = await Promise.all([
+  const [showcase, featured, points, marketplaceStats, texts, testimonials] = await Promise.all([
+    getShowcaseListings(12),
     getFeaturedListings(6),
     getMapPoints(),
     getMarketplaceStats(),
     getHomeTexts(),
     prisma.testimonial.findMany({ where: { published: true }, orderBy: [{ sortOrder: "asc" }, { createdAt: "desc" }] }).catch(() => []),
-    getSiteContact(),
   ]);
 
   const t = (key: string, fallback: string) => texts.get(key) || fallback;
@@ -54,9 +49,6 @@ export default async function Home() {
     "home_hero_subtitle",
     `Merkez ve tüm ilçelerde ${marketplaceStats.activeListings} güncel ilanı, bölgesel verileri ve yerel danışmanlığı tek yerde keşfedin.`,
   );
-  // Only use the deliberately selected CMS visual here. Listing covers may contain
-  // agent artwork or embedded copy that does not work as a large editorial hero.
-  const heroVisual = texts.get("home_hero_image") || null;
   const whyTitle = t("home_why_title", "Yerel pazarı yakından tanıyoruz");
   const categoryCoverByType = new Map<string, string>();
   for (const listing of featured) {
@@ -68,120 +60,98 @@ export default async function Home() {
       <TrackView />
       <HomeJsonLd />
 
-      <section className="relative overflow-hidden border-b border-stone bg-canvas">
-        <div className="ceramic-grid pointer-events-none absolute inset-y-0 right-0 hidden w-1/2 opacity-55 lg:block" />
-        <div className="relative mx-auto grid max-w-7xl items-stretch px-5 sm:px-6 lg:grid-cols-12">
-          <div className="flex flex-col justify-center py-14 sm:py-20 lg:col-span-6 lg:pr-14 lg:py-24">
-            <p className="eyebrow">{t("home_hero_badge", SITE.brand)}</p>
-            <h1 className="mt-4 max-w-2xl text-3xl font-bold leading-tight tracking-tight text-ink sm:text-4xl lg:text-5xl">
-              {heroTitle} <span className="italic text-brand-600">{heroHighlight}</span>
-            </h1>
-            <p className="mt-6 max-w-xl text-base leading-7 text-muted sm:text-lg sm:leading-8">{heroSubtitle}</p>
-
-            <div className="mt-9 border border-stone bg-paper p-4 sm:p-5">
-              <HomeSearch />
-              <div className="mt-4 flex flex-wrap items-center gap-x-5 gap-y-2 border-t border-stone pt-4 text-xs font-semibold text-muted">
-                <Link href="/degerleme" className="inline-flex items-center gap-1.5 text-brand-700 hover:text-brand-900"><BarChart3 className="h-4 w-4" /> Bölgesel ön değerleme</Link>
-                <span className="inline-flex items-center gap-1.5"><Check className="h-4 w-4 text-green-700" /> Şeffaf satış süreci</span>
-                {contact.phoneRaw && <a href={telLink(contact.phoneRaw)} className="inline-flex items-center gap-1.5 text-brand-700 hover:text-brand-900"><Phone className="h-4 w-4" /> {contact.phone}</a>}
-              </div>
-            </div>
+      {/* ÜST BANT — arama. Dev illüstrasyon kaldırıldı: dergi kapağı düzeni
+          kullanıcıyı ilana değil manzaraya bakmaya davet ediyordu. */}
+      <section className="border-b border-stone bg-paper">
+        <div className="mx-auto max-w-7xl px-5 py-6 sm:px-6 sm:py-8">
+          <h1 className="text-xl font-bold tracking-tight text-ink sm:text-2xl">
+            {heroTitle} <span className="text-brand-700">{heroHighlight}</span>
+          </h1>
+          <p className="mt-1.5 max-w-2xl text-sm text-muted">{heroSubtitle}</p>
+          <div className="mt-4">
+            <HomeSearch />
           </div>
-
-          <div className="relative min-h-[390px] overflow-hidden border-x border-t border-stone bg-brand-950 lg:col-span-6 lg:min-h-[680px] lg:border-y-0 lg:border-r">
-            {heroVisual ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img src={mediaUrl(heroVisual)} alt="Kütahya güncel gayrimenkul portföyü" loading="eager" fetchPriority="high" className="absolute inset-0 h-full w-full object-cover" />
-            ) : (
-              <Image
-                src="/brand/kutahya-editorial-hero.webp"
-                alt="Kütahya silüeti ve çini motiflerinden editoryal illüstrasyon"
-                fill
-                sizes="(max-width: 1023px) 100vw, 50vw"
-                loading="eager"
-                fetchPriority="high"
-                className="object-cover object-center"
-              />
-            )}
-            <div className="absolute inset-0 bg-gradient-to-t from-brand-950/65 via-transparent to-transparent" />
-            <div className="absolute inset-x-0 bottom-0 p-6 text-white sm:p-8">
-              <p className="eyebrow !text-gold-300">Yerel portföy</p>
-              <p className="mt-2 max-w-md text-xl font-bold leading-tight">Bir ilan değil, doğru bölge ve doğru karar.</p>
-            </div>
+          <div className="mt-3 flex flex-wrap items-center gap-x-5 gap-y-2 text-xs font-semibold text-muted">
+            <Link href="/degerleme" className="inline-flex items-center gap-1.5 text-brand-700 hover:text-brand-900">
+              <BarChart3 className="h-4 w-4" /> Bölgesel ön değerleme
+            </Link>
+            <span className="inline-flex items-center gap-1.5">
+              <Check className="h-4 w-4 text-green-700" /> Şeffaf satış süreci
+            </span>
           </div>
         </div>
       </section>
 
-      <section className="border-b border-stone bg-paper">
-        <div className="mx-auto grid max-w-7xl grid-cols-2 divide-x divide-y divide-stone px-5 sm:px-6 lg:grid-cols-4 lg:divide-y-0">
-          {[
-            [marketplaceStats.activeListings, "Güncel ilan"],
-            [marketplaceStats.soldListings, "Satılmış ilan"],
-            [marketplaceStats.approvedAgencies, "Onaylı emlak ofisi"],
-            [marketplaceStats.activeDistricts, "Portföylü ilçe"],
-          ].map(([value, label]) => (
-            <div key={label} className="px-4 py-7 sm:px-8">
-              <p className="text-2xl font-bold tabular-nums text-ink sm:text-3xl">{value}</p>
-              <p className="mt-1 text-sm text-muted">{label}</p>
-            </div>
+      {/* ÖNE ÇIKAN İLANLAR — sayfanın ilk içeriği. Kare karolar, her tazelemede
+          farklı seçki; kullanıcı hemen gerçek ilan görüyor. */}
+      <section className="mx-auto max-w-7xl px-5 py-8 sm:px-6">
+        <div className="mb-4 flex flex-wrap items-end justify-between gap-2">
+          <div>
+            <h2 className="text-lg font-bold tracking-tight text-ink sm:text-xl">Öne çıkan ilanlar</h2>
+            <p className="mt-0.5 text-sm text-muted">Portföyden seçki — her ziyarette değişir.</p>
+          </div>
+        </div>
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
+          {showcase.map((listing, index) => (
+            <ListingCard key={listing.slug} listing={listing} variant="tile" priority={index < 6} />
           ))}
         </div>
       </section>
 
-      <section className="mx-auto max-w-7xl px-5 py-10 sm:px-6 sm:py-14">
-        <div className="grid gap-10 lg:grid-cols-12">
-          <div className="lg:col-span-4">
-            <p className="eyebrow">Kategorileri keşfet</p>
-            <h2 className="mt-2 text-2xl font-bold tracking-tight text-ink sm:text-3xl">Aradığınıza doğrudan ulaşın.</h2>
-            <p className="mt-4 max-w-md leading-7 text-muted">Kütahya&apos;daki ilanları kategorilere ayırdık; filtre kalabalığı olmadan başlayın.</p>
-          </div>
-          <div className="border-t border-stone lg:col-span-8">
-            {LANDING_PAGES.map((category, index) => {
-              const categoryCover = categoryCoverByType.get(category.propertyType);
+      {/* KATEGORİ SEÇİMİ — "tüm ilanlar" yerine buradan giriliyor. Alt türler
+          çip olarak açık: kullanıcı tek tıkla daraltılmış listeye düşüyor. */}
+      <section className="border-y border-stone bg-canvas">
+        <div className="mx-auto max-w-7xl px-5 py-8 sm:px-6 sm:py-10">
+          <h2 className="text-lg font-bold tracking-tight text-ink sm:text-xl">Ne arıyorsunuz?</h2>
+          <p className="mt-0.5 text-sm text-muted">Kategori seçin; filtreler seçtiğiniz kategoriye göre açılır.</p>
+
+          <div className="mt-5 grid gap-4 md:grid-cols-3">
+            {CATEGORY_LIST.map((category) => {
+              const count = marketplaceStats.categoryCounts[category.key] ?? 0;
               return (
-                <Link key={category.slug} href={`/${category.slug}`} className="group grid grid-cols-[2rem_4.5rem_1fr_auto] items-center gap-3 border-b border-stone py-3 sm:grid-cols-[2.5rem_6rem_1fr_auto] sm:gap-4 sm:py-4">
-                  <span className="text-sm font-semibold tabular-nums text-gold-700">0{index + 1}</span>
-                  <span className="ceramic-grid relative block aspect-[4/3] overflow-hidden border border-stone bg-brand-50">
-                    {categoryCover && (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img src={mediaUrl(categoryCover)} alt="" loading="lazy" className="absolute inset-0 h-full w-full object-cover transition duration-200 group-hover:scale-[1.03]" />
-                    )}
-                  </span>
-                  <span>
-                    <span className="block text-base font-semibold text-ink group-hover:text-brand-700 sm:text-lg">{category.title}</span>
-                    <span className="mt-1 block text-xs font-medium tabular-nums text-muted">{marketplaceStats.subTypeCounts[category.propertyType] ?? 0} güncel ilan</span>
-                  </span>
-                  <ArrowRight className="h-5 w-5 text-muted transition group-hover:translate-x-1 group-hover:text-brand-700" />
-                </Link>
+                <div key={category.key} className="rounded-card border border-stone bg-paper p-4">
+                  <Link
+                    href={`/ilanlar?kategori=${category.key}`}
+                    className="group flex items-center justify-between gap-3"
+                  >
+                    <span className="text-base font-bold text-ink group-hover:text-brand-700">{category.label}</span>
+                    <span className="inline-flex items-center gap-1 whitespace-nowrap text-sm tabular-nums text-muted">
+                      {count} ilan <ArrowRight className="h-4 w-4 transition group-hover:translate-x-0.5" />
+                    </span>
+                  </Link>
+                  <div className="mt-3 flex flex-wrap gap-1.5">
+                    {category.subTypes.map((sub) => (
+                      <Link
+                        key={sub.value}
+                        href={`/ilanlar?kategori=${category.key}&tur=${sub.value}`}
+                        className="rounded-control border border-stone px-2.5 py-1 text-xs font-medium text-ink transition hover:border-brand-300 hover:text-brand-700"
+                      >
+                        {sub.label}
+                      </Link>
+                    ))}
+                  </div>
+                </div>
               );
             })}
+          </div>
 
-            {/* Emlak dışı kategoriler. Kendi SEO sayfaları yok; /ilanlar
-                sekmesine gidiyorlar (bkz. COK-KATEGORI-PLANI.md kapsam dışı). */}
-            {NON_PROPERTY_CATEGORIES.map((category, index) => (
-              <Link
-                key={category.key}
-                href={`/ilanlar?kategori=${category.key}`}
-                className="group grid grid-cols-[2rem_4.5rem_1fr_auto] items-center gap-3 border-b border-stone py-3 sm:grid-cols-[2.5rem_6rem_1fr_auto] sm:gap-4 sm:py-4"
-              >
-                <span className="text-sm font-semibold tabular-nums text-gold-700">
-                  0{LANDING_PAGES.length + index + 1}
-                </span>
-                <span className="ceramic-grid relative block aspect-[4/3] overflow-hidden border border-stone bg-brand-50" />
-                <span>
-                  <span className="block text-base font-semibold text-ink group-hover:text-brand-700 sm:text-lg">
-                    {category.label}
-                  </span>
-                  <span className="mt-1 block text-xs font-medium tabular-nums text-muted">
-                    {marketplaceStats.categoryCounts[category.key] ?? 0} güncel ilan
-                  </span>
-                </span>
-                <ArrowRight className="h-5 w-5 text-muted transition group-hover:translate-x-1 group-hover:text-brand-700" />
-              </Link>
+          {/* Sayaç bandı — ayrı bir bölüm yerine kategori seçiminin altına alındı. */}
+          <div className="mt-6 grid grid-cols-2 gap-px overflow-hidden rounded-card border border-stone bg-stone sm:grid-cols-4">
+            {([
+              [marketplaceStats.activeListings, "Güncel ilan"],
+              [marketplaceStats.soldListings, "Satılmış ilan"],
+              [marketplaceStats.approvedAgencies, "Onaylı emlak ofisi"],
+              [marketplaceStats.activeDistricts, "Portföylü ilçe"],
+            ] as const).map(([value, label]) => (
+              <div key={label} className="bg-paper px-4 py-3 text-center">
+                <p className="text-xl font-bold tabular-nums text-ink">{value}</p>
+                <p className="mt-0.5 text-xs text-muted">{label}</p>
+              </div>
             ))}
           </div>
         </div>
       </section>
+
 
       <section className="border-y border-stone bg-paper">
         <div className="mx-auto max-w-7xl px-5 py-10 sm:px-6 sm:py-14">

@@ -150,6 +150,31 @@ export async function getListingsPaged(
   };
 }
 
+/**
+ * Ana sayfa vitrini — rastgele karışık.
+ *
+ * Sabit sıralama (featured, createdAt) her ziyarette aynı ilanları gösteriyordu;
+ * 360 ilanlık katalogda vitrin hep aynı 6 ilan demekti. Geniş bir pencere çekip
+ * karıştırıyoruz: ORDER BY random() yerine, çünkü o tablo büyüdükçe tam tarama
+ * yapar. Sayfa ISR ile 5 dakikada tazelendiği için vitrin de o ritimde değişir.
+ *
+ * GÖRSELSİZ İLANLAR VİTRİNE GİRMEZ: kapağı olmayan bir ilan sayfanın en büyük
+ * öğesi olduğunda "Görsel eklenmemiş" placeholder'ı sayfayı domine ediyordu.
+ */
+export async function getShowcaseListings(take = 12): Promise<ListingCardData[]> {
+  const rows = await prisma.listing.findMany({
+    where: { ...PUBLIC_VISIBLE_LISTING, images: { some: {} } },
+    orderBy: [{ featured: "desc" }, { createdAt: "desc" }],
+    take: Math.max(take * 5, 40),
+    select: cardSelect,
+  });
+  for (let i = rows.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [rows[i], rows[j]] = [rows[j], rows[i]];
+  }
+  return decorate(rows.slice(0, take) as RawCard[]);
+}
+
 export async function getFeaturedListings(take = 6): Promise<ListingCardData[]> {
   const rows = await prisma.listing.findMany({
     where: PUBLIC_VISIBLE_LISTING,

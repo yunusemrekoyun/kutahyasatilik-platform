@@ -41,8 +41,9 @@ export type ListingCardData = {
  * - `standard`  ızgara kartı (varsayılan)
  * - `editorial` büyük vitrin kartı (ana sayfa ilk kart)
  * - `compact`   dar yatay kart (yan listeler)
+ * - `tile`      kare vitrin karosu (ana sayfa) — kare görsel, kısa başlık, fiyat
  */
-type Variant = "row" | "standard" | "editorial" | "compact";
+type Variant = "row" | "standard" | "editorial" | "compact" | "tile";
 
 export default function ListingCard({
   listing,
@@ -65,7 +66,9 @@ export default function ListingCard({
   const titleId = `listing-${listing.slug}-title`;
 
   const mediaCls =
-    variant === "editorial"
+    variant === "tile"
+      ? "aspect-square"
+      : variant === "editorial"
       ? "aspect-[16/10]"
       : variant === "compact"
       ? "w-36 shrink-0 sm:w-44"
@@ -74,7 +77,9 @@ export default function ListingCard({
       : "aspect-[4/3]";
 
   const titleCls =
-    variant === "editorial"
+    variant === "tile"
+      ? "text-sm"
+      : variant === "editorial"
       ? "text-xl sm:text-2xl"
       : variant === "compact"
       ? "text-[15px]"
@@ -130,7 +135,7 @@ export default function ListingCard({
 
       <div
         className={`flex min-w-0 flex-grow flex-col ${
-          variant === "editorial" ? "p-5" : variant === "row" ? "p-3 sm:p-4" : "p-3.5"
+          variant === "editorial" ? "p-5" : variant === "row" ? "p-3 sm:p-4" : variant === "tile" ? "p-2.5" : "p-3.5"
         }`}
       >
         <Link href={`/ilan/${listing.slug}`} className="block">
@@ -147,7 +152,7 @@ export default function ListingCard({
 
         <div
           className={`mt-2 flex flex-wrap items-center gap-x-3.5 gap-y-1 text-[13px] text-muted ${
-            variant === "compact" ? "hidden sm:flex" : ""
+            variant === "compact" ? "hidden sm:flex" : variant === "tile" ? "hidden" : ""
           }`}
         >
           {isRealEstate ? (
@@ -193,7 +198,7 @@ export default function ListingCard({
           </div>
         )}
 
-        {listing.agentName && variant !== "compact" && variant !== "row" && (
+        {listing.agentName && variant !== "compact" && variant !== "row" && variant !== "tile" && (
           <div className="mt-2.5 flex items-center gap-2">
             {agentLogo ? (
               // eslint-disable-next-line @next/next/no-img-element
@@ -213,10 +218,10 @@ export default function ListingCard({
         {/* Fiyat: standart arayüzlerde sayfanın en yüksek sesli öğesi.
             Editoryal dilde düz altın metindi; nötr yüzeyde okunurluk için
             lacivert taşıyıcıya alındı, altın vurgu rozetlerde kaldı. */}
-        <div className="mt-auto flex items-end justify-between gap-2 pt-3">
+        <div className={`mt-auto flex items-end justify-between gap-2 ${variant === "tile" ? "pt-2" : "pt-3"}`}>
           <span
             className={`font-bold tabular-nums text-brand-800 ${
-              variant === "editorial" ? "text-xl sm:text-2xl" : variant === "compact" ? "text-base" : "text-lg"
+              variant === "editorial" ? "text-xl sm:text-2xl" : variant === "compact" || variant === "tile" ? "text-base" : "text-lg"
             }`}
           >
             {formatPrice(listing.price, listing.currency)}

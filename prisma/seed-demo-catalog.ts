@@ -50,11 +50,6 @@ const chance = (p: number) => rng() < p;
 // ---------------------------------------------------------------------------
 // Kütahya coğrafyası
 // ---------------------------------------------------------------------------
-const DISTRICTS = [
-  "Merkez", "Tavşanlı", "Simav", "Gediz", "Emet", "Domaniç", "Hisarcık",
-  "Altıntaş", "Aslanapa", "Dumlupınar", "Çavdarhisar", "Pazarlar", "Şaphane",
-] as const;
-
 // Merkez ağırlıklı dağılım — gerçek bir portföyde ilanların çoğu merkezde olur.
 const DISTRICT_WEIGHTS: [string, number][] = [
   ["Merkez", 42], ["Tavşanlı", 12], ["Simav", 10], ["Gediz", 8], ["Emet", 5],
@@ -151,7 +146,7 @@ const HEATING = ["Doğalgaz kombi", "Merkezi", "Yerden ısıtma", "Klima", "Soba
 const ZONING = ["Konut", "Ticari", "Konut + Ticari", "İmara açık", "Tarla vasfında"];
 const DEED = ["Kat mülkiyeti", "Kat irtifakı", "Arsa tapulu", "Müstakil tapu"];
 
-function realEstate(i: number) {
+function realEstate() {
   const subType = pick(["daire", "daire", "daire", "villa", "mustakil", "arsa", "tarla", "isyeri"]);
   const district = weightedDistrict();
   const neighborhood = neighborhoodFor(district);
@@ -241,7 +236,7 @@ const TRACTORS: [string, string[]][] = [
 ];
 const COLORS = ["Beyaz", "Siyah", "Gri", "Gümüş", "Kırmızı", "Lacivert", "Mavi"];
 
-function vehicle(i: number) {
+function vehicle() {
   const subType = pick(["otomobil", "otomobil", "otomobil", "motosiklet", "ticari", "traktor"]);
   const table = subType === "otomobil" ? CARS : subType === "motosiklet" ? BIKES : subType === "ticari" ? VANS : TRACTORS;
   const [marka, models] = pick(table);
@@ -320,7 +315,7 @@ const CAMERAS: [string, string[], number][] = [
   ["Sony", ["Alpha A6400 + 16-50 mm", "ZV-E10 Body"], 34_000],
 ];
 
-function tech(i: number) {
+function tech() {
   const subType = pick(["telefon", "telefon", "bilgisayar", "bilgisayar", "tablet", "konsol", "kamera"]);
   const table =
     subType === "telefon" ? PHONES
@@ -407,9 +402,9 @@ async function main() {
     heating?: string | null; zoningStatus?: string | null; deedStatus?: string | null;
   }[] = [];
 
-  for (let i = 0; i < nEmlak; i++) rows.push({ category: "emlak", ...realEstate(i) });
-  for (let i = 0; i < nVasita; i++) rows.push({ category: "vasita", ...vehicle(i) });
-  for (let i = 0; i < nTeknoloji; i++) rows.push({ category: "teknoloji", ...tech(i) });
+  for (let i = 0; i < nEmlak; i++) rows.push({ category: "emlak", ...realEstate() });
+  for (let i = 0; i < nVasita; i++) rows.push({ category: "vasita", ...vehicle() });
+  for (let i = 0; i < nTeknoloji; i++) rows.push({ category: "teknoloji", ...tech() });
 
   let created = 0;
   const usedSlugs = new Set<string>();
