@@ -48,7 +48,26 @@ async function main() {
     prisma.testimonial.count(),
   ]);
 
-  // Sahibi demo hesap OLMAYAN ilan = gerçek olabilir; --reset bunu da siler.
+  // Sahiplik dağılımı. "Sahipsiz" tek başına gerçek/demo ayrımı YAPMAZ: önceki
+  // seed sürümü sahip atamıyordu, dolayısıyla eski demo katalogu da sahipsizdir.
+  const [withAgent, withUser, ownerless] = await Promise.all([
+    prisma.listing.count({ where: { agentId: { not: null } } }),
+    prisma.listing.count({ where: { userId: { not: null } } }),
+    prisma.listing.count({ where: { agentId: null, userId: null } }),
+  ]);
+
+  // AYIRT EDİCİ İŞARET: demo katalogun görselleri "/uploads/demo-<konu>-<n>.jpg"
+  // adıyla üretiliyor. Gerçek bir ilanın görseli yükleme akışından geçtiği için
+  // asla bu deseni taşımaz. Görseli olmayan ilan da şüpheli sayılır.
+  const demoLooking = await prisma.listing.count({
+    where: { images: { some: { url: { startsWith: "/uploads/demo-" } } } },
+  });
+  const nonDemoImage = await prisma.listing.count({
+    where: { images: { some: { NOT: { url: { startsWith: "/uploads/demo-" } } } } },
+  });
+  const noImage = await prisma.listing.count({ where: { images: { none: {} } } });
+
+  // Demo hesap sahipliği (yeni seed sürümünün bıraktığı iz).
   const atRisk = await prisma.listing.count({
     where: {
       AND: [
@@ -57,6 +76,29 @@ async function main() {
       ],
     },
   });
+
+  // Gerçek görünen hesaplar — kimlikler maskeli (log paylaşımı için).
+  const mask = (value: string | null) => {
+    if (!value) return "-";
+    const [name, domain] = value.split("@");
+    return domain ? `${name.slice(0, 2)}***@${domain}` : `${value.slice(0, 2)}***`;
+  };
+  const [realUserRows, realAgentRows, agencyRows] = await Promise.all([
+    prisma.user.findMany({
+      where: { NOT: { email: { endsWith: "@demo.kutahyasatilik.com" } } },
+      select: { email: true, createdAt: true, _count: { select: { listings: true, favorites: true } } },
+      orderBy: { createdAt: "asc" },
+    }),
+    prisma.agent.findMany({
+      where: { NOT: { email: { endsWith: "@demo.kutahyasatilik.com" } } },
+      select: { email: true, slug: true, status: true, createdAt: true, _count: { select: { listings: true } } },
+      orderBy: { createdAt: "asc" },
+    }),
+    prisma.agency.findMany({
+      select: { slug: true, name: true, status: true, createdAt: true, _count: { select: { listings: true, agents: true } } },
+      orderBy: { createdAt: "asc" },
+    }),
+  ]);
 
   const [agentClash, agencyClash] = await Promise.all([
     prisma.agent.findMany({
@@ -76,7 +118,11 @@ async function main() {
 
   const rows: [string, number | string][] = [
     ["Listing (toplam)", listings],
-    ["Listing (sahibi demo DEĞİL = risk altında)", atRisk],
+    ["  \u2514 demo hesap sahipli", listings - atRisk],
+    ["  \u2514 danışmanlı / kullanıcılı / sahipsiz", `${withAgent} / ${withUser} / ${ownerless}`],
+    ["  \u2514 demo görselli (silinmesi güvenli)", demoLooking],
+    ["  \u2514 GERÇEK görselli (İNCELE)", nonDemoImage],
+    ["  \u2514 hiç görseli yok (İNCELE)", noImage],
     ["ListingImage", images],
     ["Favorite", favorites],
     ["Conversation", conversations],
@@ -100,12 +146,45 @@ async function main() {
     for (const a of agencyClash) console.log(`  OFİS      ${a.slug}  ${a.name}  ${a.createdAt.toISOString().slice(0, 10)}`);
   }
 
-  const safe = atRisk === 0 && !agentClash.length && !agencyClash.length;
+  console.log("\n=== DEMO OLMAYAN HESAPLAR (--reset bunlara DOKUNMAZ) ===");
+  for (const u of realUserRows) {
+    console.log(`  KULLANICI ${mask(u.email).padEnd(28)} ${u.createdAt.toISOString().slice(0, 10)}  ilan=${u._count.listings} favori=${u._count.favorites}`);
+  }
+  for (const a of realAgentRows) {
+    console.log(`  DANIŞMAN  ${mask(a.email).padEnd(28)} ${a.createdAt.toISOString().slice(0, 10)}  slug=${a.slug} durum=${a.status} ilan=${a._count.listings}`);
+  }
+  for (const a of agencyRows) {
+    console.log(`  OFİS      ${a.name.slice(0, 26).padEnd(28)} ${a.createdAt.toISOString().slice(0, 10)}  slug=${a.slug} durum=${a.status} ilan=${a._count.listings} danışman=${a._count.agents}`);
+  }
+  if (!realUserRows.length && !realAgentRows.length && !agencyRows.length) console.log("  yok");
+
+  // Karar YALNIZ görsel parmak izine dayanıyor: sahipsizlik eski seed sürümünün
+  // de izi olduğu için tek başına kanıt değil.
+  const suspicious = nonDemoImage + noImage;
+  const safe = suspicious === 0 && !agentClash.length && !agencyClash.length;
   console.log(
     safe
-      ? "\nSONUÇ: --reset yalnız demo verisini siler, devam edilebilir."
-      : `\nSONUÇ: DİKKAT — ${atRisk} ilan, ${agentClash.length} danışman, ${agencyClash.length} ofis demo değil.`,
+      ? `\nSONUÇ: ${demoLooking} ilanın tamamı demo görselli. --reset güvenli, devam edilebilir.`
+      : `\nSONUÇ: DİKKAT — ${suspicious} ilan demo parmak izi taşımıyor (${nonDemoImage} gerçek görselli, ${noImage} görselsiz). Silmeden önce incele.`,
   );
+
+  if (suspicious > 0) {
+    const samples = await prisma.listing.findMany({
+      where: {
+        OR: [
+          { images: { some: { NOT: { url: { startsWith: "/uploads/demo-" } } } } },
+          { images: { none: {} } },
+        ],
+      },
+      select: { slug: true, title: true, category: true, createdAt: true, images: { select: { url: true }, take: 1 } },
+      orderBy: { createdAt: "desc" },
+      take: 10,
+    });
+    console.log("\n=== ŞÜPHELİ İLANLARDAN ÖRNEKLER (en yeni 10) ===");
+    for (const s of samples) {
+      console.log(`  ${s.createdAt.toISOString().slice(0, 10)}  ${s.category.padEnd(10)} ${s.title.slice(0, 52).padEnd(54)} ${s.images[0]?.url ?? "(görselsiz)"}`);
+    }
+  }
 }
 
 main()
