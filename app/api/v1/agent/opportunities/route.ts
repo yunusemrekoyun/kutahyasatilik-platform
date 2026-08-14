@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { reportApiError } from "@/lib/apiErrors";
 import { prisma } from "@/lib/prisma";
 import { resolveApiAgent } from "@/lib/apiAgent";
 
@@ -24,7 +25,10 @@ export async function GET(req: NextRequest) {
       myBid: o.bids[0] ? { commissionPct: o.bids[0].commissionPct, note: o.bids[0].note } : null,
     }));
     return NextResponse.json({ ok: true, items });
-  } catch {
-    return NextResponse.json({ ok: true, items: [] }); // tablo migrate edilmemiş olabilir
+  } catch (error) {
+    // Boş liste dönmeye devam ediyoruz (eski istemciler ok:false beklemiyor)
+    // ama hata artık raporlanıyor ve `degraded` ile ayırt edilebiliyor. // tablo migrate edilmemiş olabilir
+    reportApiError("v1/agent/opportunities", error);
+    return NextResponse.json({ ok: true, items: [], degraded: true });
   }
 }

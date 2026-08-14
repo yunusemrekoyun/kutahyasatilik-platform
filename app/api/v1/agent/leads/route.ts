@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { reportApiError } from "@/lib/apiErrors";
 import { prisma } from "@/lib/prisma";
 import { resolveApiAgent } from "@/lib/apiAgent";
 import { parseJsonArray } from "@/lib/format";
@@ -37,7 +38,10 @@ export async function GET(req: NextRequest) {
     });
     const items = rows.map((l) => ({ ...l, photos: parseJsonArray(l.photos) }));
     return NextResponse.json({ ok: true, items });
-  } catch {
-    return NextResponse.json({ ok: true, items: [] });
+  } catch (error) {
+    // Boş liste dönmeye devam ediyoruz (eski istemciler ok:false beklemiyor)
+    // ama hata artık raporlanıyor ve `degraded` ile ayırt edilebiliyor.
+    reportApiError("v1/agent/leads", error);
+    return NextResponse.json({ ok: true, items: [], degraded: true });
   }
 }

@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { reportApiError } from "@/lib/apiErrors";
 import { prisma } from "@/lib/prisma";
 import { requestOrigin } from "@/lib/apiMedia";
 
@@ -31,7 +32,10 @@ export async function GET(req: NextRequest) {
     const origin = requestOrigin(req);
     const items = rows.map((p) => ({ ...p, coverImage: absolutize(p.coverImage, origin) }));
     return NextResponse.json({ ok: true, items });
-  } catch {
-    return NextResponse.json({ ok: true, items: [] });
+  } catch (error) {
+    // Boş liste dönmeye devam ediyoruz (eski istemciler ok:false beklemiyor)
+    // ama hata artık raporlanıyor ve `degraded` ile ayırt edilebiliyor.
+    reportApiError("v1/posts", error);
+    return NextResponse.json({ ok: true, items: [], degraded: true });
   }
 }

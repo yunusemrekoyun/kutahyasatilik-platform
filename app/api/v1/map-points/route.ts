@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { reportApiError } from "@/lib/apiErrors";
 import { getMapPoints, type ListingFilter } from "@/lib/listings";
 import { absolutizeUrl } from "@/lib/apiMedia";
 
@@ -30,7 +31,10 @@ export async function GET(req: NextRequest) {
     const points = await getMapPoints(filter);
     const items = points.map((p) => ({ ...p, coverImage: absolutizeUrl(p.coverImage, req) }));
     return NextResponse.json({ ok: true, items });
-  } catch {
-    return NextResponse.json({ ok: true, items: [] });
+  } catch (error) {
+    // Boş liste dönmeye devam ediyoruz (eski istemciler ok:false beklemiyor)
+    // ama hata artık raporlanıyor ve `degraded` ile ayırt edilebiliyor.
+    reportApiError("v1/map-points", error);
+    return NextResponse.json({ ok: true, items: [], degraded: true });
   }
 }

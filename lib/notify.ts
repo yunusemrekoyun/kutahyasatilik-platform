@@ -1,4 +1,5 @@
 import "server-only";
+import { reportApiError } from "@/lib/apiErrors";
 import { prisma } from "./prisma";
 import { getSession } from "./auth";
 import { getAgentSession } from "./agentAuth";
@@ -49,8 +50,11 @@ export async function notify(opts: CreateOpts): Promise<void> {
         });
       }
     });
-  } catch {
-    // Bildirim ikincil — tablo henüz yoksa ya da hata olursa sessizce geç.
+  } catch (error) {
+    // Bildirim ikincil: asıl isteği bloke etmiyoruz. Ama "sessizce geç" fazlaydı —
+    // outbox yazımı bozulduğunda hiç kimse haberdar olmuyordu, push kuyruğu
+    // boş kaldığı için sorun "bildirim gelmiyor" diye çok geç fark ediliyordu.
+    reportApiError("notify", error);
   }
   // E-posta kanalı (ikincil, fire-and-forget; isteği bloke etmez, anahtar yoksa atlanır).
   void dispatchEmail(opts);

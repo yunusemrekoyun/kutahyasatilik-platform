@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { reportApiError } from "@/lib/apiErrors";
 import { prisma } from "@/lib/prisma";
 import { resolveApiAdmin } from "@/lib/apiAdmin";
 
@@ -38,8 +39,11 @@ export async function GET(req: NextRequest) {
       bids: o.bids.map((b) => ({ id: b.id, commissionPct: b.commissionPct, note: b.note, status: b.status, agentName: b.agent?.name ?? null })),
     }));
     return NextResponse.json({ ok: true, items });
-  } catch {
-    return NextResponse.json({ ok: true, items: [] });
+  } catch (error) {
+    // Boş liste dönmeye devam ediyoruz (eski istemciler ok:false beklemiyor)
+    // ama hata artık raporlanıyor ve `degraded` ile ayırt edilebiliyor.
+    reportApiError("v1/admin/opportunities", error);
+    return NextResponse.json({ ok: true, items: [], degraded: true });
   }
 }
 
