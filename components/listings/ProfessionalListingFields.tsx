@@ -41,12 +41,12 @@ export default function ProfessionalListingFields({
 
   return (
     <>
-      <section className="rounded-lg bg-paper p-6 ring-1 ring-stone">
-        <h2 className="font-bold text-slate-900">Profesyonel İlan Bilgileri</h2>
-        <p className="mt-1 text-xs text-slate-500">Yalnız doğrulayabildiğiniz bilgileri doldurun. Boş alanlar ilanda gösterilmez.</p>
+      <section className="rounded-control bg-paper p-6 ring-1 ring-stone">
+        <h2 className="font-bold text-ink">Profesyonel İlan Bilgileri</h2>
+        <p className="mt-1 text-xs text-muted">Yalnız doğrulayabildiğiniz bilgileri doldurun. Boş alanlar ilanda gösterilmez.</p>
         <div className="mt-4 grid grid-cols-2 gap-4 sm:grid-cols-4">
           <label className="block">
-            <span className="mb-1 block text-sm font-medium text-slate-700">Krediye Uygunluk</span>
+            <span className="mb-1 block text-sm font-medium text-ink">Krediye Uygunluk</span>
             <select name="creditEligible" defaultValue={values?.creditEligible ?? ""} className={inputClassName}>
               <option value="">Belirtilmedi</option>
               <option value="yes">Uygun</option>
@@ -55,7 +55,7 @@ export default function ProfessionalListingFields({
             </select>
           </label>
           <label className="block">
-            <span className="mb-1 block text-sm font-medium text-slate-700">Kullanım Durumu</span>
+            <span className="mb-1 block text-sm font-medium text-ink">Kullanım Durumu</span>
             <select name="usageStatus" defaultValue={values?.usageStatus ?? ""} className={inputClassName}>
               <option value="">Belirtilmedi</option>
               <option value="vacant">Boş</option>
@@ -64,7 +64,7 @@ export default function ProfessionalListingFields({
             </select>
           </label>
           <label className="block">
-            <span className="mb-1 block text-sm font-medium text-slate-700">Taşınmaz Durumu</span>
+            <span className="mb-1 block text-sm font-medium text-ink">Taşınmaz Durumu</span>
             <select name="propertyCondition" defaultValue={values?.propertyCondition ?? ""} className={inputClassName}>
               <option value="">Belirtilmedi</option>
               <option value="new">Sıfır</option>
@@ -73,15 +73,15 @@ export default function ProfessionalListingFields({
             </select>
           </label>
           <label className="block">
-            <span className="mb-1 block text-sm font-medium text-slate-700">Banyo Sayısı</span>
+            <span className="mb-1 block text-sm font-medium text-ink">Banyo Sayısı</span>
             <input name="bathroomCount" type="number" min="0" defaultValue={values?.bathroomCount ?? ""} className={inputClassName} />
           </label>
           <label className="block">
-            <span className="mb-1 block text-sm font-medium text-slate-700">Aidat (₺)</span>
+            <span className="mb-1 block text-sm font-medium text-ink">Aidat (₺)</span>
             <input name="dues" type="number" min="0" defaultValue={values?.dues ?? ""} className={inputClassName} />
           </label>
           <label className="block">
-            <span className="mb-1 block text-sm font-medium text-slate-700">Tapu Tipi</span>
+            <span className="mb-1 block text-sm font-medium text-ink">Tapu Tipi</span>
             <select name="deedType" defaultValue={values?.deedType ?? ""} className={inputClassName}>
               <option value="">Belirtilmedi</option>
               <option value="kat_mulkiyeti">Kat mülkiyeti</option>
@@ -92,7 +92,7 @@ export default function ProfessionalListingFields({
             </select>
           </label>
           <label className="block">
-            <span className="mb-1 block text-sm font-medium text-slate-700">İskân Durumu</span>
+            <span className="mb-1 block text-sm font-medium text-ink">İskân Durumu</span>
             <select name="occupancyPermit" defaultValue={values?.occupancyPermit ?? ""} className={inputClassName}>
               <option value="">Belirtilmedi</option>
               <option value="available">İskânlı</option>
@@ -101,19 +101,19 @@ export default function ProfessionalListingFields({
             </select>
           </label>
           <label className="block">
-            <span className="mb-1 block text-sm font-medium text-slate-700">İlan Geçerlilik Tarihi</span>
+            <span className="mb-1 block text-sm font-medium text-ink">İlan Geçerlilik Tarihi</span>
             <input name="validUntil" type="date" defaultValue={dateInputValue(values?.validUntil)} className={inputClassName} />
           </label>
         </div>
-        <label className="mt-4 flex min-h-11 items-center gap-2 text-sm text-slate-700">
-          <input type="checkbox" name="exchangeEligible" defaultChecked={values?.exchangeEligible === true} className="h-4 w-4 rounded border-slate-300" />
+        <label className="mt-4 flex min-h-11 items-center gap-2 text-sm text-ink">
+          <input type="checkbox" name="exchangeEligible" defaultChecked={values?.exchangeEligible === true} className="h-4 w-4 rounded border-stone" />
           Takasa uygun
         </label>
       </section>
 
-      <section className="rounded-lg bg-paper p-6 ring-1 ring-stone">
-        <h2 className="font-bold text-slate-900">Seçili Özellikler</h2>
-        <p className="mt-1 text-xs text-slate-500">İlan sayfasında yalnız işaretlediğiniz özellikler gösterilir.</p>
+      <section className="rounded-control bg-paper p-6 ring-1 ring-stone">
+        <h2 className="font-bold text-ink">Seçili Özellikler</h2>
+        <p className="mt-1 text-xs text-muted">İlan sayfasında yalnız işaretlediğiniz özellikler gösterilir.</p>
         <div className="mt-5 space-y-5">
           {groups.map((group) => {
             const items = LISTING_AMENITIES.filter(
@@ -122,11 +122,11 @@ export default function ProfessionalListingFields({
             if (!items.length) return null;
             return (
               <fieldset key={group}>
-                <legend className="text-sm font-semibold text-slate-900">{items[0].groupLabel}</legend>
+                <legend className="text-sm font-semibold text-ink">{items[0].groupLabel}</legend>
                 <div className="mt-2 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
                   {items.map((item) => (
-                    <label key={item.key} className="flex min-h-11 items-center gap-2 rounded-lg border border-stone px-3 py-2 text-sm text-slate-700">
-                      <input type="checkbox" name="amenities" value={item.key} defaultChecked={selected.has(item.key)} className="h-4 w-4 rounded border-slate-300" />
+                    <label key={item.key} className="flex min-h-11 items-center gap-2 rounded-control border border-stone px-3 py-2 text-sm text-ink">
+                      <input type="checkbox" name="amenities" value={item.key} defaultChecked={selected.has(item.key)} className="h-4 w-4 rounded border-stone" />
                       {item.label}
                     </label>
                   ))}
@@ -137,20 +137,20 @@ export default function ProfessionalListingFields({
         </div>
       </section>
 
-      <section className="rounded-lg bg-paper p-6 ring-1 ring-stone">
-        <h2 className="font-bold text-slate-900">Konum ve Tapu Gizliliği</h2>
-        <p className="mt-1 text-xs text-slate-500">Kesin konum ve parsel bilgileri yalnız açık izinle kamuya gösterilir.</p>
+      <section className="rounded-control bg-paper p-6 ring-1 ring-stone">
+        <h2 className="font-bold text-ink">Konum ve Tapu Gizliliği</h2>
+        <p className="mt-1 text-xs text-muted">Kesin konum ve parsel bilgileri yalnız açık izinle kamuya gösterilir.</p>
         <div className="mt-4 grid gap-4 sm:grid-cols-2">
           <label className="block">
-            <span className="mb-1 block text-sm font-medium text-slate-700">Harita Konumu</span>
+            <span className="mb-1 block text-sm font-medium text-ink">Harita Konumu</span>
             <select name="locationVisibility" defaultValue={values?.locationVisibility ?? "approximate"} className={inputClassName}>
               <option value="hidden">Gizli</option>
               <option value="approximate">Yaklaşık bölge</option>
               <option value="exact">Kesin konum</option>
             </select>
           </label>
-          <label className="flex min-h-11 items-center gap-2 self-end rounded-lg border border-stone px-3 py-2 text-sm text-slate-700">
-            <input type="checkbox" name="parcelVisibility" defaultChecked={values?.parcelVisibility === true} className="h-4 w-4 rounded border-slate-300" />
+          <label className="flex min-h-11 items-center gap-2 self-end rounded-control border border-stone px-3 py-2 text-sm text-ink">
+            <input type="checkbox" name="parcelVisibility" defaultChecked={values?.parcelVisibility === true} className="h-4 w-4 rounded border-stone" />
             Ada/parsel bilgisini ilanda göster
           </label>
         </div>

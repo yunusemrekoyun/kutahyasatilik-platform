@@ -12,8 +12,8 @@ export default function NotFoundCTA({
 }) {
   const c = useSiteContact();
   return (
-    <section className="rounded-lg bg-brand-950 p-8 text-center text-white sm:p-12">
-      <h2 className="font-display text-2xl font-bold sm:text-3xl">{title}</h2>
+    <section className="rounded-control bg-brand-950 p-8 text-center text-white sm:p-12">
+      <h2 className="text-2xl font-bold sm:text-3xl">{title}</h2>
       <p className="mx-auto mt-3 max-w-2xl leading-relaxed text-brand-100">
         Bizi arayın, portföyümüzde yer alan ve henüz yayınlanmamış diğer seçenekleri
         size özel sunalım. Kütahya&apos;nın dijital emlak ofisi olarak doğru mülkü

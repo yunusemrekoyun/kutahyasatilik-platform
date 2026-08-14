@@ -34,7 +34,7 @@ export default function DistrictCompare({ districts }: { districts: DistrictStat
   const db = districts.find((d) => d.name === b);
 
   const selectCls =
-    "w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm font-semibold focus:border-brand-500 focus:ring-1 focus:ring-brand-500 outline-none";
+    "w-full rounded-control border border-stone px-3 py-2.5 text-sm font-semibold focus:border-brand-500 focus:ring-1 focus:ring-brand-500 outline-none";
 
   function winner(key: keyof DistrictStat, higherBetter: boolean): "a" | "b" | null {
     const va = da?.[key] as number | null | undefined;
@@ -45,8 +45,8 @@ export default function DistrictCompare({ districts }: { districts: DistrictStat
   }
 
   return (
-    <div className="overflow-hidden rounded-lg bg-paper ring-1 ring-stone">
-      <div className="grid grid-cols-2 gap-3 bg-slate-50 p-4">
+    <div className="overflow-hidden rounded-control bg-paper ring-1 ring-stone">
+      <div className="grid grid-cols-2 gap-3 bg-canvas p-4">
         <select value={a} onChange={(e) => setA(e.target.value)} className={selectCls}>
           {districts.map((d) => <option key={d.name} value={d.name}>{d.name}</option>)}
         </select>
@@ -60,14 +60,14 @@ export default function DistrictCompare({ districts }: { districts: DistrictStat
           {ROWS.map((r) => {
             const w = winner(r.key, r.higherBetter);
             return (
-              <tr key={r.label} className="border-t border-slate-100">
-                <td className={`p-3 text-center font-semibold ${w === "a" ? "bg-green-50 text-green-700" : "text-slate-800"}`}>
+              <tr key={r.label} className="border-t border-stone">
+                <td className={`p-3 text-center font-semibold ${w === "a" ? "bg-green-50 text-green-700" : "text-ink"}`}>
                   {r.fmt((da?.[r.key] as number | null) ?? null)}
                 </td>
-                <td className="w-px whitespace-nowrap bg-slate-50 px-3 py-3 text-center text-xs font-medium text-slate-400">
+                <td className="w-px whitespace-nowrap bg-canvas px-3 py-3 text-center text-xs font-medium text-muted/70">
                   {r.label}
                 </td>
-                <td className={`p-3 text-center font-semibold ${w === "b" ? "bg-green-50 text-green-700" : "text-slate-800"}`}>
+                <td className={`p-3 text-center font-semibold ${w === "b" ? "bg-green-50 text-green-700" : "text-ink"}`}>
                   {r.fmt((db?.[r.key] as number | null) ?? null)}
                 </td>
               </tr>

@@ -94,12 +94,12 @@ export default function SellerForm({
 
   if (status === "ok") {
     return (
-      <div role="status" className="rounded-lg bg-paper p-8 text-center ring-1 ring-stone">
+      <div role="status" className="rounded-control bg-paper p-8 text-center ring-1 ring-stone">
         <span className="mx-auto grid h-14 w-14 place-items-center rounded-full bg-green-50 text-green-600 ring-1 ring-green-200">
           <CheckCircle2 aria-hidden="true" className="h-8 w-8" />
         </span>
-        <h3 className="mt-4 font-display text-2xl font-bold text-slate-900">Talebiniz alındı</h3>
-        <p className="mt-2 leading-relaxed text-slate-600">
+        <h3 className="mt-4 text-2xl font-bold text-ink">Talebiniz alındı</h3>
+        <p className="mt-2 leading-relaxed text-muted">
           Mülkünüz için en geç 1 iş günü içinde sizinle iletişime geçeceğiz. Sürecini
           &ldquo;Hesabım → Taleplerim&rdquo; sayfasından takip edebilirsiniz.
         </p>
@@ -107,9 +107,9 @@ export default function SellerForm({
     );
   }
 
-  const labelCls = "mb-1.5 block text-sm font-semibold text-slate-700";
+  const labelCls = "mb-1.5 block text-sm font-semibold text-ink";
   const inputCls =
-    "w-full h-12 rounded-[10px] border border-slate-300 bg-paper px-3.5 text-base text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/30";
+    "w-full h-12 rounded-[10px] border border-stone bg-paper px-3.5 text-base text-ink outline-none transition placeholder:text-slate-400 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/30";
 
   return (
     <form
@@ -165,12 +165,12 @@ export default function SellerForm({
       </div>
 
       <fieldset>
-        <legend className={labelCls}>Konum <span className="font-normal text-slate-400">(opsiyonel — mülkün yerini haritada işaretleyin)</span></legend>
+        <legend className={labelCls}>Konum <span className="font-normal text-muted/70">(opsiyonel — mülkün yerini haritada işaretleyin)</span></legend>
         <LocationPicker latName="lat" lngName="lng" />
       </fieldset>
 
       <div>
-        <label htmlFor="sf-photos" className={labelCls}>Fotoğraf ekleyin <span className="font-normal text-slate-400">(opsiyonel, en fazla 6)</span></label>
+        <label htmlFor="sf-photos" className={labelCls}>Fotoğraf ekleyin <span className="font-normal text-muted/70">(opsiyonel, en fazla 6)</span></label>
         <input
           id="sf-photos"
           type="file"
@@ -178,9 +178,9 @@ export default function SellerForm({
           multiple
           onChange={(e) => setFiles(Array.from(e.target.files || []))}
           aria-describedby="sf-photo-status"
-          className="block min-h-11 w-full text-sm text-slate-600 file:mr-3 file:min-h-11 file:rounded-[10px] file:border-0 file:bg-brand-50 file:px-4 file:py-2.5 file:text-sm file:font-semibold file:text-brand-700 hover:file:bg-brand-100"
+          className="block min-h-11 w-full text-sm text-muted file:mr-3 file:min-h-11 file:rounded-[10px] file:border-0 file:bg-brand-50 file:px-4 file:py-2.5 file:text-sm file:font-semibold file:text-brand-700 hover:file:bg-brand-100"
         />
-        <p id="sf-photo-status" aria-live="polite" className={files.length > 0 ? "mt-1.5 text-sm text-slate-500" : "sr-only"}>
+        <p id="sf-photo-status" aria-live="polite" className={files.length > 0 ? "mt-1.5 text-sm text-muted" : "sr-only"}>
           {files.length > 0 ? `${files.length} fotoğraf seçildi` : "Henüz fotoğraf seçilmedi"}
         </p>
       </div>
@@ -200,7 +200,7 @@ export default function SellerForm({
           ? "Gönderiliyor..."
           : "İlan Talebi Oluştur"}
       </button>
-      <p className="flex items-center justify-center gap-1.5 text-center text-[13px] text-slate-500">
+      <p className="flex items-center justify-center gap-1.5 text-center text-[13px] text-muted">
         <Lock aria-hidden="true" className="h-3.5 w-3.5" /> Bilgileriniz KVKK kapsamında korunur. Spam göndermiyoruz.
       </p>
     </form>

@@ -5,8 +5,8 @@ import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 
 const inputCls =
-  "h-12 w-full rounded-[10px] border border-slate-300 bg-paper px-3.5 text-base text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/30";
-const labelCls = "mb-1.5 block text-sm font-semibold text-slate-700";
+  "h-12 w-full rounded-[10px] border border-stone bg-paper px-3.5 text-base text-ink outline-none transition placeholder:text-slate-400 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/30";
+const labelCls = "mb-1.5 block text-sm font-semibold text-ink";
 
 // Açık-yönlendirme koruması: yalnız site-içi yollar (tek '/' ile başlamalı).
 function safeNext(raw: string | null): string | null {
@@ -52,7 +52,7 @@ export default function LoginForm() {
         <label htmlFor="login-password" className={labelCls}>Şifre</label>
         <input id="login-password" name="password" type="password" required autoComplete="current-password" placeholder="••••••••" className={inputCls} />
         <div className="mt-1.5 text-right">
-          <Link href="/sifremi-unuttum" className="inline-flex min-h-11 items-center text-sm text-slate-500 hover:text-brand-700 hover:underline">Şifremi unuttum?</Link>
+          <Link href="/sifremi-unuttum" className="inline-flex min-h-11 items-center text-sm text-muted hover:text-brand-700 hover:underline">Şifremi unuttum?</Link>
         </div>
       </div>
       {error && <p id="login-error" role="alert" className="rounded-[10px] bg-red-50 px-3.5 py-2.5 text-sm font-medium text-red-700 ring-1 ring-red-200">{error}</p>}
@@ -63,7 +63,7 @@ export default function LoginForm() {
       >
         {status === "loading" ? "Giriş yapılıyor..." : "Giriş Yap"}
       </button>
-      <p className="pt-1 text-center text-sm text-slate-500">
+      <p className="pt-1 text-center text-sm text-muted">
         Hesabın yok mu?{" "}
         <Link href="/kayit" className="inline-flex min-h-11 items-center font-semibold text-brand-700 hover:underline">Kayıt ol</Link>
       </p>

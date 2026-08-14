@@ -20,18 +20,18 @@ export default async function MapPage() {
   return (
     <div className="mx-auto max-w-7xl px-4 py-8">
       <TrackView />
-      <h1 className="font-display text-2xl font-bold text-slate-900 sm:text-3xl">Harita ile İlan Ara</h1>
-      <p className="mt-1.5 text-slate-500">
+      <h1 className="text-2xl font-bold text-ink sm:text-3xl">Harita ile İlan Ara</h1>
+      <p className="mt-1.5 text-muted">
         İlçe seçerek bölgedeki tüm ilanları haritada görüntüleyin ve doğrudan ilana ulaşın.
       </p>
-      <div className="mt-6 overflow-hidden rounded-lg ring-1 ring-stone">
+      <div className="mt-6 overflow-hidden rounded-control ring-1 ring-stone">
         <ListingsMap points={points} height="600px" />
       </div>
       <div className="mt-8 flex flex-col gap-4 border-y border-stone bg-paper px-5 py-5 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex gap-3">
           <Landmark className="mt-0.5 h-5 w-5 shrink-0 text-brand-700" aria-hidden="true" />
           <div>
-            <h2 className="font-display text-lg font-semibold text-brand-950">İmar ve parsel bilgilerini resmî kaynaktan kontrol edin</h2>
+            <h2 className="text-lg font-semibold text-brand-950">İmar ve parsel bilgilerini resmî kaynaktan kontrol edin</h2>
             <p className="mt-1 text-sm leading-6 text-muted">Belediye, parsel ve e-Devlet araçlarına doğrulanmış kurum bağlantılarından ulaşın.</p>
           </div>
         </div>

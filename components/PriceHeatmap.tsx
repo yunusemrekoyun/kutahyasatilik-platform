@@ -6,7 +6,7 @@ import type { HeatPoint } from "./PriceHeatmapInner";
 const Inner = dynamic(() => import("./PriceHeatmapInner"), {
   ssr: false,
   loading: () => (
-    <div className="grid h-full w-full place-items-center rounded-lg bg-slate-100 text-slate-400">
+    <div className="grid h-full w-full place-items-center rounded-control bg-canvas text-muted/70">
       Harita yükleniyor...
     </div>
   ),

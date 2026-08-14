@@ -4,7 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 
 const inputCls =
-  "h-12 w-full rounded-[10px] border border-slate-300 bg-paper px-3.5 text-base text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/30";
+  "h-12 w-full rounded-[10px] border border-stone bg-paper px-3.5 text-base text-ink outline-none transition placeholder:text-slate-400 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/30";
 
 export default function ForgotPasswordForm() {
   const [status, setStatus] = useState<"idle" | "loading" | "sent">("idle");
@@ -46,7 +46,7 @@ export default function ForgotPasswordForm() {
   return (
     <form onSubmit={handleSubmit} aria-busy={status === "loading"} aria-describedby={error ? "forgot-password-error" : undefined} className="space-y-4">
       <div>
-        <label htmlFor="fp-email" className="mb-1.5 block text-sm font-semibold text-slate-700">E-posta</label>
+        <label htmlFor="fp-email" className="mb-1.5 block text-sm font-semibold text-ink">E-posta</label>
         <input id="fp-email" name="email" type="email" required autoComplete="email" placeholder="ornek@eposta.com" className={inputCls} />
       </div>
       {error && <p id="forgot-password-error" role="alert" className="rounded-[10px] bg-red-50 px-3.5 py-2.5 text-sm font-medium text-red-700 ring-1 ring-red-200">{error}</p>}
@@ -57,7 +57,7 @@ export default function ForgotPasswordForm() {
       >
         {status === "loading" ? "Gönderiliyor..." : "Sıfırlama bağlantısı gönder"}
       </button>
-      <p className="pt-1 text-center text-sm text-slate-500">
+      <p className="pt-1 text-center text-sm text-muted">
         <Link href="/giris" className="inline-flex min-h-11 items-center font-semibold text-brand-700 hover:underline">Girişe dön</Link>
       </p>
     </form>

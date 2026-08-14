@@ -34,7 +34,7 @@ export default async function ValuationPage() {
 
       {/* GÜVEN / SÜREÇ */}
       <section className="mx-auto max-w-5xl px-4 py-12">
-        <div className="grid divide-y divide-slate-100 sm:grid-cols-3 sm:divide-x sm:divide-y-0">
+        <div className="grid divide-y divide-stone sm:grid-cols-3 sm:divide-x sm:divide-y-0">
           {[
             { Icon: Zap, title: "Anında Sonuç", text: "Form doldurmadan, beklemeden tahmini değer aralığını hemen görün." },
             { Icon: MapPin, title: "Bölgeye Özel", text: "13 ilçenin güncel ortalama m² değerleri ve mülk türüne göre hesaplanır." },
@@ -44,17 +44,17 @@ export default async function ValuationPage() {
               <f.Icon className="mt-0.5 h-6 w-6 shrink-0 text-brand-700" strokeWidth={1.6} />
               <div>
                 <h3 className="font-semibold text-brand-900">{f.title}</h3>
-                <p className="mt-1.5 text-sm leading-relaxed text-slate-600">{f.text}</p>
+                <p className="mt-1.5 text-sm leading-relaxed text-muted">{f.text}</p>
               </div>
             </div>
           ))}
         </div>
 
-        <div className="mt-10 rounded-lg bg-brand-50 p-6 text-center ring-1 ring-brand-100 sm:p-8">
-          <h2 className="font-display text-2xl font-bold text-brand-900">
+        <div className="mt-10 rounded-control bg-brand-50 p-6 text-center ring-1 ring-brand-100 sm:p-8">
+          <h2 className="text-2xl font-bold text-brand-900">
             Mülkünüzü satmaya hazır mısınız?
           </h2>
-          <p className="mx-auto mt-2 max-w-xl text-slate-600">
+          <p className="mx-auto mt-2 max-w-xl text-muted">
             {SITE.brand} olarak doğru fiyatlandırma, profesyonel pazarlama ve güvenli
             satış sürecini sizin için yönetiyoruz.
           </p>

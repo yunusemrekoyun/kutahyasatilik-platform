@@ -11,8 +11,8 @@ export default function Toaster() {
       {toasts.map((t) => (
         <div
           key={t.id}
-          className={`animate-toast pointer-events-auto flex items-center gap-2 rounded-lg px-4 py-3 text-sm font-medium text-white shadow-lg ${
-            t.type === "error" ? "bg-red-600" : t.type === "info" ? "bg-slate-800" : "bg-brand-700"
+          className={`animate-toast pointer-events-auto flex items-center gap-2 rounded-control px-4 py-3 text-sm font-medium text-white shadow-lg ${
+            t.type === "error" ? "bg-red-600" : t.type === "info" ? "bg-ink" : "bg-brand-700"
           }`}
         >
           <span>

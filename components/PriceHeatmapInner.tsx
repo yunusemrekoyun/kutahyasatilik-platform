@@ -34,7 +34,7 @@ export default function PriceHeatmapInner({
   const max = vals.length ? Math.max(...vals) : 1;
 
   return (
-    <div style={{ height }} className="w-full overflow-hidden rounded-lg ring-1 ring-stone">
+    <div style={{ height }} className="w-full overflow-hidden rounded-control ring-1 ring-stone">
       <MapContainer
         center={[KUTAHYA_CENTER.lat, KUTAHYA_CENTER.lng]}
         zoom={KUTAHYA_CENTER.zoom}

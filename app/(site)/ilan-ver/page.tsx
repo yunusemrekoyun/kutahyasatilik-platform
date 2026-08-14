@@ -27,7 +27,7 @@ export default async function CreateListingPage() {
 
       <header className="mb-8 border-b border-stone pb-7">
         <p className="eyebrow">Ücretsiz yayın</p>
-        <h1 className="mt-2 font-display text-4xl font-semibold tracking-tight text-brand-950 sm:text-5xl">
+        <h1 className="mt-2 text-4xl font-semibold tracking-tight text-brand-950 sm:text-5xl">
           İlan Ver
         </h1>
         <p className="mt-3 text-muted">

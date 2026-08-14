@@ -22,12 +22,12 @@ export default function CompareBar() {
           </div>
         </div>
         <div className="flex shrink-0 items-center gap-2">
-          <button type="button" onClick={clearCompare} className="min-h-11 rounded-lg px-3 py-2 text-xs text-white/70 hover:text-white">
+          <button type="button" onClick={clearCompare} className="min-h-11 rounded-control px-3 py-2 text-xs text-white/70 hover:text-white">
             Temizle
           </button>
           <Link
             href="/karsilastir"
-            className="inline-flex min-h-11 items-center gap-1 rounded-lg bg-white px-4 py-2 text-xs font-bold text-brand-950 hover:bg-brand-50"
+            className="inline-flex min-h-11 items-center gap-1 rounded-control bg-white px-4 py-2 text-xs font-bold text-brand-950 hover:bg-brand-50"
           >
             Karşılaştır ({compare.length}) <ArrowRight aria-hidden="true" className="h-4 w-4" />
           </Link>

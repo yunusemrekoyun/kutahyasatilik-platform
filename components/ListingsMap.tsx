@@ -8,7 +8,7 @@ import type { MapPoint } from "./MapInner";
 const MapInner = dynamic(() => import("./MapInner"), {
   ssr: false,
   loading: () => (
-    <div className="grid h-full w-full place-items-center rounded-lg bg-slate-100 text-slate-400">
+    <div className="grid h-full w-full place-items-center rounded-control bg-canvas text-muted/70">
       Harita yükleniyor...
     </div>
   ),
@@ -57,7 +57,7 @@ export default function ListingsMap({
               type="button"
               onClick={() => setActive("")}
               aria-pressed={!active}
-              className={`min-h-10 shrink-0 rounded-lg px-4 text-sm font-semibold transition ${
+              className={`min-h-10 shrink-0 rounded-control px-4 text-sm font-semibold transition ${
                 !active ? "bg-brand-800 text-white" : "border border-stone bg-paper text-ink hover:border-brand-300 hover:text-brand-800"
               }`}
             >
@@ -69,7 +69,7 @@ export default function ListingsMap({
                 key={d.slug}
                 onClick={() => setActive(d.name)}
                 aria-pressed={active === d.name}
-                className={`min-h-10 shrink-0 rounded-lg px-4 text-sm font-semibold transition ${
+                className={`min-h-10 shrink-0 rounded-control px-4 text-sm font-semibold transition ${
                   active === d.name ? "bg-brand-800 text-white" : "border border-stone bg-paper text-ink hover:border-brand-300 hover:text-brand-800"
                 }`}
               >
@@ -83,7 +83,7 @@ export default function ListingsMap({
         <MapInner points={filtered} center={center} zoom={zoom} />
       </div>
       {filtered.length === 0 && (
-        <p className="absolute inset-x-4 bottom-4 rounded-lg bg-paper/95 px-4 py-3 text-center text-sm text-muted shadow-lg">
+        <p className="absolute inset-x-4 bottom-4 rounded-control bg-paper/95 px-4 py-3 text-center text-sm text-muted shadow-lg">
           Bu bölgede haritada gösterilecek ilan bulunamadı.
         </p>
       )}

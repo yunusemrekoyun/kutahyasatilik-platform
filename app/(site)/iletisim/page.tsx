@@ -23,52 +23,52 @@ export default async function ContactPage() {
   return (
     <div className="mx-auto max-w-5xl px-4 py-10">
       <TrackView />
-      <h1 className="font-display text-3xl font-bold text-slate-900">İletişim</h1>
-      <p className="mt-2 text-slate-600">{SITE.brand}</p>
+      <h1 className="text-3xl font-bold text-ink">İletişim</h1>
+      <p className="mt-2 text-muted">{SITE.brand}</p>
 
       <div className="mt-8 grid gap-8 lg:grid-cols-2">
         <div className="space-y-3.5">
           {c.phoneRaw && (
-            <a href={telLink(c.phoneRaw)} className="flex items-center gap-4 rounded-lg bg-paper p-5 ring-1 ring-stone transition hover:ring-brand-300">
-              <span className="grid h-11 w-11 shrink-0 place-items-center rounded-lg bg-brand-50 text-brand-700"><Phone className="h-5 w-5" /></span>
+            <a href={telLink(c.phoneRaw)} className="flex items-center gap-4 rounded-control bg-paper p-5 ring-1 ring-stone transition hover:ring-brand-300">
+              <span className="grid h-11 w-11 shrink-0 place-items-center rounded-control bg-brand-50 text-brand-700"><Phone className="h-5 w-5" /></span>
               <div>
-                <p className="text-sm text-slate-500">Telefon</p>
-                <p className="font-semibold text-slate-900">{c.phone}</p>
+                <p className="text-sm text-muted">Telefon</p>
+                <p className="font-semibold text-ink">{c.phone}</p>
               </div>
             </a>
           )}
           {c.whatsapp && (
-            <a href={whatsappLink(c.whatsapp, "Merhaba, bilgi almak istiyorum.")} target="_blank" rel="noopener noreferrer" className="flex items-center gap-4 rounded-lg bg-paper p-5 ring-1 ring-stone transition hover:ring-green-300">
-              <span className="grid h-11 w-11 shrink-0 place-items-center rounded-lg bg-green-50 text-green-600"><MessageCircle className="h-5 w-5" /></span>
+            <a href={whatsappLink(c.whatsapp, "Merhaba, bilgi almak istiyorum.")} target="_blank" rel="noopener noreferrer" className="flex items-center gap-4 rounded-control bg-paper p-5 ring-1 ring-stone transition hover:ring-green-300">
+              <span className="grid h-11 w-11 shrink-0 place-items-center rounded-control bg-green-50 text-green-600"><MessageCircle className="h-5 w-5" /></span>
               <div>
-                <p className="text-sm text-slate-500">WhatsApp</p>
-                <p className="font-semibold text-slate-900">Mesaj gönderin</p>
+                <p className="text-sm text-muted">WhatsApp</p>
+                <p className="font-semibold text-ink">Mesaj gönderin</p>
               </div>
             </a>
           )}
           {c.email && (
-            <div className="flex items-center gap-4 rounded-lg bg-paper p-5 ring-1 ring-stone">
-              <span className="grid h-11 w-11 shrink-0 place-items-center rounded-lg bg-slate-100 text-slate-500"><Mail className="h-5 w-5" /></span>
+            <div className="flex items-center gap-4 rounded-control bg-paper p-5 ring-1 ring-stone">
+              <span className="grid h-11 w-11 shrink-0 place-items-center rounded-control bg-canvas text-muted"><Mail className="h-5 w-5" /></span>
               <div>
-                <p className="text-sm text-slate-500">E-posta</p>
-                <p className="font-semibold text-slate-900">{c.email}</p>
+                <p className="text-sm text-muted">E-posta</p>
+                <p className="font-semibold text-ink">{c.email}</p>
               </div>
             </div>
           )}
           {c.address && (
-            <div className="flex items-center gap-4 rounded-lg bg-paper p-5 ring-1 ring-stone">
-              <span className="grid h-11 w-11 shrink-0 place-items-center rounded-lg bg-slate-100 text-slate-500"><MapPin className="h-5 w-5" /></span>
+            <div className="flex items-center gap-4 rounded-control bg-paper p-5 ring-1 ring-stone">
+              <span className="grid h-11 w-11 shrink-0 place-items-center rounded-control bg-canvas text-muted"><MapPin className="h-5 w-5" /></span>
               <div>
-                <p className="text-sm text-slate-500">Adres</p>
-                <p className="font-semibold text-slate-900">{c.address}</p>
+                <p className="text-sm text-muted">Adres</p>
+                <p className="font-semibold text-ink">{c.address}</p>
               </div>
             </div>
           )}
         </div>
 
-        <div className="rounded-lg bg-paper p-6 ring-1 ring-stone">
-          <h2 className="font-display text-lg font-bold text-slate-900">Bize Yazın</h2>
-          <p className="mt-1 text-sm text-slate-500">Formu doldurun, en kısa sürede dönüş yapalım.</p>
+        <div className="rounded-control bg-paper p-6 ring-1 ring-stone">
+          <h2 className="text-lg font-bold text-ink">Bize Yazın</h2>
+          <p className="mt-1 text-sm text-muted">Formu doldurun, en kısa sürede dönüş yapalım.</p>
           <div className="mt-4">
             <LeadForm type="contact" />
           </div>

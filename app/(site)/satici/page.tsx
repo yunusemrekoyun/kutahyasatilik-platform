@@ -47,9 +47,9 @@ export default async function SellerPage() {
       <section className="mx-auto max-w-7xl px-4 py-12">
         <div className="grid items-start gap-8 lg:grid-cols-12">
           <div className="border border-stone bg-paper p-6 sm:p-8 lg:col-span-8">
-            <div className="border-b border-slate-100 pb-5">
-              <h2 className="font-display text-2xl font-bold text-brand-900">İlan Talebi Oluştur</h2>
-              <p className="mt-1.5 text-slate-500">
+            <div className="border-b border-stone pb-5">
+              <h2 className="text-2xl font-bold text-brand-900">İlan Talebi Oluştur</h2>
+              <p className="mt-1.5 text-muted">
                 Gayrimenkulünüz hakkında bilgileri girin, uzmanlarımız en kısa sürede sizinle iletişime geçsin.
               </p>
               <ol className="mt-4 grid gap-2.5 sm:grid-cols-2">
@@ -59,7 +59,7 @@ export default async function SellerPage() {
                   "Sana en uygun danışman atanır",
                   "İlanın yayına alınır",
                 ].map((step, i) => (
-                  <li key={i} className="flex items-start gap-2.5 text-sm text-slate-600">
+                  <li key={i} className="flex items-start gap-2.5 text-sm text-muted">
                     <span className="grid h-6 w-6 shrink-0 place-items-center rounded-full bg-brand-50 text-xs font-bold text-brand-700">{i + 1}</span>
                     <span className="pt-0.5">{step}</span>
                   </li>
@@ -73,13 +73,13 @@ export default async function SellerPage() {
 
           <div className="space-y-4 lg:col-span-4">
             {TRUST.map((t) => (
-              <div key={t.title} className="flex items-start gap-4 rounded-lg bg-paper p-6 ring-1 ring-stone">
+              <div key={t.title} className="flex items-start gap-4 rounded-control bg-paper p-6 ring-1 ring-stone">
                 <span className="grid h-12 w-12 shrink-0 place-items-center rounded-full bg-brand-50 text-brand-700">
                   <t.Icon className="h-6 w-6" strokeWidth={1.7} />
                 </span>
                 <div>
-                  <h3 className="font-display text-lg font-semibold text-brand-900">{t.title}</h3>
-                  <p className="mt-1 text-[15px] leading-relaxed text-slate-600">{t.text}</p>
+                  <h3 className="text-lg font-semibold text-brand-900">{t.title}</h3>
+                  <p className="mt-1 text-[15px] leading-relaxed text-muted">{t.text}</p>
                 </div>
               </div>
             ))}

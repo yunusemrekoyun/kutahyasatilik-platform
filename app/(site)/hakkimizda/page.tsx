@@ -41,7 +41,7 @@ export default async function AboutPage() {
   return (
     <div>
       <TrackView />
-      <PageIntro eyebrow="Kurumsal" title={title} intro="Kütahya'nın ilçelerini, mahallelerini ve gayrimenkul dinamiklerini yakından bilen yerel bir ekibiz." actions={<><Link href="/ilanlar" className="rounded-lg bg-brand-700 px-6 py-3 font-semibold text-white hover:bg-brand-800">Portföyü incele</Link>{c.phoneRaw && <a href={telLink(c.phoneRaw)} className="inline-flex items-center gap-2 rounded-lg border border-brand-200 bg-paper px-6 py-3 font-semibold text-brand-800"><Phone className="h-4 w-4" /> {c.phone}</a>}</>} />
+      <PageIntro eyebrow="Kurumsal" title={title} intro="Kütahya'nın ilçelerini, mahallelerini ve gayrimenkul dinamiklerini yakından bilen yerel bir ekibiz." actions={<><Link href="/ilanlar" className="rounded-control bg-brand-700 px-6 py-3 font-semibold text-white hover:bg-brand-800">Portföyü incele</Link>{c.phoneRaw && <a href={telLink(c.phoneRaw)} className="inline-flex items-center gap-2 rounded-control border border-brand-200 bg-paper px-6 py-3 font-semibold text-brand-800"><Phone className="h-4 w-4" /> {c.phone}</a>}</>} />
 
       {/* İçerik (admin'den düzenlenebilir) */}
       <section className="mx-auto max-w-3xl px-4 py-14">

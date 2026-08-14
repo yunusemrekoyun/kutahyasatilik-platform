@@ -56,19 +56,19 @@ export default function BuyerAlertForm() {
     }
   }
 
-  const labelCls = "mb-1.5 block text-sm font-semibold text-slate-700";
+  const labelCls = "mb-1.5 block text-sm font-semibold text-ink";
   const inputCls =
-    "w-full h-12 rounded-[10px] border border-slate-300 bg-paper px-3.5 text-base text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/30";
+    "w-full h-12 rounded-[10px] border border-stone bg-paper px-3.5 text-base text-ink outline-none transition placeholder:text-slate-400 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/30";
 
   if (status === "ok") {
     return (
       <div className="space-y-8">
-        <div role="status" className="rounded-lg bg-green-50 p-6 text-center ring-1 ring-green-200">
+        <div role="status" className="rounded-control bg-green-50 p-6 text-center ring-1 ring-green-200">
           <span className="mx-auto grid h-14 w-14 place-items-center rounded-full bg-paper text-green-600 ring-1 ring-green-200">
             <CheckCircle2 aria-hidden="true" className="h-8 w-8" />
           </span>
-          <h3 className="mt-4 font-display text-xl font-bold text-slate-900">Talebiniz kaydedildi</h3>
-          <p className="mt-2 text-sm text-slate-600">
+          <h3 className="mt-4 text-xl font-bold text-ink">Talebiniz kaydedildi</h3>
+          <p className="mt-2 text-sm text-muted">
             Kriterlerinize uygun yeni bir ilan geldiğinde uzmanımız sizi arayacak.
             {matches.length > 0
               ? ` Şu an kriterlerinize uyan ${matches.length} ilan var, aşağıda:`
@@ -105,7 +105,7 @@ export default function BuyerAlertForm() {
         </div>
       </div>
       <div>
-        <label htmlFor="ba-email" className={labelCls}>E-posta <span className="font-normal text-slate-400">(opsiyonel)</span></label>
+        <label htmlFor="ba-email" className={labelCls}>E-posta <span className="font-normal text-muted/70">(opsiyonel)</span></label>
         <input id="ba-email" name="email" type="email" autoComplete="email" placeholder="ornek@eposta.com" className={inputCls} />
       </div>
 
@@ -167,7 +167,7 @@ export default function BuyerAlertForm() {
       >
         {status === "loading" ? "Aranıyor..." : "Talebimi Bırak ve Uygun İlanları Gör"}
       </button>
-      <p className="flex items-center justify-center gap-1.5 text-center text-[13px] text-slate-500">
+      <p className="flex items-center justify-center gap-1.5 text-center text-[13px] text-muted">
         <Lock aria-hidden="true" className="h-3.5 w-3.5" /> Kriterlerinize uyan ilan geldiğinde haber veririz. Spam göndermiyoruz.
       </p>
     </form>

@@ -18,17 +18,17 @@ export default function RequestStatusStepper({ status }: { status: string }) {
               <div className="flex w-16 flex-col items-center gap-1 text-center">
                 <span
                   className={`grid h-6 w-6 place-items-center rounded-full text-[11px] font-bold ${
-                    done ? "bg-brand-600 text-white" : "bg-slate-200 text-slate-500"
+                    done ? "bg-brand-600 text-white" : "bg-stone text-muted"
                   } ${current ? "ring-2 ring-brand-200" : ""}`}
                 >
                   {done ? <Check className="h-3.5 w-3.5" /> : i + 1}
                 </span>
-                <span className={`text-[10px] leading-tight ${done ? "font-semibold text-brand-700" : "text-slate-400"}`}>
+                <span className={`text-[10px] leading-tight ${done ? "font-semibold text-brand-700" : "text-muted/70"}`}>
                   {LEAD_STATUS_LABELS[s]}
                 </span>
               </div>
               {i < LEAD_STATUS_FLOW.length - 1 && (
-                <div className={`mt-3 h-0.5 w-5 shrink-0 ${i < currentIdx ? "bg-brand-600" : "bg-slate-200"}`} />
+                <div className={`mt-3 h-0.5 w-5 shrink-0 ${i < currentIdx ? "bg-brand-600" : "bg-stone"}`} />
               )}
             </div>
           );

@@ -49,7 +49,7 @@ function ResourceRow({ resource }: { resource: PublicLocalResource }) {
     <li className="grid gap-4 border-b border-stone py-6 last:border-b-0 sm:grid-cols-[1fr_auto] sm:items-center">
       <div>
         <div className="flex flex-wrap items-center gap-2">
-          <h3 className="font-display text-xl font-semibold text-ink">{resource.title}</h3>
+          <h3 className="text-xl font-semibold text-ink">{resource.title}</h3>
           {resource.district ? (
             <span className="rounded-full border border-stone px-2 py-0.5 text-[11px] font-semibold text-muted">{resource.district}</span>
           ) : null}
@@ -67,7 +67,7 @@ function ResourceRow({ resource }: { resource: PublicLocalResource }) {
         href={resource.url}
         target="_blank"
         rel="noopener noreferrer external"
-        className="inline-flex min-h-11 items-center justify-center gap-2 rounded-lg border border-brand-200 px-4 text-sm font-semibold text-brand-800 transition hover:border-brand-400 hover:bg-brand-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2"
+        className="inline-flex min-h-11 items-center justify-center gap-2 rounded-control border border-brand-200 px-4 text-sm font-semibold text-brand-800 transition hover:border-brand-400 hover:bg-brand-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2"
         aria-label={`${resource.title} hizmetini yeni sekmede aç`}
       >
         Kuruma git <ArrowUpRight className="h-4 w-4" aria-hidden="true" />
@@ -116,7 +116,7 @@ export default async function LocalToolsPage() {
         {resources.length === 0 ? (
           <div className="ceramic-grid border-y border-stone px-5 py-14 text-center">
             <Landmark className="mx-auto h-8 w-8 text-brand-600" aria-hidden="true" />
-            <h2 className="mt-4 font-display text-2xl font-semibold text-brand-950">Doğrulanmış bağlantılar hazırlanıyor</h2>
+            <h2 className="mt-4 text-2xl font-semibold text-brand-950">Doğrulanmış bağlantılar hazırlanıyor</h2>
             <p className="mx-auto mt-3 max-w-xl leading-7 text-muted">Kurum adresleri doğrulandıktan sonra bu alanda yayımlanacak. Bu sırada arama sonuçlarındaki benzer isimli, resmî olmayan sitelerde kişisel bilgi paylaşmayın.</p>
           </div>
         ) : (
@@ -129,9 +129,9 @@ export default async function LocalToolsPage() {
               return (
                 <section key={type} aria-labelledby={`resource-${type}`}>
                   <div className="flex gap-3 border-b border-stone pb-5">
-                    <span className="grid h-10 w-10 shrink-0 place-items-center rounded-lg bg-brand-50 text-brand-700"><ResourceIcon type={type} /></span>
+                    <span className="grid h-10 w-10 shrink-0 place-items-center rounded-control bg-brand-50 text-brand-700"><ResourceIcon type={type} /></span>
                     <div>
-                      <h2 id={`resource-${type}`} className="font-display text-2xl font-semibold text-brand-950">{meta.label}</h2>
+                      <h2 id={`resource-${type}`} className="text-2xl font-semibold text-brand-950">{meta.label}</h2>
                       <p className="mt-1 text-sm leading-6 text-muted">{meta.description}</p>
                     </div>
                   </div>

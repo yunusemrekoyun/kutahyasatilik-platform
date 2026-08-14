@@ -14,11 +14,11 @@ export default async function UserMessagesPage() {
   if (!session) redirect("/giris?next=/hesabim/mesajlar");
   return (
     <div className="mx-auto max-w-5xl px-4 py-8">
-      <Link href="/hesabim" className="inline-flex items-center gap-1.5 text-sm font-medium text-slate-500 hover:text-brand-700">
+      <Link href="/hesabim" className="inline-flex items-center gap-1.5 text-sm font-medium text-muted hover:text-brand-700">
         <ArrowLeft className="h-4 w-4" /> Hesabım
       </Link>
-      <h1 className="mb-4 mt-2 text-2xl font-bold text-slate-900">Mesajlarım</h1>
-      <Suspense fallback={<div className="h-96 rounded-lg bg-paper ring-1 ring-stone" />}>
+      <h1 className="mb-4 mt-2 text-2xl font-bold text-ink">Mesajlarım</h1>
+      <Suspense fallback={<div className="h-96 rounded-control bg-paper ring-1 ring-stone" />}>
         <MessagesClient basePath="/hesabim/mesajlar" />
       </Suspense>
     </div>

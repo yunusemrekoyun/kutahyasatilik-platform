@@ -63,7 +63,7 @@ export default async function AgenciesPage({
         actions={
           <Link
             href="/danismanlar"
-            className="inline-flex min-h-11 items-center gap-2 rounded-lg border border-brand-200 bg-paper px-5 text-sm font-semibold text-brand-800 transition hover:border-brand-400"
+            className="inline-flex min-h-11 items-center gap-2 rounded-control border border-brand-200 bg-paper px-5 text-sm font-semibold text-brand-800 transition hover:border-brand-400"
           >
             Danışmanları gör <ArrowRight className="h-4 w-4" />
           </Link>
@@ -74,7 +74,7 @@ export default async function AgenciesPage({
         <div className="flex flex-col gap-3 border-b border-stone pb-6 sm:flex-row sm:items-end sm:justify-between">
           <div>
             <p className="eyebrow">Yerel portföy ortakları</p>
-            <h2 className="mt-2 font-display text-3xl font-semibold text-brand-950 sm:text-4xl">
+            <h2 className="mt-2 text-3xl font-semibold text-brand-950 sm:text-4xl">
               Kütahya emlak ofisleri
             </h2>
           </div>
@@ -98,10 +98,10 @@ export default async function AgenciesPage({
           </>
         ) : (
           <section className="ceramic-grid mt-8 border-y border-stone bg-paper px-6 py-14 text-center">
-            <span className="mx-auto grid h-14 w-14 place-items-center rounded-lg border border-stone bg-canvas text-brand-700">
+            <span className="mx-auto grid h-14 w-14 place-items-center rounded-control border border-stone bg-canvas text-brand-700">
               <Building2 className="h-7 w-7" />
             </span>
-            <h2 className="mt-4 font-display text-2xl font-semibold text-brand-950">
+            <h2 className="mt-4 text-2xl font-semibold text-brand-950">
               Onaylı ofis profilleri hazırlanıyor
             </h2>
             <p className="mx-auto mt-2 max-w-xl leading-7 text-muted">
@@ -109,7 +109,7 @@ export default async function AgenciesPage({
             </p>
             <Link
               href="/emlakci/kayit"
-              className="mt-6 inline-flex min-h-11 items-center rounded-lg bg-brand-700 px-5 text-sm font-semibold text-white hover:bg-brand-800"
+              className="mt-6 inline-flex min-h-11 items-center rounded-control bg-brand-700 px-5 text-sm font-semibold text-white hover:bg-brand-800"
             >
               Ağa katılmak için başvurun
             </Link>

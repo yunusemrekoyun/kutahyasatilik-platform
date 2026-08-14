@@ -66,9 +66,9 @@ export default async function RegionAnalysis() {
       {showScores && (<>
       {/* Isı haritası */}
       <section className="mx-auto max-w-6xl px-4 py-10">
-        <div className="rounded-lg bg-paper p-5 ring-1 ring-stone sm:p-7">
-          <h2 className="font-display text-2xl font-bold text-brand-900">Fiyat Isı Haritası</h2>
-          <p className="mt-1 text-sm text-slate-600">
+        <div className="rounded-control bg-paper p-5 ring-1 ring-stone sm:p-7">
+          <h2 className="text-2xl font-bold text-brand-900">Fiyat Isı Haritası</h2>
+          <p className="mt-1 text-sm text-muted">
             Arsa m² fiyatına göre renklendirilmiştir — <span className="font-semibold text-green-600">yeşil: uygun</span>, <span className="font-semibold text-red-600">kırmızı: yüksek</span>. Marker üzerine gelin.
           </p>
           <div className="mt-5">
@@ -79,20 +79,20 @@ export default async function RegionAnalysis() {
 
       {/* Karşılaştırma */}
       <section className="mx-auto max-w-3xl px-4 pb-10">
-        <h2 className="font-display text-2xl font-bold text-brand-900">İlçe Karşılaştır</h2>
-        <p className="mt-1 mb-4 text-sm text-slate-600">İki ilçeyi yan yana karşılaştırın; her satırda avantajlı olan yeşil gösterilir.</p>
+        <h2 className="text-2xl font-bold text-brand-900">İlçe Karşılaştır</h2>
+        <p className="mt-1 mb-4 text-sm text-muted">İki ilçeyi yan yana karşılaştırın; her satırda avantajlı olan yeşil gösterilir.</p>
         <DistrictCompare districts={stats} />
       </section>
       </>)}
 
       {/* Sıralı liste */}
       <section className="mx-auto max-w-6xl px-4 pb-16">
-        <h2 className="font-display text-2xl font-bold text-brand-900">Yatırım Puanına Göre İlçeler</h2>
-        <div className="mt-5 overflow-hidden rounded-lg bg-paper ring-1 ring-stone">
+        <h2 className="text-2xl font-bold text-brand-900">Yatırım Puanına Göre İlçeler</h2>
+        <div className="mt-5 overflow-hidden rounded-control bg-paper ring-1 ring-stone">
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-slate-100 bg-slate-50 text-left text-xs text-slate-500">
+                <tr className="border-b border-stone bg-canvas text-left text-xs text-muted">
                   <th className="p-3">İlçe</th>
                   {showScores && (<>
                   <th className="p-3 text-right">Yatırım Puanı</th>
@@ -106,19 +106,19 @@ export default async function RegionAnalysis() {
               </thead>
               <tbody>
                 {ranked.map((d) => (
-                  <tr key={d.name} className="border-b border-slate-50 hover:bg-slate-50">
-                    <td className="p-3 font-semibold text-slate-800">{d.name}</td>
+                  <tr key={d.name} className="border-b border-stone hover:bg-canvas">
+                    <td className="p-3 font-semibold text-ink">{d.name}</td>
                     {showScores && (<>
                     <td className="p-3 text-right">
                       {d.investmentScore != null ? (
-                        <span className="rounded-md bg-brand-50 px-2 py-0.5 font-bold text-brand-700">{d.investmentScore}/100</span>
+                        <span className="rounded-control bg-brand-50 px-2 py-0.5 font-bold text-brand-700">{d.investmentScore}/100</span>
                       ) : "—"}
                     </td>
                     <td className="p-3 text-right text-green-600 font-medium">{d.valueGrowth3yPct != null ? `%${d.valueGrowth3yPct}` : "—"}</td>
-                    <td className="p-3 text-right text-slate-700">{d.avgPriceArsaM2 != null ? `${formatNumber(d.avgPriceArsaM2)} ₺` : "—"}</td>
-                    <td className="p-3 text-right text-slate-700">{d.avgPriceDaire != null ? `${formatNumber(d.avgPriceDaire)} ₺` : "—"}</td>
+                    <td className="p-3 text-right text-ink">{d.avgPriceArsaM2 != null ? `${formatNumber(d.avgPriceArsaM2)} ₺` : "—"}</td>
+                    <td className="p-3 text-right text-ink">{d.avgPriceDaire != null ? `${formatNumber(d.avgPriceDaire)} ₺` : "—"}</td>
                     </>)}
-                    <td className="p-3 text-center text-slate-600">{d.count}</td>
+                    <td className="p-3 text-center text-muted">{d.count}</td>
                     <td className="p-3 text-right">
                       <Link href={`/ilanlar?ilce=${encodeURIComponent(d.name)}`} className="inline-flex items-center gap-1 text-xs font-semibold text-brand-700 hover:underline">İlanlar <ArrowRight className="h-4 w-4" /></Link>
                     </td>

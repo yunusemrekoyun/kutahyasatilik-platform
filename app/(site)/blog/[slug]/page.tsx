@@ -79,18 +79,18 @@ export default async function BlogPost({ params }: { params: Promise<{ slug: str
       <TrackView postId={post.id} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
 
-      <nav className="mb-4 text-sm text-slate-500">
+      <nav className="mb-4 text-sm text-muted">
         <Link href="/" className="hover:text-brand-700">Ana Sayfa</Link>
         <span className="mx-2">/</span>
         <Link href="/blog" className="hover:text-brand-700">Blog</Link>
       </nav>
 
       <p className="text-sm font-medium text-gold-600">{formatDate(post.publishedAt ?? post.createdAt)}</p>
-      <h1 className="mt-2 font-display text-3xl font-bold leading-tight text-slate-900 sm:text-4xl">{post.title}</h1>
-      {post.author && <p className="mt-2 inline-flex items-center gap-1.5 text-sm text-slate-500"><PenLine className="h-4 w-4" />{post.author}</p>}
+      <h1 className="mt-2 text-3xl font-bold leading-tight text-ink sm:text-4xl">{post.title}</h1>
+      {post.author && <p className="mt-2 inline-flex items-center gap-1.5 text-sm text-muted"><PenLine className="h-4 w-4" />{post.author}</p>}
 
       {post.coverImage && (
-        <div className="relative mt-6 aspect-[16/9] overflow-hidden rounded-lg bg-slate-100 ring-1 ring-stone">
+        <div className="relative mt-6 aspect-[16/9] overflow-hidden rounded-control bg-canvas ring-1 ring-stone">
           <Image src={mediaUrl(post.coverImage)} alt={post.title} fill sizes="(max-width:768px) 100vw, 768px" className="object-cover" priority />
         </div>
       )}
@@ -101,22 +101,22 @@ export default async function BlogPost({ params }: { params: Promise<{ slug: str
       />
 
       {tags.length > 0 && (
-        <div className="mt-8 flex flex-wrap gap-2 border-t border-slate-100 pt-6">
+        <div className="mt-8 flex flex-wrap gap-2 border-t border-stone pt-6">
           {tags.map((t) => (
-            <span key={t} className="rounded-lg bg-slate-100 px-3 py-1.5 text-xs font-medium text-slate-600">#{t}</span>
+            <span key={t} className="rounded-control bg-canvas px-3 py-1.5 text-xs font-medium text-muted">#{t}</span>
           ))}
         </div>
       )}
 
       {related.length > 0 && (
         <section className="mt-12">
-          <h2 className="font-display text-xl font-bold text-brand-900">Diğer Yazılar</h2>
+          <h2 className="text-xl font-bold text-brand-900">Diğer Yazılar</h2>
           <div className="gold-divider mt-2 mb-5" />
           <div className="grid gap-4 sm:grid-cols-3">
             {related.map((r) => (
-              <Link key={r.id} href={`/blog/${r.slug}`} className="group rounded-lg bg-paper p-4 ring-1 ring-stone hover:ring-brand-200">
+              <Link key={r.id} href={`/blog/${r.slug}`} className="group rounded-control bg-paper p-4 ring-1 ring-stone hover:ring-brand-200">
                 <p className="text-[11px] font-medium text-gold-600">{formatDate(r.publishedAt ?? r.createdAt)}</p>
-                <p className="mt-1 line-clamp-3 text-sm font-semibold text-slate-800 group-hover:text-brand-700">{r.title}</p>
+                <p className="mt-1 line-clamp-3 text-sm font-semibold text-ink group-hover:text-brand-700">{r.title}</p>
               </Link>
             ))}
           </div>

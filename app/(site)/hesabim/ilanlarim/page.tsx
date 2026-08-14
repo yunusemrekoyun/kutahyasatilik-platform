@@ -83,7 +83,7 @@ export default async function MyListingsPage({
           <span className="mx-auto grid h-14 w-14 place-items-center rounded-control border border-stone bg-canvas text-muted">
             <PackageOpen className="h-7 w-7" />
           </span>
-          <h2 className="mt-4 font-display text-lg font-semibold text-ink">Henüz ilanınız yok</h2>
+          <h2 className="mt-4 text-lg font-semibold text-ink">Henüz ilanınız yok</h2>
           <p className="mx-auto mt-1.5 max-w-md text-muted">
             Aracınızı veya teknoloji ürününüzü birkaç dakikada yayımlayabilirsiniz.
           </p>

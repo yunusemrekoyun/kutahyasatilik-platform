@@ -5,7 +5,7 @@ const isLocalMp4 = (url?: string | null) => !!url && /^\/uploads\/videos\/[\w.-]
 
 function Frame({ src, title }: { src: string; title: string }) {
   return (
-    <div className="relative aspect-video w-full overflow-hidden rounded-lg bg-slate-900 ring-1 ring-stone">
+    <div className="relative aspect-video w-full overflow-hidden rounded-control bg-brand-950 ring-1 ring-stone">
       <iframe
         src={src}
         title={title}
@@ -21,7 +21,7 @@ function Frame({ src, title }: { src: string; title: string }) {
 function LocalVideo({ src }: { src: string }) {
   const poster = src.replace(/\.mp4$/, ".jpg");
   return (
-    <div className="relative aspect-video w-full overflow-hidden rounded-lg bg-slate-900 ring-1 ring-stone">
+    <div className="relative aspect-video w-full overflow-hidden rounded-control bg-brand-950 ring-1 ring-stone">
       <video controls preload="metadata" poster={poster} playsInline className="absolute inset-0 h-full w-full bg-black">
         <source src={src} type="video/mp4" />
       </video>
@@ -46,21 +46,21 @@ export default function ListingMedia({
   if (!video && !localVideo && !drone && !tour) return null;
 
   return (
-    <section className="rounded-lg bg-paper p-6 ring-1 ring-stone">
+    <section className="rounded-control bg-paper p-6 ring-1 ring-stone">
       <div className="flex items-center gap-2">
-        <span className="grid h-9 w-9 place-items-center rounded-lg bg-brand-100 text-brand-700">
+        <span className="grid h-9 w-9 place-items-center rounded-control bg-brand-100 text-brand-700">
           <Video className="h-5 w-5" />
         </span>
         <div>
-          <h2 className="text-lg font-bold text-slate-900">Video &amp; Sanal Tur</h2>
-          <p className="text-xs text-slate-500">Mülkü uzaktan, her açıdan keşfedin</p>
+          <h2 className="text-lg font-bold text-ink">Video &amp; Sanal Tur</h2>
+          <p className="text-xs text-muted">Mülkü uzaktan, her açıdan keşfedin</p>
         </div>
       </div>
 
       <div className="mt-5 space-y-6">
         {(localVideo || video) && (
           <div>
-            <h3 className="mb-2 flex items-center gap-1.5 text-sm font-semibold text-slate-800">
+            <h3 className="mb-2 flex items-center gap-1.5 text-sm font-semibold text-ink">
               <Video className="h-4 w-4 text-brand-600" /> Tanıtım Videosu
             </h3>
             {localVideo ? <LocalVideo src={localVideo} /> : <Frame src={video!} title="Tanıtım videosu" />}
@@ -69,7 +69,7 @@ export default function ListingMedia({
 
         {drone && (
           <div>
-            <h3 className="mb-2 flex items-center gap-1.5 text-sm font-semibold text-slate-800">
+            <h3 className="mb-2 flex items-center gap-1.5 text-sm font-semibold text-ink">
               <Plane className="h-4 w-4 text-brand-600" /> Drone / Havadan Görüntü
             </h3>
             <Frame src={drone} title="Drone görüntüsü" />
@@ -79,7 +79,7 @@ export default function ListingMedia({
         {tour && (
           <div>
             <div className="mb-2 flex items-center justify-between">
-              <h3 className="flex items-center gap-1.5 text-sm font-semibold text-slate-800">
+              <h3 className="flex items-center gap-1.5 text-sm font-semibold text-ink">
                 <Rotate3d className="h-4 w-4 text-brand-600" /> 360° Sanal Tur
               </h3>
               <a

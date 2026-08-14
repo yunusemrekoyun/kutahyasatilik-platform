@@ -12,7 +12,7 @@ export default function RecentlyViewed({ excludeSlug }: { excludeSlug?: string }
   return (
     <section className="mt-14">
       <div className="flex items-center gap-3">
-        <h2 className="font-display text-2xl font-bold text-brand-900">Son Görüntülediğiniz İlanlar</h2>
+        <h2 className="text-2xl font-bold text-brand-900">Son Görüntülediğiniz İlanlar</h2>
       </div>
       <div className="gold-divider mt-2 mb-6" />
       <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">

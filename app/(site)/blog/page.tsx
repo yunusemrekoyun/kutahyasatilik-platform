@@ -28,7 +28,7 @@ export default async function BlogList() {
       <PageIntro eyebrow="Yerel bilgi" title="Doğru Gayrimenkul Rehberi" intro="Kütahya'da alım, satım ve yatırım kararları için sahadan bilgiler, bölge analizleri ve pratik rehberler." />
 
       <div className="mx-auto max-w-7xl px-5 py-14 sm:px-6 sm:py-20">{posts.length === 0 ? (
-        <p className="mt-12 rounded-lg bg-paper p-10 text-center text-slate-500 ring-1 ring-stone">
+        <p className="mt-12 rounded-control bg-paper p-10 text-center text-muted ring-1 ring-stone">
           Henüz yazı yayınlanmadı. Çok yakında burada olacağız.
         </p>
       ) : (
@@ -37,19 +37,19 @@ export default async function BlogList() {
             <Link
               key={p.id}
               href={`/blog/${p.slug}`}
-              className="group overflow-hidden rounded-lg bg-paper ring-1 ring-stone transition hover:shadow-prestige hover:ring-brand-200"
+              className="group overflow-hidden rounded-control bg-paper ring-1 ring-stone transition hover:shadow-prestige hover:ring-brand-200"
             >
-              <div className="relative aspect-[16/10] overflow-hidden bg-slate-100">
+              <div className="relative aspect-[16/10] overflow-hidden bg-canvas">
                 {p.coverImage ? (
                   <Image src={p.coverImage} alt={p.title} fill sizes="(max-width:768px) 100vw, 33vw" className="object-cover transition duration-500 group-hover:scale-105" />
                 ) : (
-                  <div className="grid h-full place-items-center text-slate-300"><PenLine className="h-10 w-10" /></div>
+                  <div className="grid h-full place-items-center text-stone"><PenLine className="h-10 w-10" /></div>
                 )}
               </div>
               <div className="p-5">
                 <p className="text-xs font-medium text-gold-600">{formatDate(p.publishedAt ?? p.createdAt)}</p>
-                <h2 className="mt-1.5 line-clamp-2 font-display text-lg font-bold text-slate-900 group-hover:text-brand-700">{p.title}</h2>
-                {p.excerpt && <p className="mt-2 line-clamp-3 text-sm text-slate-600">{p.excerpt}</p>}
+                <h2 className="mt-1.5 line-clamp-2 text-lg font-bold text-ink group-hover:text-brand-700">{p.title}</h2>
+                {p.excerpt && <p className="mt-2 line-clamp-3 text-sm text-muted">{p.excerpt}</p>}
                 <span className="mt-3 inline-flex items-center gap-1 text-sm font-semibold text-brand-700">Devamını oku <ArrowRight className="h-4 w-4" /></span>
               </div>
             </Link>

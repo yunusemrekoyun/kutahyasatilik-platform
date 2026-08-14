@@ -79,15 +79,15 @@ export default function AnalyticsConsent({ gaId, gtagId }: { gaId?: string; gtag
           aria-labelledby="analytics-consent-title"
           aria-describedby="analytics-consent-description"
           tabIndex={-1}
-          className="fixed inset-x-3 bottom-3 z-[100] mx-auto max-w-3xl rounded-lg bg-brand-950 p-4 text-white shadow-2xl ring-1 ring-white/15 outline-none sm:flex sm:items-center sm:gap-5 sm:p-5"
+          className="fixed inset-x-3 bottom-3 z-[100] mx-auto max-w-3xl rounded-control bg-brand-950 p-4 text-white shadow-2xl ring-1 ring-white/15 outline-none sm:flex sm:items-center sm:gap-5 sm:p-5"
         >
           <h2 id="analytics-consent-title" className="sr-only">Çerez ve analiz tercihi</h2>
           <p id="analytics-consent-description" className="flex-1 text-sm leading-relaxed text-brand-100">
             Siteyi geliştirmek için anonim kullanım ölçümü yapmak istiyoruz. Zorunlu işlevler analiz izninden bağımsız çalışır.
           </p>
           <div className="mt-3 flex shrink-0 gap-2 sm:mt-0">
-            <button type="button" onClick={() => choose("denied")} className="min-h-11 flex-1 rounded-lg border border-white/30 px-4 text-sm font-semibold sm:flex-none">Reddet</button>
-            <button type="button" onClick={() => choose("granted")} className="min-h-11 flex-1 rounded-lg bg-paper px-4 text-sm font-semibold text-brand-900 sm:flex-none">Kabul et</button>
+            <button type="button" onClick={() => choose("denied")} className="min-h-11 flex-1 rounded-control border border-white/30 px-4 text-sm font-semibold sm:flex-none">Reddet</button>
+            <button type="button" onClick={() => choose("granted")} className="min-h-11 flex-1 rounded-control bg-paper px-4 text-sm font-semibold text-brand-900 sm:flex-none">Kabul et</button>
           </div>
         </div>
       ) : null}

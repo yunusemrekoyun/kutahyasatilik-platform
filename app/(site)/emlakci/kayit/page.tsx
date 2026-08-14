@@ -17,28 +17,28 @@ export default function AgentRegisterPage() {
           <span className="inline-flex items-center gap-2 rounded-full bg-brand-50 px-4 py-1.5 text-sm font-medium text-brand-700 ring-1 ring-brand-100">
             <Handshake className="h-4 w-4" /> Danışman Ağı
           </span>
-          <h1 className="mt-4 text-3xl font-black text-slate-900 sm:text-4xl">
+          <h1 className="mt-4 text-3xl font-black text-ink sm:text-4xl">
             Kütahya&apos;nın Dijital Emlak Ağına Katılın
           </h1>
-          <p className="mt-4 text-slate-600">
+          <p className="mt-4 text-muted">
             Gayrimenkul danışmanıysanız portföyünüzü dijital vitrinimizde sergileyin.
             Başvurunuz yönetim ekibimizce değerlendirilir; onaylandığında kendi
             panelinizden ilan ekleyebilirsiniz.
           </p>
-          <ul className="mt-6 space-y-3 text-slate-700">
+          <ul className="mt-6 space-y-3 text-ink">
             <li className="flex gap-3"><CheckCircle2 className="h-5 w-5 shrink-0 text-green-600" /> Kendi panelinizden ilan ekleyin ve yönetin</li>
             <li className="flex gap-3"><CheckCircle2 className="h-5 w-5 shrink-0 text-green-600" /> İlanlarınızda isim &amp; unvan etiketiniz görünür</li>
             <li className="flex gap-3"><CheckCircle2 className="h-5 w-5 shrink-0 text-green-600" /> Google&apos;da reklamlı geniş erişim</li>
             <li className="flex gap-3"><CheckCircle2 className="h-5 w-5 shrink-0 text-green-600" /> Yatırım analizi ve değerleme araçları</li>
           </ul>
-          <div className="mt-6 flex items-start gap-2 rounded-lg bg-amber-50 p-4 text-sm text-amber-800 ring-1 ring-amber-100">
+          <div className="mt-6 flex items-start gap-2 rounded-control bg-amber-50 p-4 text-sm text-amber-800 ring-1 ring-amber-100">
             <Info className="mt-0.5 h-4 w-4 shrink-0 text-amber-600" /> Kalite ve güven için her başvuru ve her ilan yönetim onayından geçer.
           </div>
         </div>
 
-        <div className="rounded-lg border border-stone bg-paper p-6 sm:p-7">
-          <h2 className="text-xl font-extrabold text-slate-900">Danışman Başvuru Formu</h2>
-          <p className="mt-1 text-sm text-slate-500">Bilgilerinizi girin, başvurunuzu inceleyelim.</p>
+        <div className="rounded-control border border-stone bg-paper p-6 sm:p-7">
+          <h2 className="text-xl font-extrabold text-ink">Danışman Başvuru Formu</h2>
+          <p className="mt-1 text-sm text-muted">Bilgilerinizi girin, başvurunuzu inceleyelim.</p>
           <div className="mt-5">
             <AgentRegisterForm />
           </div>

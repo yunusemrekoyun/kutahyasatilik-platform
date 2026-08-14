@@ -118,7 +118,7 @@ export default function PromoPopup({ popup }: { popup: PromoData }) {
         aria-modal="true"
         aria-labelledby="promo-popup-title"
         aria-describedby={popup.body ? "promo-popup-description" : undefined}
-        className="relative w-full max-w-md overflow-hidden rounded-lg bg-paper shadow-2xl animate-fade-up"
+        className="relative w-full max-w-md overflow-hidden rounded-control bg-paper shadow-2xl animate-fade-up"
         onClick={(e) => e.stopPropagation()}
       >
         <button
@@ -132,21 +132,21 @@ export default function PromoPopup({ popup }: { popup: PromoData }) {
         </button>
 
         {popup.imageUrl && (
-          <div className="relative aspect-[16/9] w-full bg-slate-100">
+          <div className="relative aspect-[16/9] w-full bg-canvas">
             <Image src={popup.imageUrl} alt={popup.title} fill sizes="(max-width:768px) 100vw, 448px" className="object-cover" />
           </div>
         )}
 
         <div className="p-6 text-center">
-          <h3 id="promo-popup-title" className="font-display text-xl font-bold text-brand-900">{popup.title}</h3>
-          {popup.body && <p id="promo-popup-description" className="mt-2 text-sm leading-relaxed text-slate-600">{popup.body}</p>}
+          <h3 id="promo-popup-title" className="text-xl font-bold text-brand-900">{popup.title}</h3>
+          {popup.body && <p id="promo-popup-description" className="mt-2 text-sm leading-relaxed text-muted">{popup.body}</p>}
 
           {popup.linkUrl && popup.linkText && (
             internal ? (
               <Link
                 href={popup.linkUrl}
                 onClick={dismiss}
-                className="mt-5 inline-flex min-h-11 items-center rounded-lg bg-brand-800 px-6 py-3 font-bold text-white transition hover:bg-brand-900"
+                className="mt-5 inline-flex min-h-11 items-center rounded-control bg-brand-800 px-6 py-3 font-bold text-white transition hover:bg-brand-900"
               >
                 {popup.linkText}
               </Link>
@@ -156,7 +156,7 @@ export default function PromoPopup({ popup }: { popup: PromoData }) {
                 target="_blank"
                 rel="noopener noreferrer"
                 onClick={dismiss}
-                className="mt-5 inline-flex min-h-11 items-center rounded-lg bg-brand-800 px-6 py-3 font-bold text-white transition hover:bg-brand-900"
+                className="mt-5 inline-flex min-h-11 items-center rounded-control bg-brand-800 px-6 py-3 font-bold text-white transition hover:bg-brand-900"
               >
                 {popup.linkText}
               </a>

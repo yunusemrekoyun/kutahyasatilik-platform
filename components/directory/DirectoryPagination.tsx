@@ -31,7 +31,7 @@ export default function DirectoryPagination({
   }
 
   const buttonClass =
-    "grid min-h-11 min-w-11 place-items-center rounded-lg px-3 text-sm font-semibold transition";
+    "grid min-h-11 min-w-11 place-items-center rounded-control px-3 text-sm font-semibold transition";
 
   return (
     <nav

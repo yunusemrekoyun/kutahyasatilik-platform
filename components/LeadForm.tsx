@@ -61,7 +61,7 @@ export default function LeadForm({
   // Oturum henüz bilinmiyorken ne formu ne de giriş uyarısını göster — yanlış
   // durumun bir an görünüp değişmesini önler.
   if (sessionLoading) {
-    return <div aria-busy="true" className="skeleton h-40 rounded-xl" />;
+    return <div aria-busy="true" className="skeleton h-40 rounded-card" />;
   }
 
   // Talep bırakmak için giriş zorunlu → giriş yoksa form yerine bildirim göster.
@@ -109,11 +109,11 @@ export default function LeadForm({
 
   if (status === "ok") {
     return (
-      <div role="status" className="rounded-lg border border-green-200 bg-green-50 p-6 text-center">
+      <div role="status" className="rounded-control border border-green-200 bg-green-50 p-6 text-center">
         <span className="mx-auto grid h-12 w-12 place-items-center rounded-full bg-paper text-green-600 ring-1 ring-green-200">
           <CheckCircle2 className="h-7 w-7" />
         </span>
-        <h3 className="mt-3 font-display text-lg font-bold text-green-800">Talebiniz alındı</h3>
+        <h3 className="mt-3 text-lg font-bold text-green-800">Talebiniz alındı</h3>
         <p className="mt-1 text-sm text-green-700">
           Talebiniz danışmanımıza iletildi; en geç 1 iş günü içinde size dönüş yapacağız. İlginiz için teşekkürler.
         </p>
@@ -121,17 +121,17 @@ export default function LeadForm({
     );
   }
 
-  const labelCls = "mb-1.5 block text-sm font-semibold text-slate-700";
+  const labelCls = "mb-1.5 block text-sm font-semibold text-ink";
   const inputCls =
-    "w-full h-12 rounded-[10px] border border-slate-300 bg-paper px-3.5 text-base text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/30";
+    "w-full h-12 rounded-[10px] border border-stone bg-paper px-3.5 text-base text-ink outline-none transition placeholder:text-slate-400 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/30";
 
   return (
     <form onSubmit={handleSubmit} aria-busy={status === "loading"} aria-describedby={status === "error" ? "lead-form-error" : undefined} className="space-y-4">
       {!compact && (
         <div>
-          <h3 className="font-display text-lg font-bold text-slate-900">{cfg.title}</h3>
+          <h3 className="text-lg font-bold text-ink">{cfg.title}</h3>
           {listingTitle && (
-            <p className="mt-0.5 text-[13px] text-slate-500">İlan: {listingTitle}</p>
+            <p className="mt-0.5 text-[13px] text-muted">İlan: {listingTitle}</p>
           )}
         </div>
       )}
@@ -146,7 +146,7 @@ export default function LeadForm({
         </div>
       </div>
       <div>
-        <label htmlFor="lf-email" className={labelCls}>E-posta <span className="font-normal text-slate-400">(opsiyonel)</span></label>
+        <label htmlFor="lf-email" className={labelCls}>E-posta <span className="font-normal text-muted/70">(opsiyonel)</span></label>
         <input id="lf-email" name="email" type="email" autoComplete="email" defaultValue={user.email || ""} placeholder="ornek@eposta.com" className={inputCls} />
       </div>
       {cfg.showDate && (
@@ -169,7 +169,7 @@ export default function LeadForm({
       >
         {status === "loading" ? "Gönderiliyor..." : cfg.cta}
       </button>
-      <p className="flex items-center justify-center gap-1.5 text-center text-[13px] text-slate-500">
+      <p className="flex items-center justify-center gap-1.5 text-center text-[13px] text-muted">
         <Lock aria-hidden="true" className="h-3.5 w-3.5" /> Bilgileriniz yalnızca sizinle iletişim için kullanılır.
       </p>
     </form>

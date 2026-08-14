@@ -124,7 +124,7 @@ export default function ContactButtons({
       </div>
 
       {c.phone && (
-        <p className="mt-3 text-center text-xs text-slate-500">
+        <p className="mt-3 text-center text-xs text-muted">
           Hemen arayın: <a href={telLink(c.phoneRaw)} className="font-semibold text-brand-700">{c.phone}</a>
         </p>
       )}
@@ -141,16 +141,16 @@ export default function ContactButtons({
             aria-modal="true"
             aria-labelledby="listing-contact-dialog-title"
             aria-describedby="listing-contact-dialog-description"
-            className="max-h-[90vh] w-full max-w-md overflow-y-auto rounded-lg bg-paper p-6 shadow-prestige"
+            className="max-h-[90vh] w-full max-w-md overflow-y-auto rounded-control bg-paper p-6 shadow-prestige"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="mb-2 flex items-start justify-between">
-              <h3 id="listing-contact-dialog-title" className="font-display text-lg font-bold text-slate-900">
+              <h3 id="listing-contact-dialog-title" className="text-lg font-bold text-ink">
                 {modalTitle}
               </h3>
-              <button ref={closeButtonRef} type="button" onClick={() => setModal(null)} className="grid h-11 w-11 shrink-0 place-items-center text-slate-400 hover:text-slate-700" aria-label={`${modalTitle} penceresini kapat`}><X aria-hidden="true" className="h-5 w-5" /></button>
+              <button ref={closeButtonRef} type="button" onClick={() => setModal(null)} className="grid h-11 w-11 shrink-0 place-items-center text-muted/70 hover:text-ink" aria-label={`${modalTitle} penceresini kapat`}><X aria-hidden="true" className="h-5 w-5" /></button>
             </div>
-            <p id="listing-contact-dialog-description" className="mb-4 text-xs text-slate-500">İlan: {listingTitle}</p>
+            <p id="listing-contact-dialog-description" className="mb-4 text-xs text-muted">İlan: {listingTitle}</p>
             <LeadForm
               type={modal}
               listingId={listingId}

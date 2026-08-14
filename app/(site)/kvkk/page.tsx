@@ -33,7 +33,7 @@ export default async function KvkkPage() {
   return (
     <div className="mx-auto max-w-3xl px-4 py-12">
       <TrackView />
-      <h1 className="font-display text-3xl font-bold text-brand-900">{title}</h1>
+      <h1 className="text-3xl font-bold text-brand-900">{title}</h1>
       <div className="gold-divider mt-3 mb-8" />
       <div className="cms-content" dangerouslySetInnerHTML={{ __html: sanitizeCmsHtml(content) }} />
     </div>

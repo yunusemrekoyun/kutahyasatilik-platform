@@ -95,7 +95,7 @@ export default function Header() {
     <header className="sticky top-0 z-40 border-b border-stone bg-paper/95 backdrop-blur-xl">
       <div className="mx-auto flex h-[72px] max-w-7xl items-center justify-between gap-5 px-4 sm:px-6">
         <Link href="/" className="shrink-0 leading-none" aria-label="Kütahya Satılık ana sayfa">
-          <span className="block font-display text-[22px] font-bold tracking-[-0.02em] text-brand-950">
+          <span className="block text-[22px] font-bold tracking-[-0.02em] text-brand-950">
             Kütahya<span className="text-gold-700">Satılık</span>
           </span>
           <span className="mt-1 hidden text-[9px] font-bold uppercase tracking-[0.2em] text-muted sm:block">

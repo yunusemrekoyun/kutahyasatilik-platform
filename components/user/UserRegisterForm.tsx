@@ -10,8 +10,8 @@ import {
 import { isValidTrPhone, TR_PHONE_ERROR } from "@/lib/validation";
 
 const inputCls =
-  "h-12 w-full rounded-[10px] border border-slate-300 bg-paper px-3.5 text-base text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/30";
-const labelCls = "mb-1.5 block text-sm font-semibold text-slate-700";
+  "h-12 w-full rounded-[10px] border border-stone bg-paper px-3.5 text-base text-ink outline-none transition placeholder:text-slate-400 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/30";
+const labelCls = "mb-1.5 block text-sm font-semibold text-ink";
 
 export default function UserRegisterForm() {
   const [status, setStatus] = useState<"idle" | "loading">("idle");
@@ -74,7 +74,7 @@ export default function UserRegisterForm() {
       >
         {status === "loading" ? "Hesap oluşturuluyor..." : "Kayıt Ol"}
       </button>
-      <p className="text-center text-sm text-slate-500">
+      <p className="text-center text-sm text-muted">
         Zaten hesabın var mı?{" "}
         <Link href="/giris" className="inline-flex min-h-11 items-center font-semibold text-brand-700 hover:underline">Giriş yap</Link>
       </p>

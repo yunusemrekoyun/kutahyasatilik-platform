@@ -21,7 +21,7 @@ export default async function Footer() {
     <footer className="mt-24 border-t border-white/10 bg-brand-950 text-brand-100">
       <div className="mx-auto grid max-w-7xl gap-12 px-5 py-14 sm:px-6 lg:grid-cols-12 lg:py-20">
         <div className="lg:col-span-5">
-          <p className="font-display text-3xl font-semibold tracking-tight text-white">Kütahya<span className="text-gold-400">Satılık</span></p>
+          <p className="text-3xl font-semibold tracking-tight text-white">Kütahya<span className="text-gold-400">Satılık</span></p>
           <p className="mt-5 max-w-md text-base leading-7 text-brand-200">
             Kütahya merkez ve ilçelerinde güncel portföy, bölgesel veri ve yerel danışmanlık tek yerde.
           </p>

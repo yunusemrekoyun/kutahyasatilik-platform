@@ -66,9 +66,9 @@ export default function SavedSearches() {
 
   if (loaded && items.length === 0) {
     return (
-      <div className="rounded-lg bg-slate-50 p-5 ring-1 ring-stone">
-        <p className="text-sm font-semibold text-slate-700">Kayıtlı aramalarınız</p>
-        <p className="mt-1 text-xs text-slate-500">
+      <div className="rounded-control bg-canvas p-5 ring-1 ring-stone">
+        <p className="text-sm font-semibold text-ink">Kayıtlı aramalarınız</p>
+        <p className="mt-1 text-xs text-muted">
           Henüz kayıtlı aramanız yok.{" "}
           <Link href="/alici-talebi" className="font-medium text-brand-700 hover:underline">
             Alıcı talebi
@@ -80,20 +80,20 @@ export default function SavedSearches() {
   }
 
   return (
-    <div className="rounded-lg bg-paper p-5 ring-1 ring-stone">
-      <p className="flex items-center gap-2 text-sm font-semibold text-slate-900">
+    <div className="rounded-control bg-paper p-5 ring-1 ring-stone">
+      <p className="flex items-center gap-2 text-sm font-semibold text-ink">
         <Search className="h-4 w-4 text-brand-600" /> Kayıtlı aramalarım
       </p>
-      <p className="mt-0.5 text-xs text-slate-500">Uygun yeni ilan geldiğinde bildirim alırsınız.</p>
-      <ul className="mt-3 divide-y divide-slate-100">
+      <p className="mt-0.5 text-xs text-muted">Uygun yeni ilan geldiğinde bildirim alırsınız.</p>
+      <ul className="mt-3 divide-y divide-stone">
         {(loaded ? items : []).map((s) => (
           <li key={s.id} className="flex items-center justify-between gap-3 py-2.5">
-            <span className="text-sm text-slate-700">{summary(s)}</span>
+            <span className="text-sm text-ink">{summary(s)}</span>
             <button
               type="button"
               onClick={() => remove(s.id)}
               aria-label="Kayıtlı aramayı kaldır"
-              className="inline-flex items-center gap-1 rounded-md px-2 py-1 text-xs font-medium text-red-600 hover:bg-red-50"
+              className="inline-flex items-center gap-1 rounded-control px-2 py-1 text-xs font-medium text-red-600 hover:bg-red-50"
             >
               <Trash2 className="h-3.5 w-3.5" /> Kaldır
             </button>

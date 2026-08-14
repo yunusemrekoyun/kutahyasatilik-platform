@@ -5,8 +5,8 @@ import { CheckCircle2, Lock } from "lucide-react";
 import { isValidTrPhone, TR_PHONE_ERROR } from "@/lib/validation";
 
 const inputCls =
-  "w-full h-12 rounded-[10px] border border-slate-300 bg-paper px-3.5 text-base text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/30";
-const labelCls = "mb-1.5 block text-sm font-semibold text-slate-700";
+  "w-full h-12 rounded-[10px] border border-stone bg-paper px-3.5 text-base text-ink outline-none transition placeholder:text-slate-400 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/30";
+const labelCls = "mb-1.5 block text-sm font-semibold text-ink";
 
 export default function AdRequestForm() {
   const [status, setStatus] = useState<"idle" | "loading" | "ok" | "error">("idle");
@@ -46,11 +46,11 @@ export default function AdRequestForm() {
 
   if (status === "ok") {
     return (
-      <div role="status" className="rounded-lg border border-green-200 bg-green-50 p-6 text-center">
+      <div role="status" className="rounded-control border border-green-200 bg-green-50 p-6 text-center">
         <span className="mx-auto grid h-12 w-12 place-items-center rounded-full bg-paper text-green-600 ring-1 ring-green-200">
           <CheckCircle2 aria-hidden="true" className="h-7 w-7" />
         </span>
-        <h3 className="mt-3 font-display text-lg font-bold text-green-800">Talebiniz alındı</h3>
+        <h3 className="mt-3 text-lg font-bold text-green-800">Talebiniz alındı</h3>
         <p className="mt-1 text-sm text-green-700">Reklam ekibimiz en kısa sürede sizinle iletişime geçecek.</p>
       </div>
     );
@@ -94,7 +94,7 @@ export default function AdRequestForm() {
       >
         {status === "loading" ? "Gönderiliyor..." : "Talebi Gönder"}
       </button>
-      <p className="flex items-center justify-center gap-1.5 text-center text-[13px] text-slate-500">
+      <p className="flex items-center justify-center gap-1.5 text-center text-[13px] text-muted">
         <Lock aria-hidden="true" className="h-3.5 w-3.5" /> Bilgileriniz yalnızca sizinle iletişim için kullanılır.
       </p>
     </form>

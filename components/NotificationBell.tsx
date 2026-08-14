@@ -112,7 +112,7 @@ export default function NotificationBell() {
         aria-label={unread > 0 ? `Bildirimler, ${unread} okunmamış` : "Bildirimler"}
         aria-controls="notification-panel"
         aria-expanded={open}
-        className="relative grid h-11 w-11 place-items-center rounded-lg text-slate-600 transition hover:bg-slate-100"
+        className="relative grid h-11 w-11 place-items-center rounded-control text-muted transition hover:bg-canvas"
       >
         <Bell aria-hidden="true" className="h-5 w-5" />
         {unread > 0 && (
@@ -123,9 +123,9 @@ export default function NotificationBell() {
       </button>
 
       {open && (
-        <div id="notification-panel" role="region" aria-label="Bildirim listesi" className="absolute right-0 z-50 mt-2 w-80 max-w-[88vw] overflow-hidden rounded-lg border border-stone bg-paper shadow-[0_12px_40px_-12px_rgba(15,23,42,0.35)]">
-          <div className="flex items-center justify-between border-b border-slate-100 px-4 py-3">
-            <b className="text-sm text-slate-900">Bildirimler</b>
+        <div id="notification-panel" role="region" aria-label="Bildirim listesi" className="absolute right-0 z-50 mt-2 w-80 max-w-[88vw] overflow-hidden rounded-control border border-stone bg-paper shadow-[0_12px_40px_-12px_rgba(15,23,42,0.35)]">
+          <div className="flex items-center justify-between border-b border-stone px-4 py-3">
+            <b className="text-sm text-ink">Bildirimler</b>
             {unread > 0 && (
               <button type="button" onClick={markAll} className="inline-flex min-h-11 items-center gap-1 text-xs font-medium text-brand-700 hover:underline">
                 <Check aria-hidden="true" className="h-3.5 w-3.5" /> Tümünü okundu
@@ -134,7 +134,7 @@ export default function NotificationBell() {
           </div>
           <div className="max-h-96 overflow-y-auto">
             {items.length === 0 ? (
-              <p className="px-4 py-8 text-center text-sm text-slate-400">Henüz bildirim yok.</p>
+              <p className="px-4 py-8 text-center text-sm text-muted/70">Henüz bildirim yok.</p>
             ) : (
               items.map((it) => (
                 <button
@@ -142,13 +142,13 @@ export default function NotificationBell() {
                   key={it.id}
                   onClick={() => openItem(it)}
                   aria-label={`${it.title}${it.isRead ? ", okundu" : ", okunmamış"}${it.body ? `. ${it.body}` : ""}`}
-                  className={`flex w-full items-start gap-2.5 border-b border-slate-50 px-4 py-3 text-left transition hover:bg-slate-50 ${it.isRead ? "opacity-60" : ""}`}
+                  className={`flex w-full items-start gap-2.5 border-b border-stone px-4 py-3 text-left transition hover:bg-canvas ${it.isRead ? "opacity-60" : ""}`}
                 >
                   <span aria-hidden="true" className={`mt-1.5 h-2 w-2 shrink-0 rounded-full ${it.isRead ? "bg-slate-300" : "bg-gold-500"}`} />
                   <span className="min-w-0 flex-1">
-                    <span className="block text-sm font-semibold text-slate-900">{it.title}</span>
-                    {it.body && <span className="mt-0.5 block truncate text-xs text-slate-500">{it.body}</span>}
-                    <span className="mt-0.5 block text-[11px] text-slate-400">{timeAgo(it.createdAt)}</span>
+                    <span className="block text-sm font-semibold text-ink">{it.title}</span>
+                    {it.body && <span className="mt-0.5 block truncate text-xs text-muted">{it.body}</span>}
+                    <span className="mt-0.5 block text-[11px] text-muted/70">{timeAgo(it.createdAt)}</span>
                   </span>
                 </button>
               ))

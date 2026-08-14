@@ -38,7 +38,7 @@ export default async function ContentPage({ params }: { params: Promise<{ slug: 
   return (
     <div className="mx-auto max-w-3xl px-4 py-10">
       <TrackView />
-      <h1 className="font-display text-3xl font-bold text-brand-900 sm:text-4xl">{page.title}</h1>
+      <h1 className="text-3xl font-bold text-brand-900 sm:text-4xl">{page.title}</h1>
       <div className="gold-divider mt-3 mb-7" />
       <div className="cms-content" dangerouslySetInnerHTML={{ __html: sanitizeCmsHtml(page.content) }} />
     </div>

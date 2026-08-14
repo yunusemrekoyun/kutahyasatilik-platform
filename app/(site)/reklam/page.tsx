@@ -12,16 +12,16 @@ export default function AdRequestPage() {
   return (
     <div className="mx-auto max-w-2xl px-4 py-14">
       <div className="text-center">
-        <span className="mx-auto inline-grid h-12 w-12 place-items-center rounded-lg bg-brand-700 text-white">
+        <span className="mx-auto inline-grid h-12 w-12 place-items-center rounded-control bg-brand-700 text-white">
           <Megaphone className="h-6 w-6" />
         </span>
-        <h1 className="mt-4 font-display text-3xl font-bold text-brand-900">Reklam Vermek İstiyorum</h1>
-        <p className="mx-auto mt-2 max-w-lg text-slate-600">
+        <h1 className="mt-4 text-3xl font-bold text-brand-900">Reklam Vermek İstiyorum</h1>
+        <p className="mx-auto mt-2 max-w-lg text-muted">
           Bölgenin en aktif emlak platformunda markanızı tanıtın. Talebinizi bırakın, reklam
           seçeneklerini ve fiyatları sizinle paylaşalım.
         </p>
       </div>
-      <div className="mt-8 rounded-lg border border-stone bg-paper p-6 sm:p-8">
+      <div className="mt-8 rounded-control border border-stone bg-paper p-6 sm:p-8">
         <AdRequestForm />
       </div>
     </div>

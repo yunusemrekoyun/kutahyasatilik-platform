@@ -24,7 +24,7 @@ export default async function SiteLayout({ children }: { children: React.ReactNo
     <SiteContactProvider contact={contact}>
       <a
         href="#main-content"
-        className="fixed left-4 top-4 z-[120] -translate-y-24 rounded-lg bg-paper px-4 py-3 font-semibold text-brand-950 shadow-prestige transition-transform focus:translate-y-0"
+        className="fixed left-4 top-4 z-[120] -translate-y-24 rounded-control bg-paper px-4 py-3 font-semibold text-brand-950 shadow-prestige transition-transform focus:translate-y-0"
       >
         Ana içeriğe geç
       </a>

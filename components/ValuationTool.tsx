@@ -85,18 +85,18 @@ export default function ValuationTool({
     }
   }
 
-  const labelCls = "mb-1.5 block text-sm font-semibold text-slate-700";
+  const labelCls = "mb-1.5 block text-sm font-semibold text-ink";
   const inputCls =
-    "w-full h-12 rounded-[10px] border border-slate-300 bg-paper px-3.5 text-base text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/30";
+    "w-full h-12 rounded-[10px] border border-stone bg-paper px-3.5 text-base text-ink outline-none transition placeholder:text-slate-400 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/30";
 
   return (
-    <div className="overflow-hidden rounded-lg bg-paper shadow-prestige ring-1 ring-stone">
+    <div className="overflow-hidden rounded-control bg-paper shadow-prestige ring-1 ring-stone">
       <div className="grid md:grid-cols-2">
         {/* SOL: Form */}
         <div className="p-6 sm:p-8">
           <div className="flex items-center gap-2.5">
             <BarChart3 aria-hidden="true" className="h-6 w-6 text-brand-700" strokeWidth={1.7} />
-            <h2 className="font-display text-lg font-bold text-slate-900">Mülk Bilgileri</h2>
+            <h2 className="text-lg font-bold text-ink">Mülk Bilgileri</h2>
           </div>
 
           <div className="mt-5 space-y-4">
@@ -169,7 +169,7 @@ export default function ValuationTool({
             )}
           </div>
 
-          <p className="mt-4 text-xs leading-relaxed text-slate-400">
+          <p className="mt-4 text-xs leading-relaxed text-muted/70">
             * Tahmin; ilçe ortalama m² değerleri ve girilen mülk özelliklerine dayalı
             otomatik bir ön değerlendirmedir; resmi ekspertiz değildir. Kesin değer için ücretsiz ekspertiz talep edin.
           </p>
@@ -198,14 +198,14 @@ export default function ValuationTool({
               <p className="text-sm font-medium uppercase tracking-wider text-gold-300">
                 Tahmini Değer Aralığı
               </p>
-              <p className="mt-2 font-display text-2xl font-bold sm:text-3xl">
+              <p className="mt-2 text-2xl font-bold sm:text-3xl">
                 {formatPrice(result.low)}
               </p>
               <p className="text-sm text-brand-200">—</p>
-              <p className="font-display text-2xl font-bold sm:text-3xl">
+              <p className="text-2xl font-bold sm:text-3xl">
                 {formatPrice(result.high)}
               </p>
-              <div className="mt-4 inline-flex items-center gap-2 rounded-lg bg-paper/10 px-3 py-1.5 text-sm ring-1 ring-white/20">
+              <div className="mt-4 inline-flex items-center gap-2 rounded-control bg-paper/10 px-3 py-1.5 text-sm ring-1 ring-white/20">
                 Yaklaşık <strong>{formatPrice(result.mid)}</strong>
               </div>
               <p className="mt-3 text-xs text-brand-200">
@@ -221,7 +221,7 @@ export default function ValuationTool({
                   Ücretsiz Detaylı Ekspertiz İste
                 </button>
               ) : sessionLoading ? (
-                <div aria-busy="true" className="skeleton mt-6 h-28 rounded-xl" />
+                <div aria-busy="true" className="skeleton mt-6 h-28 rounded-card" />
               ) : !isLoggedIn ? (
                 <div className="mt-6">
                   <LoginRequiredNotice text="Ekspertiz talebi için giriş yapın" />

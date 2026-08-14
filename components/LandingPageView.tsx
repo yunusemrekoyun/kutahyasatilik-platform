@@ -28,7 +28,7 @@ export default async function LandingPageView({
         eyebrow="Kütahya portföyü"
         title={heading}
         intro={intro}
-        actions={<><Link href="#ilanlar" className="rounded-lg bg-brand-700 px-5 py-3 font-semibold text-white hover:bg-brand-800">İlanları gör ({listings.length})</Link><Link href="/satici" className="rounded-lg border border-brand-200 bg-paper px-5 py-3 font-semibold text-brand-800 hover:bg-brand-50">Mülkümü sat</Link></>}
+        actions={<><Link href="#ilanlar" className="rounded-control bg-brand-700 px-5 py-3 font-semibold text-white hover:bg-brand-800">İlanları gör ({listings.length})</Link><Link href="/satici" className="rounded-control border border-brand-200 bg-paper px-5 py-3 font-semibold text-brand-800 hover:bg-brand-50">Mülkümü sat</Link></>}
       />
 
       <div className="mx-auto max-w-7xl px-4 py-10">
@@ -53,8 +53,8 @@ export default async function LandingPageView({
               ))}
             </div>
           ) : (
-            <div className="rounded-lg bg-paper p-10 text-center ring-1 ring-stone">
-              <p className="text-slate-600">Bu kategoride şu an aktif ilan bulunmuyor. Aşağıdan bizimle iletişime geçin, size uygun seçenekleri sunalım.</p>
+            <div className="rounded-control bg-paper p-10 text-center ring-1 ring-stone">
+              <p className="text-muted">Bu kategoride şu an aktif ilan bulunmuyor. Aşağıdan bizimle iletişime geçin, size uygun seçenekleri sunalım.</p>
             </div>
           )}
         </section>

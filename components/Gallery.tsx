@@ -107,7 +107,7 @@ export default function Gallery({
             </button>
           ))}
         </div>
-        <span aria-live="polite" aria-atomic="true" className="pointer-events-none absolute right-3 top-3 rounded-lg bg-brand-950/70 px-2.5 py-1 text-xs font-medium text-white backdrop-blur">
+        <span aria-live="polite" aria-atomic="true" className="pointer-events-none absolute right-3 top-3 rounded-control bg-brand-950/70 px-2.5 py-1 text-xs font-medium text-white backdrop-blur">
           {idx + 1} / {imgs.length}
         </span>
         {imgs.length > 1 && (
@@ -124,7 +124,7 @@ export default function Gallery({
         <button
           type="button"
           onClick={() => openAt(0)}
-          className="group relative h-full w-full overflow-hidden bg-slate-100 md:col-span-3 md:row-span-3"
+          className="group relative h-full w-full overflow-hidden bg-canvas md:col-span-3 md:row-span-3"
           aria-label={`${title} fotoğraf galerisini aç`}
         >
           <Image
@@ -135,7 +135,7 @@ export default function Gallery({
             className="object-cover transition duration-500 group-hover:scale-[1.02]"
             priority
           />
-          <span className="absolute bottom-3 right-3 inline-flex items-center gap-1.5 rounded-lg bg-brand-950/70 px-3 py-1.5 text-xs font-medium text-white backdrop-blur">
+          <span className="absolute bottom-3 right-3 inline-flex items-center gap-1.5 rounded-control bg-brand-950/70 px-3 py-1.5 text-xs font-medium text-white backdrop-blur">
             <Expand aria-hidden="true" className="h-3.5 w-3.5" /> {imgs.length} fotoğraf
           </span>
         </button>
@@ -148,7 +148,7 @@ export default function Gallery({
               type="button"
               key={thumbIdx}
               onClick={() => openAt(thumbIdx)}
-              className="group relative hidden h-full w-full overflow-hidden bg-slate-100 md:block"
+              className="group relative hidden h-full w-full overflow-hidden bg-canvas md:block"
               aria-label={`${thumbIdx + 1}. fotoğrafı aç`}
             >
               <Image
@@ -204,7 +204,7 @@ export default function Gallery({
                   onClick={() => setActive(i)}
                   aria-label={`${i + 1}. fotoğrafı göster`}
                   aria-current={i === idx ? "true" : undefined}
-                  className={`relative h-16 w-20 shrink-0 overflow-hidden rounded-md ring-2 ${i === idx ? "ring-gold-500" : "ring-transparent opacity-60 hover:opacity-100"}`}
+                  className={`relative h-16 w-20 shrink-0 overflow-hidden rounded-control ring-2 ${i === idx ? "ring-gold-500" : "ring-transparent opacity-60 hover:opacity-100"}`}
                 >
                   <Image src={thumbUrl(img.url)} alt="" fill sizes="80px" className="object-cover" />
                 </button>

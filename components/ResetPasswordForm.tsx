@@ -10,7 +10,7 @@ import {
 } from "@/lib/passwordPolicy";
 
 const inputCls =
-  "h-12 w-full rounded-[10px] border border-slate-300 bg-paper px-3.5 text-base text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/30";
+  "h-12 w-full rounded-[10px] border border-stone bg-paper px-3.5 text-base text-ink outline-none transition placeholder:text-slate-400 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/30";
 
 export default function ResetPasswordForm() {
   const params = useSearchParams();
@@ -67,11 +67,11 @@ export default function ResetPasswordForm() {
   return (
     <form onSubmit={handleSubmit} aria-busy={status === "loading"} aria-describedby={error ? "reset-password-error" : undefined} className="space-y-4">
       <div>
-        <label htmlFor="rp-pw" className="mb-1.5 block text-sm font-semibold text-slate-700">Yeni şifre</label>
+        <label htmlFor="rp-pw" className="mb-1.5 block text-sm font-semibold text-ink">Yeni şifre</label>
         <input id="rp-pw" name="password" type="password" required minLength={PASSWORD_MIN_LENGTH} maxLength={PASSWORD_MAX_LENGTH} autoComplete="new-password" placeholder={PASSWORD_REQUIREMENT} className={inputCls} />
       </div>
       <div>
-        <label htmlFor="rp-pw2" className="mb-1.5 block text-sm font-semibold text-slate-700">Yeni şifre (tekrar)</label>
+        <label htmlFor="rp-pw2" className="mb-1.5 block text-sm font-semibold text-ink">Yeni şifre (tekrar)</label>
         <input id="rp-pw2" name="password2" type="password" required minLength={PASSWORD_MIN_LENGTH} maxLength={PASSWORD_MAX_LENGTH} autoComplete="new-password" placeholder="••••••••••" className={inputCls} />
       </div>
       {error && <p id="reset-password-error" role="alert" className="rounded-[10px] bg-red-50 px-3.5 py-2.5 text-sm font-medium text-red-700 ring-1 ring-red-200">{error}</p>}

@@ -33,11 +33,11 @@ export default function ShareButtons({ title }: { title: string }) {
     }
   }
 
-  const btn = "grid h-11 w-11 place-items-center rounded-full bg-slate-100 text-slate-600 hover:bg-slate-200";
+  const btn = "grid h-11 w-11 place-items-center rounded-full bg-canvas text-muted hover:bg-stone";
 
   return (
     <div className="flex items-center gap-2">
-      <span className="text-xs font-medium text-slate-500">Paylaş:</span>
+      <span className="text-xs font-medium text-muted">Paylaş:</span>
       <button type="button" onClick={shareWhatsApp} aria-label="WhatsApp'ta paylaş" title="WhatsApp" className="grid h-11 w-11 place-items-center rounded-full bg-green-100 text-green-700 hover:bg-green-200">
         <MessageCircle aria-hidden="true" className="h-4 w-4" />
       </button>

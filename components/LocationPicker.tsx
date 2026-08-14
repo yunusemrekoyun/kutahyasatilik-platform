@@ -7,14 +7,14 @@ import { KUTAHYA_CENTER } from "@/lib/constants";
 const Inner = dynamic(() => import("./LocationPickerInner"), {
   ssr: false,
   loading: () => (
-    <div className="grid h-full w-full place-items-center bg-slate-100 text-sm text-slate-400">
+    <div className="grid h-full w-full place-items-center bg-canvas text-sm text-muted/70">
       Harita yükleniyor...
     </div>
   ),
 });
 
 const inputCls =
-  "w-full rounded-lg border border-slate-300 bg-paper px-3.5 py-2.5 text-[15px] text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/30";
+  "w-full rounded-control border border-stone bg-paper px-3.5 py-2.5 text-[15px] text-ink outline-none transition placeholder:text-slate-400 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/30";
 
 export default function LocationPicker({
   initialLat = null,
@@ -98,20 +98,20 @@ export default function LocationPicker({
           onClick={search}
           disabled={searching}
           aria-busy={searching}
-          className="min-h-11 shrink-0 rounded-lg bg-brand-700 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-brand-800 disabled:opacity-60"
+          className="min-h-11 shrink-0 rounded-control bg-brand-700 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-brand-800 disabled:opacity-60"
         >
           {searching ? "Aranıyor..." : "Ara"}
         </button>
       </div>
       {err && <p id="location-search-error" role="alert" className="text-xs text-red-600">{err}</p>}
 
-      <div role="region" aria-label="Mülk konumu haritası" className="h-72 overflow-hidden rounded-lg ring-1 ring-stone">
+      <div role="region" aria-label="Mülk konumu haritası" className="h-72 overflow-hidden rounded-control ring-1 ring-stone">
         <Inner lat={lat} lng={lng} center={center} zoom={zoom} onPick={pick} />
       </div>
 
       <div className="flex flex-wrap items-center gap-3 text-sm">
-        <span id="location-search-help" className="text-slate-500">Adres arayın; isterseniz haritaya tıklayın veya pini sürükleyin.</span>
-        <code aria-live="polite" className="rounded bg-slate-900 px-2 py-1 text-xs text-emerald-300">
+        <span id="location-search-help" className="text-muted">Adres arayın; isterseniz haritaya tıklayın veya pini sürükleyin.</span>
+        <code aria-live="polite" className="rounded bg-brand-950 px-2 py-1 text-xs text-emerald-300">
           {lat != null && lng != null ? `${lat.toFixed(5)}, ${lng.toFixed(5)}` : "lat: — , lng: —"}
         </code>
         {lat != null && (
@@ -121,7 +121,7 @@ export default function LocationPicker({
               setLat(null);
               setLng(null);
             }}
-            className="min-h-11 px-1 text-xs text-slate-500 underline hover:text-slate-700"
+            className="min-h-11 px-1 text-xs text-muted underline hover:text-ink"
           >
             Konumu temizle
           </button>
