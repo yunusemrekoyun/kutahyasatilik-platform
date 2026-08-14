@@ -24,6 +24,7 @@
     "seed:bulk": "tsx prisma/seed-bulk.ts",
     "seed:media": "tsx prisma/seed-media.ts",
     "seed:categories": "tsx prisma/seed-categories.ts",
+    "seed:demo": "tsx prisma/seed-demo-catalog.ts",
     "prune:analytics": "tsx prisma/rollup-analytics.ts",
     "cleanup:uploads": "tsx prisma/cleanup-orphan-uploads.ts",
     "backfill:agencies": "node scripts/backfill-agencies.mjs",
