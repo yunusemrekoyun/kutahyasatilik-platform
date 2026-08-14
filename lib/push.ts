@@ -9,6 +9,7 @@ import {
   nextPushAttemptAt,
   nextPushReceiptCheckAt,
   pushFailureAction,
+  staleQueueCutoff,
 } from "./pushPolicy";
 
 const expo = new Expo({ accessToken: process.env.EXPO_ACCESS_TOKEN || undefined });
@@ -22,6 +23,17 @@ export async function dispatchPendingPushes(): Promise<{ sent: number; retried: 
     where: { status: "processing", nextAttemptAt: { lte: now } },
     data: { status: "pending", claimId: null },
   });
+
+  // Bayatlamış kuyruk temizliği — GÖNDERİMDEN ÖNCE. PUSH_ENABLED uzun süre
+  // kapalı kaldığı için outbox birikti; filtresiz açılış aylar öncesine ait
+  // bildirimleri kullanıcılara gönderirdi (bkz. pushPolicy.PUSH_MAX_QUEUE_AGE_MS).
+  const stale = staleQueueCutoff(now.getTime());
+  if (stale) {
+    await prisma.pushDelivery.updateMany({
+      where: { status: "pending", createdAt: { lt: stale } },
+      data: { status: "failed", claimId: null, error: "StaleQueue" },
+    });
+  }
   const candidates = await prisma.pushDelivery.findMany({
     where: { status: "pending", nextAttemptAt: { lte: new Date() }, pushToken: { active: true } },
     orderBy: { createdAt: "asc" },
@@ -66,7 +78,15 @@ export async function dispatchPendingPushes(): Promise<{ sent: number; retried: 
 
   let tickets: ExpoPushTicket[];
   try {
-    tickets = await expo.sendPushNotificationsAsync(messages);
+    // Expo tek istekte en çok 100 mesaj alır ve buradaki `take: 100` TAM limitte
+    // duruyordu — sınır bir gün düşerse ya da SDK katılaşırsa sessizce patlardı.
+    // chunkPushNotifications sınırı SDK'nın kendisine bırakıyor.
+    // Bilet sırası mesaj sırasıyla aynı kalmalı: chunk'lar sırayla işlenip
+    // biletler tek diziye ekleniyor.
+    tickets = [];
+    for (const chunk of expo.chunkPushNotifications(messages)) {
+      tickets.push(...(await expo.sendPushNotificationsAsync(chunk)));
+    }
   } catch (error) {
     const message = error instanceof Error ? error.message.slice(0, 500) : "Expo push request failed";
     await Promise.all(valid.map((d) => {
@@ -153,7 +173,14 @@ export async function checkPushReceipts(): Promise<{ delivered: number; retried:
   }
 
   const ids = rows.map((r) => r.ticketId).filter((id): id is string => !!id);
-  const receipts = await expo.getPushNotificationReceiptsAsync(ids);
+  // KRİTİK: `take: 1000` ile toplanan biletler tek çağrıda gönderiliyordu ama
+  // Expo receipt uç noktası istek başına 300 bilet alıyor. Bayrak açılıp gerçek
+  // hacim oluştuğunda bu çağrı throw ediyor, dispatch route'u 500 dönüyordu.
+  // chunkPushNotificationReceiptIds repoda vardı ve hiç kullanılmıyordu.
+  const receipts: Record<string, Awaited<ReturnType<typeof expo.getPushNotificationReceiptsAsync>>[string]> = {};
+  for (const chunk of expo.chunkPushNotificationReceiptIds(ids)) {
+    Object.assign(receipts, await expo.getPushNotificationReceiptsAsync(chunk));
+  }
   let delivered = 0;
   let retried = 0;
   let failed = expired.count;
