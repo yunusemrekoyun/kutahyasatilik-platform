@@ -6,10 +6,15 @@ import { verifyUserCredentials } from "@/lib/userAuth";
 import { verifyAgentCredentials } from "@/lib/agentAuth";
 import { verifyCredentials } from "@/lib/auth";
 
-// Mobil TEK login. Backend 3 siloyu sırayla dener (user → agent → admin) ve eşleşen
-// ilk silonun token'ını döner. Token silo-özeldir (çapraz-silo fix korunur); cookie
-// SET ETMEZ — mobil token'ı Bearer olarak saklar.
-// Web'in kendi cookie tabanlı login route'ları (/api/user|emlakci|admin/login) aynen durur.
+// Mobil TEK login. Backend 3 siloyu sırayla dener ve eşleşen ilk silonun token'ını
+// döner. Token silo-özeldir (çapraz-silo fix korunur); cookie SET ETMEZ — mobil
+// token'ı Bearer olarak saklar.
+//
+// SIRA WEB İLE AYNI: admin → emlakçı → kullanıcı (bkz. /api/auth/login).
+// Kayıt akışlarının hiçbiri çapraz-silo e-posta kontrolü yapmıyor, yani aynı e-posta
+// üç siloda birden bulunabilir. Sıra platformlar arasında ayrıştığı sürece aynı kimlik
+// web'de admin, mobilde user olarak giriyordu. Yetki yükseltme riski yok: her silo
+// kendi bcrypt hash'iyle doğrulanır, eşleşmeyen silo sessizce atlanır.
 
 const schema = z.object({
   identifier: z.string().min(1, "E-posta gerekli").max(160),
@@ -40,14 +45,11 @@ export async function POST(req: NextRequest) {
   const { identifier, password } = data;
 
   try {
-    // 1) Standart kullanıcı (en yaygın)
-    const user = await verifyUserCredentials(identifier, password);
-    if (user) {
-      const token = await signSessionToken(
-        { userId: user.id, email: user.email, name: user.name },
-        "30d"
-      );
-      return NextResponse.json({ ok: true, token, role: "user" });
+    // 1) Admin
+    const admin = await verifyCredentials(identifier, password);
+    if (admin) {
+      const token = await signSessionToken({ adminId: admin.id, email: admin.email }, "7d");
+      return NextResponse.json({ ok: true, token, role: "admin" });
     }
 
     // 2) Emlakçı — yalnız onaylıysa token verilir
@@ -66,11 +68,14 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ ok: true, token, role: "agent" });
     }
 
-    // 3) Admin
-    const admin = await verifyCredentials(identifier, password);
-    if (admin) {
-      const token = await signSessionToken({ adminId: admin.id, email: admin.email }, "7d");
-      return NextResponse.json({ ok: true, token, role: "admin" });
+    // 3) Standart kullanıcı
+    const user = await verifyUserCredentials(identifier, password);
+    if (user) {
+      const token = await signSessionToken(
+        { userId: user.id, email: user.email, name: user.name },
+        "30d"
+      );
+      return NextResponse.json({ ok: true, token, role: "user" });
     }
 
     return NextResponse.json({ ok: false, error: "E-posta veya şifre hatalı." }, { status: 401 });
