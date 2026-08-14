@@ -117,7 +117,8 @@ export default function AgentRegisterForm() {
         )}
       </button>
       <p className="text-center text-xs text-muted">
-        Başvurunuz admin onayından sonra aktifleşir. Zaten hesabınız var mı?{" "}
+        Başvurunuz incelenir; uygun bulunursa size paket teklifi gönderilir ve hesabınız
+        teklifi kabul ettikten sonra açılır. Zaten hesabınız var mı?{" "}
         <Link href="/giris" className="inline-flex min-h-11 items-center font-semibold text-brand-700 hover:underline">
           Giriş yapın
         </Link>

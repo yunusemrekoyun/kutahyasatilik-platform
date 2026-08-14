@@ -17,9 +17,9 @@ import { getPublicListingOwner } from "@/lib/publicDirectory";
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
-  title: "Tüm İlanlar - Kütahya Satılık Daire, Arsa, Villa",
+  title: "Tüm İlanlar - Kütahya Satılık Emlak, Vasıta, Teknoloji",
   description:
-    "Kütahya ve ilçelerinde güncel satılık daire, arsa, villa ve yatırımlık tarla ilanları. İlçe, fiyat ve mülk türüne göre filtreleyin.",
+    "Kütahya ve ilçelerinde güncel satılık ilanlar: daire, arsa, villa, otomobil ve teknoloji ürünleri. Kategori, ilçe ve fiyata göre filtreleyin.",
   alternates: { canonical: "/ilanlar" },
 };
 

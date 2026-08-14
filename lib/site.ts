@@ -4,7 +4,9 @@
 
 export const SITE = {
   name: "Kütahya Satılık",
-  brand: "Kütahya'nın Dijital Emlak Ofisi",
+  // K8: ürün genel ilan sitesi. "Emlak Ofisi" ifadesi vasıta ve teknoloji
+  // ilanlarıyla çelişiyordu. Admin > Ayarlar bunu Setting ile ezebilir.
+  brand: "Kütahya'nın Yerel İlan Platformu",
   domain: "kutahyasatilik.com",
   url: process.env.NEXT_PUBLIC_SITE_URL || "https://kutahyasatilik.com",
   // İletişim VARSAYILANLARI (env ile). Asıl kaynak admin > Ayarlar (Setting) —
@@ -20,7 +22,7 @@ export const SITE = {
   gaId: process.env.NEXT_PUBLIC_GA_ID || "", // örn: G-XXXXXXXXX
   adsConversionLabel: process.env.NEXT_PUBLIC_ADS_CONVERSION_LABEL || "",
   description:
-    "Kütahya'da satılık daire, arsa, villa ve yatırımlık tarla. Kütahya'nın dijital emlak ofisi — telefon, WhatsApp ve randevu ile hızlı iletişim.",
+    "Kütahya'da satılık daire, arsa, villa, otomobil ve teknoloji ürünleri. Yerel ilan platformu — telefon, WhatsApp ve mesajla hızlı iletişim.",
 };
 
 // Numara verilmezse undefined döner → çağıran taraf butonu gizler (sahte link olmaz).

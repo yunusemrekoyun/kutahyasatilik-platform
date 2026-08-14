@@ -73,7 +73,7 @@ export default async function Home() {
         <div className="relative mx-auto grid max-w-7xl items-stretch px-5 sm:px-6 lg:grid-cols-12">
           <div className="flex flex-col justify-center py-14 sm:py-20 lg:col-span-6 lg:pr-14 lg:py-24">
             <p className="eyebrow">{t("home_hero_badge", SITE.brand)}</p>
-            <h1 className="mt-5 max-w-2xl font-display text-[42px] font-semibold leading-[1.02] tracking-[-0.035em] text-brand-950 sm:text-6xl">
+            <h1 className="mt-4 max-w-2xl text-3xl font-bold leading-tight tracking-tight text-ink sm:text-4xl lg:text-5xl">
               {heroTitle} <span className="italic text-brand-600">{heroHighlight}</span>
             </h1>
             <p className="mt-6 max-w-xl text-base leading-7 text-muted sm:text-lg sm:leading-8">{heroSubtitle}</p>
@@ -106,7 +106,7 @@ export default async function Home() {
             <div className="absolute inset-0 bg-gradient-to-t from-brand-950/65 via-transparent to-transparent" />
             <div className="absolute inset-x-0 bottom-0 p-6 text-white sm:p-8">
               <p className="eyebrow !text-gold-300">Yerel portföy</p>
-              <p className="mt-2 max-w-md font-display text-2xl font-semibold leading-tight">Bir ilan değil, doğru bölge ve doğru karar.</p>
+              <p className="mt-2 max-w-md text-xl font-bold leading-tight">Bir ilan değil, doğru bölge ve doğru karar.</p>
             </div>
           </div>
         </div>
@@ -121,18 +121,18 @@ export default async function Home() {
             [marketplaceStats.activeDistricts, "Portföylü ilçe"],
           ].map(([value, label]) => (
             <div key={label} className="px-4 py-7 sm:px-8">
-              <p className="font-display text-3xl font-semibold tabular-nums text-brand-950">{value}</p>
+              <p className="text-2xl font-bold tabular-nums text-ink sm:text-3xl">{value}</p>
               <p className="mt-1 text-sm text-muted">{label}</p>
             </div>
           ))}
         </div>
       </section>
 
-      <section className="mx-auto max-w-7xl px-5 py-16 sm:px-6 sm:py-24">
+      <section className="mx-auto max-w-7xl px-5 py-10 sm:px-6 sm:py-14">
         <div className="grid gap-10 lg:grid-cols-12">
           <div className="lg:col-span-4">
             <p className="eyebrow">Kategorileri keşfet</p>
-            <h2 className="mt-3 font-display text-3xl font-semibold tracking-tight text-brand-950 sm:text-4xl">Aradığınıza doğrudan ulaşın.</h2>
+            <h2 className="mt-2 text-2xl font-bold tracking-tight text-ink sm:text-3xl">Aradığınıza doğrudan ulaşın.</h2>
             <p className="mt-4 max-w-md leading-7 text-muted">Kütahya&apos;daki ilanları kategorilere ayırdık; filtre kalabalığı olmadan başlayın.</p>
           </div>
           <div className="border-t border-stone lg:col-span-8">
@@ -140,7 +140,7 @@ export default async function Home() {
               const categoryCover = categoryCoverByType.get(category.propertyType);
               return (
                 <Link key={category.slug} href={`/${category.slug}`} className="group grid grid-cols-[2rem_4.5rem_1fr_auto] items-center gap-3 border-b border-stone py-3 sm:grid-cols-[2.5rem_6rem_1fr_auto] sm:gap-4 sm:py-4">
-                  <span className="font-display text-sm tabular-nums text-gold-700">0{index + 1}</span>
+                  <span className="text-sm font-semibold tabular-nums text-gold-700">0{index + 1}</span>
                   <span className="ceramic-grid relative block aspect-[4/3] overflow-hidden border border-stone bg-brand-50">
                     {categoryCover && (
                       // eslint-disable-next-line @next/next/no-img-element
@@ -148,8 +148,8 @@ export default async function Home() {
                     )}
                   </span>
                   <span>
-                    <span className="block font-display text-base font-semibold text-ink group-hover:text-brand-700 sm:text-xl">{category.title}</span>
-                    <span className="mt-1 block text-xs font-medium tabular-nums text-muted">{marketplaceStats.categoryCounts[category.propertyType] ?? 0} güncel ilan</span>
+                    <span className="block text-base font-semibold text-ink group-hover:text-brand-700 sm:text-lg">{category.title}</span>
+                    <span className="mt-1 block text-xs font-medium tabular-nums text-muted">{marketplaceStats.subTypeCounts[category.propertyType] ?? 0} güncel ilan</span>
                   </span>
                   <ArrowRight className="h-5 w-5 text-muted transition group-hover:translate-x-1 group-hover:text-brand-700" />
                 </Link>
@@ -164,16 +164,16 @@ export default async function Home() {
                 href={`/ilanlar?kategori=${category.key}`}
                 className="group grid grid-cols-[2rem_4.5rem_1fr_auto] items-center gap-3 border-b border-stone py-3 sm:grid-cols-[2.5rem_6rem_1fr_auto] sm:gap-4 sm:py-4"
               >
-                <span className="font-display text-sm tabular-nums text-gold-700">
+                <span className="text-sm font-semibold tabular-nums text-gold-700">
                   0{LANDING_PAGES.length + index + 1}
                 </span>
                 <span className="ceramic-grid relative block aspect-[4/3] overflow-hidden border border-stone bg-brand-50" />
                 <span>
-                  <span className="block font-display text-base font-semibold text-ink group-hover:text-brand-700 sm:text-xl">
+                  <span className="block text-base font-semibold text-ink group-hover:text-brand-700 sm:text-lg">
                     {category.label}
                   </span>
-                  <span className="mt-1 block text-xs font-medium text-muted">
-                    {category.subTypes.map((s) => s.label).join(" · ")}
+                  <span className="mt-1 block text-xs font-medium tabular-nums text-muted">
+                    {marketplaceStats.categoryCounts[category.key] ?? 0} güncel ilan
                   </span>
                 </span>
                 <ArrowRight className="h-5 w-5 text-muted transition group-hover:translate-x-1 group-hover:text-brand-700" />
@@ -184,11 +184,11 @@ export default async function Home() {
       </section>
 
       <section className="border-y border-stone bg-paper">
-        <div className="mx-auto max-w-7xl px-5 py-16 sm:px-6 sm:py-24">
+        <div className="mx-auto max-w-7xl px-5 py-10 sm:px-6 sm:py-14">
           <div className="flex items-end justify-between gap-5">
             <div>
               <p className="eyebrow">Güncel seçki</p>
-              <h2 className="mt-3 font-display text-3xl font-semibold tracking-tight text-brand-950 sm:text-4xl">Öne çıkan ilanlar</h2>
+              <h2 className="mt-2 text-2xl font-bold tracking-tight text-ink sm:text-3xl">Öne çıkan ilanlar</h2>
             </div>
             <Link href="/ilanlar" className="inline-flex shrink-0 items-center gap-2 text-sm font-semibold text-brand-700 hover:text-brand-900">Tüm portföy <ArrowRight className="h-4 w-4" /></Link>
           </div>
@@ -206,7 +206,7 @@ export default async function Home() {
         </div>
       </section>
 
-      <section className="mx-auto max-w-7xl px-5 py-16 sm:px-6 sm:py-24">
+      <section className="mx-auto max-w-7xl px-5 py-10 sm:px-6 sm:py-14">
         <div className="grid overflow-hidden border-y border-stone bg-paper lg:grid-cols-12">
           <div className="flex flex-col justify-between bg-canvas p-8 sm:p-12 lg:col-span-4 lg:border-r lg:border-stone">
             <div>
@@ -222,10 +222,10 @@ export default async function Home() {
       </section>
 
       <section className="border-y border-stone bg-canvas">
-        <div className="mx-auto grid max-w-7xl gap-12 px-5 py-16 sm:px-6 sm:py-24 lg:grid-cols-12">
+        <div className="mx-auto grid max-w-7xl gap-12 px-5 py-10 sm:px-6 sm:py-14 lg:grid-cols-12">
           <div className="lg:col-span-4">
             <p className="eyebrow">Yerel uzmanlık</p>
-            <h2 className="mt-3 font-display text-3xl font-semibold tracking-tight text-brand-950">{whyTitle}</h2>
+            <h2 className="mt-2 text-2xl font-bold tracking-tight text-ink sm:text-3xl">{whyTitle}</h2>
           </div>
           <div className="border-t border-stone lg:col-span-8">
             {[
@@ -234,8 +234,8 @@ export default async function Home() {
               ["03", "Yerel ekiple ilerleyin", "Randevu, ön değerleme ve satış sürecinde doğrudan Kütahya ekibiyle iletişim kurun."],
             ].map(([number, title, text]) => (
               <div key={number} className="grid gap-3 border-b border-stone py-6 sm:grid-cols-[4rem_14rem_1fr] sm:items-start">
-                <span className="font-display text-gold-700">{number}</span>
-                <h3 className="font-display text-xl font-semibold text-ink">{title}</h3>
+                <span className="font-semibold text-gold-700">{number}</span>
+                <h3 className="text-lg font-bold text-ink">{title}</h3>
                 <p className="leading-7 text-muted">{text}</p>
               </div>
             ))}
@@ -244,12 +244,12 @@ export default async function Home() {
       </section>
 
       {testimonials.length > 0 && (
-        <section className="mx-auto max-w-7xl px-5 py-16 sm:px-6 sm:py-24">
+        <section className="mx-auto max-w-7xl px-5 py-10 sm:px-6 sm:py-14">
           <p className="eyebrow">Deneyimler</p>
           <div className="mt-7 grid border-y border-stone md:grid-cols-3 md:divide-x md:divide-stone">
             {testimonials.slice(0, 3).map((testimonial) => (
               <figure key={testimonial.id} className="border-b border-stone py-7 last:border-b-0 md:border-b-0 md:px-7 md:first:pl-0 md:last:pr-0">
-                <blockquote className="font-display text-xl leading-8 text-ink">“{testimonial.text}”</blockquote>
+                <blockquote className="text-lg leading-8 text-ink">“{testimonial.text}”</blockquote>
                 <figcaption className="mt-6 text-sm font-semibold text-brand-800">{testimonial.name}{testimonial.role ? ` · ${testimonial.role}` : ""}</figcaption>
               </figure>
             ))}
@@ -261,11 +261,11 @@ export default async function Home() {
         <div className="ceramic-grid mx-auto grid max-w-7xl gap-8 px-5 py-14 sm:px-6 sm:py-16 lg:grid-cols-12 lg:items-center">
           <div className="lg:col-span-8">
             <p className="eyebrow !text-gold-300">Satış yolculuğu</p>
-            <h2 className="mt-3 font-display text-3xl font-semibold sm:text-4xl">Mülkünüzün piyasadaki yerini birlikte belirleyelim.</h2>
+            <h2 className="mt-2 text-2xl font-bold sm:text-3xl">Mülkünüzün piyasadaki yerini birlikte belirleyelim.</h2>
             <p className="mt-4 max-w-2xl leading-7 text-brand-100">Bölgesel ön değerleme, portföy hazırlığı ve şeffaf satış süreci için talebinizi bırakın.</p>
           </div>
           <div className="lg:col-span-4 lg:text-right">
-            <Link href="/satici" className="inline-flex min-h-12 items-center justify-center gap-2 rounded-lg bg-paper px-6 font-semibold text-brand-900 hover:bg-paper">Satış talebi oluştur <ArrowRight className="h-4 w-4" /></Link>
+            <Link href="/satici" className="inline-flex min-h-12 items-center justify-center gap-2 rounded-control bg-paper px-6 font-semibold text-brand-900 hover:bg-paper">Satış talebi oluştur <ArrowRight className="h-4 w-4" /></Link>
           </div>
         </div>
       </section>

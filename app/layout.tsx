@@ -18,13 +18,15 @@ export const metadata: Metadata = {
     template: `%s | ${SITE.name}`,
   },
   description: SITE.description,
+  // K8: anahtar kelimeler emlağın yanına vasıta ve teknolojiyi de aldı.
   keywords: [
     "Kütahya satılık",
-    "Kütahya emlak",
+    "Kütahya ilan",
     "Kütahya satılık daire",
     "Kütahya satılık arsa",
-    "Kütahya satılık villa",
-    "Kütahya yatırımlık arsa",
+    "Kütahya satılık araba",
+    "Kütahya ikinci el",
+    "Kütahya emlak",
     "Kütahya gayrimenkul",
   ],
   openGraph: {

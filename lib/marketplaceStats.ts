@@ -8,7 +8,10 @@ export type MarketplaceStats = {
   activeDistricts: number;
   approvedAgencies: number;
   publicAgents: number;
+  /** Kategori bazında (emlak / vasita / teknoloji) aktif ilan sayısı. */
   categoryCounts: Record<string, number>;
+  /** Alt tür bazında (daire / arsa / otomobil ...) aktif ilan sayısı. */
+  subTypeCounts: Record<string, number>;
 };
 
 /**
@@ -21,12 +24,19 @@ export const getMarketplaceStats = unstable_cache(
       moderationStatus: "approved",
     } as const;
 
-    const [categories, districts, soldListings, approvedAgencies, publicAgents] = await Promise.all([
-      // `propertyType` ile gruplanıyordu: daire, otomobil ve telefon aynı düzlemde
-      // sayılıyor, "Kategoriler" başlığı altında alt türler listeleniyordu. Artık
-      // gerçek kategori kırılımı — ana sayfa kategori girişleri bunu tüketecek.
+    const [categories, subTypes, districts, soldListings, approvedAgencies, publicAgents] = await Promise.all([
+      // İKİ KIRILIM birden gerekiyor:
+      // - categoryCounts: ana sayfadaki kategori girişleri (Vasıta, Teknoloji)
+      // - subTypeCounts : emlak landing kutuları (Daire, Arsa, Villa...) — bunlar
+      //   propertyType ile anahtarlanır. Yalnız kategoriye çevirmek o kutuların
+      //   hepsini 0 gösteriyordu.
       prisma.listing.groupBy({
         by: ["category"],
+        where: { ...publicListingWhere, status: "active" },
+        _count: { _all: true },
+      }),
+      prisma.listing.groupBy({
+        by: ["propertyType"],
         where: { ...publicListingWhere, status: "active" },
         _count: { _all: true },
       }),
@@ -61,6 +71,9 @@ export const getMarketplaceStats = unstable_cache(
     const categoryCounts = Object.fromEntries(
       categories.map((category) => [category.category, category._count._all]),
     );
+    const subTypeCounts = Object.fromEntries(
+      subTypes.map((row) => [row.propertyType, row._count._all]),
+    );
     const activeListings = categories.reduce((total, category) => total + category._count._all, 0);
 
     return {
@@ -70,8 +83,9 @@ export const getMarketplaceStats = unstable_cache(
       approvedAgencies,
       publicAgents,
       categoryCounts,
+      subTypeCounts,
     };
   },
-  ["public-marketplace-stats-v1"],
+  ["public-marketplace-stats-v2"],
   { revalidate: 300, tags: ["marketplace-stats"] },
 );

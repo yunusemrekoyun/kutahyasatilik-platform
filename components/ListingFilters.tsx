@@ -18,7 +18,8 @@ const AMENITIES: { key: string; label: string }[] = [
   { key: "dogrulanmis", label: "Doğrulanmış" },
 ];
 
-const CHIP_KEYS = ["q", "tur", "ilce", "oda", "min", "max", "minAlan", "maxAlan", "imar", "esyali", "otopark", "balkon", "site", "dogrulanmis"];
+/** Kategoriden bağımsız, her zaman geçerli filtre anahtarları. */
+const BASE_CHIP_KEYS = ["q", "tur", "ilce", "oda", "min", "max", "minAlan", "maxAlan", "imar", "esyali", "otopark", "balkon", "site", "dogrulanmis"];
 
 export default function ListingFilters() {
   const router = useRouter();
@@ -129,12 +130,32 @@ export default function ListingFilters() {
       case "balkon": return "Balkonlu";
       case "site": return "Site İçinde";
       case "dogrulanmis": return "Doğrulanmış";
-      default: return null;
+      default: {
+        // Kategoriye özel nitelik filtreleri (yakit, vites, yil_min ...).
+        // Sabit listeye yazılamazlar: kayıt büyüdükçe değişiyorlar.
+        for (const field of attributeFields) {
+          if (key === field.key) {
+            const option = field.options?.find((o) => o.value === val);
+            return `${field.label}: ${option?.label ?? val}`;
+          }
+          if (key === `${field.key}_min`) return `${field.label} min ${val}${field.unit ? ` ${field.unit}` : ""}`;
+          if (key === `${field.key}_max`) return `${field.label} max ${val}${field.unit ? ` ${field.unit}` : ""}`;
+        }
+        return null;
+      }
     }
   }
 
-  const activeCount = CHIP_KEYS.filter((k) => sp.get(k)).length;
-  const activeChips = CHIP_KEYS.map((k) => ({ k, v: sp.get(k) })).filter((c) => c.v) as { k: string; v: string }[];
+  // Çip anahtarları kayıttan genişliyor: kategori filtreleri eskiden hiç
+  // görünmüyordu ve yalnız kendi kontrolünden temizlenebiliyordu.
+  const chipKeys = [
+    ...BASE_CHIP_KEYS,
+    ...attributeFields.flatMap((f) =>
+      f.type === "select" ? [f.key] : [`${f.key}_min`, `${f.key}_max`]
+    ),
+  ];
+  const activeCount = chipKeys.filter((k) => sp.get(k)).length;
+  const activeChips = chipKeys.map((k) => ({ k, v: sp.get(k) })).filter((c) => c.v) as { k: string; v: string }[];
 
   const fieldCls =
     "h-11 w-full rounded-control border border-stone bg-paper px-3.5 text-[15px] text-ink outline-none transition focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20";
