@@ -17,11 +17,35 @@ export async function POST(req: NextRequest) {
   if (limited) return limited;
   const parsed = schema.safeParse(await req.json().catch(() => null));
   if (!parsed.success) return NextResponse.json({ ok: false, error: parsed.error.issues[0]?.message || "Geçersiz istek" }, { status: 400 });
-  await prisma.pushToken.upsert({
-    where: { token: parsed.data.token },
-    create: { token: parsed.data.token, platform: parsed.data.platform, recipientRole: session.role, recipientId: session.id },
-    update: { platform: parsed.data.platform, recipientRole: session.role, recipientId: session.id, active: true, lastSeenAt: new Date(), lastError: null },
+
+  const { token, platform } = parsed.data;
+
+  // Cihaz el değiştirebilir: aynı telefonda çıkış yapıp başka hesapla girilince Expo
+  // token'ı aynı kalır, kaydın yeni sahibe geçmesi DOĞRU davranış. Ancak eski sahibin
+  // kuyrukta bekleyen bildirimleri artık başkasının elindeki cihaza gitmemeli —
+  // devirde o kayıtları kapat. (Yalnız recipientId'yi üzerine yazmak, kuyruktaki
+  // bildirimleri yeni sahibin cihazına teslim ediyordu.)
+  const existing = await prisma.pushToken.findUnique({
+    where: { token },
+    select: { id: true, recipientRole: true, recipientId: true },
   });
+  const reassigned =
+    existing !== null && (existing.recipientRole !== session.role || existing.recipientId !== session.id);
+
+  await prisma.$transaction(async (tx) => {
+    if (existing && reassigned) {
+      await tx.pushDelivery.updateMany({
+        where: { pushTokenId: existing.id, status: { in: ["pending", "processing"] } },
+        data: { status: "failed", claimId: null, error: "TokenReassigned" },
+      });
+    }
+    await tx.pushToken.upsert({
+      where: { token },
+      create: { token, platform, recipientRole: session.role, recipientId: session.id },
+      update: { platform, recipientRole: session.role, recipientId: session.id, active: true, lastSeenAt: new Date(), lastError: null },
+    });
+  });
+
   return NextResponse.json({ ok: true });
 }
 
