@@ -15,6 +15,7 @@ import { notifyAgent, notifyUser, notifyMatchingAlerts } from "@/lib/notify";
 import { sendEmail, notificationEmail } from "@/lib/email";
 import bcrypt from "bcryptjs";
 import { listingAmenityRows } from "@/lib/listingAmenities";
+import { LANDING_PAGES } from "@/lib/constants";
 import { getCategory, isCategoryKey, parseAttributes, type CategoryKey } from "@/lib/categories";
 import { validateExternalHttpUrl } from "@/lib/externalUrl";
 import { isPasswordLengthValid, PASSWORD_ERROR } from "@/lib/passwordPolicy";
@@ -88,10 +89,10 @@ function revalidateListingSurfaces(slug?: string) {
   revalidatePath("/harita");
   revalidatePath("/emlak-ofisleri");
   revalidatePath("/danismanlar");
-  revalidatePath("/daire");
-  revalidatePath("/arsa");
-  revalidatePath("/villa");
-  revalidatePath("/yatirimlik-arsa");
+  // Landing yolları elle sayılıyordu ve liste kaymıştı: /isyeri revalidate=300
+  // ile ISR'deydi ama burada yoktu, yani onaylanan işyeri ilanı 5 dakika o
+  // sayfada görünmüyordu. Kaynağın kendisinden türetiliyor.
+  for (const landing of LANDING_PAGES) revalidatePath(`/${landing.slug}`);
   if (slug) revalidatePath(`/ilan/${slug}`);
 }
 

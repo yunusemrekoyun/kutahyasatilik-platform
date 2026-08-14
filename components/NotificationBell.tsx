@@ -144,7 +144,7 @@ export default function NotificationBell() {
                   aria-label={`${it.title}${it.isRead ? ", okundu" : ", okunmamış"}${it.body ? `. ${it.body}` : ""}`}
                   className={`flex w-full items-start gap-2.5 border-b border-stone px-4 py-3 text-left transition hover:bg-canvas ${it.isRead ? "opacity-60" : ""}`}
                 >
-                  <span aria-hidden="true" className={`mt-1.5 h-2 w-2 shrink-0 rounded-full ${it.isRead ? "bg-slate-300" : "bg-gold-500"}`} />
+                  <span aria-hidden="true" className={`mt-1.5 h-2 w-2 shrink-0 rounded-full ${it.isRead ? "bg-stone" : "bg-gold-500"}`} />
                   <span className="min-w-0 flex-1">
                     <span className="block text-sm font-semibold text-ink">{it.title}</span>
                     {it.body && <span className="mt-0.5 block truncate text-xs text-muted">{it.body}</span>}

@@ -14,7 +14,7 @@ const Inner = dynamic(() => import("./LocationPickerInner"), {
 });
 
 const inputCls =
-  "w-full rounded-control border border-stone bg-paper px-3.5 py-2.5 text-[15px] text-ink outline-none transition placeholder:text-slate-400 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/30";
+  "w-full rounded-control border border-stone bg-paper px-3.5 py-2.5 text-[15px] text-ink outline-none transition placeholder:text-muted/70 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/30";
 
 export default function LocationPicker({
   initialLat = null,

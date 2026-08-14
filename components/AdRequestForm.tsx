@@ -5,7 +5,7 @@ import { CheckCircle2, Lock } from "lucide-react";
 import { isValidTrPhone, TR_PHONE_ERROR } from "@/lib/validation";
 
 const inputCls =
-  "w-full h-12 rounded-[10px] border border-stone bg-paper px-3.5 text-base text-ink outline-none transition placeholder:text-slate-400 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/30";
+  "w-full h-12 rounded-[10px] border border-stone bg-paper px-3.5 text-base text-ink outline-none transition placeholder:text-muted/70 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/30";
 const labelCls = "mb-1.5 block text-sm font-semibold text-ink";
 
 export default function AdRequestForm() {

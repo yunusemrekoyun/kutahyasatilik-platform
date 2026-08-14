@@ -5,22 +5,43 @@ import Image from "next/image";
 import { ArrowLeftRight, X, ArrowRight } from "lucide-react";
 import { useStore } from "@/components/store/StoreProvider";
 import { formatPrice } from "@/lib/format";
-import { PROPERTY_TYPE_LABELS } from "@/lib/constants";
+import { CATEGORY_LABELS, getSubTypeLabel } from "@/lib/categories";
 
 export default function ComparePage() {
   const { compare, toggleCompare, clearCompare, hydrated } = useStore();
 
+  // Emlak satırları (oda/m²/kat/ısıtma) gayrimenkule özgü. Sabit listeyken bir
+  // vasıta ya da teknoloji ilanı karşılaştırıldığında TÜM satırlar "—" çıkıyordu.
+  // Karşılaştırılanlardan en az biri emlaksa emlak satırları gösterilir.
+  const hasRealEstate = compare.some((l) => !l.category || l.category === "emlak");
+  const hasOther = compare.some((l) => l.category && l.category !== "emlak");
+
   const rows: { label: string; render: (l: (typeof compare)[number]) => React.ReactNode }[] = [
     { label: "Fiyat", render: (l) => <span className="text-lg font-bold text-brand-700">{formatPrice(l.price, l.currency)}</span> },
-    { label: "Tür", render: (l) => PROPERTY_TYPE_LABELS[l.propertyType] || l.propertyType },
+    { label: "Kategori", render: (l) => CATEGORY_LABELS[l.category ?? "emlak"] ?? "—" },
+    { label: "Tür", render: (l) => getSubTypeLabel(l.category, l.propertyType) },
     { label: "İlçe", render: (l) => l.district },
     { label: "Mahalle", render: (l) => l.neighborhood || "—" },
-    { label: "Oda", render: (l) => l.rooms || "—" },
-    { label: "Brüt m²", render: (l) => (l.areaGross ? `${l.areaGross} m²` : "—") },
-    { label: "Net m²", render: (l) => (l.areaNet ? `${l.areaNet} m²` : "—") },
-    { label: "Kat", render: (l) => l.floor || "—" },
-    { label: "Bina Yaşı", render: (l) => l.buildingAge || "—" },
-    { label: "Isıtma", render: (l) => l.heating || "—" },
+    // Emlak dışı ilanların nitelikleri sunucuda özetlenip karta yazılıyor
+    // (lib/categories.ts summarizeAttributes). Alan alan karşılaştırma snapshot'ın
+    // etiketli nitelikleri taşımasını gerektirir — ayrı iş.
+    ...(hasOther
+      ? [{
+          label: "Öne çıkanlar",
+          render: (l: (typeof compare)[number]) =>
+            l.attributeSummary?.length ? l.attributeSummary.join(" · ") : "—",
+        }]
+      : []),
+    ...(hasRealEstate
+      ? [
+          { label: "Oda", render: (l: (typeof compare)[number]) => l.rooms || "—" },
+          { label: "Brüt m²", render: (l: (typeof compare)[number]) => (l.areaGross ? `${l.areaGross} m²` : "—") },
+          { label: "Net m²", render: (l: (typeof compare)[number]) => (l.areaNet ? `${l.areaNet} m²` : "—") },
+          { label: "Kat", render: (l: (typeof compare)[number]) => l.floor || "—" },
+          { label: "Bina Yaşı", render: (l: (typeof compare)[number]) => l.buildingAge || "—" },
+          { label: "Isıtma", render: (l: (typeof compare)[number]) => l.heating || "—" },
+        ]
+      : []),
   ];
 
   return (

@@ -10,7 +10,7 @@ import {
 import { isValidTrPhone, TR_PHONE_ERROR } from "@/lib/validation";
 
 const inputCls =
-  "h-12 w-full rounded-[10px] border border-stone bg-paper px-3.5 text-base text-ink outline-none transition placeholder:text-slate-400 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/30";
+  "h-12 w-full rounded-[10px] border border-stone bg-paper px-3.5 text-base text-ink outline-none transition placeholder:text-muted/70 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/30";
 const labelCls = "mb-1.5 block text-sm font-semibold text-ink";
 
 export default function UserRegisterForm() {
