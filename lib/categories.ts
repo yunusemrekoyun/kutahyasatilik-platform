@@ -30,6 +30,11 @@ export type CategoryField = {
   options?: readonly CategoryOption[];
   /** Sayı alanlarında değerin sonuna eklenir: "120.000 km" */
   unit?: string;
+  /**
+   * Sayıyı binlik ayracı olmadan yazar. Yıl gibi alanlar sayı olarak tutulur
+   * ama miktar değildir: "2019" doğru, "2.019" değil.
+   */
+  plain?: boolean;
   placeholder?: string;
   /**
    * Filtre arayüzünde kontrol olarak görünür. YALNIZ "select" ve "number"
@@ -60,7 +65,7 @@ const CURRENT_YEAR = new Date().getFullYear();
 const VASITA_FIELDS: readonly CategoryField[] = [
   { key: "marka", label: "Marka", type: "text", required: true, maxLength: 40, placeholder: "Örn. Renault" },
   { key: "model", label: "Model", type: "text", required: true, maxLength: 60, placeholder: "Örn. Clio 1.5 dCi" },
-  { key: "yil", label: "Yıl", type: "number", required: true, filterable: true, min: 1950, max: CURRENT_YEAR + 1 },
+  { key: "yil", label: "Yıl", type: "number", required: true, filterable: true, plain: true, min: 1950, max: CURRENT_YEAR + 1 },
   { key: "kilometre", label: "Kilometre", type: "number", required: true, filterable: true, min: 0, max: 2_000_000, unit: "km" },
   {
     key: "yakit",
@@ -292,7 +297,8 @@ export function formatAttributeValue(field: CategoryField, value: unknown): stri
   if (field.type === "number") {
     const n = typeof value === "number" ? value : Number(value);
     if (!Number.isFinite(n)) return String(value);
-    return field.unit ? `${groupThousands(n)} ${field.unit}` : groupThousands(n);
+    const text = field.plain ? String(n) : groupThousands(n);
+    return field.unit ? `${text} ${field.unit}` : text;
   }
   return String(value);
 }
