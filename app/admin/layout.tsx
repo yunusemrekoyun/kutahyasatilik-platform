@@ -1,3 +1,4 @@
+import { redirect } from "next/navigation";
 import { getSession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import AdminShell from "@/components/admin/AdminShell";
@@ -27,9 +28,13 @@ export default async function AdminLayout({
 }) {
   const session = await getSession();
 
-  // Oturum yoksa (login sayfası) sade göster — middleware diğer yolları zaten korur.
+  // İkinci kapı: bu layout eskiden oturum yokken children'ı çıplak render ediyordu,
+  // yani panelin tüm okuma koruması tek başına proxy.ts'e bağlıydı (31 admin
+  // sayfasının hiçbirinde kendi oturum kontrolü yok). Matcher ya da Next proxy
+  // konvansiyonu değişirse dashboard verisi kimliksiz görüntülenebilirdi.
+  // /admin/login zaten /giris'e yönlendiren bir shim olduğu için döngü oluşmaz.
   if (!session) {
-    return <div className="min-h-screen bg-canvas">{children}</div>;
+    redirect("/giris?next=/admin");
   }
 
   const counts = await getCounts();
