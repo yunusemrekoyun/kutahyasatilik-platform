@@ -1,10 +1,13 @@
 import { cache } from "react";
 import { prisma } from "@/lib/prisma";
+import { cardSelect, decorate, type RawCard } from "@/lib/listings";
+import { PUBLIC_ACTIVE_LISTING } from "@/lib/listingFilters";
+import type { ListingCardData } from "@/components/ListingCard";
 
-const PUBLIC_LISTING_WHERE = {
-  status: "active",
-  moderationStatus: "approved",
-} as const;
+// Dizin, "en az bir yayında ilanı var mı" uygunluk kapısını kullanır — satılmış
+// ilan bu soruyu karşılamaz, bu yüzden ACTIVE varyantı. Kuralın kendisi
+// lib/listingFilters.ts'te tek kaynakta tutuluyor.
+const PUBLIC_LISTING_WHERE = PUBLIC_ACTIVE_LISTING;
 
 const PUBLIC_AGENT_WHERE = {
   status: "approved",
@@ -18,46 +21,11 @@ const PUBLIC_AGENCY_WHERE = {
   listings: { some: PUBLIC_LISTING_WHERE },
 } as const;
 
-const listingCardSelect = {
-  id: true,
-  slug: true,
-  title: true,
-  price: true,
-  currency: true,
-  propertyType: true,
-  district: true,
-  neighborhood: true,
-  rooms: true,
-  areaGross: true,
-  status: true,
-  featured: true,
-  verified: true,
-  images: {
-    select: { url: true },
-    orderBy: { sortOrder: "asc" as const },
-    take: 1,
-  },
-  agent: { select: { name: true, logo: true } },
-} as const;
-
-export type PublicListingCard = {
-  id: string;
-  slug: string;
-  title: string;
-  price: number;
-  currency: string;
-  propertyType: string;
-  district: string;
-  neighborhood: string | null;
-  rooms: string | null;
-  areaGross: number | null;
-  status: string;
-  featured: boolean;
-  verified: boolean;
-  coverImage: string | null;
-  agentName: string | null;
-  agentLogo: string | null;
-};
+// Kart select'i ve rozet/özet üretimi lib/listings.ts'te tek kaynakta.
+// Burada kendi kopyası durduğu sürece `category` ve `attributeSummary` eksik
+// geliyordu; ofis/danışman portföyündeki bir vasıta ilanı ListingCard'ın
+// `!category → emlak` fallback'i yüzünden emlak gibi çiziliyordu.
+export type PublicListingCard = ListingCardData;
 
 export type PublicAgencyCard = {
   id: string;
@@ -135,43 +103,6 @@ function safeHttpsUrl(value: string | null | undefined): string | null {
   } catch {
     return null;
   }
-}
-
-function toListingCard(row: {
-  id: string;
-  slug: string;
-  title: string;
-  price: number;
-  currency: string;
-  propertyType: string;
-  district: string;
-  neighborhood: string | null;
-  rooms: string | null;
-  areaGross: number | null;
-  status: string;
-  featured: boolean;
-  verified: boolean;
-  images: { url: string }[];
-  agent: { name: string; logo: string | null } | null;
-}): PublicListingCard {
-  return {
-    id: row.id,
-    slug: row.slug,
-    title: row.title,
-    price: row.price,
-    currency: row.currency,
-    propertyType: row.propertyType,
-    district: row.district,
-    neighborhood: row.neighborhood,
-    rooms: row.rooms,
-    areaGross: row.areaGross,
-    status: row.status,
-    featured: row.featured,
-    verified: row.verified,
-    coverImage: row.images[0]?.url ?? null,
-    agentName: row.agent?.name ?? null,
-    agentLogo: row.agent?.logo ?? null,
-  };
 }
 
 function toAgencyCard(row: {
@@ -363,7 +294,7 @@ export const getPublicAgency = cache(async (slug: string): Promise<PublicAgencyP
         where: PUBLIC_LISTING_WHERE,
         orderBy: [{ featured: "desc" }, { createdAt: "desc" }],
         take: 12,
-        select: listingCardSelect,
+        select: cardSelect,
       },
     },
   });
@@ -375,7 +306,7 @@ export const getPublicAgency = cache(async (slug: string): Promise<PublicAgencyP
     whatsapp: agency.showWhatsapp ? agency.whatsapp : null,
     website: safeHttpsUrl(agency.website),
     agents: agency.agents.map(toAgentCard),
-    listings: agency.listings.map(toListingCard),
+    listings: await decorate(agency.listings as RawCard[]),
   };
 });
 
@@ -391,7 +322,7 @@ export const getPublicAgent = cache(async (slug: string): Promise<PublicAgentPro
         where: PUBLIC_LISTING_WHERE,
         orderBy: [{ featured: "desc" }, { createdAt: "desc" }],
         take: 12,
-        select: listingCardSelect,
+        select: cardSelect,
       },
     },
   });
@@ -402,7 +333,7 @@ export const getPublicAgent = cache(async (slug: string): Promise<PublicAgentPro
     ...card,
     phone: agent.showPhone ? agent.phone : null,
     whatsapp: agent.showWhatsapp ? agent.phone : null,
-    listings: agent.listings.map(toListingCard),
+    listings: await decorate(agent.listings as RawCard[]),
   };
 });
 

@@ -1,37 +1,26 @@
 import "server-only";
 import { prisma } from "./prisma";
+import { cardSelect, decorate, type RawCard } from "./listings";
 
 // Favori sorguları. Client `slug` ile çalışır; burada Listing.id'ye çözülür.
 // GET dönüşü ListingCardData ile uyumlu (favoriler sayfası ListingCard render eder).
-
-const CARD_SELECT = {
-  id: true,
-  slug: true,
-  title: true,
-  price: true,
-  currency: true,
-  propertyType: true,
-  district: true,
-  neighborhood: true,
-  rooms: true,
-  areaGross: true,
-  status: true,
-  featured: true,
-  verified: true,
-  images: { select: { url: true }, orderBy: { sortOrder: "asc" as const }, take: 1 },
-  agent: { select: { name: true } },
-} as const;
+//
+// Kart alanları lib/listings.ts'ten geliyor. Burada kendi select kopyası durduğu
+// sürece `category` ve `attributeSummary` eksik geliyordu; ListingCard'ın
+// `!category → emlak` fallback'i yüzünden favorideki bir vasıta ilanı emlak gibi
+// çiziliyordu (ham "otomobil" etiketi, kayıp "2019 · 120.000 km" özeti, rozet yok).
+//
+// Not: favori listesi bilerek görünürlük filtresi UYGULAMIYOR — kullanıcının kendi
+// kaydettiği ilan, sonradan pasife alınsa bile listesinde kalır. Bu davranış
+// değiştirilmedi.
 
 export async function favoriteCards(userId: string) {
   const favs = await prisma.favorite.findMany({
     where: { userId },
     orderBy: { createdAt: "desc" },
-    select: { listing: { select: CARD_SELECT } },
+    select: { listing: { select: cardSelect } },
   });
-  return favs.map((f) => {
-    const { images, agent, ...rest } = f.listing;
-    return { ...rest, coverImage: images[0]?.url ?? null, agentName: agent?.name ?? null };
-  });
+  return decorate(favs.map((f) => f.listing) as RawCard[]);
 }
 
 export async function addFavoriteBySlug(userId: string, slug: string): Promise<void> {
