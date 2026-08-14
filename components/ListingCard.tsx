@@ -17,6 +17,8 @@ export type ListingCardData = {
   category?: string;
   /** Kategori içi alt tür (emlakta daire/arsa, vasıtada otomobil...) */
   propertyType: string;
+  /** Alt türün okunur etiketi — decorate() üretir, istemciler kayıt taşımasın. */
+  subTypeLabel?: string;
   /**
    * Emlak dışı kategorilerde kartta gösterilecek hazır özet metinleri
    * ("2019", "120.000 km"). Emlak kendi kolonlarını (rooms/areaGross) kullanır.
@@ -140,7 +142,7 @@ export default function ListingCard({
       >
         <Link href={`/ilan/${listing.slug}`} className="block">
           <p className="mb-1 line-clamp-1 text-xs font-medium text-muted">
-            {getSubTypeLabel(listing.category, listing.propertyType)} · {location}
+            {listing.subTypeLabel ?? getSubTypeLabel(listing.category, listing.propertyType)} · {location}
           </p>
           <h3
             id={titleId}

@@ -33,15 +33,21 @@ export default function ListingMedia({
   videoUrl,
   droneUrl,
   virtualTourUrl,
+  category,
 }: {
   videoUrl?: string | null;
   droneUrl?: string | null;
   virtualTourUrl?: string | null;
+  /** İlanın kategorisi. Verilmezse emlak varsayılır (eski çağrı yerleri). */
+  category?: string;
 }) {
+  // Drone çekimi ve 360° sanal tur mülke ait kavramlar: bir telefon ilanında
+  // "Havadan görüntü" başlığı ürünü yanlış tanıtır.
+  const isRealEstate = !category || category === "emlak";
   const localVideo = isLocalMp4(videoUrl) ? videoUrl! : null;
   const video = localVideo ? null : toVideoEmbed(videoUrl);
-  const drone = toVideoEmbed(droneUrl);
-  const tour = toTourEmbed(virtualTourUrl);
+  const drone = isRealEstate ? toVideoEmbed(droneUrl) : null;
+  const tour = isRealEstate ? toTourEmbed(virtualTourUrl) : null;
 
   if (!video && !localVideo && !drone && !tour) return null;
 
@@ -52,8 +58,8 @@ export default function ListingMedia({
           <Video className="h-5 w-5" />
         </span>
         <div>
-          <h2 className="text-lg font-bold text-ink">Video &amp; Sanal Tur</h2>
-          <p className="text-xs text-muted">Mülkü uzaktan, her açıdan keşfedin</p>
+          <h2 className="text-lg font-bold text-ink">{isRealEstate ? "Video & Sanal Tur" : "Video"}</h2>
+          <p className="text-xs text-muted">{isRealEstate ? "Mülkü uzaktan, her açıdan keşfedin" : "İlanı uzaktan, her açıdan inceleyin"}</p>
         </div>
       </div>
 

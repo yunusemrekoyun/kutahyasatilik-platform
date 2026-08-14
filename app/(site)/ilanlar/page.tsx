@@ -52,6 +52,7 @@ export default async function ListingsPage({
   // ana listesi; kategori seçilmeden liste değil kategori seçimi gösterilir.
   const categoryParam = get("kategori");
   const category = isCategoryKey(categoryParam) ? getCategory(categoryParam) : null;
+  const isRealEstate = category?.key === "emlak";
 
   // Kategoriye özel nitelik filtreleri. Yalnız kayıtta filtrelenebilir işaretli
   // alanlar okunur; URL'e elle eklenen başka bir anahtar sorguya geçmez.
@@ -75,17 +76,20 @@ export default async function ListingsPage({
       q: get("q"),
       propertyType: get("tur"),
       district: get("ilce"),
-      rooms: get("oda"),
-      zoning: get("imar"),
+      // Emlak kolonlarına dayanan filtreler yalnız emlak kapsamında geçer.
+      // Vasıta listesine paylaşılan bir URL'de "oda=3+1" kalırsa sorgu sessizce
+      // hiçbir sonuç dönmüyordu — kullanıcı boş listeyi kendi aramasına yoruyor.
+      rooms: isRealEstate ? get("oda") : undefined,
+      zoning: isRealEstate ? get("imar") : undefined,
       sort: get("sira"),
       minPrice: pos(get("min")),
       maxPrice: pos(get("max")),
-      minArea: minAlan,
-      maxArea: maxAlan,
-      furnished: !!get("esyali"),
-      parking: !!get("otopark"),
-      balcony: !!get("balkon"),
-      inSite: !!get("site"),
+      minArea: isRealEstate ? minAlan : undefined,
+      maxArea: isRealEstate ? maxAlan : undefined,
+      furnished: isRealEstate && !!get("esyali"),
+      parking: isRealEstate && !!get("otopark"),
+      balcony: isRealEstate && !!get("balkon"),
+      inSite: isRealEstate && !!get("site"),
       verified: !!get("dogrulanmis"),
       agencySlug,
       agentSlug,
@@ -201,10 +205,17 @@ export default async function ListingsPage({
                 <SearchX className="h-6 w-6" />
               </span>
               <h2 className="mt-3 text-base font-bold text-ink">Bu kriterlere uygun ilan bulunamadı</h2>
-              <p className="mx-auto mt-1.5 max-w-md text-sm text-muted">Filtreleri biraz gevşetin ya da talebinizi bırakın; uygun ilan geldiğinde haber verelim.</p>
-              <Link href="/alici-talebi" className="mt-4 inline-flex items-center justify-center rounded-control bg-brand-700 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-brand-800">
-                Talep Bırak
-              </Link>
+              <p className="mx-auto mt-1.5 max-w-md text-sm text-muted">
+                {isRealEstate
+                  ? "Filtreleri biraz gevşetin ya da talebinizi bırakın; uygun ilan geldiğinde haber verelim."
+                  : "Filtreleri biraz gevşetin ya da başka bir alt tür deneyin."}
+              </p>
+              {/* Talep bırakma yalnız emlakta: eşleştirme emlak kriterleriyle çalışıyor. */}
+              {isRealEstate && (
+                <Link href="/alici-talebi" className="mt-4 inline-flex items-center justify-center rounded-control bg-brand-700 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-brand-800">
+                  Talep Bırak
+                </Link>
+              )}
             </div>
           )}
         </div>
@@ -214,7 +225,7 @@ export default async function ListingsPage({
       )}
 
       <div className="mt-10">
-        <NotFoundCTA />
+        <NotFoundCTA category={category?.key} />
       </div>
     </div>
   );

@@ -90,7 +90,7 @@ export default async function Home() {
         <div className="mb-4 flex flex-wrap items-end justify-between gap-2">
           <div>
             <h2 className="text-lg font-bold tracking-tight text-ink sm:text-xl">Öne çıkan ilanlar</h2>
-            <p className="mt-0.5 text-sm text-muted">Portföyden seçki — her ziyarette değişir.</p>
+            <p className="mt-0.5 text-sm text-muted">Tüm kategorilerden seçki — her ziyarette değişir.</p>
           </div>
         </div>
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
@@ -115,7 +115,7 @@ export default async function Home() {
               [marketplaceStats.activeListings, "Güncel ilan"],
               [marketplaceStats.soldListings, "Satılmış ilan"],
               [marketplaceStats.approvedAgencies, "Onaylı emlak ofisi"],
-              [marketplaceStats.activeDistricts, "Portföylü ilçe"],
+              [marketplaceStats.activeDistricts, "İlan olan ilçe"],
             ] as const).map(([value, label]) => (
               <div key={label} className="bg-paper px-4 py-3 text-center">
                 <p className="text-xl font-bold tabular-nums text-ink">{value}</p>
@@ -157,7 +157,7 @@ export default async function Home() {
               <div className="mb-6 h-1 w-12 bg-gold-600" />
               <p className="text-xs font-semibold uppercase tracking-[0.16em] text-brand-700">Kütahya ilan haritası</p>
               <h2 className="mt-4 max-w-sm text-2xl font-bold leading-tight tracking-tight text-ink sm:text-3xl">İlanı, bulunduğu çevreyle birlikte değerlendirin.</h2>
-              <p className="mt-5 max-w-sm leading-7 text-muted">İlçeyi seçin; emlak ilanlarının Kütahya içindeki dağılımını tek bakışta görün.</p>
+              <p className="mt-5 max-w-sm leading-7 text-muted">İlçeyi seçin; emlak ilanlarının Kütahya içindeki dağılımını tek bakışta görün. Harita yalnız emlak ilanlarını gösterir.</p>
             </div>
             <Link href="/harita" className="mt-8 inline-flex items-center gap-2 text-sm font-semibold text-brand-800 hover:text-brand-950">Tam ekran haritayı aç <ArrowRight className="h-4 w-4" /></Link>
           </div>

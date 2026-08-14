@@ -10,16 +10,20 @@ import ThousandsInput from "@/components/ThousandsInput";
 
 const ROOMS = ["1+0", "1+1", "2+1", "3+1", "4+1", "4+2", "5+1"];
 
+// "Doğrulanmış" burada DEĞİL: emlak olanağı değil, her kategoride geçerli bir
+// güven işareti. Emlak bloğunun içindeyken kartta rozet görünüyor ama filtre
+// yalnız emlakta açılıyordu.
 const AMENITIES: { key: string; label: string }[] = [
   { key: "esyali", label: "Eşyalı" },
   { key: "otopark", label: "Otoparklı" },
   { key: "balkon", label: "Balkonlu" },
   { key: "site", label: "Site İçinde" },
-  { key: "dogrulanmis", label: "Doğrulanmış" },
 ];
 
-/** Kategoriden bağımsız, her zaman geçerli filtre anahtarları. */
-const BASE_CHIP_KEYS = ["q", "tur", "ilce", "oda", "min", "max", "minAlan", "maxAlan", "imar", "esyali", "otopark", "balkon", "site", "dogrulanmis"];
+/** Her kategoride geçerli filtre anahtarları. */
+const BASE_CHIP_KEYS = ["q", "tur", "ilce", "min", "max", "dogrulanmis"];
+/** Yalnız emlakta anlamlı olanlar — vasıta listesinde "Otoparklı" çipi çıkmasın. */
+const REAL_ESTATE_CHIP_KEYS = ["oda", "minAlan", "maxAlan", "imar", "esyali", "otopark", "balkon", "site"];
 
 export default function ListingFilters() {
   const router = useRouter();
@@ -150,6 +154,7 @@ export default function ListingFilters() {
   // görünmüyordu ve yalnız kendi kontrolünden temizlenebiliyordu.
   const chipKeys = [
     ...BASE_CHIP_KEYS,
+    ...(isRealEstate ? REAL_ESTATE_CHIP_KEYS : []),
     ...attributeFields.flatMap((f) =>
       f.type === "select" ? [f.key] : [`${f.key}_min`, `${f.key}_max`]
     ),
@@ -172,10 +177,15 @@ export default function ListingFilters() {
             <button
               type="button"
               onClick={() => {
-                const owner = new URLSearchParams();
-                if (sp.get("ofis")) owner.set("ofis", sp.get("ofis")!);
-                if (sp.get("danisman")) owner.set("danisman", sp.get("danisman")!);
-                const query = owner.toString();
+                // Korunanlar filtre DEĞİL, bağlam: kategori düşerse /ilanlar
+                // liste yerine kategori seçim ekranına döner, yani "Temizle"
+                // kullanıcıyı listeden atardı. Görünüm/sıra da tercih.
+                const keep = new URLSearchParams();
+                for (const key of ["kategori", "ofis", "danisman", "gorunum", "sira"]) {
+                  const value = sp.get(key);
+                  if (value) keep.set(key, value);
+                }
+                const query = keep.toString();
                 router.push(`/ilanlar${query ? `?${query}` : ""}`);
               }}
               className="min-h-11 px-1 text-sm font-medium text-muted transition hover:text-brand-700"
@@ -319,6 +329,21 @@ export default function ListingFilters() {
         </>
         )}
 
+        {/* Doğrulanmış — kategoriden bağımsız */}
+        <div className={sectionCls}>
+          <h3 id="verified-filter-title" className={headCls}>Güven</h3>
+          <div role="group" aria-labelledby="verified-filter-title" className="flex flex-wrap gap-2">
+            <button
+              type="button"
+              onClick={() => toggle("dogrulanmis")}
+              aria-pressed={!!sp.get("dogrulanmis")}
+              className={`min-h-11 rounded-full px-3.5 py-1.5 text-sm font-medium transition ${sp.get("dogrulanmis") ? "bg-brand-700 text-white" : "bg-canvas text-muted hover:bg-stone"}`}
+            >
+              Doğrulanmış ilanlar
+            </button>
+          </div>
+        </div>
+
         {/* Kategoriye özel filtreler — kayıttan üretilir (lib/categories.ts) */}
         {attributeFields.map((field) =>
           field.type === "select" ? (
@@ -393,14 +418,18 @@ export default function ListingFilters() {
         )}
       </div>
 
-      {/* Bu aramayı kaydet → alıcı talebi (kriterler taşınır, uygun ilan gelince haber) */}
-      <button
-        type="button"
-        onClick={saveSearch}
-        className="mt-5 flex w-full items-center justify-center gap-2 rounded-control border border-brand-200 bg-brand-50 px-4 py-3 text-sm font-semibold text-brand-700 transition hover:bg-brand-100"
-      >
-        <BellRing aria-hidden="true" className="h-4 w-4" /> Bu aramayı kaydet, uygun ilan gelince haber ver
-      </button>
+      {/* Bu aramayı kaydet → alıcı talebi (kriterler taşınır, uygun ilan gelince haber).
+          YALNIZ emlakta: eşleştirme (lib/matching.ts) emlak kriterleri üzerinden
+          çalışıyor, vasıta alıcısına asla bildirim gelmez — karşılıksız vaat. */}
+      {isRealEstate && (
+        <button
+          type="button"
+          onClick={saveSearch}
+          className="mt-5 flex w-full items-center justify-center gap-2 rounded-control border border-brand-200 bg-brand-50 px-4 py-3 text-sm font-semibold text-brand-700 transition hover:bg-brand-100"
+        >
+          <BellRing aria-hidden="true" className="h-4 w-4" /> Bu aramayı kaydet, uygun ilan gelince haber ver
+        </button>
+      )}
 
       {/* Mobil: sonuçları gör (sheet'i kapatır; filtreler zaten anında uygulanır) */}
       <div className="mt-6 lg:hidden">

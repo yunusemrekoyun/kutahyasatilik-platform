@@ -5,27 +5,50 @@ import { BellRing, Phone, MessageCircle } from "lucide-react";
 import { telLink, whatsappLink } from "@/lib/site";
 import { useSiteContact } from "@/components/SiteContactProvider";
 
+/**
+ * Sayfa sonu iletişim bloğu.
+ *
+ * Metin kategoriye bağlı: site emlak sitesinden genel ilan sitesine dönerken bu
+ * blok her yüzeyde ("otomobil listesinin altında bile") "Aradığınız
+ * gayrimenkulü bulamadınız mı? … Kütahya'nın dijital emlak ofisi olarak"
+ * diyordu — sayfanın en büyük ikinci başlığı emlak ofisi reklamıydı.
+ *
+ * `/alici-talebi` düğmesi de emlağa özel: kayıtlı arama eşleştirmesi yalnız
+ * emlak kriterleri üzerinden çalışıyor (bkz. lib/matching.ts), vasıta alıcısına
+ * asla eşleşme gelmez. Karşılıksız vaat vermemek için emlak dışında gizli.
+ */
 export default function NotFoundCTA({
-  title = "Aradığınız gayrimenkulü bulamadınız mı?",
+  category,
+  title,
 }: {
+  /** İlanın/listenin kategorisi. Verilmezse kategori-nötr metin kullanılır. */
+  category?: string;
   title?: string;
 }) {
   const c = useSiteContact();
+  const isRealEstate = category === "emlak";
+
+  const heading = title ?? (isRealEstate ? "Aradığınız gayrimenkulü bulamadınız mı?" : "Aradığınızı bulamadınız mı?");
+  const body = isRealEstate
+    ? "Bizi arayın, portföyümüzde yer alan ve henüz yayınlanmamış diğer seçenekleri size özel sunalım. Kütahya'nın dijital emlak ofisi olarak doğru mülkü bulmanıza yardımcı oluyoruz."
+    : "Bizi arayın, aradığınız kriterlere uyan ilanlar yayına girdiğinde size haber verelim. Kütahya'da alınır satılır ne varsa tek yerde topluyoruz.";
+  const waMessage = isRealEstate
+    ? "Merhaba, aradığım kriterlerde gayrimenkul arıyorum. Yardımcı olabilir misiniz?"
+    : "Merhaba, aradığım kriterlerde bir ilan arıyorum. Yardımcı olabilir misiniz?";
+
   return (
     <section className="rounded-control bg-brand-950 p-8 text-center text-white sm:p-12">
-      <h2 className="text-2xl font-bold sm:text-3xl">{title}</h2>
-      <p className="mx-auto mt-3 max-w-2xl leading-relaxed text-brand-100">
-        Bizi arayın, portföyümüzde yer alan ve henüz yayınlanmamış diğer seçenekleri
-        size özel sunalım. Kütahya&apos;nın dijital emlak ofisi olarak doğru mülkü
-        bulmanıza yardımcı oluyoruz.
-      </p>
+      <h2 className="text-2xl font-bold sm:text-3xl">{heading}</h2>
+      <p className="mx-auto mt-3 max-w-2xl leading-relaxed text-brand-100">{body}</p>
       <div className="mt-7 flex flex-col items-center justify-center gap-3 sm:flex-row">
-        <Link
-          href="/alici-talebi"
-          className="inline-flex w-full items-center justify-center gap-2 rounded-[10px] bg-paper px-6 py-3.5 font-semibold text-brand-800 transition hover:bg-brand-50 sm:w-auto"
-        >
-          <BellRing className="h-5 w-5" /> Talebimi Bırak, Bulun
-        </Link>
+        {isRealEstate && (
+          <Link
+            href="/alici-talebi"
+            className="inline-flex w-full items-center justify-center gap-2 rounded-[10px] bg-paper px-6 py-3.5 font-semibold text-brand-800 transition hover:bg-brand-50 sm:w-auto"
+          >
+            <BellRing className="h-5 w-5" /> Talebimi Bırak, Bulun
+          </Link>
+        )}
         {c.phoneRaw && (
           <a
             href={telLink(c.phoneRaw)}
@@ -36,7 +59,7 @@ export default function NotFoundCTA({
         )}
         {c.whatsapp && (
           <a
-            href={whatsappLink(c.whatsapp, "Merhaba, aradığım kriterlerde gayrimenkul arıyorum. Yardımcı olabilir misiniz?")}
+            href={whatsappLink(c.whatsapp, waMessage)}
             target="_blank"
             rel="noopener noreferrer"
             className="inline-flex w-full items-center justify-center gap-2 rounded-[10px] bg-green-600 px-6 py-3.5 font-semibold text-white transition hover:bg-green-700 sm:w-auto"

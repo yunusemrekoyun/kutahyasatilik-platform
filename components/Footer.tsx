@@ -3,6 +3,7 @@ import { ArrowUpRight, MessageCircle, Phone } from "lucide-react";
 import ConsentSettingsLink from "@/components/ConsentSettingsLink";
 import { getSiteContact } from "@/lib/contact";
 import { DISTRICTS } from "@/lib/constants";
+import { CATEGORY_LIST } from "@/lib/categories";
 import { prisma } from "@/lib/prisma";
 import { SITE, telLink, whatsappLink } from "@/lib/site";
 
@@ -23,7 +24,7 @@ export default async function Footer() {
         <div className="lg:col-span-5">
           <p className="text-3xl font-semibold tracking-tight text-white">Kütahya<span className="text-gold-400">Satılık</span></p>
           <p className="mt-5 max-w-md text-base leading-7 text-brand-200">
-            Kütahya merkez ve ilçelerinde güncel portföy, bölgesel veri ve yerel danışmanlık tek yerde.
+            Kütahya merkez ve ilçelerinde satılık emlak, vasıta ve teknoloji ilanları; bölgesel veri ve yerel danışmanlık tek yerde.
           </p>
           <div className="mt-7 flex flex-wrap gap-3">
             {contact.phoneRaw && (
@@ -32,7 +33,7 @@ export default async function Footer() {
               </a>
             )}
             {contact.whatsapp && (
-              <a href={whatsappLink(contact.whatsapp, "Merhaba, gayrimenkul hakkında bilgi almak istiyorum.")} className="inline-flex min-h-11 items-center gap-2 rounded-control border border-white/20 px-4 text-sm font-semibold text-white hover:bg-paper/10">
+              <a href={whatsappLink(contact.whatsapp, "Merhaba, kutahyasatilik.com üzerinden bilgi almak istiyorum.")} className="inline-flex min-h-11 items-center gap-2 rounded-control border border-white/20 px-4 text-sm font-semibold text-white hover:bg-paper/10">
                 <MessageCircle className="h-4 w-4" /> WhatsApp
               </a>
             )}
@@ -41,12 +42,17 @@ export default async function Footer() {
 
         <div className="grid grid-cols-2 gap-10 sm:grid-cols-3 lg:col-span-7">
           <div>
-            <h2 className="eyebrow !text-gold-300">Portföy</h2>
+            {/* Kategoriler kayıttan üretiliyor: elle yazılan liste yüzünden
+                vasıta ve teknolojiye giden tek bir footer bağlantısı yoktu. */}
+            <h2 className="eyebrow !text-gold-300">Kategoriler</h2>
             <ul className="mt-4 space-y-3 text-sm">
-              <li><Link href="/ilanlar" className="hover:text-white">Tüm İlanlar</Link></li>
+              {CATEGORY_LIST.map((category) => (
+                <li key={category.key}>
+                  <Link href={`/ilanlar?kategori=${category.key}`} className="hover:text-white">{category.label}</Link>
+                </li>
+              ))}
               <li><Link href="/daire" className="hover:text-white">Daire</Link></li>
               <li><Link href="/arsa" className="hover:text-white">Arsa</Link></li>
-              <li><Link href="/villa" className="hover:text-white">Villa</Link></li>
               <li><Link href="/harita" className="hover:text-white">Haritada Ara</Link></li>
             </ul>
           </div>

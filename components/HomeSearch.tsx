@@ -3,22 +3,34 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Search } from "lucide-react";
-import { DISTRICTS, PROPERTY_TYPES } from "@/lib/constants";
+import { DISTRICTS } from "@/lib/constants";
+import { CATEGORY_LIST } from "@/lib/categories";
 
+/**
+ * Ana sayfa araması.
+ *
+ * `kategori` zorunlu bir parametre: /ilanlar kategorisiz çağrıldığında liste
+ * değil kategori seçim ekranı çiziyor, yani kategorisiz gönderilen bir arama
+ * kullanıcıyı sonuca değil başa götürüyordu. Tür listesi de sabit emlak
+ * dizisinden değil seçili kategorinin alt türlerinden üretiliyor.
+ */
 export default function HomeSearch() {
   const router = useRouter();
   const [q, setQ] = useState("");
+  const [kategori, setKategori] = useState<string>(CATEGORY_LIST[0]?.key ?? "emlak");
   const [tur, setTur] = useState("");
   const [ilce, setIlce] = useState("");
+
+  const subTypes = CATEGORY_LIST.find((c) => c.key === kategori)?.subTypes ?? [];
 
   function submit(e: React.FormEvent) {
     e.preventDefault();
     const p = new URLSearchParams();
+    p.set("kategori", kategori);
     if (q.trim()) p.set("q", q.trim());
     if (tur) p.set("tur", tur);
     if (ilce) p.set("ilce", ilce);
-    const qs = p.toString();
-    router.push(`/ilanlar${qs ? `?${qs}` : ""}`);
+    router.push(`/ilanlar?${p.toString()}`);
   }
 
   const labelCls = "mb-2 block text-left text-[11px] font-bold uppercase tracking-[0.12em] text-muted";
@@ -26,7 +38,7 @@ export default function HomeSearch() {
     "h-12 w-full rounded-control border border-stone bg-paper px-3.5 text-[15px] text-ink outline-none transition focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20";
 
   return (
-    <form role="search" aria-label="İlan arama" onSubmit={submit} className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4 xl:items-end">
+    <form role="search" aria-label="İlan arama" onSubmit={submit} className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-5 xl:items-end">
       <div className="xl:col-span-1">
         <label htmlFor="hs-q" className={labelCls}>Anahtar Kelime</label>
         <div className="relative">
@@ -43,10 +55,21 @@ export default function HomeSearch() {
         </div>
       </div>
       <div>
+        <label htmlFor="hs-kategori" className={labelCls}>Kategori</label>
+        <select
+          id="hs-kategori"
+          value={kategori}
+          onChange={(e) => { setKategori(e.target.value); setTur(""); }}
+          className={fieldCls}
+        >
+          {CATEGORY_LIST.map((c) => <option key={c.key} value={c.key}>{c.label}</option>)}
+        </select>
+      </div>
+      <div>
         <label htmlFor="hs-tur" className={labelCls}>Tür Seçiniz</label>
         <select id="hs-tur" value={tur} onChange={(e) => setTur(e.target.value)} className={fieldCls}>
           <option value="">Tüm Türler</option>
-          {PROPERTY_TYPES.map((p) => <option key={p.value} value={p.value}>{p.label}</option>)}
+          {subTypes.map((s) => <option key={s.value} value={s.value}>{s.label}</option>)}
         </select>
       </div>
       <div>

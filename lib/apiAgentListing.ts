@@ -177,7 +177,10 @@ export async function upsertAgentListing(
         .split(",")
         .map((s) => s.trim())
         .filter(Boolean);
-  const amenityKeys = Array.isArray(body.amenities)
+  // Olanaklar (asansör, ankastre mutfak, site içi...) emlak kavramı. Yazma
+  // tarafında kapıya almazsak bir traktör ilanına "Balkon" kaydedilebiliyor ve
+  // okuma tarafındaki kapı yalnız gizliyor, veriyi düzeltmiyor.
+  const amenityKeys = isRealEstate && Array.isArray(body.amenities)
     ? (body.amenities as unknown[]).map(String).filter(Boolean)
     : [];
   const amenities = listingAmenityRows(amenityKeys);
@@ -208,10 +211,10 @@ export async function upsertAgentListing(
     ...(has(body, "totalFloors") ? { totalFloors: num(body.totalFloors) } : {}),
     ...(has(body, "buildingAge") ? { buildingAge: str(body.buildingAge) } : {}),
     ...(has(body, "heating") ? { heating: str(body.heating) } : {}),
-    ...(has(body, "furnished") ? { furnished: bool(body.furnished) } : {}),
-    ...(has(body, "inSite") ? { inSite: bool(body.inSite) } : {}),
-    ...(has(body, "balcony") ? { balcony: bool(body.balcony) } : {}),
-    ...(has(body, "parking") ? { parking: bool(body.parking) } : {}),
+    ...(has(body, "furnished") ? { furnished: isRealEstate && bool(body.furnished) } : {}),
+    ...(has(body, "inSite") ? { inSite: isRealEstate && bool(body.inSite) } : {}),
+    ...(has(body, "balcony") ? { balcony: isRealEstate && bool(body.balcony) } : {}),
+    ...(has(body, "parking") ? { parking: isRealEstate && bool(body.parking) } : {}),
     ...(has(body, "creditEligible") ? { creditEligible: str(body.creditEligible) } : {}),
     ...(has(body, "usageStatus") ? { usageStatus: str(body.usageStatus) } : {}),
     ...(has(body, "propertyCondition") ? { propertyCondition: str(body.propertyCondition) } : {}),
@@ -234,8 +237,9 @@ export async function upsertAgentListing(
     ...(has(body, "parcelVisibility") ? { parcelVisibility: bool(body.parcelVisibility) } : {}),
     // Medya linkleri: gövdede yoksa DOKUNMA (video/drone/sanal-tur silinmesin).
     ...(has(body, "videoUrl") ? { videoUrl: str(body.videoUrl) } : {}),
-    ...(has(body, "droneUrl") ? { droneUrl: str(body.droneUrl) } : {}),
-    ...(has(body, "virtualTourUrl") ? { virtualTourUrl: str(body.virtualTourUrl) } : {}),
+    // Drone çekimi ve 360° tur da mülke ait: emlak dışında kaydedilmez.
+    ...(has(body, "droneUrl") ? { droneUrl: isRealEstate ? str(body.droneUrl) : null } : {}),
+    ...(has(body, "virtualTourUrl") ? { virtualTourUrl: isRealEstate ? str(body.virtualTourUrl) : null } : {}),
     ...(has(body, "features") ? { features: features.length ? JSON.stringify(features) : null } : {}),
     moderationStatus: "pending", // her kayıt/güncelleme yeniden admin onayına düşer
     agentId,

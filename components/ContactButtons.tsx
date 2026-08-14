@@ -8,30 +8,63 @@ import { trackConversion } from "@/lib/track";
 import { useSessionUser } from "@/lib/useSessionUser";
 import LeadForm from "./LeadForm";
 
-type ModalType = "appointment" | "expertise" | "price_offer" | null;
+type ModalType = "appointment" | "expertise" | "price_offer" | "contact";
+
+const MODAL_TITLE: Record<ModalType, string> = {
+  appointment: "Randevu Talep Et",
+  expertise: "Ücretsiz Ekspertiz İste",
+  price_offer: "Fiyat Teklifi Al",
+  contact: "Bilgi İste",
+};
+
+/**
+ * İlan formu eylemleri kategoriye göre değişir.
+ *
+ * "Ekspertiz" ve "yerinde randevu" emlak akışının kavramları; bir traktör ya da
+ * telefon ilanında anlamsız. Site her tür satılık ilana açıldığında bu düğmeler
+ * kategori bakılmadan çizilmeye devam ediyordu — emlak dışı ilanlarda emlak
+ * arayüzü görünüyordu.
+ */
+function actionsFor(category: string | undefined): { type: Exclude<ModalType, "contact"> | "contact"; label: string; tone: "soft" | "gold"; wide?: boolean }[] {
+  if (!category || category === "emlak") {
+    return [
+      { type: "appointment", label: "Randevu Talep Et", tone: "soft" },
+      { type: "expertise", label: "Ekspertiz İste", tone: "soft" },
+      { type: "price_offer", label: "Fiyat Teklifi Al", tone: "gold", wide: true },
+    ];
+  }
+  return [
+    { type: "contact", label: "Bilgi İste", tone: "soft" },
+    { type: "price_offer", label: "Fiyat Teklifi Al", tone: "gold" },
+  ];
+}
 
 export default function ContactButtons({
   listingId,
   listingTitle,
   district,
+  category,
   layout = "grid",
 }: {
   listingId: string;
   listingTitle: string;
   district?: string;
+  /** İlanın kategorisi. Verilmezse emlak varsayılır (eski çağrı yerleri). */
+  category?: string;
   layout?: "grid" | "stack";
 }) {
   // Oturumu burada da çağırıyoruz: bileşen sayfa yüklenirken mount olduğu için
   // istek modal açılmadan tamamlanır, LeadForm cache'e hazır bulur.
   useSessionUser();
-  const [modal, setModal] = useState<ModalType>(null);
+  const [modal, setModal] = useState<ModalType | null>(null);
   const c = useSiteContact();
   const dialogRef = useRef<HTMLDivElement>(null);
   const closeButtonRef = useRef<HTMLButtonElement>(null);
   const returnFocusRef = useRef<HTMLButtonElement | null>(null);
 
   const waMessage = `Merhaba, "${listingTitle}" ilanı (kutahyasatilik.com) hakkında bilgi almak istiyorum.`;
-  const modalTitle = modal === "appointment" ? "Randevu Talep Et" : modal === "expertise" ? "Ücretsiz Ekspertiz İste" : "Fiyat Teklifi Al";
+  const actions = actionsFor(category);
+  const modalTitle = modal ? MODAL_TITLE[modal] : "";
 
   useEffect(() => {
     if (!modal) return;
@@ -100,27 +133,32 @@ export default function ContactButtons({
             <MessageCircle aria-hidden="true" className="h-5 w-5" /> WhatsApp&apos;tan Yaz
           </a>
         )}
-        <button
-          type="button"
-          onClick={(event) => { returnFocusRef.current = event.currentTarget; setModal("appointment"); }}
-          className="inline-flex items-center justify-center gap-1.5 rounded-[10px] border border-brand-200 bg-brand-50 px-3 py-3 text-sm font-semibold text-brand-800 transition hover:bg-brand-100"
-        >
-          <CalendarDays aria-hidden="true" className="h-4 w-4" /> Randevu Talep Et
-        </button>
-        <button
-          type="button"
-          onClick={(event) => { returnFocusRef.current = event.currentTarget; setModal("expertise"); }}
-          className="inline-flex items-center justify-center gap-1.5 rounded-[10px] border border-brand-200 bg-brand-50 px-3 py-3 text-sm font-semibold text-brand-800 transition hover:bg-brand-100"
-        >
-          <ClipboardCheck aria-hidden="true" className="h-4 w-4" /> Ekspertiz İste
-        </button>
-        <button
-          type="button"
-          onClick={(event) => { returnFocusRef.current = event.currentTarget; setModal("price_offer"); }}
-          className="col-span-2 inline-flex items-center justify-center gap-1.5 rounded-[10px] border border-gold-300 bg-gold-50 px-3 py-3 text-sm font-semibold text-gold-700 transition hover:bg-gold-100"
-        >
-          <Banknote aria-hidden="true" className="h-4 w-4" /> Fiyat Teklifi Al
-        </button>
+        {actions.map((action) => {
+          const Icon =
+            action.type === "appointment"
+              ? CalendarDays
+              : action.type === "expertise"
+              ? ClipboardCheck
+              : action.type === "price_offer"
+              ? Banknote
+              : MessageCircle;
+          return (
+            <button
+              key={action.type}
+              type="button"
+              onClick={(event) => { returnFocusRef.current = event.currentTarget; setModal(action.type); }}
+              className={`inline-flex items-center justify-center gap-1.5 rounded-[10px] border px-3 py-3 text-sm font-semibold transition ${
+                action.wide ? "col-span-2 " : ""
+              }${
+                action.tone === "gold"
+                  ? "border-gold-300 bg-gold-50 text-gold-700 hover:bg-gold-100"
+                  : "border-brand-200 bg-brand-50 text-brand-800 hover:bg-brand-100"
+              }`}
+            >
+              <Icon aria-hidden="true" className="h-4 w-4" /> {action.label}
+            </button>
+          );
+        })}
       </div>
 
       {c.phone && (

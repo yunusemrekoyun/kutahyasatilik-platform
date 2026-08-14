@@ -17,7 +17,9 @@ export default function BuyerAlertPage() {
   return (
     <div>
       <TrackView />
-      <PageIntro eyebrow="Alıcı talebi" title="Aradığınız mülkü birlikte bulalım" intro="Kriterlerinizi paylaşın; mevcut portföyü eşleştirelim ve uygun yeni bir ilan geldiğinde size haber verelim." />
+      {/* Kapsam etiketi metinde açık: eşleştirme (lib/matching.ts) emlak
+          kriterleri üzerinden çalışıyor, vasıta/teknoloji talebi kabul edilmiyor. */}
+      <PageIntro eyebrow="Alıcı talebi · Emlak" title="Aradığınız mülkü birlikte bulalım" intro="Emlak kriterlerinizi paylaşın; mevcut portföyü eşleştirelim ve uygun yeni bir ilan geldiğinde size haber verelim." />
 
       <section className="mx-auto max-w-3xl px-4 py-10">
         <div className="border border-stone bg-paper p-6 sm:p-8">

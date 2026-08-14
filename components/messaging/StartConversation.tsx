@@ -6,12 +6,18 @@ import { MessageSquare, X, Send } from "lucide-react";
 import LoginRequiredNotice from "@/components/LoginRequiredNotice";
 import { useSessionUser } from "@/lib/useSessionUser";
 
-// İlan detayında "Mesaj Gönder / Teklif Ver" — kullanıcı o ilanın danışmanıyla sohbet başlatır.
+// İlan detayında "Mesaj Gönder / Teklif Ver" — kullanıcı o ilanın satıcısıyla sohbet başlatır.
 export default function StartConversation({
   listingId,
   canMessage,
+  sellerLabel = "Satıcıya",
 }: {
   listingId: string;
+  /**
+   * Muhatabın yönelme hâlindeki adı ("Danışmana" / "Satıcıya").
+   * Bireysel ilanda "Danışmana Mesaj" demek karşıdaki kişiyi yanlış tanıtıyordu.
+   */
+  sellerLabel?: string;
   /**
    * Bu ilanın muhatabı var mı — danışman VEYA bireysel sahip.
    * Eskiden `hasAgent` idi: bireysel ilanlarda false gelip bileşen null
@@ -65,7 +71,7 @@ export default function StartConversation({
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4" onClick={() => setOpen(false)}>
           <div className="w-full max-w-md rounded-control bg-paper p-6 shadow-prestige" onClick={(e) => e.stopPropagation()}>
             <div className="mb-3 flex items-center justify-between">
-              <h3 className="text-lg font-bold text-ink">Danışmana Mesaj</h3>
+              <h3 className="text-lg font-bold text-ink">{sellerLabel} Mesaj</h3>
               <button onClick={() => setOpen(false)} aria-label="Kapat"><X className="h-5 w-5 text-muted/70" /></button>
             </div>
 
@@ -75,7 +81,7 @@ export default function StartConversation({
               <LoginRequiredNotice text="Mesaj / teklif göndermek için giriş yapın" />
             ) : status === "ok" ? (
               <div className="rounded-control bg-green-50 p-5 text-center ring-1 ring-green-200">
-                <p className="text-sm font-semibold text-green-800">Mesajınız danışmana iletildi.</p>
+                <p className="text-sm font-semibold text-green-800">Mesajınız {sellerLabel.toLocaleLowerCase("tr-TR")} iletildi.</p>
                 <Link href="/hesabim/mesajlar" className="mt-3 inline-block rounded-control bg-brand-700 px-4 py-2 text-sm font-semibold text-white hover:bg-brand-800">
                   Mesajlarıma Git
                 </Link>

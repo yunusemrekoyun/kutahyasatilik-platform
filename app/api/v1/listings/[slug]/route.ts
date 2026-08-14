@@ -3,7 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { parseJsonArray } from "@/lib/format";
 import { requestOrigin } from "@/lib/apiMedia";
 import { buildAnalysis } from "@/lib/analysis";
-import { CATEGORY_LABELS, describeAttributes, getSubTypeLabel } from "@/lib/categories";
+import { CATEGORY_LABELS, describeAttributes, getSubTypeLabel, summarizeAttributes } from "@/lib/categories";
 import { PUBLIC_ACTIVE_LISTING, PUBLIC_VISIBLE_LISTING } from "@/lib/listingFilters";
 
 // Mobil ilan detayı — web detay sayfasıyla (app/(site)/ilan/[slug]) aynı veri kaynağı.
@@ -50,11 +50,14 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ slug
   const [district, scoresSetting, similarRaw] = await Promise.all([
     prisma.district.findFirst({ where: { name: l.district } }),
     prisma.setting.findUnique({ where: { key: "analysis_scores" }, select: { value: true } }),
+    // Kategori KAPSAM koşulu: kategorisiz sorguda bir otomobilin altına aynı
+    // ilçedeki daireler geliyordu.
     prisma.listing.findMany({
       where: {
         status: "active",
         moderationStatus: "approved",
         id: { not: l.id },
+        category: l.category,
         OR: [{ district: l.district }, { propertyType: l.propertyType }],
       },
       orderBy: [{ featured: "desc" }, { createdAt: "desc" }],
@@ -75,6 +78,9 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ slug
     title: item.title,
     price: item.price,
     currency: item.currency,
+    category: item.category,
+    subTypeLabel: getSubTypeLabel(item.category, item.propertyType),
+    attributeSummary: summarizeAttributes(item.category, item.attributes),
     propertyType: item.propertyType,
     district: item.district,
     neighborhood: item.neighborhood,

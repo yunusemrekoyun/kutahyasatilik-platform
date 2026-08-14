@@ -20,9 +20,12 @@ export const metadata: Metadata = {
 export default async function RegionAnalysis() {
   const [districts, counts, scoresSetting] = await Promise.all([
     prisma.district.findMany({ orderBy: { sortOrder: "asc" } }),
+    // Sayfanın tüm metrikleri (m² fiyatı, imar, yatırım puanı) emlak verisi;
+    // sayacın kategorisiz kalması "Merkez'de 128 ilan" derken 40'ının telefon
+    // olduğu anlamına geliyordu.
     prisma.listing.groupBy({
       by: ["district"],
-      where: { status: "active", moderationStatus: "approved" },
+      where: { status: "active", moderationStatus: "approved", category: "emlak" },
       _count: { _all: true },
     }),
     prisma.setting.findUnique({ where: { key: "analysis_scores" } }),
@@ -100,7 +103,7 @@ export default async function RegionAnalysis() {
                   <th className="p-3 text-right">Arsa m²</th>
                   <th className="p-3 text-right">Ort. Daire</th>
                   </>)}
-                  <th className="p-3 text-center">İlan</th>
+                  <th className="p-3 text-center">Emlak ilanı</th>
                   <th className="p-3"></th>
                 </tr>
               </thead>
@@ -120,7 +123,7 @@ export default async function RegionAnalysis() {
                     </>)}
                     <td className="p-3 text-center text-muted">{d.count}</td>
                     <td className="p-3 text-right">
-                      <Link href={`/ilanlar?ilce=${encodeURIComponent(d.name)}`} className="inline-flex items-center gap-1 text-xs font-semibold text-brand-700 hover:underline">İlanlar <ArrowRight className="h-4 w-4" /></Link>
+                      <Link href={`/ilanlar?kategori=emlak&ilce=${encodeURIComponent(d.name)}`} className="inline-flex items-center gap-1 text-xs font-semibold text-brand-700 hover:underline">İlanlar <ArrowRight className="h-4 w-4" /></Link>
                     </td>
                   </tr>
                 ))}

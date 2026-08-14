@@ -69,7 +69,7 @@ export default async function LandingPageView({
         )}
 
         <section className="mt-14">
-          <NotFoundCTA />
+          <NotFoundCTA category="emlak" />
         </section>
       </div>
     </div>

@@ -17,6 +17,8 @@
  *   npm run seed:demo -- --no-images
  */
 import "dotenv/config";
+import bcrypt from "bcryptjs";
+import { randomUUID } from "crypto";
 import { mkdir, writeFile, access } from "fs/promises";
 import path from "path";
 import { PrismaClient } from "../app/generated/prisma/client";
@@ -363,6 +365,121 @@ function tech() {
 }
 
 // ---------------------------------------------------------------------------
+// Sahiplik — ilanlar sahipsiz kalmamalı
+//
+// Sahipsiz ilan yalnız veri eksikliği değil, YANLIŞ ARAYÜZ demek: ilan detayı
+// "ne danışman ne bireysel sahip" dalına düşüyor ve emlak akışını (ekspertiz,
+// yerinde randevu, fiyat teklifi) bir traktör ilanında gösteriyor.
+//
+// Dağılım ürünün kendi kuralını izliyor (kilitli karar):
+//   emlak                -> onaylı emlakçı (ofise bağlı)
+//   vasita, teknoloji    -> bireysel kullanıcı
+// ---------------------------------------------------------------------------
+
+const AGENCIES = [
+  { name: "Evliya Gayrimenkul", districts: ["Merkez", "Yoncalı"] },
+  { name: "Çini Emlak", districts: ["Merkez", "Bölcek"] },
+  { name: "Dumlupınar Yapı & Emlak", districts: ["Merkez", "Dumlupınar"] },
+  { name: "Tavşanlı Portföy", districts: ["Tavşanlı", "Emet"] },
+  { name: "Simav Konut", districts: ["Simav", "Şaphane"] },
+  { name: "Gediz Emlak Ofisi", districts: ["Gediz", "Pazarlar"] },
+];
+
+const AGENT_NAMES = [
+  "Hüseyin Yılmaz", "Ayşe Demir", "Mehmet Kaya", "Fatma Şahin",
+  "Ahmet Çelik", "Zeynep Aydın", "Mustafa Doğan", "Elif Arslan",
+  "Kemal Öztürk", "Hatice Yıldız", "Emre Koç", "Merve Aslan",
+];
+
+const SELLER_NAMES = [
+  "Ali Kurt", "Selin Ateş", "Burak Tunç", "Deniz Ergin", "Cem Bozkurt",
+  "Ece Yalçın", "Serkan Uysal", "Nazlı Kılıç", "Onur Şen", "Pınar Aksoy",
+  "Volkan Tekin", "Gizem Barut", "Tolga Erdem", "Sude Polat", "Kaan Işık",
+  "Melis Duran", "Baran Sarı", "İrem Çetin", "Umut Güneş", "Ceren Akın",
+  "Hakan Bulut", "Yasemin Kara", "Eren Toprak", "Damla Öz", "Sinan Ak",
+  "Buse Yavuz", "Furkan Ünal", "Aslı Turan", "Berk Sezer", "Nehir Balcı",
+];
+
+/** 05XX XXX XX XX — gerçek bir numaraya denk gelmesin diye 0555 555 bloğu. */
+const demoPhone = (i: number) => `0555 555 ${String(10 + (i % 90)).padStart(2, "0")} ${String(i % 100).padStart(2, "0")}`;
+
+async function ensureOwners() {
+  // Tek hash, hepsinde aynı: demo hesapların parolası gizli bir bilgi değil ama
+  // düz metin de tutulmuyor. Giriş yapılması beklenmiyor.
+  const passwordHash = await bcrypt.hash(randomUUID(), 10);
+
+  const agencies = [];
+  for (const [index, def] of AGENCIES.entries()) {
+    const slug = slugify(def.name);
+    agencies.push(
+      await prisma.agency.upsert({
+        where: { slug },
+        update: {},
+        create: {
+          name: def.name,
+          slug,
+          description: `${def.districts[0]} ve çevresinde ${ri(8, 24)} yıldır hizmet veren yerel emlak ofisi.`,
+          address: `${def.districts[0]}, Kütahya`,
+          serviceDistricts: JSON.stringify(def.districts),
+          status: "approved",
+          published: true,
+          approvedAt: new Date(),
+          verifiedAt: index < 3 ? new Date() : null,
+          showPhone: true,
+        },
+        select: { id: true, name: true },
+      }),
+    );
+  }
+
+  const agents = [];
+  for (const [index, name] of AGENT_NAMES.entries()) {
+    const agency = agencies[index % agencies.length];
+    const slug = slugify(name);
+    agents.push(
+      await prisma.agent.upsert({
+        where: { slug },
+        update: {},
+        create: {
+          email: `${slug}@demo.kutahyasatilik.com`,
+          passwordHash,
+          name,
+          phone: demoPhone(index),
+          title: "Gayrimenkul Danışmanı",
+          agency: agency.name,
+          agencyId: agency.id,
+          slug,
+          status: "approved",
+          approvedAt: new Date(),
+          publicProfile: true,
+          showPhone: true,
+          showWhatsapp: true,
+          experienceYears: ri(2, 18),
+          bio: `Kütahya'da konut ve arsa portföyünde ${ri(2, 18)} yıllık deneyim.`,
+        },
+        select: { id: true, agencyId: true },
+      }),
+    );
+  }
+
+  const sellers = [];
+  for (const [index, name] of SELLER_NAMES.entries()) {
+    const email = `${slugify(name)}@demo.kutahyasatilik.com`;
+    sellers.push(
+      await prisma.user.upsert({
+        where: { email },
+        update: {},
+        create: { email, passwordHash, name, phone: demoPhone(index + 40), verifiedAt: new Date() },
+        select: { id: true },
+      }),
+    );
+  }
+
+  console.log(`Sahipler: ${agencies.length} ofis · ${agents.length} danışman · ${sellers.length} bireysel satıcı`);
+  return { agents, sellers };
+}
+
+// ---------------------------------------------------------------------------
 function slugify(input: string): string {
   const map: Record<string, string> = { ç: "c", ğ: "g", ı: "i", ö: "o", ş: "s", ü: "u", İ: "i" };
   return input
@@ -382,6 +499,8 @@ async function main() {
     const { count } = await prisma.listing.deleteMany({});
     console.log(`  ${count} mevcut ilan silindi`);
   }
+
+  const owners = await ensureOwners();
 
   console.log("Görseller hazırlanıyor (indirilenler nokta, atlananlar x):");
   const pools = await ensureImages();
@@ -422,6 +541,11 @@ async function main() {
     // Vitrin oranı ~%12 — hepsi vitrinse vitrin anlamını yitirir.
     const featured = chance(0.12);
 
+    // Sahip ataması. Emlak ilanı danışmana, diğerleri bireysel satıcıya gider;
+    // ilan detayı iletişim kutusunu buna göre seçiyor.
+    const agent = row.category === "emlak" ? owners.agents[index % owners.agents.length] : null;
+    const seller = agent ? null : owners.sellers[index % owners.sellers.length];
+
     await prisma.listing.create({
       data: {
         slug,
@@ -449,6 +573,9 @@ async function main() {
         featured,
         verified: chance(0.25),
         attributes: row.attributes ?? undefined,
+        agentId: agent?.id ?? null,
+        agencyId: agent?.agencyId ?? null,
+        userId: seller?.id ?? null,
         // createdAt dağılımı: "yeni" rozeti hepsinde çıkmasın diye son 90 güne yayılıyor.
         createdAt: new Date(Date.now() - ri(0, 90) * 86_400_000),
         images: images.length

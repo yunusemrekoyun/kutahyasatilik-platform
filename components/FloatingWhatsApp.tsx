@@ -9,7 +9,7 @@ export default function FloatingWhatsApp() {
   if (!c.whatsapp) return null; // WhatsApp tanımlı değilse balonu gösterme
   return (
     <a
-      href={whatsappLink(c.whatsapp, "Merhaba, kutahyasatilik.com üzerinden gayrimenkul hakkında bilgi almak istiyorum.")}
+      href={whatsappLink(c.whatsapp, "Merhaba, kutahyasatilik.com üzerinden bilgi almak istiyorum.")}
       target="_blank"
       rel="noopener noreferrer"
       onClick={() => track({ type: "whatsapp_click" })}

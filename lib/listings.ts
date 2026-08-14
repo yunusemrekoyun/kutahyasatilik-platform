@@ -4,7 +4,7 @@ import type { ListingCardData } from "@/components/ListingCard";
 import { getDistrictStats } from "./districtStats";
 import { computeBadges } from "./badges";
 import { buildOrderBy, buildWhere, PUBLIC_VISIBLE_LISTING, type ListingFilter } from "./listingFilters";
-import { summarizeAttributes } from "./categories";
+import { getSubTypeLabel, summarizeAttributes } from "./categories";
 
 export { buildOrderBy, buildWhere, PUBLIC_VISIBLE_LISTING, PUBLIC_ACTIVE_LISTING } from "./listingFilters";
 export type { ListingFilter } from "./listingFilters";
@@ -97,6 +97,9 @@ export async function decorate(rows: RawCard[]): Promise<ListingCardData[]> {
       currency: l.currency,
       category: l.category,
       propertyType: l.propertyType,
+      // Alt tür etiketi kart sözleşmesinin parçası: kategori kaydı yalnız web'de
+      // duruyor, etiketi burada üretmezsek mobil ham slug ("otomobil") basıyor.
+      subTypeLabel: getSubTypeLabel(l.category, l.propertyType),
       attributeSummary: summarizeAttributes(l.category, l.attributes),
       district: l.district,
       neighborhood: l.neighborhood,
@@ -218,10 +221,18 @@ export async function getListingSnapshotsBySlugs(slugs: string[]) {
   });
 }
 
+/**
+ * Harita noktaları — VARSAYILAN OLARAK EMLAK.
+ *
+ * Konum bir mülkün ayrılmaz özelliği; bir telefonun ya da otomobilin değil.
+ * Kategori kapsamı burada uygulanmazsa harita "Kütahya ilan haritası" olurken
+ * pinlerin bir kısmı satıcının evinin yaklaşık koordinatı oluyor. Çağıran
+ * açıkça başka bir kategori verirse ona saygı duyulur.
+ */
 export async function getMapPoints(filter: ListingFilter = {}) {
   const rows = await prisma.listing.findMany({
     where: {
-      ...buildWhere(filter),
+      ...buildWhere({ category: "emlak", ...filter }),
       locationVisibility: { not: "hidden" },
       lat: { not: null },
       lng: { not: null },

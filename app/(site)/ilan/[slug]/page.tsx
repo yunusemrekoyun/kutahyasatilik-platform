@@ -5,13 +5,14 @@ import type { Metadata } from "next";
 import { prisma } from "@/lib/prisma";
 import { buildAnalysis } from "@/lib/analysis";
 import { formatPrice, formatDate, parseJsonArray } from "@/lib/format";
-import { describeAttributes, getSubTypeLabel } from "@/lib/categories";
+import { CATEGORY_LABELS, describeAttributes, getSubTypeLabel, summarizeAttributes } from "@/lib/categories";
 import { publicImageUrl } from "@/lib/media";
 import { SITE } from "@/lib/site";
 import Gallery from "@/components/Gallery";
 import ContactButtons from "@/components/ContactButtons";
 import SellerPhone from "@/components/SellerPhone";
 import { PUBLIC_ACTIVE_LISTING, PUBLIC_VISIBLE_LISTING } from "@/lib/listingFilters";
+import { cardSelect, decorate, type RawCard } from "@/lib/listings";
 import StartConversation from "@/components/messaging/StartConversation";
 import AnalysisSection from "@/components/AnalysisSection";
 import ListingMedia from "@/components/ListingMedia";
@@ -135,17 +136,18 @@ export default async function ListingPage({
     prisma.district.findFirst({ where: { name: listing.district } }),
     // Bölge analizi skorlarını göster/gizle (Setting: analysis_scores; "0" ise gizli, varsayılan göster)
     prisma.setting.findUnique({ where: { key: "analysis_scores" } }),
-    // Benzer ilanlar
+    // Benzer ilanlar — kategori KAPSAM koşulu, tercih değil: kategorisiz
+    // sorguda bir otomobilin altına aynı ilçedeki daireler geliyordu.
     prisma.listing.findMany({
       where: {
-        status: "active",
-        moderationStatus: "approved",
+        ...PUBLIC_ACTIVE_LISTING,
         id: { not: listing.id },
+        category: listing.category,
         OR: [{ district: listing.district }, { propertyType: listing.propertyType }],
       },
       orderBy: [{ featured: "desc" }, { createdAt: "desc" }],
       take: 3,
-      include: { images: { take: 1, orderBy: { sortOrder: "asc" } } },
+      select: cardSelect,
     }),
   ]);
 
@@ -153,12 +155,10 @@ export default async function ListingPage({
   const features = parseJsonArray(listing.features);
   const amenityGroups = groupListingAmenities(listing.amenities.map((item) => item.key));
   const showScores = scoresSetting?.value !== "0";
-  const similar = similarRaw.map((l) => ({
-    slug: l.slug, title: l.title, price: l.price, currency: l.currency,
-    propertyType: l.propertyType, district: l.district, neighborhood: l.neighborhood,
-    rooms: l.rooms, areaGross: l.areaGross, status: l.status, featured: l.featured,
-    coverImage: l.images[0]?.url ?? null,
-  }));
+  // Elle kopyalanan alan listesi yerine ortak kart sözleşmesi: category ve
+  // attributeSummary düşerse kart kendini emlak sanıyor (ham "otomobil" etiketi,
+  // km/yıl özeti yok).
+  const similar = await decorate(similarRaw as RawCard[]);
 
   const publicCoordinates =
     listing.locationVisibility === "hidden" || listing.lat == null || listing.lng == null
@@ -186,6 +186,7 @@ export default async function ListingPage({
   const isCommercial = isRealEstate && listing.propertyType === "isyeri";
   const isResidential = isRealEstate && !isLand && !isCommercial;
   const isSold = listing.status === "sold";
+  const categoryLabel = CATEGORY_LABELS[listing.category] ?? "İlanlar";
   const agentLogo = publicImageUrl(listing.agent?.logo);
 
   // Brüt=Net olduğunda "125 / 125" yerine tek değer göster (gereksiz tekrar olmasın).
@@ -221,11 +222,20 @@ export default async function ListingPage({
       ]
   ).filter((m) => m.value && m.value !== "—");
 
+  // Favori / karşılaştır / son gezilenler bu kopyayı localStorage'a yazar; sayfa
+  // bir daha okunmaz. category ve attributeSummary buradan düşerse ilan o üç
+  // yüzeyde emlak kartına dönüşür (ham alt tür etiketi, boş m²/oda satırları).
   const snapshot = {
     slug: listing.slug, title: listing.title, price: listing.price, currency: listing.currency,
-    propertyType: listing.propertyType, district: listing.district, neighborhood: listing.neighborhood,
-    rooms: listing.rooms, areaGross: listing.areaGross, areaNet: listing.areaNet,
-    floor: listing.floor, buildingAge: listing.buildingAge, heating: listing.heating,
+    category: listing.category, propertyType: listing.propertyType,
+    attributeSummary: isRealEstate ? undefined : summarizeAttributes(listing.category, listing.attributes),
+    district: listing.district, neighborhood: listing.neighborhood,
+    rooms: isRealEstate ? listing.rooms : null,
+    areaGross: isRealEstate ? listing.areaGross : null,
+    areaNet: isRealEstate ? listing.areaNet : null,
+    floor: isRealEstate ? listing.floor : null,
+    buildingAge: isRealEstate ? listing.buildingAge : null,
+    heating: isRealEstate ? listing.heating : null,
     status: listing.status, featured: listing.featured, coverImage: listing.images[0]?.url ?? null,
   };
 
@@ -256,7 +266,15 @@ export default async function ListingPage({
   return (
     <div className="mx-auto max-w-7xl px-5 py-8 pb-36 sm:px-6 lg:pb-10">
       <TrackView listingId={listing.id} district={listing.district} />
-      {!isSold && <MobileContactBar listingId={listing.id} listingTitle={listing.title} district={listing.district} />}
+      {!isSold && (
+        <MobileContactBar
+          listingId={listing.id}
+          listingTitle={listing.title}
+          district={listing.district}
+          category={listing.category}
+          hasOwnSeller={!!listing.agent || !!listing.user}
+        />
+      )}
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, "\\u003c") }}
@@ -386,7 +404,7 @@ export default async function ListingPage({
               </div>
             )}
 
-            {amenityGroups.length > 0 && (
+            {isRealEstate && amenityGroups.length > 0 && (
               <div className="mt-7">
                 <h2 className="border-b border-stone pb-3 text-lg font-bold text-ink">Seçili özellikler</h2>
                 <div className="mt-5 grid gap-6 sm:grid-cols-2">
@@ -421,6 +439,7 @@ export default async function ListingPage({
             videoUrl={listing.videoUrl}
             droneUrl={listing.droneUrl}
             virtualTourUrl={listing.virtualTourUrl}
+            category={listing.category}
           />
 
           {/* VERİ DESTEKLİ BÖLGE ANALİZİ — m² fiyatı, imar ve yatırım skoru
@@ -433,7 +452,7 @@ export default async function ListingPage({
               <h2 className="text-lg font-bold text-ink">Konum</h2>
               <p className="mt-1 text-sm text-muted">{listing.district} / Kütahya</p>
               {listing.locationVisibility === "approximate" && (
-                <p className="mt-1 text-xs text-muted/70">Mülk sahibinin gizliliği için yaklaşık konum gösterilmektedir.</p>
+                <p className="mt-1 text-xs text-muted/70">İlan sahibinin gizliliği için yaklaşık konum gösterilmektedir.</p>
               )}
               <div className="mt-4 overflow-hidden border border-stone">
                 <ListingsMap points={mapPoints} height="360px" showFilter={false} />
@@ -443,7 +462,7 @@ export default async function ListingPage({
         </div>
 
         {/* SAĞ: iletişim (sticky) */}
-        <aside aria-label="İlan iletişim ve danışman bilgileri" className="lg:col-span-4">
+        <aside aria-label="İlan iletişim ve satıcı bilgileri" className="lg:col-span-4">
           <div className="sticky top-20 space-y-4">
             <div id="ilan-iletisim" tabIndex={-1} className="scroll-mt-24 border border-stone border-t-[3px] border-t-gold-700 bg-paper p-6 shadow-card outline-none">
               <span className={`inline-block text-2xl font-bold tabular-nums ${isSold ? "text-muted line-through" : "text-brand-800"}`}>{formatPrice(listing.price, listing.currency)}</span>
@@ -459,10 +478,10 @@ export default async function ListingPage({
                   {listing.agent ? (
                     <>
                       <div className="mt-4">
-                        <ContactButtons listingId={listing.id} listingTitle={listing.title} district={listing.district} />
+                        <ContactButtons listingId={listing.id} listingTitle={listing.title} district={listing.district} category={listing.category} />
                       </div>
                       <div className="mt-2">
-                        <StartConversation listingId={listing.id} canMessage />
+                        <StartConversation listingId={listing.id} canMessage sellerLabel="Danışmana" />
                       </div>
                     </>
                   ) : listing.user ? (
@@ -482,7 +501,7 @@ export default async function ListingPage({
                   ) : (
                     /* Ne danışman ne bireysel sahip: talep formu tek kanal. */
                     <div className="mt-4">
-                      <ContactButtons listingId={listing.id} listingTitle={listing.title} district={listing.district} />
+                      <ContactButtons listingId={listing.id} listingTitle={listing.title} district={listing.district} category={listing.category} />
                     </div>
                   )}
                 </>
@@ -554,8 +573,13 @@ export default async function ListingPage({
               </div>
             )}
             <div className="rounded-card border border-stone bg-canvas p-5 text-center">
-              <p className="text-sm font-semibold text-brand-900">Bu mülke benzer fırsatlar mı arıyorsunuz?</p>
-              <Link href="/ilanlar" className="mt-2 inline-flex items-center gap-1 text-sm font-bold text-brand-700 hover:underline">Tüm ilanları gör <ArrowRight className="h-4 w-4" /></Link>
+              <p className="text-sm font-semibold text-brand-900">Bu ilana benzer fırsatlar mı arıyorsunuz?</p>
+              <Link
+                href={`/ilanlar?kategori=${listing.category}`}
+                className="mt-2 inline-flex items-center gap-1 text-sm font-bold text-brand-700 hover:underline"
+              >
+                {categoryLabel} ilanlarını gör <ArrowRight className="h-4 w-4" />
+              </Link>
             </div>
           </div>
         </aside>
@@ -564,9 +588,11 @@ export default async function ListingPage({
       {/* BENZER İLANLAR */}
       {similar.length > 0 && (
         <section className="mt-14">
-          <p className="eyebrow">Portföyden</p>
+          <p className="eyebrow">{categoryLabel}</p>
           <h2 className="mt-2 text-xl font-bold text-ink">Benzer ilanlar</h2>
-          <p className="mt-1.5 text-muted">Bu mülke yakın diğer seçenekler.</p>
+          <p className="mt-1.5 text-muted">
+            {isRealEstate ? "Bu mülke yakın diğer seçenekler." : "Bu ilana yakın diğer seçenekler."}
+          </p>
           <div className="mt-6 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
             {similar.map((l) => (
               <ListingCard key={l.slug} listing={l} />
@@ -578,7 +604,7 @@ export default async function ListingPage({
       <RecentlyViewed excludeSlug={listing.slug} />
 
       <section className="mt-14">
-        <NotFoundCTA />
+        <NotFoundCTA category={listing.category} />
       </section>
     </div>
   );

@@ -40,7 +40,7 @@ export default async function MapPage() {
         </Link>
       </div>
       <div className="mt-12">
-        <NotFoundCTA />
+        <NotFoundCTA category="emlak" />
       </div>
     </div>
   );
