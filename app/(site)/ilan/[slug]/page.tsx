@@ -10,6 +10,8 @@ import { publicImageUrl } from "@/lib/media";
 import { SITE } from "@/lib/site";
 import Gallery from "@/components/Gallery";
 import ContactButtons from "@/components/ContactButtons";
+import SellerPhone from "@/components/SellerPhone";
+import { PUBLIC_ACTIVE_LISTING, PUBLIC_VISIBLE_LISTING } from "@/lib/listingFilters";
 import StartConversation from "@/components/messaging/StartConversation";
 import AnalysisSection from "@/components/AnalysisSection";
 import ListingMedia from "@/components/ListingMedia";
@@ -32,7 +34,7 @@ export const revalidate = 300; // ISR: her 5 dakikada yenilenir (CDN cache + adm
 // buna karşılık her ek sayfa deploy süresine ve build'in DB yüküne ekleniyor.
 export async function generateStaticParams() {
   const listings = await prisma.listing.findMany({
-    where: { moderationStatus: "approved", status: { not: "passive" } },
+    where: PUBLIC_VISIBLE_LISTING,
     select: { slug: true },
     orderBy: [{ featured: "desc" }, { createdAt: "desc" }],
     take: 100,
@@ -42,22 +44,25 @@ export async function generateStaticParams() {
 
 async function getListing(slug: string) {
   return prisma.listing.findFirst({
-    where: { slug, moderationStatus: "approved", status: { not: "passive" } },
+    where: { slug, ...PUBLIC_VISIBLE_LISTING },
     include: {
       images: { orderBy: { sortOrder: "asc" } },
       agent: {
         select: {
           name: true, title: true, agency: true, logo: true, slug: true,
           publicProfile: true, status: true,
-          _count: { select: { listings: { where: { status: "active", moderationStatus: "approved" } } } },
+          _count: { select: { listings: { where: PUBLIC_ACTIVE_LISTING } } },
         },
       },
       agencyRef: {
         select: {
           name: true, slug: true, logo: true, status: true, published: true, verifiedAt: true,
-          _count: { select: { listings: { where: { status: "active", moderationStatus: "approved" } } } },
+          _count: { select: { listings: { where: PUBLIC_ACTIVE_LISTING } } },
         },
       },
+      // Bireysel ilanlarda danışman yok; sahibi kullanıcıdır. Telefon "Telefonu
+      // Göster" perdesinin arkasında sunuluyor (bkz. components/SellerPhone.tsx).
+      user: { select: { name: true, phone: true } },
       amenities: { orderBy: { sortOrder: "asc" }, select: { key: true } },
       priceHistory: { orderBy: { createdAt: "asc" } },
     },
@@ -94,9 +99,9 @@ export async function generateMetadata({
 
 const DetailRow = ({ label, value }: { label: string; value?: string | number | null }) =>
   value === null || value === undefined || value === "" ? null : (
-    <div className="flex justify-between gap-4 border-b border-slate-100 py-2.5 text-sm">
-      <span className="text-slate-500">{label}</span>
-      <span className="font-semibold text-slate-800 text-right">{value}</span>
+    <div className="flex justify-between gap-4 border-b border-stone py-2.5 text-sm">
+      <span className="text-muted">{label}</span>
+      <span className="font-semibold text-ink text-right">{value}</span>
     </div>
   );
 
@@ -258,7 +263,7 @@ export default async function ListingPage({
       />
 
       {/* Breadcrumb */}
-      <nav aria-label="Sayfa yolu" className="mb-4 text-sm text-slate-500">
+      <nav aria-label="Sayfa yolu" className="mb-4 text-sm text-muted">
         <Link href="/" className="hover:text-brand-700">Ana Sayfa</Link>
         <span className="mx-2">/</span>
         <Link href="/ilanlar" className="hover:text-brand-700">İlanlar</Link>
@@ -276,27 +281,27 @@ export default async function ListingPage({
               <div>
                 <div className="flex flex-wrap items-center gap-2">
                   {isSold ? (
-                    <span className="rounded-md bg-red-600 px-2.5 py-1 text-xs font-semibold text-white">Satıldı</span>
+                    <span className="rounded-control bg-red-600 px-2.5 py-1 text-xs font-semibold text-white">Satıldı</span>
                   ) : !isLand ? (
-                    <span className="rounded-md bg-brand-700 px-2.5 py-1 text-xs font-semibold text-white">Satılık</span>
+                    <span className="rounded-control bg-brand-700 px-2.5 py-1 text-xs font-semibold text-white">Satılık</span>
                   ) : null}
-                  <span className="inline-block rounded-md bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-600">
+                  <span className="inline-block rounded-control bg-canvas px-2.5 py-1 text-xs font-semibold text-muted">
                     {getSubTypeLabel(listing.category, listing.propertyType)}
                   </span>
                   {listing.verified && (
-                    <span className="inline-flex items-center gap-1 rounded-md bg-green-50 px-2.5 py-1 text-xs font-semibold text-green-700 ring-1 ring-green-200">
+                    <span className="inline-flex items-center gap-1 rounded-control bg-green-50 px-2.5 py-1 text-xs font-semibold text-green-700 ring-1 ring-green-200">
                       <BadgeCheck className="h-3.5 w-3.5" /> Doğrulanmış
                     </span>
                   )}
-                  <span className="text-xs text-slate-400">İlan No: {listing.referenceNo || listing.id.slice(-6).toUpperCase()}</span>
+                  <span className="text-xs text-muted/70">İlan No: {listing.referenceNo || listing.id.slice(-6).toUpperCase()}</span>
                 </div>
-                <h1 className="mt-3 max-w-3xl font-display text-3xl font-semibold leading-tight tracking-tight text-ink sm:text-4xl">{listing.title}</h1>
-                <p className="mt-2 inline-flex items-center gap-1.5 text-slate-500">
-                  <MapPin className="h-4 w-4 text-slate-400" /> {listing.neighborhood ? `${listing.neighborhood}, ` : ""}{listing.district} / Kütahya
+                <h1 className="mt-3 max-w-3xl text-2xl font-bold leading-tight tracking-tight text-ink sm:text-3xl">{listing.title}</h1>
+                <p className="mt-2 inline-flex items-center gap-1.5 text-muted">
+                  <MapPin className="h-4 w-4 text-muted/70" /> {listing.neighborhood ? `${listing.neighborhood}, ` : ""}{listing.district} / Kütahya
                 </p>
               </div>
               <div className="shrink-0">
-                <span className="inline-block text-[30px] font-bold leading-tight tabular-nums text-gold-800">
+                <span className="inline-block text-[28px] font-bold leading-tight tabular-nums text-brand-800">
                   {formatPrice(listing.price, listing.currency)}
                 </span>
               </div>
@@ -306,13 +311,13 @@ export default async function ListingPage({
             <div className="mt-6 grid grid-cols-2 divide-x divide-stone border-y border-stone md:grid-cols-4">
               {keyMetrics.map((m) => (
                 <div key={m.label} className="px-3 py-4 sm:px-4">
-                  <p className="mb-1 text-[13px] font-medium uppercase tracking-wide text-slate-500">{m.label}</p>
-                  <p className="font-display text-lg font-semibold text-slate-900">{m.value}</p>
+                  <p className="mb-1 text-[13px] font-medium uppercase tracking-wide text-muted">{m.label}</p>
+                  <p className="text-base font-semibold text-ink">{m.value}</p>
                 </div>
               ))}
             </div>
 
-            <h2 className="mt-9 border-b border-stone pb-3 font-display text-xl font-semibold text-ink">Tüm detaylar</h2>
+            <h2 className="mt-9 border-b border-stone pb-3 text-lg font-bold text-ink">Tüm detaylar</h2>
             <div className="mt-3 grid grid-cols-1 gap-x-8 sm:grid-cols-2">
               {isRealEstate ? (
               <>
@@ -370,10 +375,10 @@ export default async function ListingPage({
 
             {features.length > 0 && (
               <div className="mt-7">
-                <h2 className="border-b border-stone pb-3 font-display text-xl font-semibold text-ink">Özellikler</h2>
+                <h2 className="border-b border-stone pb-3 text-lg font-bold text-ink">Özellikler</h2>
                 <div className="mt-4 grid grid-cols-1 gap-x-6 gap-y-3 sm:grid-cols-2">
                   {features.map((f) => (
-                    <div key={f} className="flex items-center gap-2 text-[15px] text-slate-700">
+                    <div key={f} className="flex items-center gap-2 text-[15px] text-ink">
                       <Check className="h-[18px] w-[18px] shrink-0 text-brand-600" strokeWidth={2.6} /> {f}
                     </div>
                   ))}
@@ -383,14 +388,14 @@ export default async function ListingPage({
 
             {amenityGroups.length > 0 && (
               <div className="mt-7">
-                <h2 className="border-b border-stone pb-3 font-display text-xl font-semibold text-ink">Seçili özellikler</h2>
+                <h2 className="border-b border-stone pb-3 text-lg font-bold text-ink">Seçili özellikler</h2>
                 <div className="mt-5 grid gap-6 sm:grid-cols-2">
                   {amenityGroups.map((group) => (
                     <section key={group.key}>
-                      <h3 className="text-sm font-semibold uppercase tracking-wide text-slate-500">{group.label}</h3>
+                      <h3 className="text-sm font-semibold uppercase tracking-wide text-muted">{group.label}</h3>
                       <ul className="mt-3 space-y-2">
                         {group.items.map((item) => (
-                          <li key={item.key} className="flex items-center gap-2 text-[15px] text-slate-700">
+                          <li key={item.key} className="flex items-center gap-2 text-[15px] text-ink">
                             <Check className="h-[18px] w-[18px] shrink-0 text-brand-600" strokeWidth={2.6} />
                             {item.label}
                           </li>
@@ -403,8 +408,8 @@ export default async function ListingPage({
             )}
 
             <div className="mt-7">
-              <h2 className="border-b border-stone pb-3 font-display text-xl font-semibold text-ink">Açıklama</h2>
-              <p className="mt-3 whitespace-pre-line leading-relaxed text-slate-700">{listing.description}</p>
+              <h2 className="border-b border-stone pb-3 text-lg font-bold text-ink">Açıklama</h2>
+              <p className="mt-3 whitespace-pre-line leading-relaxed text-ink">{listing.description}</p>
             </div>
           </div>
 
@@ -425,10 +430,10 @@ export default async function ListingPage({
           {/* HARİTA */}
           {mapPoints.length > 0 && (
             <div className="border-y border-stone bg-paper py-6 sm:px-6">
-              <h2 className="font-display text-xl font-bold text-slate-900">Konum</h2>
-              <p className="mt-1 text-sm text-slate-500">{listing.district} / Kütahya</p>
+              <h2 className="text-lg font-bold text-ink">Konum</h2>
+              <p className="mt-1 text-sm text-muted">{listing.district} / Kütahya</p>
               {listing.locationVisibility === "approximate" && (
-                <p className="mt-1 text-xs text-slate-400">Mülk sahibinin gizliliği için yaklaşık konum gösterilmektedir.</p>
+                <p className="mt-1 text-xs text-muted/70">Mülk sahibinin gizliliği için yaklaşık konum gösterilmektedir.</p>
               )}
               <div className="mt-4 overflow-hidden border border-stone">
                 <ListingsMap points={mapPoints} height="360px" showFilter={false} />
@@ -441,28 +446,44 @@ export default async function ListingPage({
         <aside aria-label="İlan iletişim ve danışman bilgileri" className="lg:col-span-4">
           <div className="sticky top-20 space-y-4">
             <div id="ilan-iletisim" tabIndex={-1} className="scroll-mt-24 border border-stone border-t-[3px] border-t-gold-700 bg-paper p-6 shadow-card outline-none">
-              <span className={`inline-block text-2xl font-bold tabular-nums ${isSold ? "text-slate-500 line-through" : "text-gold-800"}`}>{formatPrice(listing.price, listing.currency)}</span>
+              <span className={`inline-block text-2xl font-bold tabular-nums ${isSold ? "text-muted line-through" : "text-brand-800"}`}>{formatPrice(listing.price, listing.currency)}</span>
               {isSold ? (
-                <div className="mt-4 rounded-lg bg-red-50 p-4 ring-1 ring-red-100">
+                <div className="mt-4 rounded-control bg-red-50 p-4 ring-1 ring-red-100">
                   <p className="text-sm font-semibold text-red-800">Bu ilan satılmıştır.</p>
                   <p className="mt-1 text-sm text-red-700">Benzer fırsatlar için tüm ilanlarımıza göz atabilirsiniz.</p>
                   <Link href="/ilanlar" className="mt-3 inline-flex items-center gap-1 text-sm font-bold text-brand-700 hover:underline">Benzer ilanları gör <ArrowRight className="h-4 w-4" /></Link>
                 </div>
               ) : (
                 <>
-                  <p className="mt-3 text-sm text-slate-500">İletişime geçin, hemen yanıt verelim.</p>
-                  <div className="mt-4">
-                    <ContactButtons listingId={listing.id} listingTitle={listing.title} district={listing.district} />
-                  </div>
-                  <div className="mt-2">
-                    <StartConversation listingId={listing.id} hasAgent={!!listing.agent} />
-                  </div>
+                  <p className="mt-3 text-sm text-muted">İletişime geçin, hemen yanıt verelim.</p>
+                  {listing.agent ? (
+                    <>
+                      <div className="mt-4">
+                        <ContactButtons listingId={listing.id} listingTitle={listing.title} district={listing.district} />
+                      </div>
+                      <div className="mt-2">
+                        <StartConversation listingId={listing.id} hasAgent />
+                      </div>
+                    </>
+                  ) : listing.user?.phone ? (
+                    /* Bireysel ilan: sitenin genel numarası yerine SATICININ numarası.
+                       Mesajlaşma bu ilanlarda henüz yok — Conversation.agentId NOT NULL
+                       olduğu için sohbet kurulamıyor (Faz 7 şema değişikliği). */
+                    <div className="mt-4">
+                      <SellerPhone phone={listing.user.phone} listingId={listing.id} district={listing.district} />
+                    </div>
+                  ) : (
+                    /* Telefonu olmayan bireysel satıcı: talep formu tek kanal. */
+                    <div className="mt-4">
+                      <ContactButtons listingId={listing.id} listingTitle={listing.title} district={listing.district} />
+                    </div>
+                  )}
                 </>
               )}
-              <div className="mt-4 border-t border-slate-100 pt-4">
+              <div className="mt-4 border-t border-stone pt-4">
                 <ListingDetailActions listing={snapshot} />
               </div>
-              <div className="mt-4 flex items-center justify-between border-t border-slate-100 pt-4">
+              <div className="mt-4 flex items-center justify-between border-t border-stone pt-4">
                 <ShareButtons title={listing.title} />
               </div>
             </div>
@@ -470,7 +491,7 @@ export default async function ListingPage({
             {/* Danışman etiketi */}
             {listing.agent && (
               <div className="border border-stone bg-paper p-5">
-                <p className="text-xs font-medium uppercase tracking-wider text-slate-400">İlan Danışmanı</p>
+                <p className="text-xs font-medium uppercase tracking-wider text-muted/70">İlan Danışmanı</p>
                 <div className="mt-3 flex items-center gap-3">
                   {agentLogo ? (
                     // eslint-disable-next-line @next/next/no-img-element
@@ -485,8 +506,8 @@ export default async function ListingPage({
                     </span>
                   )}
                   <div className="min-w-0">
-                    <p className="truncate font-bold text-slate-900">{listing.agent.name}</p>
-                    <p className="truncate text-sm text-slate-500">
+                    <p className="truncate font-bold text-ink">{listing.agent.name}</p>
+                    <p className="truncate text-sm text-muted">
                       {listing.agent.title || "Gayrimenkul Danışmanı"}
                       {listing.agent.agency ? ` · ${listing.agent.agency}` : ""}
                     </p>
@@ -502,12 +523,30 @@ export default async function ListingPage({
                     {listing.agencyRef.name} portföyünü gör
                   </Link>
                 )}
-                <p className="mt-3 text-[11px] text-slate-400">
+                <p className="mt-3 text-[11px] text-muted/70">
                   Bu ilan, onaylı danışmanımız tarafından yayınlanmıştır. İletişim için yukarıdaki butonları kullanın.
                 </p>
               </div>
             )}
-            <div className="ceramic-grid border border-brand-100 bg-brand-50 p-5 text-center">
+            {!listing.agent && listing.user && (
+              <div className="rounded-card border border-stone bg-paper p-5">
+                <p className="text-xs font-medium uppercase tracking-wider text-muted">İlan Sahibi</p>
+                <div className="mt-3 flex items-center gap-3">
+                  <span className="grid h-12 w-12 shrink-0 place-items-center rounded-full bg-brand-800 text-lg font-bold text-gold-300">
+                    {listing.user.name.slice(0, 1).toUpperCase()}
+                  </span>
+                  <div className="min-w-0">
+                    <p className="truncate font-bold text-ink">{listing.user.name}</p>
+                    <p className="truncate text-sm text-muted">Bireysel satıcı</p>
+                  </div>
+                </div>
+                <p className="mt-3 text-[11px] text-muted">
+                  Bu ilan bireysel bir satıcı tarafından yayınlanmıştır. Alışverişte dikkatli olun;
+                  ödeme yapmadan önce ürünü ve satıcıyı doğrulayın.
+                </p>
+              </div>
+            )}
+            <div className="rounded-card border border-stone bg-canvas p-5 text-center">
               <p className="text-sm font-semibold text-brand-900">Bu mülke benzer fırsatlar mı arıyorsunuz?</p>
               <Link href="/ilanlar" className="mt-2 inline-flex items-center gap-1 text-sm font-bold text-brand-700 hover:underline">Tüm ilanları gör <ArrowRight className="h-4 w-4" /></Link>
             </div>
@@ -519,8 +558,8 @@ export default async function ListingPage({
       {similar.length > 0 && (
         <section className="mt-14">
           <p className="eyebrow">Portföyden</p>
-          <h2 className="mt-2 font-display text-3xl font-semibold text-brand-950">Benzer ilanlar</h2>
-          <p className="mt-1.5 text-slate-500">Bu mülke yakın diğer seçenekler.</p>
+          <h2 className="mt-2 text-xl font-bold text-ink">Benzer ilanlar</h2>
+          <p className="mt-1.5 text-muted">Bu mülke yakın diğer seçenekler.</p>
           <div className="mt-6 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
             {similar.map((l) => (
               <ListingCard key={l.slug} listing={l} />
