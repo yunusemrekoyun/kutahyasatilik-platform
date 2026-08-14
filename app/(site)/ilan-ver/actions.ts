@@ -6,7 +6,7 @@ import { prisma } from "@/lib/prisma";
 import { getUserSession } from "@/lib/userAuth";
 import { slugify } from "@/lib/format";
 import { notifyAdmins } from "@/lib/notify";
-import { getCategory, parseAttributes, type CategoryKey } from "@/lib/categories";
+import { getCategory, parseAttributes, type AttributeValues, type CategoryKey } from "@/lib/categories";
 import { DISTRICTS } from "@/lib/constants";
 
 /**
@@ -31,7 +31,9 @@ type ParsedListing = {
   price: number;
   district: string;
   neighborhood: string | null;
-  attributes: Record<string, unknown>;
+  // Prisma InputJsonValue ile uyumlu olması için parseAttributes'ın kendi
+  // tipi kullanılıyor; Record<string, unknown> JSON kolonuna yazılamıyor.
+  attributes: AttributeValues;
   imageUrls: string[];
 };
 

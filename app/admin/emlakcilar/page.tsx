@@ -17,7 +17,7 @@ export default async function AdminAgents() {
   const [agents, agencies] = await Promise.all([
     prisma.agent.findMany({
       orderBy: [{ status: "asc" }, { createdAt: "desc" }],
-      include: { _count: { select: { listings: true } }, agencyRef: { select: { name: true } } },,
+      include: { _count: { select: { listings: true } }, agencyRef: { select: { name: true } } },
       take: ADMIN_LIST_CAP,
     }),
     prisma.agency.findMany({ orderBy: { name: "asc" }, select: { id: true, name: true, status: true } }),

@@ -12,7 +12,7 @@ type AgencyRow = Awaited<ReturnType<typeof getAgencies>>[number];
 async function getAgencies() {
   return prisma.agency.findMany({
     orderBy: [{ published: "desc" }, { name: "asc" }],
-    include: { _count: { select: { agents: true, listings: true } } },,
+    include: { _count: { select: { agents: true, listings: true } } },
     take: ADMIN_LIST_CAP,
   });
 }

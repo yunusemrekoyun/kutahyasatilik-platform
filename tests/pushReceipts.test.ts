@@ -1,5 +1,11 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
+// Expo receipt ucu istek başına EN ÇOK 300 bilet alır. lib/push.ts eskiden
+// take:1000 ile topladığı biletleri tek çağrıda gönderiyordu; gerçek hacimde
+// throw edip worker'ı 500'e düşürüyordu. Mock bu sınırı gerçekçi taklit ediyor
+// ki chunk'lama testle kilitlensin.
+const EXPO_RECEIPT_CHUNK = 300;
+
 const mocks = vi.hoisted(() => ({
   getReceipts: vi.fn(),
   findMany: vi.fn(),
@@ -12,6 +18,12 @@ vi.mock("server-only", () => ({}));
 vi.mock("expo-server-sdk", () => ({
   Expo: class {
     getPushNotificationReceiptsAsync = mocks.getReceipts;
+    // Gerçek SDK'daki gibi 300'lük parçalara böler.
+    chunkPushNotificationReceiptIds(ids: string[]) {
+      const chunks: string[][] = [];
+      for (let i = 0; i < ids.length; i += 300) chunks.push(ids.slice(i, i + 300));
+      return chunks;
+    }
   },
 }));
 vi.mock("../lib/prisma", () => ({
@@ -97,5 +109,33 @@ describe("push receipt worker", () => {
         data: expect.objectContaining({ status: "delivered" }),
       }),
     );
+  });
+
+  it("splits receipt lookups into Expo sized chunks", async () => {
+    // 301 bilet: tek çağrıda gönderilirse Expo reddediyor. Sorgu tavanı 1000
+    // olduğu için bu senaryo gerçek hacimde kaçınılmazdı.
+    const rows = Array.from({ length: EXPO_RECEIPT_CHUNK + 1 }, (_, i) => ({
+      id: `delivery-${i}`,
+      ticketId: `ticket-${i}`,
+      attempts: 1,
+      pushTokenId: `token-${i}`,
+      pushToken: { id: `token-${i}` },
+    }));
+    mocks.findMany.mockResolvedValue(rows);
+    mocks.getReceipts.mockImplementation((ids: string[]) =>
+      Promise.resolve(Object.fromEntries(ids.map((id) => [id, { status: "ok" }]))),
+    );
+
+    await expect(checkPushReceipts()).resolves.toEqual({
+      delivered: EXPO_RECEIPT_CHUNK + 1,
+      retried: 0,
+      failed: 0,
+    });
+
+    // İki çağrı: 300 + 1. Hiçbir çağrı sınırı aşmamalı.
+    expect(mocks.getReceipts).toHaveBeenCalledTimes(2);
+    for (const [ids] of mocks.getReceipts.mock.calls) {
+      expect(ids.length).toBeLessThanOrEqual(EXPO_RECEIPT_CHUNK);
+    }
   });
 });

@@ -11,8 +11,10 @@ import type {
 function listingForApi(listing: PublicListingCard, request: NextRequest) {
   return {
     ...listing,
-    coverImage: absolutizeUrl(listing.coverImage, request),
-    agentLogo: absolutizeUrl(listing.agentLogo, request),
+    // ListingCardData alanları opsiyonel (kart yüzeyleri tek tipe indirildi);
+    // absolutizeUrl undefined kabul etmiyor.
+    coverImage: absolutizeUrl(listing.coverImage ?? null, request),
+    agentLogo: absolutizeUrl(listing.agentLogo ?? null, request),
   };
 }
 

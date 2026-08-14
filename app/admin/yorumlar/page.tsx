@@ -9,7 +9,7 @@ const inputCls =
 
 export default async function AdminTestimonials() {
   const items = await prisma.testimonial.findMany({
-    orderBy: [{ sortOrder: "asc" }, { createdAt: "desc" }],,
+    orderBy: [{ sortOrder: "asc" }, { createdAt: "desc" }],
     take: ADMIN_LIST_CAP,
   });
 

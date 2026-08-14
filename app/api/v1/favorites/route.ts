@@ -30,7 +30,7 @@ export async function GET(req: NextRequest) {
   try {
     const origin = requestOrigin(req);
     const cards = await favoriteCards(session.id);
-    const items = cards.map((c) => ({ ...c, coverImage: absolutize(c.coverImage, origin) }));
+    const items = cards.map((c) => ({ ...c, coverImage: absolutize(c.coverImage ?? null, origin) }));
     return NextResponse.json({ ok: true, authed: true, items });
   } catch {
     return NextResponse.json({ ok: true, authed: true, items: [] });

@@ -5,7 +5,7 @@ import { deleteVideo } from "@/lib/videoStorage";
 import { notifyAdmins } from "@/lib/notify";
 import { listingAmenityRows } from "@/lib/listingAmenities";
 import { listingImportKey } from "@/lib/listingImport";
-import { getCategory, isCategoryKey, parseAttributes, type CategoryKey } from "@/lib/categories";
+import { getCategory, isCategoryKey, parseAttributes, type AttributeValues, type CategoryKey } from "@/lib/categories";
 import { Prisma } from "@/app/generated/prisma/client";
 
 // Emlakçı ilan oluştur/güncelle — web app/emlakci/panel/actions.ts submitAgentListing'in
@@ -134,7 +134,7 @@ export async function upsertAgentListing(
     !id ||
     has(body, "category") ||
     categoryDef.fields.some((f) => has(body, `attr_${f.key}`) || has(body, f.key));
-  let attributes: Record<string, unknown> = {};
+  let attributes: AttributeValues = {};
   if (touchesAttributes && !isRealEstate) {
     const parsed = parseAttributes(categoryKey, body as Record<string, unknown>);
     if (Object.keys(parsed.errors).length) {
