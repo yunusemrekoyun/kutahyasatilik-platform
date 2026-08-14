@@ -9,10 +9,15 @@ import { useSessionUser } from "@/lib/useSessionUser";
 // İlan detayında "Mesaj Gönder / Teklif Ver" — kullanıcı o ilanın danışmanıyla sohbet başlatır.
 export default function StartConversation({
   listingId,
-  hasAgent,
+  canMessage,
 }: {
   listingId: string;
-  hasAgent: boolean;
+  /**
+   * Bu ilanın muhatabı var mı — danışman VEYA bireysel sahip.
+   * Eskiden `hasAgent` idi: bireysel ilanlarda false gelip bileşen null
+   * döndürüyordu, yani alıcı satıcıya hiç ulaşamıyordu.
+   */
+  canMessage: boolean;
 }) {
   // Oturum client'ta çözülür (sayfa ISR/CDN cache'ini korumak için); istek mount'ta
   // başlar, modal açıldığında sonuç hazırdır.
@@ -25,7 +30,7 @@ export default function StartConversation({
   const [status, setStatus] = useState<"idle" | "loading" | "ok" | "error">("idle");
   const [error, setError] = useState("");
 
-  if (!hasAgent) return null; // danışmansız ilanda mesajlaşma yok
+  if (!canMessage) return null; // muhatabı olmayan ilanda mesajlaşma yok
 
   async function submit() {
     const isOffer = mode === "offer" && offer;

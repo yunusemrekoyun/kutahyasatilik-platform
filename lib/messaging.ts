@@ -21,3 +21,65 @@ export async function getApiMessagingParticipant(req: Request): Promise<Particip
   if (s?.role === "agent") return { role: "agent", id: s.id };
   return null;
 }
+
+/* ---------------------------------------------------------------------------
+ * Sohbet tarafı çözümü
+ *
+ * Satıcı tarafı iki türlü olabilir: onaylı danışman (`agentId`) ya da bireysel
+ * ilan sahibi (`ownerUserId`). Bu yüzden yetki artık KATILIMCI ROLÜNDEN değil,
+ * SOHBET BAZINDA çözülüyor: aynı kullanıcı bir sohbette alıcı, başkasında
+ * satıcı olabilir.
+ *
+ * Eski kod `me.role === "user" ? conv.userId !== me.id : conv.agentId !== me.id`
+ * yazıyordu; bireysel satıcı bu kontrolden hiçbir zaman geçemezdi.
+ * ------------------------------------------------------------------------- */
+
+export type ConversationSides = {
+  userId: string;
+  agentId: string | null;
+  ownerUserId: string | null;
+};
+
+export type Side = "buyer" | "seller";
+
+/** Katılımcının bu sohbetteki tarafı; taraf değilse null (→ 404). */
+export function conversationSide(conv: ConversationSides, me: Participant): Side | null {
+  if (me.role === "user") {
+    if (conv.userId === me.id) return "buyer";
+    if (conv.ownerUserId && conv.ownerUserId === me.id) return "seller";
+    return null;
+  }
+  return conv.agentId && conv.agentId === me.id ? "seller" : null;
+}
+
+/**
+ * `Message.senderRole` değeri.
+ * - "user"  alıcı
+ * - "agent" satıcı (danışman)  — mevcut satırlarla uyumlu
+ * - "owner" satıcı (bireysel)  — yalnız yeni bireysel sohbetlerde
+ */
+export function senderRoleFor(me: Participant, side: Side): "user" | "agent" | "owner" {
+  if (side === "buyer") return "user";
+  return me.role === "agent" ? "agent" : "owner";
+}
+
+/** Bir mesaj satıcı tarafından mı gönderilmiş? */
+export function isSellerMessage(senderRole: string): boolean {
+  return senderRole === "agent" || senderRole === "owner";
+}
+
+/** Mesaj bu tarafa mı ait (UI'da "benim balonum")? */
+export function isOwnMessage(senderRole: string, side: Side): boolean {
+  return side === "seller" ? isSellerMessage(senderRole) : senderRole === "user";
+}
+
+/** Okundu damgası: alıcı `userReadAt`, satıcı (her iki tür) `agentReadAt`. */
+export function readAtField(side: Side): "userReadAt" | "agentReadAt" {
+  return side === "buyer" ? "userReadAt" : "agentReadAt";
+}
+
+/** Katılımcının sohbetlerini bulan where — alıcı VE satıcı olduğu sohbetlerin ikisi de. */
+export function conversationsWhereFor(me: Participant) {
+  if (me.role === "agent") return { agentId: me.id };
+  return { OR: [{ userId: me.id }, { ownerUserId: me.id }] };
+}

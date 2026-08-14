@@ -2,7 +2,13 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { checkRate } from "@/lib/rateLimit";
-import { getApiMessagingParticipant } from "@/lib/messaging";
+import {
+  getApiMessagingParticipant,
+  conversationSide,
+  senderRoleFor,
+  isOwnMessage,
+  isSellerMessage,
+} from "@/lib/messaging";
 import { notifyAgent, notifyUser } from "@/lib/notify";
 
 export const runtime = "nodejs";
@@ -33,13 +39,15 @@ export async function POST(req: NextRequest) {
 
   const msg = await prisma.message.findUnique({
     where: { id: data.messageId },
-    include: { conversation: { select: { id: true, userId: true, agentId: true } } },
+    include: { conversation: { select: { id: true, userId: true, agentId: true, ownerUserId: true } } },
   });
   if (!msg || msg.type !== "offer") return NextResponse.json({ ok: false, error: "Teklif bulunamadı" }, { status: 404 });
   const conv = msg.conversation;
-  const isParticipant = me.role === "user" ? conv.userId === me.id : conv.agentId === me.id;
-  if (!isParticipant) return NextResponse.json({ ok: false, error: "Yetkisiz" }, { status: 403 });
-  if (msg.senderRole === me.role) return NextResponse.json({ ok: false, error: "Kendi teklifinize yanıt veremezsiniz." }, { status: 400 });
+  const side = conversationSide(conv, me);
+  if (!side) return NextResponse.json({ ok: false, error: "Yetkisiz" }, { status: 403 });
+  // Taraf üzerinden: alıcı ve bireysel satıcı ikisi de role="user" taşıyor,
+  // rol karşılaştırması bireysel sohbette yanlış sonuç verirdi.
+  if (isOwnMessage(msg.senderRole, side)) return NextResponse.json({ ok: false, error: "Kendi teklifinize yanıt veremezsiniz." }, { status: 400 });
   if (msg.offerStatus !== "pending") return NextResponse.json({ ok: false, error: "Bu teklif zaten yanıtlanmış." }, { status: 400 });
 
   if (data.action === "counter") {
@@ -49,7 +57,7 @@ export async function POST(req: NextRequest) {
       prisma.message.create({
         data: {
           conversationId: conv.id,
-          senderRole: me.role,
+          senderRole: senderRoleFor(me, side),
           type: "offer",
           offerAmount: data.counterAmount,
           offerCurrency: data.counterCurrency || msg.offerCurrency || "TRY",
@@ -67,8 +75,12 @@ export async function POST(req: NextRequest) {
 
   const label = data.action === "accept" ? "Teklifiniz kabul edildi" : data.action === "reject" ? "Teklifiniz reddedildi" : "Size karşı teklif geldi";
   // Bildirim teklifi VEREN tarafa gider
-  if (msg.senderRole === "user") notifyUser(conv.userId, { type: "offer", title: label, body: null, link: "/hesabim/mesajlar" });
-  else notifyAgent(conv.agentId, { type: "offer", title: label, body: null, link: "/emlakci/panel/mesajlar" });
+  if (isSellerMessage(msg.senderRole)) {
+    if (conv.agentId) notifyAgent(conv.agentId, { type: "offer", title: label, body: null, link: "/emlakci/panel/mesajlar" });
+    else if (conv.ownerUserId) notifyUser(conv.ownerUserId, { type: "offer", title: label, body: null, link: "/hesabim/mesajlar" });
+  } else {
+    notifyUser(conv.userId, { type: "offer", title: label, body: null, link: "/hesabim/mesajlar" });
+  }
 
   return NextResponse.json({ ok: true });
 }

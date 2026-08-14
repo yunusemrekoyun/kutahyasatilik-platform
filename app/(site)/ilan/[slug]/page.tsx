@@ -462,18 +462,25 @@ export default async function ListingPage({
                         <ContactButtons listingId={listing.id} listingTitle={listing.title} district={listing.district} />
                       </div>
                       <div className="mt-2">
-                        <StartConversation listingId={listing.id} hasAgent />
+                        <StartConversation listingId={listing.id} canMessage />
                       </div>
                     </>
-                  ) : listing.user?.phone ? (
-                    /* Bireysel ilan: sitenin genel numarası yerine SATICININ numarası.
-                       Mesajlaşma bu ilanlarda henüz yok — Conversation.agentId NOT NULL
-                       olduğu için sohbet kurulamıyor (Faz 7 şema değişikliği). */
-                    <div className="mt-4">
-                      <SellerPhone phone={listing.user.phone} listingId={listing.id} district={listing.district} />
-                    </div>
+                  ) : listing.user ? (
+                    /* Bireysel ilan: sitenin genel numarası yerine SATICININ kendisi.
+                       Telefon perde arkasında, mesajlaşma Conversation.ownerUserId
+                       üzerinden (Faz 7 şema değişikliği). */
+                    <>
+                      {listing.user.phone ? (
+                        <div className="mt-4">
+                          <SellerPhone phone={listing.user.phone} listingId={listing.id} district={listing.district} />
+                        </div>
+                      ) : null}
+                      <div className={listing.user.phone ? "mt-2" : "mt-4"}>
+                        <StartConversation listingId={listing.id} canMessage />
+                      </div>
+                    </>
                   ) : (
-                    /* Telefonu olmayan bireysel satıcı: talep formu tek kanal. */
+                    /* Ne danışman ne bireysel sahip: talep formu tek kanal. */
                     <div className="mt-4">
                       <ContactButtons listingId={listing.id} listingTitle={listing.title} district={listing.district} />
                     </div>
