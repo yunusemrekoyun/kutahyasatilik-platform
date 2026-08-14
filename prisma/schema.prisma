@@ -556,7 +556,9 @@ model Setting {
 // ---------------------------------------------------------------------------
 // Standart kullanıcı hesabı (Admin/Agent'tan AYRI, ayrı oturum: ks_user)
 // Favori senkronu, kayıtlı arama, bildirim kutusu, portföy talebi sahipliği için.
-// ÖNEMLİ: Kullanıcı İLAN YAYINLAYAMAZ — yalnız emlakçı/admin ekler (rapor §7).
+// Bireysel kullanıcı VASITA ve TEKNOLOJİ ilanı verebilir (/ilan-ver, onaya düşer).
+// Emlak ilanları emlakçı/admin üzerinden girilir — 40 alanlık künye ve imar/tapu
+// doğrulaması bireysel akışa uymuyor (bkz. lib/categories.ts, ilan-ver/actions.ts).
 // ---------------------------------------------------------------------------
 model User {
   id           String    @id @default(cuid())
