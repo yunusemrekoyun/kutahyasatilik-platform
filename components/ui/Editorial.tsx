@@ -1,5 +1,9 @@
 import type { ReactNode } from "react";
 
+/* Sayfa başlığı ve bölüm başlığı — 10 public sayfa buradan besleniyor.
+ * Dosya adı editoryal dönemden kalma; yeniden adlandırma 10 import satırı
+ * demek olduğu için ertelendi (bkz. UYGULAMA-PLANI §12, Faz 1). */
+
 export function PageIntro({
   eyebrow,
   title,
@@ -14,27 +18,48 @@ export function PageIntro({
   visual?: ReactNode;
 }) {
   return (
-    <section className="relative overflow-hidden border-b border-stone bg-canvas">
-      <div className="ceramic-grid pointer-events-none absolute inset-y-0 right-0 w-1/3 opacity-60" />
-      <div className={`relative mx-auto max-w-7xl px-5 sm:px-6 ${visual ? "grid items-stretch gap-8 py-10 lg:grid-cols-12 lg:py-14" : "py-12 sm:py-16 lg:py-20"}`}>
-        <div className={visual ? "flex flex-col justify-center lg:col-span-7" : ""}>
+    <section className="border-b border-stone bg-paper">
+      <div
+        className={`mx-auto max-w-7xl px-5 sm:px-6 ${
+          visual ? "grid items-center gap-8 py-8 lg:grid-cols-12 lg:py-10" : "py-8 sm:py-10"
+        }`}
+      >
+        <div className={visual ? "lg:col-span-7" : ""}>
           <p className="eyebrow">{eyebrow}</p>
-          <h1 className="mt-3 max-w-4xl font-display text-4xl font-semibold leading-tight tracking-[-0.03em] text-brand-950 sm:text-5xl lg:text-6xl">{title}</h1>
-          {intro ? <div className="mt-5 max-w-3xl text-base leading-7 text-muted sm:text-lg sm:leading-8">{intro}</div> : null}
-          {actions ? <div className="mt-7 flex flex-wrap gap-3">{actions}</div> : null}
+          <h1 className="mt-2 max-w-3xl text-2xl font-bold tracking-tight text-ink sm:text-3xl">
+            {title}
+          </h1>
+          {intro ? (
+            <div className="mt-3 max-w-3xl text-[15px] leading-7 text-muted">{intro}</div>
+          ) : null}
+          {actions ? <div className="mt-5 flex flex-wrap gap-2.5">{actions}</div> : null}
         </div>
-        {visual ? <div className="relative min-h-64 overflow-hidden border border-stone lg:col-span-5">{visual}</div> : null}
+        {visual ? (
+          <div className="relative min-h-52 overflow-hidden rounded-card border border-stone lg:col-span-5">
+            {visual}
+          </div>
+        ) : null}
       </div>
     </section>
   );
 }
 
-export function SectionHeading({ eyebrow, title, description }: { eyebrow?: string; title: string; description?: string }) {
+export function SectionHeading({
+  eyebrow,
+  title,
+  description,
+}: {
+  eyebrow?: string;
+  title: string;
+  description?: string;
+}) {
   return (
     <div>
       {eyebrow ? <p className="eyebrow">{eyebrow}</p> : null}
-      <h2 className="mt-2 font-display text-3xl font-semibold tracking-tight text-brand-950 sm:text-4xl">{title}</h2>
-      {description ? <p className="mt-3 max-w-2xl leading-7 text-muted">{description}</p> : null}
+      <h2 className="mt-1.5 text-xl font-bold tracking-tight text-ink sm:text-2xl">{title}</h2>
+      {description ? (
+        <p className="mt-2 max-w-2xl text-[15px] leading-7 text-muted">{description}</p>
+      ) : null}
     </div>
   );
 }
