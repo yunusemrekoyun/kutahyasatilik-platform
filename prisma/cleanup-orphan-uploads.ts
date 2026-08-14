@@ -23,10 +23,21 @@
  *   npm run cleanup:uploads -- --apply   # gerçekten siler
  *   npm run cleanup:uploads -- --hours=72 --apply
  */
+// dotenv/config: tsx .env'i KENDİLİĞİNDEN yüklemez. Bu satır olmadan
+// DATABASE_URL boş kalıyor ve Supabase pooler "no tenant identifier" ile
+// reddediyor. Diğer prisma scriptleri (rollup-analytics) de aynı kalıpta.
+import "dotenv/config";
 import { readdir, stat, unlink } from "fs/promises";
 import path from "path";
-import { prisma } from "../lib/prisma";
+import { PrismaClient } from "../app/generated/prisma/client";
+import { PrismaPg } from "@prisma/adapter-pg";
 import { getUploadDir } from "../lib/uploads";
+
+// lib/prisma "server-only" ve Next runtime'ı için kurulu; bakım scriptleri
+// kendi istemcisini açar (projenin mevcut kalıbı).
+const prisma = new PrismaClient({
+  adapter: new PrismaPg({ connectionString: process.env.DATABASE_URL }),
+});
 
 const args = process.argv.slice(2);
 const APPLY = args.includes("--apply");
@@ -41,18 +52,19 @@ async function collectReferencedFiles(): Promise<Set<string>> {
     return `${label}:${result.length}`;
   };
 
-  const counts = await Promise.all([
-    push("listing", () => prisma.listing.findMany()),
-    push("listingImage", () => prisma.listingImage.findMany()),
-    push("agent", () => prisma.agent.findMany()),
-    push("agency", () => prisma.agency.findMany()),
-    push("lead", () => prisma.lead.findMany()),
-    push("post", () => prisma.post.findMany()),
-    push("page", () => prisma.page.findMany()),
-    push("popup", () => prisma.popup.findMany()),
-    push("setting", () => prisma.setting.findMany()),
-    push("localResource", () => prisma.localResource.findMany()),
-  ]);
+  // Sırayla: connection pooler'a on eşzamanlı sorgu açmaya gerek yok, bu bir
+  // bakım scripti. Paralel çalıştırmak pooler limitine takılabiliyor.
+  const counts: string[] = [];
+  counts.push(await push("listing", () => prisma.listing.findMany()));
+  counts.push(await push("listingImage", () => prisma.listingImage.findMany()));
+  counts.push(await push("agent", () => prisma.agent.findMany()));
+  counts.push(await push("agency", () => prisma.agency.findMany()));
+  counts.push(await push("lead", () => prisma.lead.findMany()));
+  counts.push(await push("post", () => prisma.post.findMany()));
+  counts.push(await push("page", () => prisma.page.findMany()));
+  counts.push(await push("popup", () => prisma.popup.findMany()));
+  counts.push(await push("setting", () => prisma.setting.findMany()));
+  counts.push(await push("localResource", () => prisma.localResource.findMany()));
   console.log("Taranan kayıtlar:", counts.join(" "));
 
   const referenced = new Set<string>();
