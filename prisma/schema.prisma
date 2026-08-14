@@ -575,7 +575,8 @@ model User {
   alerts        BuyerAlert[]
   resetTokens   PasswordResetToken[]
   leads         Lead[]
-  conversations Conversation[]
+  conversations     Conversation[] @relation("ConversationBuyer")
+  soldConversations Conversation[] @relation("ConversationSeller")
 }
 
 // ---------------------------------------------------------------------------
@@ -844,10 +845,18 @@ model AdRequest {
 // ---------------------------------------------------------------------------
 model Conversation {
   id        String  @id @default(cuid())
+  // Alıcı tarafı. Bir kullanıcı başka bir sohbette satıcı olabilir; yetki
+  // her zaman sohbet bazında çözülür (bkz. conversationSide).
   userId    String
-  user      User    @relation(fields: [userId], references: [id], onDelete: Cascade)
-  agentId   String
-  agent     Agent   @relation(fields: [agentId], references: [id], onDelete: Cascade)
+  user      User    @relation("ConversationBuyer", fields: [userId], references: [id], onDelete: Cascade)
+  // Satıcı tarafı: ya onaylı danışman (agentId) YA DA bireysel ilan sahibi
+  // (ownerUserId). İkisi birden dolu olmaz; ikisi birden boş da olmaz.
+  // Kısıt uygulama katmanında (lib/messaging.ts) — Prisma CHECK üretmiyor.
+  agentId   String?
+  agent     Agent?  @relation(fields: [agentId], references: [id], onDelete: Cascade)
+
+  ownerUserId String?
+  ownerUser   User?   @relation("ConversationSeller", fields: [ownerUserId], references: [id], onDelete: Cascade)
   listingId String
   listing   Listing @relation(fields: [listingId], references: [id], onDelete: Cascade)
 
@@ -861,6 +870,7 @@ model Conversation {
   @@unique([userId, listingId]) // bir kullanıcı-ilan için tek sohbet
   @@index([agentId])
   @@index([userId])
+  @@index([ownerUserId])
   @@index([lastMessageAt])
 }
 
@@ -869,7 +879,11 @@ model Message {
   conversationId String
   conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
 
-  senderRole String // "user" | "agent"
+  // "user"  = alıcı
+  // "agent"  = satıcı (onaylı danışman)
+  // "owner"  = satıcı (bireysel ilan sahibi)
+  // Mevcut satırlar user/agent taşıyor; "owner" yalnız yeni bireysel sohbetlerde.
+  senderRole String
   type       String @default("text") // "text" | "offer"
 
   body String? // metin mesajı (type=text)
