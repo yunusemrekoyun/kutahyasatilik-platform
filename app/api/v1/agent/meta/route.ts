@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { resolveApiAgent } from "@/lib/apiAgent";
 import { PROPERTY_TYPES } from "@/lib/constants";
+import { CATEGORY_LIST } from "@/lib/categories";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -22,7 +23,11 @@ export async function GET(req: NextRequest) {
 
   return NextResponse.json({
     ok: true,
-    // Etiketler tek kaynaktan (lib/constants) gelir; burada ikinci bir kopya tutulmaz.
+    // Kategori kaydı: alt türler ve nitelik alanları buradan gelir, mobil kopya
+    // tutmaz. Yeni kategori eklemek mobil sürüm çıkmayı gerektirmez.
+    categories: CATEGORY_LIST,
+    // propertyTypes GERİYE UYUMLULUK için duruyor: sahadaki eski mobil sürümler
+    // bu alanı okuyor. Yeni istemciler categories[].subTypes kullanmalı.
     propertyTypes: PROPERTY_TYPES,
     listingTypes: [{ value: "sale", label: "Satılık" }],
     currencies: ["TRY", "USD", "EUR"],

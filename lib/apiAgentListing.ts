@@ -5,6 +5,8 @@ import { deleteVideo } from "@/lib/videoStorage";
 import { notifyAdmins } from "@/lib/notify";
 import { listingAmenityRows } from "@/lib/listingAmenities";
 import { listingImportKey } from "@/lib/listingImport";
+import { getCategory, isCategoryKey, parseAttributes, type CategoryKey } from "@/lib/categories";
+import { Prisma } from "@/app/generated/prisma/client";
 
 // Emlakçı ilan oluştur/güncelle — web app/emlakci/panel/actions.ts submitAgentListing'in
 // JSON (Bearer) karşılığı. Server action mobilden çağrılamadığı için aynı iş kuralları burada.
@@ -70,6 +72,7 @@ export async function upsertAgentListing(
     slug: string;
     title: string;
     price: number;
+    category: string;
     propertyType: string;
     areaGross: number | null;
     rooms: string | null;
@@ -83,6 +86,7 @@ export async function upsertAgentListing(
         slug: true,
         title: true,
         price: true,
+        category: true,
         propertyType: true,
         areaGross: true,
         rooms: true,
@@ -97,14 +101,49 @@ export async function upsertAgentListing(
   const price = has(body, "price") ? num(body.price) ?? 0 : existingOwned?.price ?? 0;
   if (!title || price <= 0) throw new AgentListingError(400, "Başlık ve fiyat zorunludur");
 
-  const ptype = has(body, "propertyType") ? String(body.propertyType || "") : existingOwned?.propertyType ?? "daire";
-  const isLand = ptype === "arsa" || ptype === "tarla";
+  // Kategori. Kısmi güncellemede gövde taşımıyorsa mevcut değer korunur;
+  // yeni ilanda gelmezse emlak (kolonun DB varsayılanı).
+  const categoryRaw = has(body, "category")
+    ? String(body.category || "")
+    : existingOwned?.category ?? "emlak";
+  const categoryKey: CategoryKey = isCategoryKey(categoryRaw) ? categoryRaw : "emlak";
+  const categoryDef = getCategory(categoryKey);
+  const isRealEstate = categoryKey === "emlak";
+
+  const ptype = has(body, "propertyType")
+    ? String(body.propertyType || "")
+    : existingOwned?.propertyType ?? (isRealEstate ? "daire" : "");
+  if (!categoryDef.subTypes.some((s) => s.value === ptype)) {
+    throw new AgentListingError(400, "Geçersiz tür seçimi");
+  }
+
+  const isLand = isRealEstate && (ptype === "arsa" || ptype === "tarla");
   const areaVal = has(body, "areaGross") ? num(body.areaGross) : existingOwned?.areaGross ?? null;
   const rooms = has(body, "rooms") ? str(body.rooms) : existingOwned?.rooms ?? null;
   const zoningStatus = has(body, "zoningStatus") ? str(body.zoningStatus) : existingOwned?.zoningStatus ?? null;
-  if (!areaVal || areaVal <= 0) throw new AgentListingError(400, "Alan (brüt m²) zorunludur");
-  if (!isLand && !rooms) throw new AgentListingError(400, "Oda sayısı zorunludur");
-  if (isLand && !zoningStatus) throw new AgentListingError(400, "İmar durumu zorunludur");
+  // m² / oda / imar gayrimenkule özgü — emlak dışında dayatılmaz.
+  if (isRealEstate) {
+    if (!areaVal || areaVal <= 0) throw new AgentListingError(400, "Alan (brüt m²) zorunludur");
+    if (!isLand && !rooms) throw new AgentListingError(400, "Oda sayısı zorunludur");
+    if (isLand && !zoningStatus) throw new AgentListingError(400, "İmar durumu zorunludur");
+  }
+
+  // Nitelikler yalnız gövde onlara dokunduğunda (veya yeni ilanda) yazılır —
+  // aksi halde kısmi bir PATCH mevcut nitelikleri sessizce siler.
+  const touchesAttributes =
+    !id ||
+    has(body, "category") ||
+    categoryDef.fields.some((f) => has(body, `attr_${f.key}`) || has(body, f.key));
+  let attributes: Record<string, unknown> = {};
+  if (touchesAttributes && !isRealEstate) {
+    const parsed = parseAttributes(categoryKey, body as Record<string, unknown>);
+    if (Object.keys(parsed.errors).length) {
+      const [key, message] = Object.entries(parsed.errors)[0];
+      const label = categoryDef.fields.find((f) => f.key === key)?.label ?? key;
+      throw new AgentListingError(400, `${label}: ${message}`);
+    }
+    attributes = parsed.values;
+  }
 
   // İlan kotası — yalnız YENİ ilanda (ilk paketin listingQuota'sı; tablo yoksa atla).
   if (!id) {
@@ -149,7 +188,9 @@ export async function upsertAgentListing(
     ...(!id || has(body, "title") ? { title } : {}),
     slug,
     ...(!id || has(body, "description") ? { description: String(body.description ?? "").trim() } : {}),
+    ...(!id || has(body, "category") ? { category: categoryKey } : {}),
     ...(!id || has(body, "propertyType") ? { propertyType: ptype } : {}),
+    ...(touchesAttributes ? { attributes: isRealEstate ? Prisma.DbNull : attributes } : {}),
     ...(!id || has(body, "listingType") ? { listingType: String(body.listingType || "sale") } : {}),
     ...(!id || has(body, "status") ? { status } : {}),
     ...(!id || has(body, "price") ? { price } : {}),
