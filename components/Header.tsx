@@ -21,7 +21,6 @@ import NotificationBell from "@/components/NotificationBell";
 import { telLink, whatsappLink } from "@/lib/site";
 
 const PROPERTY_LINKS = [
-  { href: "/ilanlar", label: "Tüm İlanlar" },
   { href: "/daire", label: "Daire" },
   { href: "/arsa", label: "Arsa" },
   { href: "/villa", label: "Villa" },

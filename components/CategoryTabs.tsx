@@ -3,8 +3,12 @@
 import { useRouter, useSearchParams } from "next/navigation";
 import { CATEGORY_LIST, isCategoryKey } from "@/lib/categories";
 
-/** Kategori seçilmemiş hâl — tüm kategoriler listelenir. */
-const ALL = "";
+/**
+ * Kategori seçilmemiş hâl. Artık bir SEKME DEĞİL: "Tümü" girişi kaldırıldı,
+ * kullanıcı kategori seçmeden liste görmüyor (kategorisiz /ilanlar kategori
+ * seçim ekranı gösteriyor). Sabit yalnız "seçili değil" durumunu temsil ediyor.
+ */
+const NONE = "";
 
 /**
  * Kategori değişince taşınacak filtreler. Geri kalan her şey bilerek düşer:
@@ -17,7 +21,7 @@ export default function CategoryTabs() {
   const router = useRouter();
   const sp = useSearchParams();
   const param = sp.get("kategori");
-  const active = isCategoryKey(param) ? param : ALL;
+  const active = isCategoryKey(param) ? param : NONE;
 
   function switchTo(key: string) {
     const next = new URLSearchParams();
@@ -25,13 +29,12 @@ export default function CategoryTabs() {
       const value = sp.get(param);
       if (value) next.set(param, value);
     }
-    // "Tümü" parametresizdir; URL'i gereksiz anahtarla kirletmiyoruz.
-    if (key !== ALL) next.set("kategori", key);
+    next.set("kategori", key);
     const qs = next.toString();
     router.push(`/ilanlar${qs ? `?${qs}` : ""}`);
   }
 
-  const tabs = [{ key: ALL, label: "Tümü" }, ...CATEGORY_LIST.map((c) => ({ key: c.key as string, label: c.label }))];
+  const tabs = CATEGORY_LIST.map((c) => ({ key: c.key as string, label: c.label }));
 
   return (
     <nav aria-label="Kategoriler" className="mb-8 flex gap-7 overflow-x-auto border-b border-stone">

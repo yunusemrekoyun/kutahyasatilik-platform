@@ -12,6 +12,8 @@ import Pagination from "@/components/Pagination";
 import NotFoundCTA from "@/components/NotFoundCTA";
 import TrackView from "@/components/TrackView";
 import ViewSwitcher from "@/components/ViewSwitcher";
+import CategoryPicker from "@/components/CategoryPicker";
+import { getMarketplaceStats } from "@/lib/marketplaceStats";
 import { getPublicListingOwner } from "@/lib/publicDirectory";
 
 export const dynamic = "force-dynamic";
@@ -66,7 +68,7 @@ export default async function ListingsPage({
     }
   }
 
-  const [listingResult, owner] = await Promise.all([
+  const [listingResult, owner, stats] = await Promise.all([
     getListingsPaged({
       category: category?.key,
       attrs,
@@ -93,7 +95,9 @@ export default async function ListingsPage({
       : agentSlug
         ? getPublicListingOwner("agent", agentSlug)
         : Promise.resolve(null),
+    getMarketplaceStats(),
   ]);
+  const categoryCounts = stats.categoryCounts;
   const { items, total, totalPages } = listingResult;
   const pageTitle = owner
     ? `${owner.name} Portföyü`
@@ -105,6 +109,12 @@ export default async function ListingsPage({
 
   // Görünüm URL'den okunuyor (ViewSwitcher yazıyor); varsayılan yoğun liste.
   const gallery = get("gorunum") === "galeri";
+
+  // KATEGORİSİZ GİRİŞ: "Tüm ilanlar" kaldırıldı. Filtresiz bir listeyle
+  // karşılamak 360 ilanlık katalogda kullanıcıya karar verdirmiyor; kategori
+  // seçimi gösteriyoruz. Ofis/danışman portföyü bunun dışında — orada kategori
+  // yok ama liste anlamlı.
+  const needsCategoryChoice = !category && !owner;
 
   const flatParams: Record<string, string | undefined> = {};
   Object.entries(sp).forEach(([k, v]) => { if (typeof v === "string") flatParams[k] = v; });
@@ -129,6 +139,15 @@ export default async function ListingsPage({
         ) : null}
       </div>
 
+      {needsCategoryChoice ? (
+        <section className="py-2">
+          <p className="mb-4 max-w-2xl text-sm text-muted">
+            Kategori seçin; filtreler ve sıralama seçtiğiniz kategoriye göre açılır.
+          </p>
+          <CategoryPicker counts={categoryCounts} />
+        </section>
+      ) : (
+      <>
       {/* Ofis/danışman portföyü emlağa özgü olduğu için orada kategori yok */}
       {!owner && (
         <Suspense fallback={<div className="mb-4 h-11 border-b border-stone" />}>
@@ -190,6 +209,9 @@ export default async function ListingsPage({
           )}
         </div>
       </div>
+
+      </>
+      )}
 
       <div className="mt-10">
         <NotFoundCTA />

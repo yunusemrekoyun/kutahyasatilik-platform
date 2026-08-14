@@ -3,12 +3,12 @@ import Link from "next/link";
 import { ArrowRight, BarChart3, Check, MapPin } from "lucide-react";
 import HomeJsonLd from "@/components/HomeJsonLd";
 import HomeSearch from "@/components/HomeSearch";
+import CategoryPicker from "@/components/CategoryPicker";
 import ListingCard from "@/components/ListingCard";
 import ListingsMap from "@/components/ListingsMap";
 import NotFoundCTA from "@/components/NotFoundCTA";
 import TrackView from "@/components/TrackView";
 import { DISTRICTS } from "@/lib/constants";
-import { CATEGORY_LIST } from "@/lib/categories";
 import { getFeaturedListings, getMapPoints, getShowcaseListings } from "@/lib/listings";
 import { getMarketplaceStats } from "@/lib/marketplaceStats";
 import { prisma } from "@/lib/prisma";
@@ -105,35 +105,7 @@ export default async function Home() {
           <h2 className="text-lg font-bold tracking-tight text-ink sm:text-xl">Ne arıyorsunuz?</h2>
           <p className="mt-0.5 text-sm text-muted">Kategori seçin; filtreler seçtiğiniz kategoriye göre açılır.</p>
 
-          <div className="mt-5 grid gap-4 md:grid-cols-3">
-            {CATEGORY_LIST.map((category) => {
-              const count = marketplaceStats.categoryCounts[category.key] ?? 0;
-              return (
-                <div key={category.key} className="rounded-card border border-stone bg-paper p-4">
-                  <Link
-                    href={`/ilanlar?kategori=${category.key}`}
-                    className="group flex items-center justify-between gap-3"
-                  >
-                    <span className="text-base font-bold text-ink group-hover:text-brand-700">{category.label}</span>
-                    <span className="inline-flex items-center gap-1 whitespace-nowrap text-sm tabular-nums text-muted">
-                      {count} ilan <ArrowRight className="h-4 w-4 transition group-hover:translate-x-0.5" />
-                    </span>
-                  </Link>
-                  <div className="mt-3 flex flex-wrap gap-1.5">
-                    {category.subTypes.map((sub) => (
-                      <Link
-                        key={sub.value}
-                        href={`/ilanlar?kategori=${category.key}&tur=${sub.value}`}
-                        className="rounded-control border border-stone px-2.5 py-1 text-xs font-medium text-ink transition hover:border-brand-300 hover:text-brand-700"
-                      >
-                        {sub.label}
-                      </Link>
-                    ))}
-                  </div>
-                </div>
-              );
-            })}
-          </div>
+          <CategoryPicker counts={marketplaceStats.categoryCounts} className="mt-5" />
 
           {/* Sayaç bandı — ayrı bir bölüm yerine kategori seçiminin altına alındı. */}
           <div className="mt-6 grid grid-cols-2 gap-px overflow-hidden rounded-card border border-stone bg-stone sm:grid-cols-4">
