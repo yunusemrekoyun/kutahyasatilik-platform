@@ -66,6 +66,11 @@ jobs:
       - run: npm test
       - run: npm run audit:runtime
       - run: npm run build
+      # prepare:standalone ATLANIYORDU: check:standalone'un "public/uploads
+      # standalone çıktısına kopyalanmasın" kuralı, .next/standalone/public
+      # henüz oluşmadığı için CI'da fiilen no-op çalışıyordu. Kural ancak
+      # DEPLOY.md'deki build -> prepare -> check sırasıyla anlam kazanıyor.
+      - run: npm run prepare:standalone
       - run: npm run check:standalone
       - run: npx playwright install --with-deps chromium
       - run: npm run test:e2e

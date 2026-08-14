@@ -49,6 +49,10 @@ async function main() {
         description:
           "Yük testi amacıyla üretilmiş örnek ilan açıklamasıdır. Konum, ulaşım ve yatırım değeri yüksek. " +
           "Detaylı bilgi ve randevu için iletişime geçiniz. ".repeat(3),
+        // Kategori açıkça yazılıyor: kolon varsayılanı zaten "emlak" ama örtük
+        // bırakıldığında yük testi verisinin TAMAMI emlak oluyordu ve emlak dışı
+        // JSONB nitelik filtrelerinin maliyeti hiç ölçülemiyordu.
+        category: "emlak",
         propertyType: type,
         listingType: "sale",
         status: "active",
