@@ -132,10 +132,13 @@ export default async function ListingPage({
   // yolunda, olay kaydıyla aynı yerde artırılır.
 
   // Bu üç sorgu birbirinden bağımsız; ardışık await ile üç ayrı gidiş-dönüş oluyordu.
+  // İlk ikisi YALNIZ bölge analizini besliyor, o da yalnız emlakta çiziliyor:
+  // her vasıta ilanında iki gereksiz sorgu çalışıyordu.
+  const needsAnalysis = listing.category === "emlak";
   const [district, scoresSetting, similarRaw] = await Promise.all([
-    prisma.district.findFirst({ where: { name: listing.district } }),
+    needsAnalysis ? prisma.district.findFirst({ where: { name: listing.district } }) : null,
     // Bölge analizi skorlarını göster/gizle (Setting: analysis_scores; "0" ise gizli, varsayılan göster)
-    prisma.setting.findUnique({ where: { key: "analysis_scores" } }),
+    needsAnalysis ? prisma.setting.findUnique({ where: { key: "analysis_scores" } }) : null,
     // Benzer ilanlar — kategori KAPSAM koşulu, tercih değil: kategorisiz
     // sorguda bir otomobilin altına aynı ilçedeki daireler geliyordu.
     prisma.listing.findMany({
@@ -151,7 +154,7 @@ export default async function ListingPage({
     }),
   ]);
 
-  const analysis = buildAnalysis(listing, district);
+  const analysis = needsAnalysis ? buildAnalysis(listing, district) : null;
   const features = parseJsonArray(listing.features);
   const amenityGroups = groupListingAmenities(listing.amenities.map((item) => item.key));
   const showScores = scoresSetting?.value !== "0";
@@ -187,6 +190,10 @@ export default async function ListingPage({
   const isResidential = isRealEstate && !isLand && !isCommercial;
   const isSold = listing.status === "sold";
   const categoryLabel = CATEGORY_LABELS[listing.category] ?? "İlanlar";
+  // JSON-LD Product dalı için: nitelikler JSONB'de, tipi burada daraltıyoruz.
+  const attributeValues = (listing.attributes ?? {}) as Record<string, unknown>;
+  const jsonLdBrand = typeof attributeValues.marka === "string" ? attributeValues.marka : null;
+  const jsonLdCondition = typeof attributeValues.durum === "string" ? attributeValues.durum : null;
   const agentLogo = publicImageUrl(listing.agent?.logo);
 
   // Brüt=Net olduğunda "125 / 125" yerine tek değer göster (gereksiz tekrar olmasın).
@@ -248,7 +255,17 @@ export default async function ListingPage({
     description: listing.description,
     url: `${SITE.url}/ilan/${listing.slug}`,
     image: listing.images.map((i) => i.url),
-    datePosted: listing.createdAt.toISOString(),
+    // datePosted ve address RealEstateListing alanları; Product şemasında
+    // geçersiz. Ürün dalında yerlerini brand/itemCondition alıyor.
+    ...(isRealEstate
+      ? { datePosted: listing.createdAt.toISOString() }
+      : {
+          ...(jsonLdBrand ? { brand: { "@type": "Brand", name: jsonLdBrand } } : {}),
+          itemCondition:
+            jsonLdCondition === "sifir"
+              ? "https://schema.org/NewCondition"
+              : "https://schema.org/UsedCondition",
+        }),
     offers: {
       "@type": "Offer",
       price: listing.price,
@@ -325,15 +342,18 @@ export default async function ListingPage({
               </div>
             </div>
 
-            {/* Künye — en önemli metrikler */}
-            <div className="mt-6 grid grid-cols-2 divide-x divide-stone border-y border-stone md:grid-cols-4">
-              {keyMetrics.map((m) => (
-                <div key={m.label} className="px-3 py-4 sm:px-4">
-                  <p className="mb-1 text-[13px] font-medium uppercase tracking-wide text-muted">{m.label}</p>
-                  <p className="text-base font-semibold text-ink">{m.value}</p>
-                </div>
-              ))}
-            </div>
+            {/* Künye — en önemli metrikler. Hepsi boşsa (nitelik girilmemiş bir
+                emlak dışı ilan) çizgili boş bir şerit kalıyordu. */}
+            {keyMetrics.length > 0 && (
+              <div className="mt-6 grid grid-cols-2 divide-x divide-stone border-y border-stone md:grid-cols-4">
+                {keyMetrics.map((m) => (
+                  <div key={m.label} className="px-3 py-4 sm:px-4">
+                    <p className="mb-1 text-[13px] font-medium uppercase tracking-wide text-muted">{m.label}</p>
+                    <p className="text-base font-semibold text-ink">{m.value}</p>
+                  </div>
+                ))}
+              </div>
+            )}
 
             <h2 className="mt-9 border-b border-stone pb-3 text-lg font-bold text-ink">Tüm detaylar</h2>
             <div className="mt-3 grid grid-cols-1 gap-x-8 sm:grid-cols-2">
@@ -444,7 +464,7 @@ export default async function ListingPage({
 
           {/* VERİ DESTEKLİ BÖLGE ANALİZİ — m² fiyatı, imar ve yatırım skoru
               üzerine kurulu olduğu için yalnız emlak ilanlarında anlamlı */}
-          {isRealEstate && <AnalysisSection analysis={analysis} showScores={showScores} />}
+          {isRealEstate && analysis && <AnalysisSection analysis={analysis} showScores={showScores} />}
 
           {/* HARİTA */}
           {mapPoints.length > 0 && (

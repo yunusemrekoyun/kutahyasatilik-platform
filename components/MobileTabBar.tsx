@@ -2,12 +2,13 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home, Building2, Map, Heart, User } from "lucide-react";
+import { Home, LayoutGrid, Map, Heart, User } from "lucide-react";
 import { useStore } from "@/components/store/StoreProvider";
 
 const TABS = [
   { href: "/", label: "Ana Sayfa", icon: Home, exact: true },
-  { href: "/ilanlar", label: "İlanlar", icon: Building2 },
+  // Bina ikonu siteyi emlak sitesi gibi gösteriyordu; ızgara ikonu kategori-nötr.
+  { href: "/ilanlar", label: "İlanlar", icon: LayoutGrid },
   { href: "/harita", label: "Harita", icon: Map },
   { href: "/favoriler", label: "Favoriler", icon: Heart, badge: true },
   // Hesap sağ altta (kullanıcı beklentisi). Girişsizse /hesabim → /giris'e yönlendirir,

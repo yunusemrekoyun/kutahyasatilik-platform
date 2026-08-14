@@ -12,6 +12,8 @@ export interface Badge {
 
 export interface BadgeInput {
   price: number;
+  /** İlanın kategorisi. Verilmezse emlak sayılır (eski çağrı yerleri). */
+  category?: string | null;
   propertyType: string;
   areaGross?: number | null;
   createdAt: Date | string;
@@ -28,11 +30,18 @@ const LAND_TYPES = new Set(["arsa", "tarla"]);
 
 export function computeBadges(input: BadgeInput): Badge[] {
   const badges: Badge[] = [];
-  const isLand = LAND_TYPES.has(input.propertyType);
+  // Fırsat rozeti EMLAK ortalamalarına (ilçe daire/arsa m² fiyatı) dayanıyor.
+  // Kategori kapısı olmadan, alt türü "arsa" olmayan bir vasıta ilanı yanlışlıkla
+  // "daire" dalına düşerse "Bölge ort. %X altında" gibi karşılıksız bir iddia
+  // üretiyordu.
+  const isRealEstate = !input.category || input.category === "emlak";
+  const isLand = isRealEstate && LAND_TYPES.has(input.propertyType);
 
   // 1) Fırsat rozeti — bölge ortalamasının belirgin altında mı?
   let belowPct = 0;
-  if (isLand && input.avgPriceArsaM2 && input.areaGross && input.areaGross > 0) {
+  if (!isRealEstate) {
+    belowPct = 0;
+  } else if (isLand && input.avgPriceArsaM2 && input.areaGross && input.areaGross > 0) {
     const m2price = input.price / input.areaGross;
     belowPct = (input.avgPriceArsaM2 - m2price) / input.avgPriceArsaM2;
   } else if (input.propertyType === "daire" && input.avgPriceDaire) {

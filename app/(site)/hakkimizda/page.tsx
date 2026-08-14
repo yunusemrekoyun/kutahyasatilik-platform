@@ -25,12 +25,12 @@ export async function generateMetadata(): Promise<Metadata> {
     title: page?.metaTitle || "Hakkımızda - Kurumsal",
     description:
       page?.metaDescription ||
-      "Kütahya'nın dijital emlak ofisi. Güvenilir, şeffaf ve teknoloji odaklı emlak danışmanlığı.",
+      "Kütahya'nın yerel ilan platformu. Emlak, vasıta ve teknoloji ilanları; güvenilir, şeffaf ve teknoloji odaklı.",
     alternates: { canonical: `${SITE.url}/hakkimizda` },
   };
 }
 
-const FALLBACK = `<p>Kütahya'nın dijital emlak ofisi olarak alım, satım ve yatırım danışmanlığında yanınızdayız.</p>`;
+const FALLBACK = `<p>Kütahya'da alınır satılır ne varsa tek yerde topluyoruz: emlak, vasıta ve teknoloji. Alım, satım ve yatırım kararlarınızda yanınızdayız.</p>`;
 
 export default async function AboutPage() {
   const page = await getPage();
@@ -41,7 +41,7 @@ export default async function AboutPage() {
   return (
     <div>
       <TrackView />
-      <PageIntro eyebrow="Kurumsal" title={title} intro="Kütahya'nın ilçelerini, mahallelerini ve gayrimenkul dinamiklerini yakından bilen yerel bir ekibiz." actions={<><Link href="/ilanlar" className="rounded-control bg-brand-700 px-6 py-3 font-semibold text-white hover:bg-brand-800">Portföyü incele</Link>{c.phoneRaw && <a href={telLink(c.phoneRaw)} className="inline-flex items-center gap-2 rounded-control border border-brand-200 bg-paper px-6 py-3 font-semibold text-brand-800"><Phone className="h-4 w-4" /> {c.phone}</a>}</>} />
+      <PageIntro eyebrow="Kurumsal" title={title} intro="Kütahya'nın ilçelerini, mahallelerini ve yerel piyasa dinamiklerini yakından bilen yerel bir ekibiz." actions={<><Link href="/ilanlar" className="rounded-control bg-brand-700 px-6 py-3 font-semibold text-white hover:bg-brand-800">İlanları incele</Link>{c.phoneRaw && <a href={telLink(c.phoneRaw)} className="inline-flex items-center gap-2 rounded-control border border-brand-200 bg-paper px-6 py-3 font-semibold text-brand-800"><Phone className="h-4 w-4" /> {c.phone}</a>}</>} />
 
       {/* İçerik (admin'den düzenlenebilir) */}
       <section className="mx-auto max-w-3xl px-4 py-14">
@@ -49,7 +49,7 @@ export default async function AboutPage() {
       </section>
 
       <section className="mx-auto max-w-7xl px-4 pb-16">
-        <NotFoundCTA title="Gayrimenkul yolculuğunuza birlikte başlayalım" />
+        <NotFoundCTA title="Alım satım yolculuğunuza birlikte başlayalım" />
       </section>
     </div>
   );

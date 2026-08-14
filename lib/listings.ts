@@ -82,6 +82,7 @@ export async function decorate(rows: RawCard[]): Promise<ListingCardData[]> {
     const stat = stats.get(l.district);
     const badges = computeBadges({
       price: l.price,
+      category: l.category,
       propertyType: l.propertyType,
       areaGross: l.areaGross,
       createdAt: l.createdAt,

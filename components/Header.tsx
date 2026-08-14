@@ -202,7 +202,7 @@ export default function Header() {
               {account ? firstName : "Giriş Yap"}
             </Link>
             <Link href="/ilan-ver" onClick={() => setMobileOpen(false)} className="flex min-h-11 items-center justify-center rounded-control bg-gold-500 text-sm font-bold text-brand-950">İlan Ver</Link>
-            <Link href="/satici" onClick={() => setMobileOpen(false)} className="flex min-h-11 items-center justify-center rounded-control border border-brand-200 text-sm font-semibold text-brand-800">Mülkünü Sat</Link>
+            <Link href="/satici" onClick={() => setMobileOpen(false)} className="flex min-h-11 items-center justify-center rounded-control border border-brand-200 text-sm font-semibold text-brand-800">Mülkünü Sat (Emlak)</Link>
           </div>
           {(contact.phoneRaw || contact.whatsapp) && (
             <div className="mt-6 flex flex-wrap gap-4 border-t border-stone pt-5 text-sm font-semibold">

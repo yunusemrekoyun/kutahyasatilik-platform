@@ -55,7 +55,7 @@ export default async function AccountPage() {
         <p className="text-sm text-muted">Bıraktığınız taleplerin süreç durumunu buradan izleyebilirsiniz.</p>
         {leads.length === 0 ? (
           <div className="mt-3 rounded-control bg-paper p-6 text-center text-sm text-muted/70 ring-1 ring-stone">
-            Henüz talebiniz yok. Bir ilanda &quot;Randevu / Bilgi Al&quot; ya da &quot;Mülkünü Sat&quot; ile talep bırakabilirsiniz.
+            Henüz talebiniz yok. Bir ilan sayfasındaki iletişim düğmeleriyle talep bırakabilirsiniz.
           </div>
         ) : (
           <div className="mt-3 space-y-3">
