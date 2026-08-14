@@ -1,6 +1,22 @@
 import { prisma } from "./prisma";
+import { PUBLIC_ACTIVE_LISTING } from "./listingFilters";
 
 // Alıcı talebi (kayıtlı arama) ↔ ilan eşleştirme motoru.
+//
+// KAPSAM: BuyerAlert tamamen EMLAĞA özgüdür — alanları (propertyType, rooms,
+// minArea, zoning) yalnız gayrimenkulde anlamlı ve kayıt yalnız "alıcı talebi"
+// formundan (/api/buyer-alert, /api/v1/buyer-alert) yaratılıyor. Vasıta/teknoloji
+// için kayıtlı arama arayüzü yok.
+//
+// Bu kapsam eskiden hiçbir yerde uygulanmıyordu: propertyType'ı boş bırakılmış bir
+// talep, yeni eklenen bir TRAKTÖR ya da iPHONE ilanıyla eşleşip kullanıcıya
+// "new_match" bildirimi gönderiyordu. Aşağıdaki iki yönlü emlak kapsamlaması bunu
+// kapatıyor.
+//
+// Yeni kategorilere kayıtlı arama gerekirse BuyerAlert'e `category` kolonu eklenmeli;
+// şu an kolon YOK, o yüzden kapsamlama kod tarafında.
+
+const ALERT_CATEGORY = "emlak";
 
 export type AlertCriteria = {
   propertyType?: string | null;
@@ -19,13 +35,20 @@ export type ListingForMatch = {
   price: number;
   areaGross?: number | null;
   rooms?: string | null;
+  /**
+   * Verilmezse `emlak` sayılır — `Listing.category` kolonunun DB varsayılanı da
+   * budur, yani kategoriyi henüz taşımayan yazma yolları (admin `saveListing`)
+   * doğru davranışı alır. Faz 6'da o yollar kategoriyi taşımaya başlayınca
+   * değer buraya kendiliğinden akar.
+   */
+  category?: string | null;
 };
 
-// Bir alıcı talebine uyan AKTİF & ONAYLI ilanları sorgular.
+// Bir alıcı talebine uyan AKTİF & ONAYLI EMLAK ilanlarını sorgular.
 export function alertToListingWhere(alert: AlertCriteria): Record<string, unknown> {
   const where: Record<string, unknown> = {
-    status: "active",
-    moderationStatus: "approved",
+    ...PUBLIC_ACTIVE_LISTING,
+    category: ALERT_CATEGORY,
   };
   if (alert.propertyType) where.propertyType = alert.propertyType;
   if (alert.listingType) where.listingType = alert.listingType;
@@ -76,7 +99,13 @@ export function listingToAlertWhere(listing: ListingForMatch): Record<string, un
   };
 }
 
+// Emlak dışı ilanların eşleşecek talebi yoktur (bkz. dosya başındaki KAPSAM notu).
+function isAlertEligible(listing: ListingForMatch): boolean {
+  return (listing.category ?? ALERT_CATEGORY) === ALERT_CATEGORY;
+}
+
 export async function findAlertsForListing(listing: ListingForMatch, take = 100) {
+  if (!isAlertEligible(listing)) return [];
   return prisma.buyerAlert.findMany({
     where: listingToAlertWhere(listing),
     orderBy: { createdAt: "desc" },
@@ -85,5 +114,6 @@ export async function findAlertsForListing(listing: ListingForMatch, take = 100)
 }
 
 export async function countAlertsForListing(listing: ListingForMatch): Promise<number> {
+  if (!isAlertEligible(listing)) return 0;
   return prisma.buyerAlert.count({ where: listingToAlertWhere(listing) });
 }
