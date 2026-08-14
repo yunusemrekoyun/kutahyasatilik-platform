@@ -21,7 +21,18 @@ for (const viewport of viewports) {
       await testInfo.attach(`${viewport.name}-${name}`, { body: await page.screenshot({ fullPage: true }), contentType: "image/png" });
     }
 
+    // /ilanlar artık KATEGORİ SEÇİM ekranı: "Tüm ilanlar" girişi kaldırıldı,
+    // kullanıcı kategori seçmeden liste görmüyor. Önce seçim ekranını, sonra
+    // kategorili listeyi doğruluyoruz.
     await page.goto("/ilanlar");
+    // href ile eşleştiriyoruz: erişilebilir ad sayacı da içeriyor ("Vasıta 108 ilan").
+    await expect(page.locator('a[href="/ilanlar?kategori=vasita"]').first()).toBeVisible();
+    const overflowHub = await page.evaluate(
+      () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
+    );
+    expect(overflowHub).toBeLessThanOrEqual(1);
+
+    await page.goto("/ilanlar?kategori=emlak");
     const detailLink = page.locator('a[href^="/ilan/"]').first();
     if (await detailLink.count()) {
       const detailHref = await detailLink.getAttribute("href");
