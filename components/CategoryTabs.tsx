@@ -1,7 +1,10 @@
 "use client";
 
 import { useRouter, useSearchParams } from "next/navigation";
-import { CATEGORY_LIST, getCategory } from "@/lib/categories";
+import { CATEGORY_LIST, isCategoryKey } from "@/lib/categories";
+
+/** Kategori seçilmemiş hâl — tüm kategoriler listelenir. */
+const ALL = "";
 
 /**
  * Kategori değişince taşınacak filtreler. Geri kalan her şey bilerek düşer:
@@ -13,7 +16,8 @@ const CARRY_OVER = ["q", "ilce", "min", "max", "sira"];
 export default function CategoryTabs() {
   const router = useRouter();
   const sp = useSearchParams();
-  const active = getCategory(sp.get("kategori")).key;
+  const param = sp.get("kategori");
+  const active = isCategoryKey(param) ? param : ALL;
 
   function switchTo(key: string) {
     const next = new URLSearchParams();
@@ -21,27 +25,29 @@ export default function CategoryTabs() {
       const value = sp.get(param);
       if (value) next.set(param, value);
     }
-    // Emlak varsayılan; URL'i gereksiz parametreyle kirletmiyoruz.
-    if (key !== "emlak") next.set("kategori", key);
+    // "Tümü" parametresizdir; URL'i gereksiz anahtarla kirletmiyoruz.
+    if (key !== ALL) next.set("kategori", key);
     const qs = next.toString();
     router.push(`/ilanlar${qs ? `?${qs}` : ""}`);
   }
 
+  const tabs = [{ key: ALL, label: "Tümü" }, ...CATEGORY_LIST.map((c) => ({ key: c.key as string, label: c.label }))];
+
   return (
     <nav aria-label="Kategoriler" className="mb-8 flex gap-7 overflow-x-auto border-b border-stone">
-      {CATEGORY_LIST.map((category) => {
-        const on = category.key === active;
+      {tabs.map((tab) => {
+        const on = tab.key === active;
         return (
           <button
-            key={category.key}
+            key={tab.key || "all"}
             type="button"
-            onClick={() => switchTo(category.key)}
+            onClick={() => switchTo(tab.key)}
             aria-current={on ? "page" : undefined}
             className={`-mb-px min-h-11 shrink-0 border-b-2 px-1 pb-3 text-[15px] font-semibold transition ${
               on ? "border-gold-600 text-ink" : "border-transparent text-muted hover:text-ink"
             }`}
           >
-            {category.label}
+            {tab.label}
           </button>
         );
       })}

@@ -4,7 +4,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { X, SlidersHorizontal, Search, Check, BellRing } from "lucide-react";
 import { DISTRICTS } from "@/lib/constants";
-import { getCategory, getFilterableFields, getSubTypeLabel } from "@/lib/categories";
+import { getCategory, getFilterableFields, getSubTypeLabel, isCategoryKey } from "@/lib/categories";
 import { formatNumber } from "@/lib/format";
 import ThousandsInput from "@/components/ThousandsInput";
 
@@ -23,10 +23,12 @@ const CHIP_KEYS = ["q", "tur", "ilce", "oda", "min", "max", "minAlan", "maxAlan"
 export default function ListingFilters() {
   const router = useRouter();
   const sp = useSearchParams();
-  // Aktif kategori. Tanımsız/bozuk değerler emlağa düşer, filtreler hiç patlamaz.
-  const category = getCategory(sp.get("kategori"));
-  const isRealEstate = category.key === "emlak";
-  const attributeFields = getFilterableFields(category.key);
+  // Kategori seçilmemişse ("Tümü") kategoriye özel hiçbir filtre gösterilmez:
+  // tüm kategoriler listelenirken "Emlak Tipi" ya da "Yakıt" başlığı yanıltıcı olur.
+  const categoryParam = sp.get("kategori");
+  const category = isCategoryKey(categoryParam) ? getCategory(categoryParam) : null;
+  const isRealEstate = category?.key === "emlak";
+  const attributeFields = category ? getFilterableFields(category.key) : [];
   const [open, setOpen] = useState(false);
   const sheetRef = useRef<HTMLElement>(null);
   const closeButtonRef = useRef<HTMLButtonElement>(null);
@@ -114,7 +116,7 @@ export default function ListingFilters() {
   function chipLabel(key: string, val: string): string | null {
     switch (key) {
       case "q": return `“${val}”`;
-      case "tur": return getSubTypeLabel(category.key, val);
+      case "tur": return getSubTypeLabel(category?.key, val);
       case "ilce": return val;
       case "oda": return val;
       case "min": return `Min ${formatNumber(Number(val))} ₺`;
@@ -183,7 +185,8 @@ export default function ListingFilters() {
           />
         </div>
 
-        {/* Kategori içi alt tür (tek seçim) */}
+        {/* Kategori içi alt tür (tek seçim) — yalnız bir kategori seçiliyken */}
+        {category && (
         <div className={sectionCls}>
           <h3 id="property-type-filter-title" className={headCls}>{isRealEstate ? "Emlak Tipi" : "Tür"}</h3>
           <div role="group" aria-labelledby="property-type-filter-title" className="space-y-1">
@@ -206,6 +209,7 @@ export default function ListingFilters() {
             })}
           </div>
         </div>
+        )}
 
         {/* İlçe */}
         <div className={sectionCls}>

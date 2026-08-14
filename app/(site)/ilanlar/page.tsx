@@ -6,7 +6,7 @@ import { getListingsPaged } from "@/lib/listings";
 import ListingCard from "@/components/ListingCard";
 import ListingFilters from "@/components/ListingFilters";
 import CategoryTabs from "@/components/CategoryTabs";
-import { getCategory, getFilterableFields } from "@/lib/categories";
+import { getCategory, getFilterableFields, isCategoryKey } from "@/lib/categories";
 import ListingSort from "@/components/ListingSort";
 import Pagination from "@/components/Pagination";
 import NotFoundCTA from "@/components/NotFoundCTA";
@@ -45,11 +45,15 @@ export default async function ListingsPage({
   const minAlan = minAlanRaw !== undefined ? minAlanRaw * areaFactor : undefined;
   const maxAlan = maxAlanRaw !== undefined ? maxAlanRaw * areaFactor : undefined;
 
+  // Kategori seçilmediyse TÜM kategoriler listelenir: burası genel ilan sitesinin
+  // ana listesi, emlağa daraltmak "Tüm İlanlar" başlığıyla çelişirdi.
+  const categoryParam = get("kategori");
+  const category = isCategoryKey(categoryParam) ? getCategory(categoryParam) : null;
+
   // Kategoriye özel nitelik filtreleri. Yalnız kayıtta filtrelenebilir işaretli
   // alanlar okunur; URL'e elle eklenen başka bir anahtar sorguya geçmez.
-  const category = getCategory(get("kategori"));
   const attrs: Record<string, string> = {};
-  for (const field of getFilterableFields(category.key)) {
+  for (const field of category ? getFilterableFields(category.key) : []) {
     if (field.type === "select") {
       const value = get(field.key);
       if (value) attrs[field.key] = value;
@@ -63,7 +67,7 @@ export default async function ListingsPage({
 
   const [listingResult, owner] = await Promise.all([
     getListingsPaged({
-      category: category.key,
+      category: category?.key,
       attrs,
       q: get("q"),
       propertyType: get("tur"),
@@ -94,9 +98,9 @@ export default async function ListingsPage({
     ? `${owner.name} Portföyü`
     : get("ilce")
       ? `${get("ilce")} İlanları`
-      : category.key === "emlak"
-        ? "Tüm İlanlar"
-        : `${category.label} İlanları`;
+      : category
+        ? `${category.label} İlanları`
+        : "Tüm İlanlar";
 
   const flatParams: Record<string, string | undefined> = {};
   Object.entries(sp).forEach(([k, v]) => { if (typeof v === "string") flatParams[k] = v; });
