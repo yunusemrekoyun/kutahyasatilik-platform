@@ -948,8 +948,10 @@ async function ensureActivity(owners: Awaited<ReturnType<typeof ensureOwners>>) 
   // Talepler (yönetim panelindeki "Talepler" listesi) — emlak ilanlarına bağlı.
   const LEAD_TYPES = ["appointment", "expertise", "price_offer", "contact"];
   const realEstate = listings.filter((l) => l.category === "emlak");
+  // Eşik "sıfır" değil: canlıda birkaç gerçek talep varken demo talepler hiç
+  // üretilmiyordu ve yönetim panelindeki "Talepler" ekranı neredeyse boş kalıyordu.
   let leads = 0;
-  if (!(await prisma.lead.count())) {
+  if ((await prisma.lead.count()) < 10) {
     for (let i = 0; i < 24 && realEstate.length; i++) {
       const listing = realEstate[(i * 7) % realEstate.length];
       const buyer = buyerFor(listing, i + 3);
@@ -974,7 +976,7 @@ async function ensureActivity(owners: Awaited<ReturnType<typeof ensureOwners>>) 
 
   // Kayıtlı aramalar — yeni emlak ilanı onaylandığında eşleşme bildirimi gider.
   let alerts = 0;
-  if (!(await prisma.buyerAlert.count())) {
+  if ((await prisma.buyerAlert.count()) < 3) {
     const criteria = [
       { propertyType: "daire", district: "Merkez", rooms: "3+1", maxPrice: 3_500_000 },
       { propertyType: "daire", district: "Tavşanlı", maxPrice: 2_200_000 },
