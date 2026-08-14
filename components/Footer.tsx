@@ -27,12 +27,12 @@ export default async function Footer() {
           </p>
           <div className="mt-7 flex flex-wrap gap-3">
             {contact.phoneRaw && (
-              <a href={telLink(contact.phoneRaw)} className="inline-flex min-h-11 items-center gap-2 rounded-lg border border-white/20 px-4 text-sm font-semibold text-white hover:bg-paper/10">
+              <a href={telLink(contact.phoneRaw)} className="inline-flex min-h-11 items-center gap-2 rounded-control border border-white/20 px-4 text-sm font-semibold text-white hover:bg-paper/10">
                 <Phone className="h-4 w-4" /> {contact.phone}
               </a>
             )}
             {contact.whatsapp && (
-              <a href={whatsappLink(contact.whatsapp, "Merhaba, gayrimenkul hakkında bilgi almak istiyorum.")} className="inline-flex min-h-11 items-center gap-2 rounded-lg border border-white/20 px-4 text-sm font-semibold text-white hover:bg-paper/10">
+              <a href={whatsappLink(contact.whatsapp, "Merhaba, gayrimenkul hakkında bilgi almak istiyorum.")} className="inline-flex min-h-11 items-center gap-2 rounded-control border border-white/20 px-4 text-sm font-semibold text-white hover:bg-paper/10">
                 <MessageCircle className="h-4 w-4" /> WhatsApp
               </a>
             )}

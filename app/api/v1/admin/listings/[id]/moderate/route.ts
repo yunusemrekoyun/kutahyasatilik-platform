@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { resolveApiAdmin } from "@/lib/apiAdmin";
-import { notifyAgent, notifyMatchingAlerts } from "@/lib/notify";
+import { notifyAgent, notifyUser, notifyMatchingAlerts } from "@/lib/notify";
+import { revalidatePath } from "next/cache";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -20,14 +21,23 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
       where: { id },
       data: { moderationStatus: "approved", note: null },
       select: {
-        slug: true, agentId: true, title: true, status: true,
+        slug: true, agentId: true, userId: true, title: true, status: true,
+        // category: notifyMatchingAlerts emlak dışı ilanları elemek için okur.
+        category: true,
         propertyType: true, listingType: true, district: true, price: true, areaGross: true, rooms: true,
       },
     });
     if (updated.agentId) {
       await notifyAgent(updated.agentId, { type: "listing_approved", title: "İlanınız onaylandı", body: updated.title, link: "/emlakci/panel" });
+    } else if (updated.userId) {
+      // Bireysel ilan: sahibi kullanıcı. Web ikiziyle aynı davranış.
+      await notifyUser(updated.userId, { type: "listing_approved", title: "İlanınız onaylandı", body: updated.title, link: "/hesabim/ilanlarim" });
     }
     if (updated.status === "active") await notifyMatchingAlerts(updated);
+    // Web ikizi revalidateListingSurfaces çağırıyor; bu uç hiç çağırmıyordu, yani
+    // mobilden onaylanan ilan ISR cache'i dolayısıyla 5 dakika görünmüyordu.
+    revalidatePath("/ilanlar");
+    revalidatePath(`/ilan/${updated.slug}`);
     return NextResponse.json({ ok: true });
   }
 
@@ -35,7 +45,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     const updated = await prisma.listing.update({
       where: { id },
       data: { moderationStatus: "rejected", note },
-      select: { slug: true, agentId: true, title: true },
+      select: { slug: true, agentId: true, userId: true, title: true },
     });
     if (updated.agentId) {
       await notifyAgent(updated.agentId, {
@@ -44,7 +54,16 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
         body: note ? `${updated.title} — ${note}` : updated.title,
         link: "/emlakci/panel",
       });
+    } else if (updated.userId) {
+      await notifyUser(updated.userId, {
+        type: "listing_rejected",
+        title: "İlanınız reddedildi",
+        body: note ? `${updated.title} — ${note}` : updated.title,
+        link: "/hesabim/ilanlarim",
+      });
     }
+    revalidatePath("/ilanlar");
+    revalidatePath(`/ilan/${updated.slug}`);
     return NextResponse.json({ ok: true });
   }
 

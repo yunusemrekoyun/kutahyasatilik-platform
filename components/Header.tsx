@@ -124,7 +124,7 @@ export default function Header() {
               }}
               aria-controls="listing-navigation"
               aria-expanded={listingMenuOpen}
-              className={`inline-flex h-full items-center gap-1 border-b-2 text-sm font-semibold transition ${listingActive ? "border-gold-700 text-brand-950" : "border-transparent text-slate-600 hover:text-brand-950"}`}
+              className={`inline-flex h-full items-center gap-1 border-b-2 text-sm font-semibold transition ${listingActive ? "border-gold-700 text-brand-950" : "border-transparent text-muted hover:text-brand-950"}`}
             >
               İlanlar <ChevronDown aria-hidden="true" className={`h-4 w-4 transition ${listingMenuOpen ? "rotate-180" : ""}`} />
             </button>
@@ -137,7 +137,7 @@ export default function Header() {
                       href={item.href}
                       onClick={() => setListingMenuOpen(false)}
                       aria-current={isActive(item.href) ? "page" : undefined}
-                      className={`flex min-h-11 items-center rounded-lg px-3 py-2.5 text-sm transition ${isActive(item.href) ? "bg-brand-50 font-semibold text-brand-800" : "text-slate-700 hover:bg-canvas"}`}
+                      className={`flex min-h-11 items-center rounded-control px-3 py-2.5 text-sm transition ${isActive(item.href) ? "bg-brand-50 font-semibold text-brand-800" : "text-ink hover:bg-canvas"}`}
                     >
                       {item.label}
                     </Link>
@@ -151,7 +151,7 @@ export default function Header() {
               key={item.href}
               href={item.href}
               aria-current={isActive(item.href) ? "page" : undefined}
-              className={`flex h-full items-center border-b-2 text-sm font-semibold transition ${isActive(item.href) ? "border-gold-700 text-brand-950" : "border-transparent text-slate-600 hover:text-brand-950"}`}
+              className={`flex h-full items-center border-b-2 text-sm font-semibold transition ${isActive(item.href) ? "border-gold-700 text-brand-950" : "border-transparent text-muted hover:text-brand-950"}`}
             >
               {item.label}
             </Link>
@@ -159,22 +159,22 @@ export default function Header() {
         </nav>
 
         <div className="flex items-center gap-1">
-          <Link href="/favoriler" aria-label={favoriteCount > 0 ? `Favoriler, ${favoriteCount} kayıtlı ilan` : "Favoriler"} className="relative grid h-11 w-11 place-items-center rounded-lg text-slate-600 hover:bg-canvas hover:text-brand-900">
+          <Link href="/favoriler" aria-label={favoriteCount > 0 ? `Favoriler, ${favoriteCount} kayıtlı ilan` : "Favoriler"} className="relative grid h-11 w-11 place-items-center rounded-control text-muted hover:bg-canvas hover:text-brand-900">
             <Heart aria-hidden="true" className="h-5 w-5" />
             {favoriteCount > 0 && <span aria-hidden="true" className="absolute right-0.5 top-0.5 min-w-4 rounded-full bg-gold-600 px-1 text-center text-[9px] font-bold text-white">{favoriteCount}</span>}
           </Link>
           {account && <NotificationBell />}
-          <Link href={account ? "/hesabim" : "/giris"} aria-current={isActive(account ? "/hesabim" : "/giris") ? "page" : undefined} className="hidden h-11 items-center gap-2 px-2 text-sm font-semibold text-slate-700 hover:text-brand-900 sm:inline-flex">
+          <Link href={account ? "/hesabim" : "/giris"} aria-current={isActive(account ? "/hesabim" : "/giris") ? "page" : undefined} className="hidden h-11 items-center gap-2 px-2 text-sm font-semibold text-ink hover:text-brand-900 sm:inline-flex">
             <User aria-hidden="true" className="h-4 w-4" /> {account ? firstName : "Giriş"}
           </Link>
-          <Link href="/satici" className="ml-1 hidden rounded-lg bg-brand-700 px-4 py-3 text-sm font-semibold text-white hover:bg-brand-800 sm:inline-flex">
+          <Link href="/satici" className="ml-1 hidden rounded-control bg-brand-700 px-4 py-3 text-sm font-semibold text-white hover:bg-brand-800 sm:inline-flex">
             Mülkünü Sat
           </Link>
           <button
             ref={mobileButtonRef}
             type="button"
             onClick={() => setMobileOpen((open) => !open)}
-            className="grid h-11 w-11 place-items-center rounded-lg border border-stone text-brand-900 lg:hidden"
+            className="grid h-11 w-11 place-items-center rounded-control border border-stone text-brand-900 lg:hidden"
             aria-label={mobileOpen ? "Menüyü kapat" : "Menüyü aç"}
             aria-controls="mobile-navigation"
             aria-expanded={mobileOpen}
@@ -199,10 +199,10 @@ export default function Header() {
             ))}
           </div>
           <div className="mt-5 grid grid-cols-2 gap-2">
-            <Link href={account ? "/hesabim" : "/giris"} onClick={() => setMobileOpen(false)} className="flex min-h-11 items-center justify-center rounded-lg border border-brand-200 text-sm font-semibold text-brand-800">
+            <Link href={account ? "/hesabim" : "/giris"} onClick={() => setMobileOpen(false)} className="flex min-h-11 items-center justify-center rounded-control border border-brand-200 text-sm font-semibold text-brand-800">
               {account ? firstName : "Giriş Yap"}
             </Link>
-            <Link href="/satici" onClick={() => setMobileOpen(false)} className="flex min-h-11 items-center justify-center rounded-lg bg-brand-700 text-sm font-semibold text-white">Mülkünü Sat</Link>
+            <Link href="/satici" onClick={() => setMobileOpen(false)} className="flex min-h-11 items-center justify-center rounded-control bg-brand-700 text-sm font-semibold text-white">Mülkünü Sat</Link>
           </div>
           {(contact.phoneRaw || contact.whatsapp) && (
             <div className="mt-6 flex flex-wrap gap-4 border-t border-stone pt-5 text-sm font-semibold">

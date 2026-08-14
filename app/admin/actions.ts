@@ -535,7 +535,10 @@ export async function approveListing(formData: FormData) {
     where: { id },
     data: { moderationStatus: "approved", note: null },
     select: {
-      slug: true, agentId: true, title: true, status: true,
+      slug: true, agentId: true, userId: true, title: true, status: true,
+      // category: notifyMatchingAlerts emlak dışı ilanları elemek için okur —
+      // seçilmezse vasıta ilanı emlak sayılıp emlak taleplerine bildirim gider.
+      category: true,
       propertyType: true, listingType: true, district: true, price: true, areaGross: true, rooms: true,
     },
   });
@@ -545,6 +548,15 @@ export async function approveListing(formData: FormData) {
       title: "İlanınız onaylandı",
       body: updated.title,
       link: "/emlakci/panel",
+    });
+  } else if (updated.userId) {
+    // Bireysel ilanda agentId null; bu dal olmadığı için kullanıcı hiçbir bildirim
+    // almıyordu — oysa UserListingForm "Onaylandığında bildirim alırsınız" diyor.
+    await notifyUser(updated.userId, {
+      type: "listing_approved",
+      title: "İlanınız onaylandı",
+      body: updated.title,
+      link: "/hesabim/ilanlarim",
     });
   }
   // Onaylanan ilan artık herkese açık → eşleşen aktif kayıtlı aramalara haber ver.
@@ -564,7 +576,7 @@ export async function rejectListing(formData: FormData) {
   const updated = await prisma.listing.update({
     where: { id },
     data: { moderationStatus: "rejected", note },
-    select: { slug: true, agentId: true, title: true },
+    select: { slug: true, agentId: true, userId: true, title: true },
   });
   if (updated.agentId) {
     await notifyAgent(updated.agentId, {
@@ -572,6 +584,13 @@ export async function rejectListing(formData: FormData) {
       title: "İlanınız reddedildi",
       body: note ? `${updated.title} — ${note}` : updated.title,
       link: "/emlakci/panel",
+    });
+  } else if (updated.userId) {
+    await notifyUser(updated.userId, {
+      type: "listing_rejected",
+      title: "İlanınız reddedildi",
+      body: note ? `${updated.title} — ${note}` : updated.title,
+      link: "/hesabim/ilanlarim",
     });
   }
   revalidatePath("/admin/onay");
