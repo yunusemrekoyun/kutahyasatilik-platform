@@ -709,6 +709,21 @@ function slugify(input: string): string {
 async function main() {
   console.log(`Demo katalog — hedef ${TOTAL} ilan${RESET ? " (RESET: mevcut ilanlar silinecek)" : ""}`);
 
+  // GÖRSELLER SİLMEDEN ÖNCE.
+  //
+  // İndirme dış ağa bağlı ve hatalar bilinçli olarak yutuluyor (ağsız ortamda
+  // da çalışsın diye). Silme önce gelirse ve indirme o sırada tökezlerse ortaya
+  // 360 GÖRSELSİZ ilan çıkıyor; vitrin sorgusu görselsiz ilanı elediği için de
+  // hem web ana sayfası hem mobil ana ekran bomboş kalıyor. Bu sırayla, ağ
+  // sorunu en kötü ihtimalle mevcut katalogu yerinde bırakır.
+  console.log("Görseller hazırlanıyor (indirilenler nokta, atlananlar x):");
+  const pools = await ensureImages();
+  const havePools = Object.values(pools).filter((p) => p.length).length;
+  console.log(`  ${havePools}/${Object.keys(IMAGE_TOPICS).length} konu için görsel havuzu hazır`);
+  if (RESET && !NO_IMAGES && havePools === 0) {
+    throw new Error("Hiçbir görsel havuzu hazırlanamadı; --reset ile devam edilmiyor (katalog görselsiz kalırdı).");
+  }
+
   if (RESET) {
     // Listing silinince ListingImage/Amenity/PriceHistory/Favorite/Conversation
     // cascade ile gider; Lead ve AnalyticsEvent SET NULL ile korunur.
@@ -717,11 +732,6 @@ async function main() {
   }
 
   const owners = await ensureOwners();
-
-  console.log("Görseller hazırlanıyor (indirilenler nokta, atlananlar x):");
-  const pools = await ensureImages();
-  const havePools = Object.values(pools).filter((p) => p.length).length;
-  console.log(`  ${havePools}/${Object.keys(IMAGE_TOPICS).length} konu için görsel havuzu hazır`);
 
   // Dağılım: emlak yarısı, vasıta üçte biri, teknoloji kalanı.
   const nEmlak = Math.round(TOTAL * 0.5);
