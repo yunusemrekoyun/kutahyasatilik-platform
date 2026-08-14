@@ -5,6 +5,7 @@ import { prisma } from "@/lib/prisma";
 import { formatPrice, formatDate } from "@/lib/format";
 import { CATEGORY_LABELS, getSubTypeLabel } from "@/lib/categories";
 import { countAlertsForListing } from "@/lib/matching";
+import type { ModerationDiff } from "@/app/(site)/ilan-ver/actions";
 import { approveListing, rejectListing } from "../actions";
 
 export const dynamic = "force-dynamic";
@@ -57,9 +58,9 @@ export default async function AdminModeration({
 
       <div className="space-y-4">
         {listings.map((l, idx) => (
-          <div key={l.id} className="overflow-hidden rounded-lg bg-paper ring-1 ring-amber-200">
+          <div key={l.id} className="overflow-hidden rounded-control bg-paper ring-1 ring-amber-200">
             <div className="flex flex-col gap-4 p-5 sm:flex-row">
-              <div className="relative h-40 w-full shrink-0 overflow-hidden rounded-lg bg-canvas sm:h-32 sm:w-44">
+              <div className="relative h-40 w-full shrink-0 overflow-hidden rounded-control bg-canvas sm:h-32 sm:w-44">
                 {l.images[0] && (
                   <Image src={l.images[0].url} alt={l.title} fill sizes="200px" className="object-cover" />
                 )}
@@ -81,24 +82,52 @@ export default async function AdminModeration({
                       : "Bilinmeyen danışman"}
                 </p>
                 {alertCounts[idx] > 0 && (
-                  <Link href="/admin/alici-talepleri" className="mt-1 inline-flex items-center gap-1 rounded-md bg-green-50 px-2 py-1 text-xs font-bold text-green-700 hover:bg-green-100">
+                  <Link href="/admin/alici-talepleri" className="mt-1 inline-flex items-center gap-1 rounded-control bg-green-50 px-2 py-1 text-xs font-bold text-green-700 hover:bg-green-100">
                     Bu ilana uygun {alertCounts[idx]} alıcı talebi bekliyor
                   </Link>
                 )}
                 <p className="mt-2 line-clamp-2 text-sm text-muted">{l.description}</p>
 
+                {/* Düzenlenmiş ilan: kırk alanlık künyeyi değil, YALNIZ değişen
+                    alanları göster. moderationDiff'i updateUserListing yazar,
+                    approveListing temizler. */}
+                {(() => {
+                  const diff = l.moderationDiff as ModerationDiff | null;
+                  const rows = diff ? Object.entries(diff) : [];
+                  if (!rows.length) return null;
+                  return (
+                    <div className="mt-3 rounded-control border border-amber-200 bg-amber-50/60 p-3">
+                      <p className="mb-2 text-xs font-bold uppercase tracking-wide text-amber-800">
+                        Düzenlenen alanlar ({rows.length})
+                      </p>
+                      <dl className="space-y-1.5">
+                        {rows.map(([key, change]) => (
+                          <div key={key} className="grid grid-cols-[7rem_1fr] gap-2 text-xs">
+                            <dt className="font-semibold text-ink">{change.label}</dt>
+                            <dd className="min-w-0">
+                              <span className="text-muted line-through">{change.from}</span>
+                              <span className="mx-1.5 text-muted/70">→</span>
+                              <span className="font-semibold text-ink">{change.to}</span>
+                            </dd>
+                          </div>
+                        ))}
+                      </dl>
+                    </div>
+                  );
+                })()}
+
                 <div className="mt-4 flex flex-wrap items-center gap-3">
-                  <Link href={`/admin/ilanlar/${l.id}`} target="_blank" className="rounded-lg bg-canvas px-3 py-2 text-xs font-semibold text-ink hover:bg-stone">
+                  <Link href={`/admin/ilanlar/${l.id}`} target="_blank" className="rounded-control bg-canvas px-3 py-2 text-xs font-semibold text-ink hover:bg-stone">
                     Detayları İncele / Düzenle
                   </Link>
                   <form action={approveListing}>
                     <input type="hidden" name="id" value={l.id} />
-                    <button className="inline-flex items-center gap-1.5 rounded-lg bg-green-600 px-4 py-2 text-sm font-bold text-white hover:bg-green-700"><Check className="h-4 w-4" />Onayla ve Yayınla</button>
+                    <button className="inline-flex items-center gap-1.5 rounded-control bg-green-600 px-4 py-2 text-sm font-bold text-white hover:bg-green-700"><Check className="h-4 w-4" />Onayla ve Yayınla</button>
                   </form>
                   <form action={rejectListing} className="flex items-center gap-1.5">
                     <input type="hidden" name="id" value={l.id} />
-                    <input name="note" placeholder="Red sebebi (ops.)" className="w-40 rounded-md border border-stone px-2 py-1.5 text-xs outline-none" />
-                    <button className="rounded-lg px-3 py-2 text-sm font-semibold text-red-600 hover:bg-red-50">Reddet</button>
+                    <input name="note" placeholder="Red sebebi (ops.)" className="w-40 rounded-control border border-stone px-2 py-1.5 text-xs outline-none" />
+                    <button className="rounded-control px-3 py-2 text-sm font-semibold text-red-600 hover:bg-red-50">Reddet</button>
                   </form>
                 </div>
               </div>
@@ -112,10 +141,10 @@ export default async function AdminModeration({
           <span className="text-muted">Sayfa {page} / {totalPages}</span>
           <div className="flex gap-2">
             {page > 1 && (
-              <Link href={`/admin/onay${page - 1 > 1 ? `?sayfa=${page - 1}` : ""}`} className="rounded-lg bg-paper px-3 py-1.5 font-medium text-ink border border-stone hover:border-brand-300">‹ Önceki</Link>
+              <Link href={`/admin/onay${page - 1 > 1 ? `?sayfa=${page - 1}` : ""}`} className="rounded-control bg-paper px-3 py-1.5 font-medium text-ink border border-stone hover:border-brand-300">‹ Önceki</Link>
             )}
             {page < totalPages && (
-              <Link href={`/admin/onay?sayfa=${page + 1}`} className="rounded-lg bg-paper px-3 py-1.5 font-medium text-ink border border-stone hover:border-brand-300">Sonraki ›</Link>
+              <Link href={`/admin/onay?sayfa=${page + 1}`} className="rounded-control bg-paper px-3 py-1.5 font-medium text-ink border border-stone hover:border-brand-300">Sonraki ›</Link>
             )}
           </div>
         </div>

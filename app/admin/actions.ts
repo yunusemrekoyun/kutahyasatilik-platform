@@ -3,6 +3,9 @@
 import { revalidatePath, updateTag } from "next/cache";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
+// Prisma.DbNull: nullable Json kolonuna SQL NULL yazar. Düz `null` Prisma 7'de
+// tip hatası, `Prisma.JsonNull` ise JSON null yazar — istediğimiz o değil.
+import { Prisma } from "@/app/generated/prisma/client";
 import { getSession } from "@/lib/auth";
 import { slugify, parseJsonArray } from "@/lib/format";
 import { sanitizeCmsHtml } from "@/lib/sanitize";
@@ -533,7 +536,7 @@ export async function approveListing(formData: FormData) {
   if (!id) return;
   const updated = await prisma.listing.update({
     where: { id },
-    data: { moderationStatus: "approved", note: null },
+    data: { moderationStatus: "approved", note: null, moderationDiff: Prisma.DbNull },
     select: {
       slug: true, agentId: true, userId: true, title: true, status: true,
       // category: notifyMatchingAlerts emlak dışı ilanları elemek için okur —

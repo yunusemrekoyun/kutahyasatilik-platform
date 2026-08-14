@@ -33,6 +33,7 @@ export default async function MyListingsPage({
 
   const sp = await searchParams;
   const justSubmitted = sp.durum === "gonderildi";
+  const justUpdated = sp.durum === "guncellendi";
 
   const listings = await prisma.listing.findMany({
     where: { userId: session.userId },
@@ -55,12 +56,11 @@ export default async function MyListingsPage({
 
       <div className="mb-8 flex flex-col gap-4 border-b border-stone pb-7 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <p className="eyebrow">Yayınlarım</p>
-          <h1 className="mt-2 font-display text-4xl font-semibold tracking-tight text-brand-950">İlanlarım</h1>
+          <h1 className="text-2xl font-bold tracking-tight text-ink sm:text-3xl">İlanlarım</h1>
         </div>
         <Link
           href="/ilan-ver"
-          className="inline-flex min-h-11 items-center justify-center gap-2 rounded-lg bg-brand-700 px-5 text-sm font-semibold text-white transition hover:bg-brand-800"
+          className="inline-flex min-h-11 items-center justify-center gap-2 rounded-control bg-brand-700 px-5 text-sm font-semibold text-white transition hover:bg-brand-800"
         >
           <Plus className="h-4 w-4" /> Yeni İlan
         </Link>
@@ -72,16 +72,22 @@ export default async function MyListingsPage({
         </p>
       )}
 
+      {justUpdated && (
+        <p role="status" className="mb-6 rounded-card border border-green-200 bg-green-50 px-4 py-3 text-sm font-medium text-green-800">
+          Değişiklikleriniz kaydedildi. İlan tekrar onaya düştü; onaylandığında bildirim alacaksınız.
+        </p>
+      )}
+
       {listings.length === 0 ? (
         <div className="border-y border-stone bg-paper p-12 text-center">
-          <span className="mx-auto grid h-14 w-14 place-items-center rounded-lg border border-stone bg-canvas text-muted">
+          <span className="mx-auto grid h-14 w-14 place-items-center rounded-control border border-stone bg-canvas text-muted">
             <PackageOpen className="h-7 w-7" />
           </span>
           <h2 className="mt-4 font-display text-lg font-semibold text-ink">Henüz ilanınız yok</h2>
           <p className="mx-auto mt-1.5 max-w-md text-muted">
             Aracınızı veya teknoloji ürününüzü birkaç dakikada yayımlayabilirsiniz.
           </p>
-          <Link href="/ilan-ver" className="mt-5 inline-flex min-h-11 items-center justify-center rounded-lg bg-brand-700 px-5 text-sm font-semibold text-white transition hover:bg-brand-800">
+          <Link href="/ilan-ver" className="mt-5 inline-flex min-h-11 items-center justify-center rounded-control bg-brand-700 px-5 text-sm font-semibold text-white transition hover:bg-brand-800">
             İlan Ver
           </Link>
         </div>
@@ -109,11 +115,11 @@ export default async function MyListingsPage({
                   </p>
                   {/* Onaylanmamış ilanın herkese açık sayfası yok; başlık düz metin kalır. */}
                   {listing.moderationStatus === "approved" ? (
-                    <Link href={`/ilan/${listing.slug}`} className="font-display text-lg font-semibold text-ink hover:text-brand-700">
+                    <Link href={`/ilan/${listing.slug}`} className="text-base font-semibold text-ink hover:text-brand-700">
                       {listing.title}
                     </Link>
                   ) : (
-                    <p className="font-display text-lg font-semibold text-ink">{listing.title}</p>
+                    <p className="text-base font-semibold text-ink">{listing.title}</p>
                   )}
                   <p className="mt-1 text-sm text-muted">
                     {formatPrice(listing.price, listing.currency)} · {formatDate(listing.createdAt)}
@@ -127,6 +133,12 @@ export default async function MyListingsPage({
                   <span className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-semibold ring-1 ${badge.className}`}>
                     <badge.Icon className="h-3.5 w-3.5" /> {badge.label}
                   </span>
+                  <Link
+                    href={`/hesabim/ilanlarim/${listing.id}/duzenle`}
+                    className="min-h-11 text-sm font-semibold text-brand-700 transition hover:text-brand-900"
+                  >
+                    Düzenle
+                  </Link>
                   <form action={deleteUserListing}>
                     <input type="hidden" name="id" value={listing.id} />
                     <button

@@ -23,40 +23,52 @@ const MAX_PRICE = 2_147_483_647;
 
 export type ListingFormState = { error?: string; fieldErrors?: Record<string, string> };
 
-export async function submitUserListing(
-  _prev: ListingFormState,
-  formData: FormData
-): Promise<ListingFormState> {
-  const session = await getUserSession();
-  if (!session) return { error: "İlan vermek için giriş yapmalısınız." };
+type ParsedListing = {
+  categoryKey: CategoryKey;
+  subType: string;
+  title: string;
+  description: string;
+  price: number;
+  district: string;
+  neighborhood: string | null;
+  attributes: Record<string, unknown>;
+  imageUrls: string[];
+};
 
+/**
+ * Oluşturma ve düzenleme aynı doğrulamadan geçer. Ayrı yazılsalardı iki akış
+ * zamanla ayrışır ve düzenleme, oluşturmanın kapattığı bir boşluğu açık bırakırdı.
+ */
+function parseListingForm(
+  formData: FormData
+): { ok: true; value: ParsedListing } | { ok: false; state: ListingFormState } {
   const categoryKey = String(formData.get("category") || "");
   if (!SELF_SERVICE_CATEGORIES.includes(categoryKey as CategoryKey)) {
-    return { error: "Bu kategoride bireysel ilan verilemiyor." };
+    return { ok: false, state: { error: "Bu kategoride bireysel ilan verilemiyor." } };
   }
   const category = getCategory(categoryKey);
 
   const subType = String(formData.get("propertyType") || "").trim();
   if (!category.subTypes.some((s) => s.value === subType)) {
-    return { error: "Lütfen bir tür seçin." };
+    return { ok: false, state: { error: "Lütfen bir tür seçin." } };
   }
 
   const title = String(formData.get("title") || "").trim();
-  if (title.length < 10) return { error: "Başlık en az 10 karakter olmalıdır." };
+  if (title.length < 10) return { ok: false, state: { error: "Başlık en az 10 karakter olmalıdır." } };
 
   const description = String(formData.get("description") || "").trim();
-  if (description.length < 20) return { error: "Açıklama en az 20 karakter olmalıdır." };
+  if (description.length < 20) return { ok: false, state: { error: "Açıklama en az 20 karakter olmalıdır." } };
 
   const price = Number(String(formData.get("price") || "").replace(/[^\d]/g, ""));
-  if (!Number.isFinite(price) || price <= 0) return { error: "Geçerli bir fiyat girin." };
-  if (price > MAX_PRICE) return { error: "Fiyat çok yüksek görünüyor, kontrol edin." };
+  if (!Number.isFinite(price) || price <= 0) return { ok: false, state: { error: "Geçerli bir fiyat girin." } };
+  if (price > MAX_PRICE) return { ok: false, state: { error: "Fiyat çok yüksek görünüyor, kontrol edin." } };
 
   const district = String(formData.get("district") || "").trim();
-  if (!DISTRICTS.some((d) => d.name === district)) return { error: "Lütfen ilçe seçin." };
+  if (!DISTRICTS.some((d) => d.name === district)) return { ok: false, state: { error: "Lütfen ilçe seçin." } };
 
   const { values: attributes, errors: fieldErrors } = parseAttributes(category.key, formData);
   if (Object.keys(fieldErrors).length) {
-    return { error: "Lütfen işaretli alanları düzeltin.", fieldErrors };
+    return { ok: false, state: { error: "Lütfen işaretli alanları düzeltin.", fieldErrors } };
   }
 
   let imageUrls: string[] = [];
@@ -67,8 +79,35 @@ export async function submitUserListing(
     /* görselsiz ilan da kabul edilir */
   }
 
+  return {
+    ok: true,
+    value: {
+      categoryKey: category.key,
+      subType,
+      title,
+      description,
+      price,
+      district,
+      neighborhood: String(formData.get("neighborhood") || "").trim() || null,
+      attributes,
+      imageUrls,
+    },
+  };
+}
+
+export async function submitUserListing(
+  _prev: ListingFormState,
+  formData: FormData
+): Promise<ListingFormState> {
+  const session = await getUserSession();
+  if (!session) return { error: "İlan vermek için giriş yapmalısınız." };
+
+  const parsed = parseListingForm(formData);
+  if (!parsed.ok) return parsed.state;
+  const v = parsed.value;
+
   // Başlıklar sık tekrar ediyor ("Sahibinden Temiz Clio"), çakışmada son ek verilir.
-  let slug = slugify(title);
+  let slug = slugify(v.title);
   if (!slug) slug = `ilan-${Date.now().toString(36)}`;
   if (await prisma.listing.findUnique({ where: { slug }, select: { id: true } })) {
     slug = `${slug}-${Date.now().toString(36).slice(-4)}`;
@@ -77,22 +116,22 @@ export async function submitUserListing(
   await prisma.listing.create({
     data: {
       slug,
-      title,
-      description,
-      category: category.key,
-      propertyType: subType,
+      title: v.title,
+      description: v.description,
+      category: v.categoryKey,
+      propertyType: v.subType,
       listingType: "sale",
       status: "active",
       // Bireysel ilan her zaman admin onayından geçer.
       moderationStatus: "pending",
-      price,
+      price: v.price,
       currency: "TRY",
-      district,
-      neighborhood: String(formData.get("neighborhood") || "").trim() || null,
-      attributes,
+      district: v.district,
+      neighborhood: v.neighborhood,
+      attributes: v.attributes,
       userId: session.userId,
-      images: imageUrls.length
-        ? { create: imageUrls.map((url, index) => ({ url, sortOrder: index })) }
+      images: v.imageUrls.length
+        ? { create: v.imageUrls.map((url, index) => ({ url, sortOrder: index })) }
         : undefined,
     },
   });
@@ -100,13 +139,142 @@ export async function submitUserListing(
   await notifyAdmins({
     type: "listing_pending",
     title: "Yeni bireysel ilan onay bekliyor",
-    body: title,
+    body: v.title,
     link: "/admin/onay",
   });
 
   updateTag("marketplace-stats");
   revalidatePath("/hesabim/ilanlarim");
   redirect("/hesabim/ilanlarim?durum=gonderildi");
+}
+
+/** Admin onay ekranında gösterilen alan etiketleri. */
+const DIFF_LABELS: Record<string, string> = {
+  title: "Başlık",
+  description: "Açıklama",
+  price: "Fiyat",
+  district: "İlçe",
+  neighborhood: "Mahalle",
+  propertyType: "Tür",
+  images: "Görseller",
+};
+
+export type ModerationDiff = Record<string, { label: string; from: string; to: string }>;
+
+function asText(value: unknown): string {
+  if (value === null || value === undefined || value === "") return "—";
+  if (typeof value === "number") return String(value);
+  return String(value);
+}
+
+/**
+ * Kullanıcı kendi ilanını günceller.
+ *
+ * Değişiklik DOĞRUDAN uygulanır ve ilan `pending`'e düşer — yani yayından kalkar
+ * ve admin onaylayana kadar görünmez. Kullanıcının "tekrar onaya düşsün" kararı
+ * budur; onaysız içeriğin yayında kalmaması da bu yolla sağlanıyor.
+ *
+ * `moderationDiff` yalnız DEĞİŞEN alanları taşır, böylece admin ekranı kırk alanlık
+ * künyeyi değil sadece farkı gösterir.
+ */
+export async function updateUserListing(
+  _prev: ListingFormState,
+  formData: FormData
+): Promise<ListingFormState> {
+  const session = await getUserSession();
+  if (!session) return { error: "İlan düzenlemek için giriş yapmalısınız." };
+
+  const id = String(formData.get("id") || "");
+  const current = await prisma.listing.findUnique({
+    where: { id },
+    select: {
+      id: true, userId: true, slug: true, category: true,
+      title: true, description: true, price: true,
+      district: true, neighborhood: true, propertyType: true,
+      attributes: true,
+      images: { orderBy: { sortOrder: "asc" }, select: { url: true } },
+    },
+  });
+  // Sahiplik kontrolü sunucuda: id tahmin edilebilir olmasa da yetkiyi istemciye
+  // bırakmıyoruz (deleteUserListing ile aynı desen).
+  if (!current || current.userId !== session.userId) return { error: "Bu ilanı düzenleme yetkiniz yok." };
+
+  const parsed = parseListingForm(formData);
+  if (!parsed.ok) return parsed.state;
+  const v = parsed.value;
+
+  // Kategori değiştirilemez: alan seti ve JSONB nitelikleri kategoriye bağlı,
+  // değiştirmek ilanı baştan yazmak demek. Kullanıcı silip yeniden açabilir.
+  if (v.categoryKey !== current.category) {
+    return { error: "İlanın kategorisi değiştirilemez. Farklı kategori için yeni ilan açın." };
+  }
+
+  const diff: ModerationDiff = {};
+  const track = (key: string, from: unknown, to: unknown) => {
+    if (asText(from) !== asText(to)) {
+      diff[key] = { label: DIFF_LABELS[key] ?? key, from: asText(from), to: asText(to) };
+    }
+  };
+  track("title", current.title, v.title);
+  track("description", current.description, v.description);
+  track("price", current.price, v.price);
+  track("district", current.district, v.district);
+  track("neighborhood", current.neighborhood, v.neighborhood);
+  track("propertyType", current.propertyType, v.subType);
+
+  const currentImages = current.images.map((i) => i.url);
+  const imagesChanged = currentImages.join("|") !== v.imageUrls.join("|");
+  if (imagesChanged) {
+    track("images", `${currentImages.length} görsel`, `${v.imageUrls.length} görsel`);
+  }
+
+  // Nitelikler kategoriye özel; her birini kendi anahtarıyla ayrı satır olarak yaz.
+  const currentAttrs = (current.attributes ?? {}) as Record<string, unknown>;
+  const category = getCategory(current.category as CategoryKey);
+  for (const field of category.fields) {
+    track(field.key, currentAttrs[field.key], v.attributes[field.key]);
+    if (diff[field.key]) diff[field.key].label = field.label;
+  }
+
+  if (!Object.keys(diff).length) {
+    return { error: "Değişiklik yapılmadı." };
+  }
+
+  await prisma.$transaction(async (tx) => {
+    if (imagesChanged) {
+      await tx.listingImage.deleteMany({ where: { listingId: current.id } });
+    }
+    await tx.listing.update({
+      where: { id: current.id },
+      data: {
+        title: v.title,
+        description: v.description,
+        propertyType: v.subType,
+        price: v.price,
+        district: v.district,
+        neighborhood: v.neighborhood,
+        attributes: v.attributes,
+        moderationStatus: "pending",
+        note: null,
+        moderationDiff: diff,
+        ...(imagesChanged && v.imageUrls.length
+          ? { images: { create: v.imageUrls.map((url, index) => ({ url, sortOrder: index })) } }
+          : {}),
+      },
+    });
+  });
+
+  await notifyAdmins({
+    type: "listing_pending",
+    title: "Düzenlenen ilan onay bekliyor",
+    body: v.title,
+    link: "/admin/onay",
+  });
+
+  updateTag("marketplace-stats");
+  revalidatePath("/hesabim/ilanlarim");
+  revalidatePath(`/ilan/${current.slug}`);
+  redirect("/hesabim/ilanlarim?durum=guncellendi");
 }
 
 /** Kullanıcı kendi ilanını siler. Yalnız sahibi silebilir. */

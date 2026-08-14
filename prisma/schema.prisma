@@ -116,6 +116,12 @@ model Listing {
   // Yayın denetimi: emlakçı ilanları admin onayından geçer
   moderationStatus String  @default("approved") // pending | approved | rejected
   note             String? // admin red/moderasyon notu
+  // Bekleyen düzenlemenin alan bazında farkı: { alan: { from, to } }.
+  // Kullanıcı kendi ilanını düzenleyince değişiklik DOĞRUDAN uygulanır,
+  // ilan pending'e düşer (yayından kalkar) ve admin onay ekranı yalnız burada
+  // listelenen alanları gösterir. Onayda null'lanır. Tek bekleyen düzenleme
+  // tutuluyor — ikinci düzenleme öncekini ezer, versiyon geçmişi gerekmiyor.
+  moderationDiff   Json?
 
   // İlanı ekleyen emlakçı (admin eklediyse boş)
   agentId String?

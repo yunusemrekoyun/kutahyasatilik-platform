@@ -6,7 +6,7 @@ import { ImagePlus, Loader2, X } from "lucide-react";
 import { CATEGORIES, type CategoryKey } from "@/lib/categories";
 import { DISTRICTS } from "@/lib/constants";
 import { publicImageUrl } from "@/lib/media";
-import { submitUserListing, type ListingFormState } from "@/app/(site)/ilan-ver/actions";
+import { submitUserListing, updateUserListing, type ListingFormState } from "@/app/(site)/ilan-ver/actions";
 
 /** Emlak bilinçli olarak yok: bireysel akış yalnız bu iki kategoride açık. */
 const SELF_SERVICE: CategoryKey[] = ["vasita", "teknoloji"];
@@ -14,17 +14,34 @@ const SELF_SERVICE: CategoryKey[] = ["vasita", "teknoloji"];
 const MAX_IMAGES = 6;
 
 const fieldCls =
-  "h-11 w-full rounded-lg border border-stone bg-paper px-3.5 text-[15px] text-ink outline-none transition placeholder:text-muted/70 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20";
+  "h-11 w-full rounded-control border border-stone bg-paper px-3.5 text-[15px] text-ink outline-none transition placeholder:text-muted/70 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20";
 const labelCls = "mb-1.5 block text-sm font-semibold text-ink";
 const sectionCls = "border-t border-stone pt-6";
 
-export default function UserListingForm() {
+/** Düzenleme modunda formu dolduran mevcut değerler. */
+export type UserListingInitial = {
+  id: string;
+  category: CategoryKey;
+  propertyType: string;
+  title: string;
+  description: string;
+  price: number;
+  district: string;
+  neighborhood: string | null;
+  attributes: Record<string, unknown>;
+  images: string[];
+};
+
+export default function UserListingForm({ initial }: { initial?: UserListingInitial }) {
+  const isEdit = !!initial;
+  // Aynı bileşen iki action'ı sürüyor: alan seti, doğrulama ve görsel yükleme
+  // birebir aynı olduğu için ayrı bir düzenleme formu ikizlik üretirdi.
   const [state, formAction, pending] = useActionState<ListingFormState, FormData>(
-    submitUserListing,
+    isEdit ? updateUserListing : submitUserListing,
     {}
   );
-  const [category, setCategory] = useState<CategoryKey>("vasita");
-  const [images, setImages] = useState<string[]>([]);
+  const [category, setCategory] = useState<CategoryKey>(initial?.category ?? "vasita");
+  const [images, setImages] = useState<string[]>(initial?.images ?? []);
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState("");
 
@@ -64,6 +81,7 @@ export default function UserListingForm() {
   return (
     <form action={formAction} className="space-y-6">
       <input type="hidden" name="imagesJson" value={JSON.stringify(images)} />
+      {isEdit ? <input type="hidden" name="id" value={initial.id} /> : null}
 
       {/* Kategori — alt tür ve nitelik alanlarını belirler */}
       <div>
@@ -77,8 +95,9 @@ export default function UserListingForm() {
                 type="button"
                 role="radio"
                 aria-checked={on}
+                disabled={isEdit}
                 onClick={() => setCategory(key)}
-                className={`min-h-11 rounded-lg border px-5 text-[15px] font-semibold transition ${
+                className={`min-h-11 rounded-control border px-5 text-[15px] font-semibold transition disabled:cursor-not-allowed disabled:opacity-60 ${
                   on ? "border-brand-700 bg-brand-700 text-white" : "border-stone bg-paper text-ink hover:border-brand-300"
                 }`}
               >
@@ -89,15 +108,21 @@ export default function UserListingForm() {
         </div>
         <input type="hidden" name="category" value={category} />
         <p className="mt-2 text-xs text-muted">
-          Emlak ilanları emlakçılarımız üzerinden yayımlanıyor.{" "}
-          <a href="/satici" className="font-semibold text-brand-700 hover:underline">Mülkünüzü satmak için buraya bakın.</a>
+          {isEdit ? (
+            "İlanın kategorisi değiştirilemez. Farklı bir kategori için yeni ilan açın."
+          ) : (
+            <>
+              Emlak ilanları emlakçılarımız üzerinden yayımlanıyor.{" "}
+              <a href="/satici" className="font-semibold text-brand-700 hover:underline">Mülkünüzü satmak için buraya bakın.</a>
+            </>
+          )}
         </p>
       </div>
 
       <div className={sectionCls}>
         <label htmlFor="propertyType" className={labelCls}>Tür</label>
         {/* key: kategori değişince tarayıcı eski seçimi korumasın */}
-        <select id="propertyType" name="propertyType" key={category} required className={fieldCls} defaultValue="">
+        <select id="propertyType" name="propertyType" key={category} required className={fieldCls} defaultValue={initial?.propertyType ?? ""}>
           <option value="" disabled>Seçin</option>
           {definition.subTypes.map((sub) => (
             <option key={sub.value} value={sub.value}>{sub.label}</option>
@@ -107,20 +132,20 @@ export default function UserListingForm() {
 
       <div className={sectionCls}>
         <label htmlFor="title" className={labelCls}>İlan başlığı</label>
-        <input id="title" name="title" required minLength={10} maxLength={120} className={fieldCls}
+        <input id="title" name="title" required minLength={10} maxLength={120} defaultValue={initial?.title} className={fieldCls}
           placeholder={category === "vasita" ? "Örn. 2019 Renault Clio 1.5 dCi Touch" : "Örn. iPhone 14 Pro 256 GB Garantili"} />
       </div>
 
       <div>
         <label htmlFor="description" className={labelCls}>Açıklama</label>
-        <textarea id="description" name="description" required minLength={20} maxLength={4000} rows={6}
+        <textarea id="description" name="description" required minLength={20} maxLength={4000} rows={6} defaultValue={initial?.description}
           className={`${fieldCls} h-auto py-3`}
           placeholder="Ürünün durumu, kullanım geçmişi ve öne çıkan özellikleri..." />
       </div>
 
       {/* Kategoriye özel alanlar — kayıttan üretilir (lib/categories.ts) */}
       <div className={sectionCls}>
-        <h2 className="mb-4 font-display text-lg font-semibold text-ink">{definition.label} bilgileri</h2>
+        <h2 className="mb-4 text-base font-bold text-ink">{definition.label} bilgileri</h2>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           {definition.fields.map((field) => {
             const id = `attr_${field.key}`;
@@ -133,7 +158,7 @@ export default function UserListingForm() {
                   {field.required ? <span className="text-red-600"> *</span> : null}
                 </label>
                 {field.type === "select" ? (
-                  <select id={id} name={id} required={field.required} className={fieldCls} defaultValue="">
+                  <select id={id} name={id} required={field.required} className={fieldCls} defaultValue={String(initial?.attributes?.[field.key] ?? "")}>
                     <option value="" disabled={field.required}>Seçin</option>
                     {field.options?.map((option) => (
                       <option key={option.value} value={option.value}>{option.label}</option>
@@ -150,6 +175,7 @@ export default function UserListingForm() {
                     max={field.max}
                     maxLength={field.maxLength}
                     placeholder={field.placeholder}
+                    defaultValue={initial ? String(initial.attributes?.[field.key] ?? "") : undefined}
                     className={fieldCls}
                   />
                 )}
@@ -161,29 +187,29 @@ export default function UserListingForm() {
       </div>
 
       <div className={sectionCls}>
-        <h2 className="mb-4 font-display text-lg font-semibold text-ink">Fiyat ve konum</h2>
+        <h2 className="mb-4 text-base font-bold text-ink">Fiyat ve konum</h2>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
           <div>
             <label htmlFor="price" className={labelCls}>Fiyat (₺)</label>
-            <input id="price" name="price" required type="number" min={1} inputMode="numeric" className={fieldCls} placeholder="450000" />
+            <input id="price" name="price" required type="number" min={1} inputMode="numeric" defaultValue={initial?.price} className={fieldCls} placeholder="450000" />
           </div>
           <div>
             <label htmlFor="district" className={labelCls}>İlçe</label>
-            <select id="district" name="district" required className={fieldCls} defaultValue="">
+            <select id="district" name="district" required className={fieldCls} defaultValue={initial?.district ?? ""}>
               <option value="" disabled>Seçin</option>
               {DISTRICTS.map((d) => <option key={d.slug} value={d.name}>{d.name}</option>)}
             </select>
           </div>
           <div>
             <label htmlFor="neighborhood" className={labelCls}>Mahalle <span className="font-normal text-muted">(opsiyonel)</span></label>
-            <input id="neighborhood" name="neighborhood" maxLength={80} className={fieldCls} />
+            <input id="neighborhood" name="neighborhood" maxLength={80} defaultValue={initial?.neighborhood ?? ""} className={fieldCls} />
           </div>
         </div>
       </div>
 
       <div className={sectionCls}>
-        <h2 className="mb-1 font-display text-lg font-semibold text-ink">Fotoğraflar</h2>
-        <p className="mb-4 text-sm text-muted">En fazla {MAX_IMAGES} fotoğraf. İlk fotoğraf kapak olur.</p>
+        <h2 className="mb-1 text-base font-bold text-ink">Fotoğraflar</h2>
+        <p className="mb-4 text-sm text-muted">En fazla {MAX_IMAGES} fotoğraf. İlk fotoğraf kapak olur. Fotoğrafları <strong className="font-semibold">tek seferde</strong> seçin — teker teker eklemek yükleme limitine takılabilir.</p>
 
         <div className="flex flex-wrap gap-3">
           {images.map((url, index) => (
@@ -221,12 +247,20 @@ export default function UserListingForm() {
         <button
           type="submit"
           disabled={pending || uploading}
-          className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-lg bg-brand-700 px-6 text-base font-semibold text-white transition hover:bg-brand-800 disabled:opacity-60 sm:w-auto"
+          className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-control bg-brand-700 px-6 text-base font-semibold text-white transition hover:bg-brand-800 disabled:opacity-60 sm:w-auto"
         >
-          {pending ? <><Loader2 className="h-5 w-5 animate-spin" /> Gönderiliyor...</> : "İlanı Gönder"}
+          {pending ? (
+            <><Loader2 className="h-5 w-5 animate-spin" /> Gönderiliyor...</>
+          ) : isEdit ? (
+            "Değişiklikleri Gönder"
+          ) : (
+            "İlanı Gönder"
+          )}
         </button>
         <p className="mt-3 text-xs text-muted">
-          İlanınız yayımlanmadan önce ekibimizin onayından geçer. Onaylandığında bildirim alırsınız.
+          {isEdit
+            ? "Düzenlenen ilan tekrar onaya düşer ve onaylanana kadar yayında görünmez. Onaylandığında bildirim alırsınız."
+            : "İlanınız yayımlanmadan önce ekibimizin onayından geçer. Onaylandığında bildirim alırsınız."}
         </p>
       </div>
     </form>
