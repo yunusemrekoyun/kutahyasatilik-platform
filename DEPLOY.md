@@ -37,6 +37,12 @@ restart etmeyin.
 - `.env` içindeki `UPLOAD_DIR`, `/var/www/kutahyasatilik.com/uploads` olmalıdır.
 - `.env` içinde `PUSH_ENABLED` **açıkça** `true` ya da `false` olmalıdır (eksik
   bırakılmamalı). Push açılacaksa önce "Push'u açma" bölümüne bakın.
+- `npm run build` artık önce `.next/standalone`'u siliyor (`scripts/clean-build.mjs`).
+  Bu ADIM ATLANMAMALIDIR: Next, standalone altındaki ön-render edilmiş HTML'i her
+  zaman yenilemiyor; bir önceki build'den kalan `index.html` artık üretilmeyen
+  chunk adlarına işaret ediyor ve ana sayfada CSS/JS 404 veriyor. Sunucu 200
+  döndüğü, health check geçtiği için sorun sessiz kalır — yalnız tarayıcıda
+  stilsiz/işlevsiz bir sayfa olarak görünür.
 - Kullanıcı trafiği açılmadan önce veritabanı yedeği ve geri yükleme tatbikatı
   ayrıca doğrulanmalıdır.
 - Production'da `seed`, `setup:demo`, `seed:bulk`, `seed:media` veya `db:reset`
