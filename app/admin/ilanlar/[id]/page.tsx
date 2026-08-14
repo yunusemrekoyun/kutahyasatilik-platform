@@ -25,6 +25,9 @@ export default async function EditListingPage({
 
   const data = {
     ...listing,
+    // Prisma JsonValue -> form tipine daralt: kayıt (lib/categories.ts) zaten
+    // tanımsız anahtarları parseAttributes'ta atıyor.
+    attributes: (listing.attributes ?? null) as Record<string, unknown> | null,
     features: parseJsonArray(listing.features),
     images: listing.images.map((i) => ({ url: i.url })),
     amenities: listing.amenities,

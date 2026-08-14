@@ -15,6 +15,7 @@ import { notifyAgent, notifyUser, notifyMatchingAlerts } from "@/lib/notify";
 import { sendEmail, notificationEmail } from "@/lib/email";
 import bcrypt from "bcryptjs";
 import { listingAmenityRows } from "@/lib/listingAmenities";
+import { getCategory, isCategoryKey, parseAttributes, type CategoryKey } from "@/lib/categories";
 import { validateExternalHttpUrl } from "@/lib/externalUrl";
 import { isPasswordLengthValid, PASSWORD_ERROR } from "@/lib/passwordPolicy";
 
@@ -105,13 +106,39 @@ export async function saveListing(formData: FormData) {
     throw new Error("Başlık ve fiyat zorunludur");
   }
 
-  // Filtre sistemini besleyen zorunlu alanlar
-  const ptype = String(formData.get("propertyType") || "daire");
-  const isLand = ptype === "arsa" || ptype === "tarla";
+  // Kategori. Form göndermezse emlak — Listing.category kolonunun DB varsayılanı da
+  // bu, yani kategoriyi taşımayan eski çağrı yolları davranışını aynen korur.
+  const categoryRaw = String(formData.get("category") || "emlak");
+  const categoryKey: CategoryKey = isCategoryKey(categoryRaw) ? categoryRaw : "emlak";
+  const category = getCategory(categoryKey);
+  const isRealEstate = categoryKey === "emlak";
+
+  // propertyType artık "kategori içi alt tür": emlakta daire/arsa, vasıtada otomobil.
+  const ptype = String(formData.get("propertyType") || "") || (isRealEstate ? "daire" : "");
+  if (!category.subTypes.some((s) => s.value === ptype)) {
+    throw new Error("Lütfen geçerli bir tür seçin");
+  }
+
+  // Filtre sistemini besleyen zorunlu alanlar — YALNIZ emlakta.
+  // m², oda ve imar gayrimenkule özgü; eskiden koşulsuz dayatıldığı için
+  // /admin/onay'daki "Düzenle" butonu vasıta ve teknoloji ilanlarında hiç
+  // çalışmıyordu: moderasyon kuyruğu kendi onayladığı ilanı düzenleyemiyordu.
+  const isLand = isRealEstate && (ptype === "arsa" || ptype === "tarla");
   const areaVal = num(formData.get("areaGross"));
-  if (!areaVal || areaVal <= 0) throw new Error("Alan (brüt m²) zorunludur");
-  if (!isLand && !str(formData.get("rooms"))) throw new Error("Oda sayısı zorunludur");
-  if (isLand && !str(formData.get("zoningStatus"))) throw new Error("İmar durumu zorunludur");
+  if (isRealEstate) {
+    if (!areaVal || areaVal <= 0) throw new Error("Alan (brüt m²) zorunludur");
+    if (!isLand && !str(formData.get("rooms"))) throw new Error("Oda sayısı zorunludur");
+    if (isLand && !str(formData.get("zoningStatus"))) throw new Error("İmar durumu zorunludur");
+  }
+
+  // Kategoriye özel nitelikler (JSONB). Emlakta kayıtta alan tanımlı olmadığı için
+  // boş döner; kayıtta tanımsız anahtarlar parseAttributes içinde atılır.
+  const { values: attributes, errors: attrErrors } = parseAttributes(categoryKey, formData);
+  if (Object.keys(attrErrors).length) {
+    const [key, message] = Object.entries(attrErrors)[0];
+    const label = category.fields.find((f) => f.key === key)?.label ?? key;
+    throw new Error(`${label}: ${message}`);
+  }
 
   // slug
   let slug = str(formData.get("slug")) || slugify(title);
@@ -154,7 +181,11 @@ export async function saveListing(formData: FormData) {
     title,
     slug,
     description: String(formData.get("description") || "").trim(),
-    propertyType: String(formData.get("propertyType") || "daire"),
+    category: categoryKey,
+    propertyType: ptype,
+    // Emlakta JSONB nitelik yok: kategori emlağa çevrilirse eski nitelikler
+    // artık kalmasın diye açıkça NULL'lanıyor.
+    attributes: isRealEstate ? Prisma.DbNull : attributes,
     listingType: String(formData.get("listingType") || "sale"),
     status: String(formData.get("status") || "active"),
     agencyId,
