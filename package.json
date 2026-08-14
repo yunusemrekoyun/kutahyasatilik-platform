@@ -23,6 +23,7 @@
     "seed:cms": "tsx prisma/seed-cms.ts",
     "seed:bulk": "tsx prisma/seed-bulk.ts",
     "seed:media": "tsx prisma/seed-media.ts",
+    "seed:categories": "tsx prisma/seed-categories.ts",
     "prune:analytics": "tsx prisma/rollup-analytics.ts",
     "backfill:agencies": "node scripts/backfill-agencies.mjs",
     "setup:demo": "prisma migrate deploy && npm run seed",

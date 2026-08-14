@@ -3,7 +3,8 @@
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { X, SlidersHorizontal, Search, Check, BellRing } from "lucide-react";
-import { DISTRICTS, PROPERTY_TYPES, PROPERTY_TYPE_LABELS } from "@/lib/constants";
+import { DISTRICTS } from "@/lib/constants";
+import { getCategory, getFilterableFields, getSubTypeLabel } from "@/lib/categories";
 import { formatNumber } from "@/lib/format";
 import ThousandsInput from "@/components/ThousandsInput";
 
@@ -22,6 +23,10 @@ const CHIP_KEYS = ["q", "tur", "ilce", "oda", "min", "max", "minAlan", "maxAlan"
 export default function ListingFilters() {
   const router = useRouter();
   const sp = useSearchParams();
+  // Aktif kategori. Tanımsız/bozuk değerler emlağa düşer, filtreler hiç patlamaz.
+  const category = getCategory(sp.get("kategori"));
+  const isRealEstate = category.key === "emlak";
+  const attributeFields = getFilterableFields(category.key);
   const [open, setOpen] = useState(false);
   const sheetRef = useRef<HTMLElement>(null);
   const closeButtonRef = useRef<HTMLButtonElement>(null);
@@ -109,7 +114,7 @@ export default function ListingFilters() {
   function chipLabel(key: string, val: string): string | null {
     switch (key) {
       case "q": return `“${val}”`;
-      case "tur": return PROPERTY_TYPE_LABELS[val] || val;
+      case "tur": return getSubTypeLabel(category.key, val);
       case "ilce": return val;
       case "oda": return val;
       case "min": return `Min ${formatNumber(Number(val))} ₺`;
@@ -178,11 +183,11 @@ export default function ListingFilters() {
           />
         </div>
 
-        {/* Emlak Tipi (tek seçim) */}
+        {/* Kategori içi alt tür (tek seçim) */}
         <div className={sectionCls}>
-          <h3 id="property-type-filter-title" className={headCls}>Emlak Tipi</h3>
+          <h3 id="property-type-filter-title" className={headCls}>{isRealEstate ? "Emlak Tipi" : "Tür"}</h3>
           <div role="group" aria-labelledby="property-type-filter-title" className="space-y-1">
-            {PROPERTY_TYPES.map((p) => {
+            {category.subTypes.map((p) => {
               const on = sp.get("tur") === p.value;
               return (
                 <button
@@ -221,6 +226,9 @@ export default function ListingFilters() {
           </div>
         </div>
 
+        {/* Oda, alan, imar ve olanaklar YALNIZ emlakta anlamlı */}
+        {isRealEstate && (
+        <>
         {/* Oda Sayısı */}
         <div className={sectionCls}>
           <h3 id="room-filter-title" className={headCls}>Oda Sayısı</h3>
@@ -282,6 +290,64 @@ export default function ListingFilters() {
             })}
           </div>
         </div>
+
+        </>
+        )}
+
+        {/* Kategoriye özel filtreler — kayıttan üretilir (lib/categories.ts) */}
+        {attributeFields.map((field) =>
+          field.type === "select" ? (
+            <div key={field.key} className={sectionCls}>
+              <label htmlFor={`attr-${field.key}`} className={headCls}>{field.label}</label>
+              <select
+                id={`attr-${field.key}`}
+                value={sp.get(field.key) || ""}
+                onChange={(e) => update(field.key, e.target.value)}
+                className={fieldCls}
+              >
+                <option value="">Farketmez</option>
+                {field.options?.map((o) => (
+                  <option key={o.value} value={o.value}>{o.label}</option>
+                ))}
+              </select>
+            </div>
+          ) : (
+            <div key={field.key} className={sectionCls}>
+              <h3 id={`attr-${field.key}-title`} className={headCls}>
+                {field.label}{field.unit ? ` (${field.unit})` : ""}
+              </h3>
+              <div role="group" aria-labelledby={`attr-${field.key}-title`} className="flex items-center gap-2">
+                <input
+                  key={`${field.key}_min-${sp.get(`${field.key}_min`) || ""}`}
+                  defaultValue={sp.get(`${field.key}_min`) || ""}
+                  onBlur={(e) => update(`${field.key}_min`, e.target.value)}
+                  onKeyDown={(e) => { if (e.key === "Enter") update(`${field.key}_min`, (e.target as HTMLInputElement).value); }}
+                  type="number"
+                  min={field.min}
+                  max={field.max}
+                  inputMode="numeric"
+                  placeholder="Min"
+                  aria-label={`Minimum ${field.label}`}
+                  className={fieldCls}
+                />
+                <span aria-hidden="true" className="text-slate-400">–</span>
+                <input
+                  key={`${field.key}_max-${sp.get(`${field.key}_max`) || ""}`}
+                  defaultValue={sp.get(`${field.key}_max`) || ""}
+                  onBlur={(e) => update(`${field.key}_max`, e.target.value)}
+                  onKeyDown={(e) => { if (e.key === "Enter") update(`${field.key}_max`, (e.target as HTMLInputElement).value); }}
+                  type="number"
+                  min={field.min}
+                  max={field.max}
+                  inputMode="numeric"
+                  placeholder="Max"
+                  aria-label={`Maksimum ${field.label}`}
+                  className={fieldCls}
+                />
+              </div>
+            </div>
+          )
+        )}
 
         {/* Aktif çipler */}
         {activeChips.length > 0 && (

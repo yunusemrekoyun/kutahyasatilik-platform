@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { parseJsonArray } from "@/lib/format";
 import { requestOrigin } from "@/lib/apiMedia";
 import { buildAnalysis } from "@/lib/analysis";
+import { CATEGORY_LABELS, describeAttributes, getSubTypeLabel } from "@/lib/categories";
 
 // Mobil ilan detayı — web detay sayfasıyla (app/(site)/ilan/[slug]) aynı veri kaynağı.
 // Onaylı + pasif olmayan ilan; görseller mobil için mutlak URL'e çevrilir.
@@ -96,6 +97,12 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ slug
       slug: l.slug,
       title: l.title,
       description: l.description,
+      category: l.category,
+      // Kategori kaydı YALNIZ web'de duruyor; mobil kopyasını taşımasın diye
+      // etiketler ve nitelik satırları burada hazırlanıp gönderiliyor.
+      categoryLabel: CATEGORY_LABELS[l.category] ?? l.category,
+      subTypeLabel: getSubTypeLabel(l.category, l.propertyType),
+      attributes: describeAttributes(l.category, l.attributes),
       propertyType: l.propertyType,
       listingType: l.listingType,
       price: l.price,

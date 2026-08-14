@@ -10,11 +10,15 @@ import NotFoundCTA from "@/components/NotFoundCTA";
 import TrackView from "@/components/TrackView";
 import { getSiteContact } from "@/lib/contact";
 import { DISTRICTS, LANDING_PAGES } from "@/lib/constants";
+import { CATEGORY_LIST } from "@/lib/categories";
 import { getFeaturedListings, getMapPoints } from "@/lib/listings";
 import { getMarketplaceStats } from "@/lib/marketplaceStats";
 import { mediaUrl } from "@/lib/media";
 import { prisma } from "@/lib/prisma";
 import { SITE, telLink } from "@/lib/site";
+
+// Emlak zaten LANDING_PAGES üzerinden mülk türü kırılımıyla listeleniyor.
+const NON_PROPERTY_CATEGORIES = CATEGORY_LIST.filter((c) => c.key !== "emlak");
 
 export const revalidate = 300;
 export const metadata: Metadata = { alternates: { canonical: "/" } };
@@ -127,9 +131,9 @@ export default async function Home() {
       <section className="mx-auto max-w-7xl px-5 py-16 sm:px-6 sm:py-24">
         <div className="grid gap-10 lg:grid-cols-12">
           <div className="lg:col-span-4">
-            <p className="eyebrow">Portföyü keşfet</p>
-            <h2 className="mt-3 font-display text-3xl font-semibold tracking-tight text-brand-950 sm:text-4xl">Aradığınız mülke doğrudan ulaşın.</h2>
-            <p className="mt-4 max-w-md leading-7 text-muted">Kütahya portföyünü mülk türüne göre ayırdık; filtre kalabalığı olmadan başlayın.</p>
+            <p className="eyebrow">Kategorileri keşfet</p>
+            <h2 className="mt-3 font-display text-3xl font-semibold tracking-tight text-brand-950 sm:text-4xl">Aradığınıza doğrudan ulaşın.</h2>
+            <p className="mt-4 max-w-md leading-7 text-muted">Kütahya&apos;daki ilanları kategorilere ayırdık; filtre kalabalığı olmadan başlayın.</p>
           </div>
           <div className="border-t border-stone lg:col-span-8">
             {LANDING_PAGES.map((category, index) => {
@@ -151,6 +155,30 @@ export default async function Home() {
                 </Link>
               );
             })}
+
+            {/* Emlak dışı kategoriler. Kendi SEO sayfaları yok; /ilanlar
+                sekmesine gidiyorlar (bkz. COK-KATEGORI-PLANI.md kapsam dışı). */}
+            {NON_PROPERTY_CATEGORIES.map((category, index) => (
+              <Link
+                key={category.key}
+                href={`/ilanlar?kategori=${category.key}`}
+                className="group grid grid-cols-[2rem_4.5rem_1fr_auto] items-center gap-3 border-b border-stone py-3 sm:grid-cols-[2.5rem_6rem_1fr_auto] sm:gap-4 sm:py-4"
+              >
+                <span className="font-display text-sm tabular-nums text-gold-700">
+                  0{LANDING_PAGES.length + index + 1}
+                </span>
+                <span className="ceramic-grid relative block aspect-[4/3] overflow-hidden border border-stone bg-brand-50" />
+                <span>
+                  <span className="block font-display text-base font-semibold text-ink group-hover:text-brand-700 sm:text-xl">
+                    {category.label}
+                  </span>
+                  <span className="mt-1 block text-xs font-medium text-muted">
+                    {category.subTypes.map((s) => s.label).join(" · ")}
+                  </span>
+                </span>
+                <ArrowRight className="h-5 w-5 text-muted transition group-hover:translate-x-1 group-hover:text-brand-700" />
+              </Link>
+            ))}
           </div>
         </div>
       </section>

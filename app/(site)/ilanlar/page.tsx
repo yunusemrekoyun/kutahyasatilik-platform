@@ -5,6 +5,8 @@ import { SearchX } from "lucide-react";
 import { getListingsPaged } from "@/lib/listings";
 import ListingCard from "@/components/ListingCard";
 import ListingFilters from "@/components/ListingFilters";
+import CategoryTabs from "@/components/CategoryTabs";
+import { getCategory, getFilterableFields } from "@/lib/categories";
 import ListingSort from "@/components/ListingSort";
 import Pagination from "@/components/Pagination";
 import NotFoundCTA from "@/components/NotFoundCTA";
@@ -43,8 +45,26 @@ export default async function ListingsPage({
   const minAlan = minAlanRaw !== undefined ? minAlanRaw * areaFactor : undefined;
   const maxAlan = maxAlanRaw !== undefined ? maxAlanRaw * areaFactor : undefined;
 
+  // Kategoriye özel nitelik filtreleri. Yalnız kayıtta filtrelenebilir işaretli
+  // alanlar okunur; URL'e elle eklenen başka bir anahtar sorguya geçmez.
+  const category = getCategory(get("kategori"));
+  const attrs: Record<string, string> = {};
+  for (const field of getFilterableFields(category.key)) {
+    if (field.type === "select") {
+      const value = get(field.key);
+      if (value) attrs[field.key] = value;
+    } else {
+      const min = get(`${field.key}_min`);
+      const max = get(`${field.key}_max`);
+      if (min) attrs[`${field.key}_min`] = min;
+      if (max) attrs[`${field.key}_max`] = max;
+    }
+  }
+
   const [listingResult, owner] = await Promise.all([
     getListingsPaged({
+      category: category.key,
+      attrs,
       q: get("q"),
       propertyType: get("tur"),
       district: get("ilce"),
@@ -74,7 +94,9 @@ export default async function ListingsPage({
     ? `${owner.name} Portföyü`
     : get("ilce")
       ? `${get("ilce")} İlanları`
-      : "Tüm İlanlar";
+      : category.key === "emlak"
+        ? "Tüm İlanlar"
+        : `${category.label} İlanları`;
 
   const flatParams: Record<string, string | undefined> = {};
   Object.entries(sp).forEach(([k, v]) => { if (typeof v === "string") flatParams[k] = v; });
@@ -109,6 +131,13 @@ export default async function ListingsPage({
           <ListingSort />
         </Suspense>
       </div>
+
+      {/* Ofis/danışman portföyü emlağa özgü olduğu için orada kategori yok */}
+      {!owner && (
+        <Suspense fallback={<div className="mb-8 h-12 border-b border-stone" />}>
+          <CategoryTabs />
+        </Suspense>
+      )}
 
       <div className="grid grid-cols-1 gap-8 lg:grid-cols-12">
         <div className="lg:col-span-3">

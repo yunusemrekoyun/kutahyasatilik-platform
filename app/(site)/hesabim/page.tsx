@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { Heart, Mail, User as UserIcon, MessageSquare } from "lucide-react";
+import { Heart, Mail, Tag, User as UserIcon, MessageSquare } from "lucide-react";
 import { getUserSession } from "@/lib/userAuth";
 import { prisma } from "@/lib/prisma";
 import { LEAD_TYPE_LABELS, PROPERTY_TYPE_LABELS } from "@/lib/constants";
@@ -111,6 +111,14 @@ export default async function AccountPage() {
         <div>
           <p className="font-semibold text-slate-900">Mesajlarım</p>
           <p className="text-xs text-slate-500">Danışmanlarla yazışmalar ve teklifler</p>
+        </div>
+      </Link>
+
+      <Link href="/hesabim/ilanlarim" className="mt-4 flex items-center gap-3 rounded-lg bg-paper p-5 ring-1 ring-stone transition hover:ring-brand-300">
+        <span className="grid h-10 w-10 place-items-center rounded-lg bg-gold-100 text-gold-700"><Tag className="h-5 w-5" /></span>
+        <div>
+          <p className="font-semibold text-slate-900">İlanlarım</p>
+          <p className="text-xs text-slate-500">Verdiğiniz ilanlar ve onay durumları</p>
         </div>
       </Link>
 

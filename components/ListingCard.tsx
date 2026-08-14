@@ -2,7 +2,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { MapPin, BedDouble, Maximize, Star, ArrowRight, Gem, Flame, Sparkles } from "lucide-react";
 import { formatPrice } from "@/lib/format";
-import { PROPERTY_TYPE_LABELS } from "@/lib/constants";
+import { getSubTypeLabel } from "@/lib/categories";
 import { publicImageUrl, thumbUrl } from "@/lib/media";
 import type { Badge } from "@/lib/badges";
 import CardActions from "./CardActions";
@@ -13,7 +13,15 @@ export type ListingCardData = {
   title: string;
   price: number;
   currency: string;
+  /** Kategori. Eski çağrı yerleri bu alanı göndermez; emlak varsayılır. */
+  category?: string;
+  /** Kategori içi alt tür (emlakta daire/arsa, vasıtada otomobil...) */
   propertyType: string;
+  /**
+   * Emlak dışı kategorilerde kartta gösterilecek hazır özet metinleri
+   * ("2019", "120.000 km"). Emlak kendi kolonlarını (rooms/areaGross) kullanır.
+   */
+  attributeSummary?: string[];
   district: string;
   neighborhood?: string | null;
   rooms?: string | null;
@@ -39,6 +47,8 @@ export default function ListingCard({
   const safeCover = publicImageUrl(listing.coverImage);
   const cover = safeCover ? thumbUrl(safeCover) : "/placeholder-listing.webp";
   const agentLogo = publicImageUrl(listing.agentLogo);
+  // Kategori gönderilmeyen eski çağrı yerleri emlak sayılır.
+  const isRealEstate = !listing.category || listing.category === "emlak";
   const isLand = listing.propertyType === "arsa" || listing.propertyType === "tarla";
   const isSold = listing.status === "sold";
   const location = `${listing.neighborhood ? `${listing.neighborhood}, ` : ""}${listing.district}`;
@@ -89,7 +99,7 @@ export default function ListingCard({
       <div className={`flex min-w-0 flex-grow flex-col ${variant === "editorial" ? "p-5 sm:p-6" : "p-4"}`}>
         <Link href={`/ilan/${listing.slug}`} className="block">
           <span className="eyebrow mb-2 block line-clamp-1">
-            {PROPERTY_TYPE_LABELS[listing.propertyType] || listing.propertyType} · {location}
+            {getSubTypeLabel(listing.category, listing.propertyType)} · {location}
           </span>
           <h3 id={titleId} className={`line-clamp-2 font-display font-semibold leading-snug text-ink transition-colors group-hover:text-brand-700 ${variant === "editorial" ? "text-2xl sm:text-3xl" : variant === "compact" ? "text-base" : "text-xl"}`}>
             {listing.title}
@@ -97,11 +107,17 @@ export default function ListingCard({
         </Link>
 
         <div className={`mt-3 flex flex-wrap items-center gap-x-4 gap-y-1 text-[13px] font-medium text-muted ${variant === "compact" ? "hidden sm:flex" : ""}`}>
-          {!isLand && listing.rooms && (
-            <span className="inline-flex items-center gap-1.5"><BedDouble aria-hidden="true" className="h-[18px] w-[18px] text-slate-400" /> {listing.rooms}</span>
-          )}
-          {listing.areaGross && (
-            <span className="inline-flex items-center gap-1.5"><Maximize aria-hidden="true" className="h-[18px] w-[18px] text-slate-400" /> {listing.areaGross} m²</span>
+          {isRealEstate ? (
+            <>
+              {!isLand && listing.rooms && (
+                <span className="inline-flex items-center gap-1.5"><BedDouble aria-hidden="true" className="h-[18px] w-[18px] text-slate-400" /> {listing.rooms}</span>
+              )}
+              {listing.areaGross && (
+                <span className="inline-flex items-center gap-1.5"><Maximize aria-hidden="true" className="h-[18px] w-[18px] text-slate-400" /> {listing.areaGross} m²</span>
+              )}
+            </>
+          ) : (
+            listing.attributeSummary?.map((text) => <span key={text}>{text}</span>)
           )}
           <span className="inline-flex items-center gap-1.5">
             <MapPin aria-hidden="true" className="h-[18px] w-[18px] text-slate-400" /> {listing.district}

@@ -5,7 +5,7 @@ import type { Metadata } from "next";
 import { prisma } from "@/lib/prisma";
 import { buildAnalysis } from "@/lib/analysis";
 import { formatPrice, formatDate, parseJsonArray } from "@/lib/format";
-import { PROPERTY_TYPE_LABELS } from "@/lib/constants";
+import { describeAttributes, getSubTypeLabel } from "@/lib/categories";
 import { publicImageUrl } from "@/lib/media";
 import { SITE } from "@/lib/site";
 import Gallery from "@/components/Gallery";
@@ -172,9 +172,14 @@ export default async function ListingPage({
         }]
       : [];
 
-  const isLand = listing.propertyType === "arsa" || listing.propertyType === "tarla";
-  const isCommercial = listing.propertyType === "isyeri";
-  const isResidential = !isLand && !isCommercial;
+  // Emlak dışı kategorilerde propertyType "otomobil" gibi bir değer taşır.
+  // isResidential'ı kategoriye bağlamazsak vasıta ilanı konut sayılıp
+  // "Oda Sayısı" gibi satırları göstermeye çalışır.
+  const isRealEstate = listing.category === "emlak";
+  const attributeRows = describeAttributes(listing.category, listing.attributes);
+  const isLand = isRealEstate && (listing.propertyType === "arsa" || listing.propertyType === "tarla");
+  const isCommercial = isRealEstate && listing.propertyType === "isyeri";
+  const isResidential = isRealEstate && !isLand && !isCommercial;
   const isSold = listing.status === "sold";
   const agentLogo = publicImageUrl(listing.agent?.logo);
 
@@ -187,7 +192,9 @@ export default async function ListingPage({
 
   // Künye kartları — türe göre anlamlı alanlar. Boş (—) kartlar aşağıda filtrelenir,
   // böylece işyeri ilanında "Oda Sayısı: —" gibi anlamsız kartlar görünmez.
-  const keyMetrics: { label: string; value: string }[] = (isLand
+  const keyMetrics: { label: string; value: string }[] = (!isRealEstate
+    ? attributeRows.slice(0, 4).map((row) => ({ label: row.label, value: row.value }))
+    : isLand
     ? [
         { label: "Alan", value: listing.areaGross ? `${listing.areaGross} m²` : "—" },
         { label: "İmar Durumu", value: listing.zoningStatus || "—" },
@@ -219,7 +226,9 @@ export default async function ListingPage({
 
   const jsonLd = {
     "@context": "https://schema.org",
-    "@type": "RealEstateListing",
+    // Vasıta/teknoloji ilanı RealEstateListing olarak işaretlenirse arama
+    // motorlarına yanlış bilgi veririz; onlar genel ürün olarak yayımlanır.
+    "@type": isRealEstate ? "RealEstateListing" : "Product",
     name: listing.title,
     description: listing.description,
     url: `${SITE.url}/ilan/${listing.slug}`,
@@ -272,7 +281,7 @@ export default async function ListingPage({
                     <span className="rounded-md bg-brand-700 px-2.5 py-1 text-xs font-semibold text-white">Satılık</span>
                   ) : null}
                   <span className="inline-block rounded-md bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-600">
-                    {PROPERTY_TYPE_LABELS[listing.propertyType] || listing.propertyType}
+                    {getSubTypeLabel(listing.category, listing.propertyType)}
                   </span>
                   {listing.verified && (
                     <span className="inline-flex items-center gap-1 rounded-md bg-green-50 px-2.5 py-1 text-xs font-semibold text-green-700 ring-1 ring-green-200">
@@ -305,8 +314,10 @@ export default async function ListingPage({
 
             <h2 className="mt-9 border-b border-stone pb-3 font-display text-xl font-semibold text-ink">Tüm detaylar</h2>
             <div className="mt-3 grid grid-cols-1 gap-x-8 sm:grid-cols-2">
+              {isRealEstate ? (
+              <>
               <div>
-                <DetailRow label="Mülk Türü" value={PROPERTY_TYPE_LABELS[listing.propertyType]} />
+                <DetailRow label="Mülk Türü" value={getSubTypeLabel(listing.category, listing.propertyType)} />
                 <DetailRow label="İlçe" value={listing.district} />
                 <DetailRow label="Mahalle" value={listing.neighborhood} />
                 {isResidential && <DetailRow label="Oda Sayısı" value={listing.rooms} />}
@@ -335,6 +346,26 @@ export default async function ListingPage({
                 <DetailRow label="İlan Tarihi" value={formatDate(listing.createdAt)} />
                 <DetailRow label="Geçerlilik Tarihi" value={listing.validUntil ? formatDate(listing.validUntil) : null} />
               </div>
+              </>
+              ) : (
+              <>
+              {/* Emlak dışı kategoriler: satırlar kayıttan üretilir */}
+              <div>
+                <DetailRow label="Tür" value={getSubTypeLabel(listing.category, listing.propertyType)} />
+                <DetailRow label="İlçe" value={listing.district} />
+                <DetailRow label="Mahalle" value={listing.neighborhood} />
+                {attributeRows.slice(0, Math.ceil(attributeRows.length / 2)).map((row) => (
+                  <DetailRow key={row.key} label={row.label} value={row.value} />
+                ))}
+              </div>
+              <div>
+                {attributeRows.slice(Math.ceil(attributeRows.length / 2)).map((row) => (
+                  <DetailRow key={row.key} label={row.label} value={row.value} />
+                ))}
+                <DetailRow label="İlan Tarihi" value={formatDate(listing.createdAt)} />
+              </div>
+              </>
+              )}
             </div>
 
             {features.length > 0 && (
@@ -387,8 +418,9 @@ export default async function ListingPage({
             virtualTourUrl={listing.virtualTourUrl}
           />
 
-          {/* VERİ DESTEKLİ BÖLGE ANALİZİ */}
-          <AnalysisSection analysis={analysis} showScores={showScores} />
+          {/* VERİ DESTEKLİ BÖLGE ANALİZİ — m² fiyatı, imar ve yatırım skoru
+              üzerine kurulu olduğu için yalnız emlak ilanlarında anlamlı */}
+          {isRealEstate && <AnalysisSection analysis={analysis} showScores={showScores} />}
 
           {/* HARİTA */}
           {mapPoints.length > 0 && (

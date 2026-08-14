@@ -4,6 +4,7 @@ import type { ListingCardData } from "@/components/ListingCard";
 import { getDistrictStats } from "./districtStats";
 import { computeBadges } from "./badges";
 import { buildOrderBy, buildWhere, type ListingFilter } from "./listingFilters";
+import { summarizeAttributes } from "./categories";
 
 export { buildOrderBy, buildWhere } from "./listingFilters";
 export type { ListingFilter } from "./listingFilters";
@@ -14,7 +15,9 @@ const cardSelect = {
   title: true,
   price: true,
   currency: true,
+  category: true,
   propertyType: true,
+  attributes: true,
   district: true,
   neighborhood: true,
   rooms: true,
@@ -33,7 +36,9 @@ type RawCard = {
   title: string;
   price: number;
   currency: string;
+  category: string;
   propertyType: string;
+  attributes: unknown;
   district: string;
   neighborhood: string | null;
   rooms: string | null;
@@ -89,7 +94,9 @@ async function decorate(rows: RawCard[]): Promise<ListingCardData[]> {
       title: l.title,
       price: l.price,
       currency: l.currency,
+      category: l.category,
       propertyType: l.propertyType,
+      attributeSummary: summarizeAttributes(l.category, l.attributes),
       district: l.district,
       neighborhood: l.neighborhood,
       rooms: l.rooms,

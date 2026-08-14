@@ -27,6 +27,9 @@ const PROPERTY_LINKS = [
   { href: "/villa", label: "Villa" },
   { href: "/yatirimlik-arsa", label: "Yatırımlık Arsa" },
   { href: "/isyeri", label: "İşyeri" },
+  // Kategoriler ayrı SEO sayfası olarak değil, /ilanlar sekmesi olarak açılır.
+  { href: "/ilanlar?kategori=vasita", label: "Vasıta" },
+  { href: "/ilanlar?kategori=teknoloji", label: "Teknoloji" },
 ];
 
 const PRIMARY_LINKS = [
@@ -96,7 +99,7 @@ export default function Header() {
             Kütahya<span className="text-gold-700">Satılık</span>
           </span>
           <span className="mt-1 hidden text-[9px] font-bold uppercase tracking-[0.2em] text-muted sm:block">
-            Yerel gayrimenkul rehberi
+            Kütahya&apos;nın yerel ilan platformu
           </span>
         </Link>
 

@@ -3,7 +3,7 @@ import Image from "next/image";
 import { CheckCircle2, User, Check } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { formatPrice, formatDate } from "@/lib/format";
-import { PROPERTY_TYPE_LABELS } from "@/lib/constants";
+import { CATEGORY_LABELS, getSubTypeLabel } from "@/lib/categories";
 import { countAlertsForListing } from "@/lib/matching";
 import { approveListing, rejectListing } from "../actions";
 
@@ -31,6 +31,8 @@ export default async function AdminModeration({
       include: {
         images: { take: 1, orderBy: { sortOrder: "asc" } },
         agent: { select: { name: true, title: true, agency: true, email: true } },
+        // Bireysel ilanlarda danışman yok; sahibi kullanıcıdır.
+        user: { select: { name: true, email: true } },
       },
     }),
   ]);
@@ -68,11 +70,15 @@ export default async function AdminModeration({
                   <span className="whitespace-nowrap text-lg font-black text-brand-700">{formatPrice(l.price, l.currency)}</span>
                 </div>
                 <p className="mt-1 text-sm text-muted">
-                  {PROPERTY_TYPE_LABELS[l.propertyType] || l.propertyType} · {l.neighborhood ? `${l.neighborhood}, ` : ""}{l.district} · {formatDate(l.createdAt)}
+                  {CATEGORY_LABELS[l.category] ?? l.category} · {getSubTypeLabel(l.category, l.propertyType)} · {l.neighborhood ? `${l.neighborhood}, ` : ""}{l.district} · {formatDate(l.createdAt)}
                 </p>
                 <p className="mt-1 inline-flex items-center gap-1.5 text-sm text-brand-700">
                   <User className="h-4 w-4" />
-                  {l.agent ? `${l.agent.name}${l.agent.title ? ` — ${l.agent.title}` : ""}${l.agent.agency ? ` (${l.agent.agency})` : ""}` : "Bilinmeyen danışman"}
+                  {l.agent
+                    ? `${l.agent.name}${l.agent.title ? ` — ${l.agent.title}` : ""}${l.agent.agency ? ` (${l.agent.agency})` : ""}`
+                    : l.user
+                      ? `${l.user.name} (bireysel)`
+                      : "Bilinmeyen danışman"}
                 </p>
                 {alertCounts[idx] > 0 && (
                   <Link href="/admin/alici-talepleri" className="mt-1 inline-flex items-center gap-1 rounded-md bg-green-50 px-2 py-1 text-xs font-bold text-green-700 hover:bg-green-100">

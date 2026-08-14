@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getListingsPaged, type ListingFilter } from "@/lib/listings";
 import { absolutizeUrl } from "@/lib/apiMedia";
+import { getFilterableFields, getSubTypeLabel } from "@/lib/categories";
 
 // Mobil ilan listesi — lib/listings.getListingsPaged üzerine ince JSON sarmal.
 // Web SSR ile AYNI veri/filtre mantığını kullanır (onaylı + aktif ilanlar).
@@ -19,7 +20,29 @@ function str(v: string | null): string | undefined {
 
 export async function GET(req: NextRequest) {
   const sp = req.nextUrl.searchParams;
+
+  // Kategoriye özel nitelik filtreleri. Web'deki /ilanlar ile aynı sözleşme:
+  // seçim alanları `?yakit=dizel`, sayı alanları `?yil_min=2015&yil_max=2020`.
+  // Yalnız kayıtta filtrelenebilir işaretli alanlar okunur.
+  const category = str(sp.get("category"));
+  const attrs: Record<string, string> = {};
+  if (category) {
+    for (const field of getFilterableFields(category)) {
+      if (field.type === "select") {
+        const value = str(sp.get(field.key));
+        if (value) attrs[field.key] = value;
+      } else {
+        const min = str(sp.get(`${field.key}_min`));
+        const max = str(sp.get(`${field.key}_max`));
+        if (min) attrs[`${field.key}_min`] = min;
+        if (max) attrs[`${field.key}_max`] = max;
+      }
+    }
+  }
+
   const filter: ListingFilter = {
+    category,
+    attrs,
     propertyType: str(sp.get("propertyType")),
     listingType: str(sp.get("listingType")),
     district: str(sp.get("district")),
@@ -48,6 +71,9 @@ export async function GET(req: NextRequest) {
       const agentLogo = absolutizeUrl(it.agentLogo ?? null, req);
       return {
         ...it,
+        // Kategori kaydı web'de duruyor; mobil kopyasını taşımasın diye alt tür
+        // etiketi burada çözülüp gönderiliyor.
+        subTypeLabel: getSubTypeLabel(it.category, it.propertyType),
         coverImage: absolutizeUrl(it.coverImage ?? null, req),
         // Emlakçı logosu da mutlak URL'e çevrilir (kart verisinde göreli /uploads/... gelir).
         agentLogo,

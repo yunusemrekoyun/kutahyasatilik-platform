@@ -1,4 +1,14 @@
+import { getFilterableFields } from "./categories";
+
 export type ListingFilter = {
+  category?: string;
+  /**
+   * Kategoriye özel nitelik filtreleri. Seçim alanlarında `{ yakit: "dizel" }`,
+   * sayı alanlarında `{ yil_min: "2015", yil_max: "2020" }` biçiminde okunur.
+   * Yalnız `category` verildiğinde ve kayıtta filtrelenebilir işaretli alanlar
+   * için uygulanır — istemciden gelen tanımsız anahtarlar sessizce atılır.
+   */
+  attrs?: Record<string, string>;
   propertyType?: string;
   listingType?: string;
   district?: string;
@@ -24,6 +34,7 @@ export function buildWhere(filter: ListingFilter) {
     status: { not: "passive" },
     moderationStatus: "approved",
   };
+  if (filter.category) where.category = filter.category;
   if (filter.propertyType) where.propertyType = filter.propertyType;
   if (filter.listingType) where.listingType = filter.listingType;
   if (filter.district) where.district = filter.district;
@@ -77,7 +88,48 @@ export function buildWhere(filter: ListingFilter) {
     if (/^[a-z0-9]{4,12}$/i.test(q)) or.push({ id: { endsWith: q.toLowerCase() } });
     where.OR = or;
   }
+
+  const attrConditions = buildAttributeConditions(filter);
+  if (attrConditions.length) where.AND = attrConditions;
+
   return where;
+}
+
+/**
+ * Kategoriye özel JSONB nitelik koşulları. Her koşul ayrı bir AND maddesi olur;
+ * tek bir `attributes` nesnesine birden fazla yol koşulu yazılamaz.
+ *
+ * Kayıtta tanımlı olmayan veya seçenek listesinde bulunmayan değerler atılır,
+ * böylece istemciden gelen serbest metin sorguya sızmaz.
+ */
+function buildAttributeConditions(filter: ListingFilter): Record<string, unknown>[] {
+  if (!filter.category || !filter.attrs) return [];
+  const attrs = filter.attrs;
+  const out: Record<string, unknown>[] = [];
+
+  for (const field of getFilterableFields(filter.category)) {
+    if (field.type === "select") {
+      const value = attrs[field.key]?.trim();
+      if (value && field.options?.some((o) => o.value === value)) {
+        out.push({ attributes: { path: [field.key], equals: value } });
+      }
+      continue;
+    }
+
+    if (field.type === "number") {
+      // Number("") === 0 olduğu için boş değer önce elenmeli.
+      const range: Record<string, number> = {};
+      const min = attrs[`${field.key}_min`]?.trim();
+      const max = attrs[`${field.key}_max`]?.trim();
+      if (min && Number.isFinite(Number(min))) range.gte = Number(min);
+      if (max && Number.isFinite(Number(max))) range.lte = Number(max);
+      if (Object.keys(range).length) {
+        out.push({ attributes: { path: [field.key], ...range } });
+      }
+    }
+  }
+
+  return out;
 }
 
 export function buildOrderBy(sort?: string) {
