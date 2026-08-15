@@ -88,8 +88,12 @@ async function download(url: string, dest: string): Promise<boolean> {
  */
 export async function prepareCatalogImages(
   catalog: ImageCatalog,
-  options: { skipDownload?: boolean } = {},
+  options: { skipDownload?: boolean; minPhotos?: number } = {},
 ): Promise<Record<string, PreparedItem[]>> {
+  // Varsayılan 1: telefon/tablet gibi bazı alt türlerde serbest lisanslı temiz
+  // ürün fotoğrafı bulmak zor ve ikinci el ilanı tek fotoğrafla yayınlamak
+  // gerçek hayatta da olağan. Eşiği 2 tutmak o alt türleri tamamen boşaltıyordu.
+  const minPhotos = options.minPhotos ?? 1;
   const dir = getUploadDir();
   await mkdir(dir, { recursive: true });
   const prepared: Record<string, PreparedItem[]> = {};
@@ -119,8 +123,7 @@ export async function prepareCatalogImages(
           process.stdout.write("x");
         }
       }
-      // Tek fotoğraflı ilan sahte durur; en az 2 fotoğrafı olan ürünleri alıyoruz.
-      if (urls.length >= 2) {
+      if (urls.length >= minPhotos) {
         const { files: _files, ...rest } = item;
         void _files;
         prepared[subType].push({ ...rest, urls });

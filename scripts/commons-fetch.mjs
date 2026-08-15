@@ -20,8 +20,27 @@ async function api(params) {
   return res.json();
 }
 
-/** Dosya adına bakarak ilanda kullanılamayacak olanları eler. */
-const REJECT = /(interior of|engine|dashboard|logo|badge|emblem|wheel|diagram|drawing|blueprint|schematic|patent|crash|accident|wreck|museum|toy|model car|scale model|assembly|production line|rear light|headlight|taillight|tail light|gauge|odometer|screenshot|advert|billboard)/i;
+/**
+ * Dosya adına bakarak ilanda kullanılamayacak olanları eler.
+ *
+ * Mağaza/fuar deseni özellikle telefon ve tablette kritik: Commons'taki
+ * ürün fotoğraflarının büyük kısmı MWC standı ya da market rafı çekimi ve
+ * kadrajda yabancı para birimiyle fiyat etiketleri oluyor. Bir ilanda
+ * "kutusu açılmamış" derken vitrin sırası göstermek ilanı sahte gösterir.
+ */
+const REJECT = new RegExp(
+  [
+    // parça / detay çekimi
+    "interior of|engine|dashboard|wheel|rear light|headlight|taillight|tail light|gauge|odometer|close-?up|detail",
+    // marka işareti ve grafik
+    "logo|badge|emblem|diagram|drawing|blueprint|schematic|patent|icon|screenshot|advert|billboard|poster",
+    // hasarlı / gerçek dışı
+    "crash|accident|wreck|damaged|burn|rust|abandoned|museum|toy|model car|scale model|replica",
+    // üretim ve perakende ortamı
+    "assembly|production line|factory|shop|store|shelf|display|booth|stand|fair|expo|exhibition|MWC|IFA|CES|showroom|retail|market",
+  ].join("|"),
+  "i",
+);
 
 async function filesInCategory(category, limit) {
   const seen = [];
