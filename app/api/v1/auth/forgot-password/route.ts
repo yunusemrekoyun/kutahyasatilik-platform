@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
-import crypto from "crypto";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { checkRate } from "@/lib/rateLimit";
+import { issueResetToken } from "@/lib/passwordReset";
 import { sendEmail, notificationEmail, emailEnabled } from "@/lib/email";
 
 export const runtime = "nodejs";
@@ -13,7 +13,6 @@ export const dynamic = "force-dynamic";
 // Sıfırlama WEB sayfasında tamamlanır (/sifre-sifirla?token=...). Enumeration önlemek için tek tip yanıt.
 
 const schema = z.object({ email: z.string().email("Geçerli bir e-posta girin").max(160) });
-const TTL_MS = 60 * 60 * 1000; // 1 saat
 
 export async function POST(req: NextRequest) {
   const limited = await checkRate(req, "forgot-password", 5, 15 * 60_000);
@@ -37,12 +36,7 @@ export async function POST(req: NextRequest) {
   });
   if (!user) return generic;
 
-  await prisma.passwordResetToken.deleteMany({ where: { userId: user.id } });
-  const token = crypto.randomBytes(32).toString("hex");
-  const tokenHash = crypto.createHash("sha256").update(token).digest("hex");
-  await prisma.passwordResetToken.create({
-    data: { userId: user.id, tokenHash, expiresAt: new Date(Date.now() + TTL_MS) },
-  });
+  const token = await issueResetToken("user", user.id);
 
   const path = `/sifre-sifirla?token=${token}`;
   if (!emailEnabled()) {

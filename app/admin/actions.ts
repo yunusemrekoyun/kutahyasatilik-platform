@@ -164,9 +164,13 @@ export async function saveListing(formData: FormData) {
     .split(",")
     .map((s) => s.trim())
     .filter(Boolean);
-  const amenities = listingAmenityRows(
-    formData.getAll("amenities").map(String).filter(Boolean),
-  );
+  // Olanaklar, drone/360 tur ve konut bayrakları EMLAK kavramları. Okuma tarafı
+  // bunları emlak dışında zaten gizliyor; kapı yazma tarafında da olmazsa veri
+  // sessizce birikiyor: bir telefon ilanına "Balkon" ve 360° tur kaydedilip
+  // hiçbir yerde gösterilmiyor, sonraki bir kategori değişiminde ortaya çıkıyor.
+  const amenities = isRealEstate
+    ? listingAmenityRows(formData.getAll("amenities").map(String).filter(Boolean))
+    : [];
 
   const agencyId = str(formData.get("agencyId"));
   if (agencyId && !(await prisma.agency.findUnique({ where: { id: agencyId }, select: { id: true } }))) {
@@ -205,10 +209,10 @@ export async function saveListing(formData: FormData) {
     totalFloors: num(formData.get("totalFloors")),
     buildingAge: str(formData.get("buildingAge")),
     heating: str(formData.get("heating")),
-    furnished: bool(formData.get("furnished")),
-    inSite: bool(formData.get("inSite")),
-    balcony: bool(formData.get("balcony")),
-    parking: bool(formData.get("parking")),
+    furnished: isRealEstate && bool(formData.get("furnished")),
+    inSite: isRealEstate && bool(formData.get("inSite")),
+    balcony: isRealEstate && bool(formData.get("balcony")),
+    parking: isRealEstate && bool(formData.get("parking")),
     creditEligible: str(formData.get("creditEligible")),
     usageStatus: str(formData.get("usageStatus")),
     propertyCondition: str(formData.get("propertyCondition")),
@@ -228,8 +232,8 @@ export async function saveListing(formData: FormData) {
       : "approximate",
     parcelVisibility: bool(formData.get("parcelVisibility")),
     videoUrl: str(formData.get("videoUrl")),
-    droneUrl: str(formData.get("droneUrl")),
-    virtualTourUrl: str(formData.get("virtualTourUrl")),
+    droneUrl: isRealEstate ? str(formData.get("droneUrl")) : null,
+    virtualTourUrl: isRealEstate ? str(formData.get("virtualTourUrl")) : null,
     featured: bool(formData.get("featured")),
     verified: bool(formData.get("verified")),
     investmentScore: num(formData.get("investmentScore")),

@@ -72,5 +72,17 @@ jobs:
       # DEPLOY.md'deki build -> prepare -> check sırasıyla anlam kazanıyor.
       - run: npm run prepare:standalone
       - run: npm run check:standalone
+      # e2e VERİLİ veritabanına koşmalı. Eskiden yalnız migrate çalışıyordu ve
+      # tablolar boştu: ilan detay sayfası CI'da hiç render edilmiyordu, çünkü
+      # design.spec "ilan bağlantısı varsa detaya git" diye koşullu ilerliyor.
+      # Boş DB'de sessizce "sonuç bulunamadı" dalına düşüp yeşil geçiyordu, yani
+      # ilan detayını bozan bir değişiklik CI'dan geçebiliyordu.
+      # Demo katalog (seed:demo) burada kullanılamaz: 977 görseli Wikimedia'dan
+      # indiriyor. Temel seed ağa çıkmıyor ve birkaç saniyede bitiyor.
+      - name: Seed e2e fixtures
+        shell: bash
+        run: |
+          set +x
+          ADMIN_PASSWORD="$(openssl rand -hex 24)" npm run seed
       - run: npx playwright install --with-deps chromium
       - run: npm run test:e2e

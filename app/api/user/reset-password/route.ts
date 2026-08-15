@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-import crypto from "crypto";
 import { z } from "zod";
-import { prisma } from "@/lib/prisma";
 import { checkRate } from "@/lib/rateLimit";
+import { applyNewPassword, resolveResetToken } from "@/lib/passwordReset";
 import { hashPassword } from "@/lib/userAuth";
 import { PASSWORD_ERROR, PASSWORD_MAX_LENGTH, PASSWORD_MIN_LENGTH } from "@/lib/passwordPolicy";
 
@@ -30,27 +29,17 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ ok: false, error: "Geçersiz istek" }, { status: 400 });
   }
 
-  const tokenHash = crypto.createHash("sha256").update(data.token).digest("hex");
-  const rec = await prisma.passwordResetToken.findUnique({
-    where: { tokenHash },
-    select: { id: true, userId: true, expiresAt: true, usedAt: true },
-  });
-  if (!rec || rec.usedAt || rec.expiresAt.getTime() < Date.now()) {
+  // Aynı uç hem kullanıcı hem danışman bağlantısını kabul eder: jeton kimin
+  // olduğunu zaten taşıyor, ayrı sayfa/uç açmak kullanıcıyı yanlış forma
+  // düşürme riski yaratırdı.
+  const resolved = await resolveResetToken(data.token);
+  if (!resolved.ok) {
     return NextResponse.json(
       { ok: false, error: "Bağlantı geçersiz veya süresi dolmuş. Yeniden şifre sıfırlama isteyin." },
       { status: 400 }
     );
   }
 
-  const passwordHash = await hashPassword(data.password);
-  await prisma.$transaction([
-    prisma.user.update({ where: { id: rec.userId }, data: { passwordHash, authVersion: { increment: 1 } } }),
-    prisma.passwordResetToken.deleteMany({ where: { userId: rec.userId } }),
-    prisma.pushToken.updateMany({
-      where: { recipientRole: "user", recipientId: rec.userId, active: true },
-      data: { active: false },
-    }),
-  ]);
-
+  await applyNewPassword(resolved.audience, resolved.id, await hashPassword(data.password));
   return NextResponse.json({ ok: true });
 }

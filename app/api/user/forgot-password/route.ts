@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
-import crypto from "crypto";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { checkRate } from "@/lib/rateLimit";
+import { issueResetToken } from "@/lib/passwordReset";
 import { sendEmail, notificationEmail, emailEnabled } from "@/lib/email";
 
 export const runtime = "nodejs";
@@ -10,9 +10,13 @@ export const runtime = "nodejs";
 // "Şifremi unuttum": e-posta al → tek kullanımlık token üret → DB'de SHA-256 hash sakla →
 // e-posta ile /sifre-sifirla?token=... linki gönder. GÜVENLİK: enumeration önlemek için
 // e-posta kayıtlı olsun olmasın TEK TİP yanıt (link yalnız gerçek kullanıcıya gider).
+//
+// Giriş BİRLEŞİK (kullanıcı/danışman/yönetici tek formdan), sıfırlama da öyle:
+// e-posta önce User'da, bulunamazsa Agent'ta aranıyor. Danışman tarafı daha önce
+// hiç yoktu — şifresini unutan danışman için tek çözüm veritabanına elle
+// müdahaleydi. Ayrı bir danışman sayfası açmak, birleşik girişle çelişirdi.
 
 const schema = z.object({ email: z.string().email("Geçerli bir e-posta girin").max(160) });
-const TTL_MS = 60 * 60 * 1000; // 1 saat
 
 export async function POST(req: NextRequest) {
   const limited = await checkRate(req, "forgot-password", 5, 15 * 60_000);
@@ -30,19 +34,21 @@ export async function POST(req: NextRequest) {
     message: "E-posta adresi kayıtlıysa şifre sıfırlama bağlantısı gönderildi.",
   });
 
-  const user = await prisma.user.findUnique({
-    where: { email: data.email.toLowerCase().trim() },
-    select: { id: true, email: true },
-  });
-  if (!user) return generic;
+  const email = data.email.toLowerCase().trim();
+  const user = await prisma.user.findUnique({ where: { email }, select: { id: true, email: true } });
+  // Reddedilmiş danışman hesabına bağlantı gönderilmez, yanıt yine tek tip.
+  const agent = user
+    ? null
+    : await prisma.agent.findUnique({ where: { email }, select: { id: true, email: true, status: true } });
 
-  // Tek aktif link: eski token'ları temizle.
-  await prisma.passwordResetToken.deleteMany({ where: { userId: user.id } });
-  const token = crypto.randomBytes(32).toString("hex"); // 64 hex, yüksek entropi
-  const tokenHash = crypto.createHash("sha256").update(token).digest("hex");
-  await prisma.passwordResetToken.create({
-    data: { userId: user.id, tokenHash, expiresAt: new Date(Date.now() + TTL_MS) },
-  });
+  const target = user
+    ? { audience: "user" as const, id: user.id, email: user.email }
+    : agent && agent.status !== "rejected"
+      ? { audience: "agent" as const, id: agent.id, email: agent.email }
+      : null;
+  if (!target) return generic;
+
+  const token = await issueResetToken(target.audience, target.id);
 
   const path = `/sifre-sifirla?token=${token}`;
   // Sıfırlama bağlantısı ve kullanıcı bilgisi hiçbir ortamda loglanmaz.
@@ -53,7 +59,7 @@ export async function POST(req: NextRequest) {
     );
   }
   await sendEmail({
-    to: user.email,
+    to: target.email,
     subject: "Şifre sıfırlama bağlantınız",
     html: notificationEmail({
       title: "Şifre sıfırlama",

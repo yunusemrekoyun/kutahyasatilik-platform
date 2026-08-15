@@ -54,6 +54,7 @@ model Agent {
   payments      Payment[]
   bids          Bid[]
   conversations Conversation[]
+  resetTokens   PasswordResetToken[]
 
   @@index([status])
   @@index([agencyId])
@@ -570,13 +571,13 @@ model User {
   authVersion  Int       @default(0)
   createdAt    DateTime  @default(now())
 
-  listings      Listing[]
-  favorites     Favorite[]
-  alerts        BuyerAlert[]
-  resetTokens   PasswordResetToken[]
-  leads         Lead[]
-  conversations     Conversation[] @relation("ConversationBuyer")
-  soldConversations Conversation[] @relation("ConversationSeller")
+  listings          Listing[]
+  favorites         Favorite[]
+  alerts            BuyerAlert[]
+  resetTokens       PasswordResetToken[]
+  leads             Lead[]
+  conversations     Conversation[]       @relation("ConversationBuyer")
+  soldConversations Conversation[]       @relation("ConversationSeller")
 }
 
 // ---------------------------------------------------------------------------
@@ -584,16 +585,24 @@ model User {
 // rastgeledir; DB'de YALNIZ SHA-256 hash saklanır (link/DB ele geçse bile token okunamaz).
 // Tek kullanımlık (usedAt) + süreli (expiresAt).
 // ---------------------------------------------------------------------------
+// Şifre sıfırlama jetonu — HEM kullanıcı HEM danışman için.
+//
+// Tablo başta yalnız User'a bağlıydı; danışman şifresini unuttuğunda tek çözüm
+// veritabanına elle müdahaleydi. İki ayrı tablo yerine sahiplik alanı ikiye
+// ayrıldı: tam olarak biri dolu olur (uygulama katmanında garanti ediliyor).
 model PasswordResetToken {
   id        String    @id @default(cuid())
-  userId    String
-  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    String?
+  user      User?     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  agentId   String?
+  agent     Agent?    @relation(fields: [agentId], references: [id], onDelete: Cascade)
   tokenHash String    @unique
   expiresAt DateTime
   usedAt    DateTime?
   createdAt DateTime  @default(now())
 
   @@index([userId])
+  @@index([agentId])
 }
 
 // ---------------------------------------------------------------------------
@@ -844,21 +853,21 @@ model AdRequest {
 // Mesajlaşma — kullanıcı ↔ emlakçı, İLAN bazında. Teklif sohbet içinde balon olarak.
 // ---------------------------------------------------------------------------
 model Conversation {
-  id        String  @id @default(cuid())
+  id      String  @id @default(cuid())
   // Alıcı tarafı. Bir kullanıcı başka bir sohbette satıcı olabilir; yetki
   // her zaman sohbet bazında çözülür (bkz. conversationSide).
-  userId    String
-  user      User    @relation("ConversationBuyer", fields: [userId], references: [id], onDelete: Cascade)
+  userId  String
+  user    User    @relation("ConversationBuyer", fields: [userId], references: [id], onDelete: Cascade)
   // Satıcı tarafı: ya onaylı danışman (agentId) YA DA bireysel ilan sahibi
   // (ownerUserId). İkisi birden dolu olmaz; ikisi birden boş da olmaz.
   // Kısıt uygulama katmanında (lib/messaging.ts) — Prisma CHECK üretmiyor.
-  agentId   String?
-  agent     Agent?  @relation(fields: [agentId], references: [id], onDelete: Cascade)
+  agentId String?
+  agent   Agent?  @relation(fields: [agentId], references: [id], onDelete: Cascade)
 
   ownerUserId String?
   ownerUser   User?   @relation("ConversationSeller", fields: [ownerUserId], references: [id], onDelete: Cascade)
-  listingId String
-  listing   Listing @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  listingId   String
+  listing     Listing @relation(fields: [listingId], references: [id], onDelete: Cascade)
 
   messages Message[]
 
