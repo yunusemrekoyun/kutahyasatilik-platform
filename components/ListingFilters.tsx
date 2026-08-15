@@ -21,9 +21,16 @@ const AMENITIES: { key: string; label: string }[] = [
 ];
 
 /** Her kategoride geçerli filtre anahtarları. */
-const BASE_CHIP_KEYS = ["q", "tur", "ilce", "min", "max", "dogrulanmis"];
-/** Yalnız emlakta anlamlı olanlar — vasıta listesinde "Otoparklı" çipi çıkmasın. */
-const REAL_ESTATE_CHIP_KEYS = ["oda", "minAlan", "maxAlan", "imar", "esyali", "otopark", "balkon", "site"];
+const BASE_CHIP_KEYS = ["q", "tur", "ilce", "min", "max"];
+/**
+ * Yalnız emlakta anlamlı olanlar — vasıta listesinde "Otoparklı" çipi çıkmasın.
+ *
+ * "dogrulanmis" de burada: rozetin tanımı tapu/ekspertiz doğrulaması ve seed
+ * yalnız emlak ilanlarına veriyor. Kategori-nötr bir filtre olarak sunulduğunda
+ * vasıta ve teknolojide GARANTİLİ sıfır sonuç veriyordu — kullanıcı kendi
+ * aramasının dar olduğunu sanıyor.
+ */
+const REAL_ESTATE_CHIP_KEYS = ["oda", "minAlan", "maxAlan", "imar", "esyali", "otopark", "balkon", "site", "dogrulanmis"];
 
 export default function ListingFilters() {
   const router = useRouter();
@@ -329,7 +336,8 @@ export default function ListingFilters() {
         </>
         )}
 
-        {/* Doğrulanmış — kategoriden bağımsız */}
+        {/* Doğrulanmış — yalnız emlakta veri var (tapu/ekspertiz doğrulaması) */}
+        {isRealEstate && (
         <div className={sectionCls}>
           <h3 id="verified-filter-title" className={headCls}>Güven</h3>
           <div role="group" aria-labelledby="verified-filter-title" className="flex flex-wrap gap-2">
@@ -343,6 +351,7 @@ export default function ListingFilters() {
             </button>
           </div>
         </div>
+        )}
 
         {/* Kategoriye özel filtreler — kayıttan üretilir (lib/categories.ts) */}
         {attributeFields.map((field) =>

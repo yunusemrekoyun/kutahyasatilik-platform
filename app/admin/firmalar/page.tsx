@@ -1,5 +1,5 @@
 import { Building2, ShieldCheck } from "lucide-react";
-import { ADMIN_LIST_CAP } from "@/components/admin/ListCap";
+import { ADMIN_LIST_CAP, ListCapNotice } from "@/components/admin/ListCap";
 import { prisma } from "@/lib/prisma";
 import { parseJsonArray } from "@/lib/format";
 import { PageHeader, StatusBadge, adminBtnGhost, adminBtnPrimary, adminCard, adminInput, adminLabel } from "@/components/admin/ui";
@@ -104,11 +104,12 @@ function AgencyFields({ agency }: { agency?: AgencyRow }) {
 }
 
 export default async function AdminAgenciesPage() {
-  const agencies = await getAgencies();
+  const [agencies, agenciesTotal] = await Promise.all([getAgencies(), prisma.agency.count()]);
 
   return (
     <div>
-      <PageHeader title="Firmalar" description={`${agencies.length} firma · kamu dizini ve portföy sahipliği`} />
+      <PageHeader title="Firmalar" description={`${agenciesTotal} firma · kamu dizini ve portföy sahipliği`} />
+      <ListCapNotice shown={agencies.length} total={agenciesTotal} />
 
       <div className="mb-6 flex gap-3 rounded-control border border-blue-200 bg-blue-50 p-4 text-sm text-blue-900">
         <ShieldCheck className="mt-0.5 h-5 w-5 shrink-0" />

@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ADMIN_LIST_CAP } from "@/components/admin/ListCap";
+import { ADMIN_LIST_CAP, ListCapNotice } from "@/components/admin/ListCap";
 import { prisma } from "@/lib/prisma";
 import { AGENT_STATUS_LABELS } from "@/lib/constants";
 import { approveAgent, suspendAgent, deleteAgent, updateAgentDirectoryProfile } from "../actions";
@@ -14,13 +14,14 @@ const statusBadge: Record<string, string> = {
 };
 
 export default async function AdminAgents() {
-  const [agents, agencies] = await Promise.all([
+  const [agents, agencies, agentsTotal] = await Promise.all([
     prisma.agent.findMany({
       orderBy: [{ status: "asc" }, { createdAt: "desc" }],
       include: { _count: { select: { listings: true } }, agencyRef: { select: { name: true } } },
       take: ADMIN_LIST_CAP,
     }),
     prisma.agency.findMany({ orderBy: { name: "asc" }, select: { id: true, name: true, status: true } }),
+    prisma.agent.count(),
   ]);
 
   return (
@@ -28,7 +29,7 @@ export default async function AdminAgents() {
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
           <h1 className="text-2xl font-bold tracking-tight text-ink">Emlakçılar</h1>
-          <p className="text-sm text-muted">{agents.length} danışman</p>
+          <p className="text-sm text-muted">{agentsTotal} danışman</p>
         </div>
         <Link href="/admin/basvurular" className="rounded-control bg-brand-50 px-3 py-2 text-sm font-semibold text-brand-700 hover:bg-brand-100">
           Yeni başvurular → Başvurular
@@ -38,6 +39,7 @@ export default async function AdminAgents() {
       {/* Tüm danışmanlar (onay bekleyenler de bu tabloda; yeni başvurular Başvurular sayfasında toplanır) */}
       <section>
         <h2 className="mb-3 text-sm font-bold uppercase tracking-wide text-muted">Danışmanlar</h2>
+        <ListCapNotice shown={agents.length} total={agentsTotal} />
         <div className="rounded-card overflow-hidden bg-paper border border-stone">
           <div className="overflow-x-auto">
             <table className="w-full text-sm">

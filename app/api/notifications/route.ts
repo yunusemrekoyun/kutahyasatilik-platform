@@ -14,8 +14,11 @@ export async function GET() {
       unreadCount(actor.role, actor.id),
     ]);
     return NextResponse.json({ ok: true, unread, items });
-  } catch {
-    // Tablo henüz yoksa (migration deploy edilmedi) boş dön — UI patlamasın.
-    return NextResponse.json({ ok: true, unread: 0, items: [] });
+  } catch (error) {
+    // Eskiden HER hata sessizce boş listeye çevriliyordu ("tablo henüz yoksa"
+    // gerekçesiyle). Migration çoktan uygulandı; artık gerçek bir arıza da
+    // "bildiriminiz yok" gibi görünüyor ve hiçbir yere düşmüyordu.
+    console.error("[notifications] listeleme başarısız", error);
+    return NextResponse.json({ ok: false, error: "Bildirimler yüklenemedi" }, { status: 500 });
   }
 }

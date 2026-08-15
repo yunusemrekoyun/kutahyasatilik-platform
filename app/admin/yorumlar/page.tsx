@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/prisma";
-import { ADMIN_LIST_CAP } from "@/components/admin/ListCap";
+import { ADMIN_LIST_CAP, ListCapNotice } from "@/components/admin/ListCap";
 import { saveTestimonial, deleteTestimonial } from "../actions";
 
 export const dynamic = "force-dynamic";
@@ -8,17 +8,21 @@ const inputCls =
   "w-full rounded-control border border-stone px-3 py-2 text-sm focus:border-brand-500 focus:ring-1 focus:ring-brand-500 outline-none";
 
 export default async function AdminTestimonials() {
-  const items = await prisma.testimonial.findMany({
-    orderBy: [{ sortOrder: "asc" }, { createdAt: "desc" }],
-    take: ADMIN_LIST_CAP,
-  });
+  const [items, itemsTotal] = await Promise.all([
+    prisma.testimonial.findMany({
+      orderBy: [{ sortOrder: "asc" }, { createdAt: "desc" }],
+      take: ADMIN_LIST_CAP,
+    }),
+    prisma.testimonial.count(),
+  ]);
 
   return (
     <div className="space-y-8">
       <div>
         <h1 className="text-2xl font-bold tracking-tight text-ink">Müşteri Yorumları</h1>
-        <p className="text-sm text-muted">Ana sayfada gösterilen yorumları buradan yönetin. {items.length} yorum.</p>
+        <p className="text-sm text-muted">Ana sayfada gösterilen yorumları buradan yönetin. {itemsTotal} yorum.</p>
       </div>
+      <ListCapNotice shown={items.length} total={itemsTotal} />
 
       {/* Yeni yorum ekle */}
       <form action={saveTestimonial} className="rounded-card bg-paper p-6 border border-stone">

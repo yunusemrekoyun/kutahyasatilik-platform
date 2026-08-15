@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ADMIN_LIST_CAP } from "@/components/admin/ListCap";
+import { ADMIN_LIST_CAP, ListCapNotice } from "@/components/admin/ListCap";
 import Image from "next/image";
 import { prisma } from "@/lib/prisma";
 import { formatDate } from "@/lib/format";
@@ -15,6 +15,7 @@ const FREQ_LABEL: Record<string, string> = {
 
 export default async function AdminPopups() {
   const popups = await prisma.popup.findMany({ orderBy: { updatedAt: "desc" }, take: ADMIN_LIST_CAP });
+  const popupsTotal = await prisma.popup.count();
   const activeCount = popups.filter((p) => p.active).length;
 
   return (
@@ -22,7 +23,7 @@ export default async function AdminPopups() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold tracking-tight text-ink">Pop-up Reklamlar</h1>
-          <p className="text-sm text-muted">{popups.length} reklam · {activeCount} aktif. Birden fazla aktifse en son güncellenen gösterilir.</p>
+          <p className="text-sm text-muted">{popupsTotal} reklam · {activeCount} aktif. Birden fazla aktifse en son güncellenen gösterilir.</p>
         </div>
         <Link href="/admin/reklamlar/yeni" className="rounded-control bg-brand-700 px-4 py-2 text-sm font-bold text-white hover:bg-brand-800">
           + Yeni Reklam
@@ -30,6 +31,7 @@ export default async function AdminPopups() {
       </div>
 
       <div className="mt-6 space-y-3">
+        <ListCapNotice shown={popups.length} total={popupsTotal} />
         {popups.length === 0 && (
           <p className="rounded-card bg-paper p-10 text-center text-muted/70 border border-stone">
             Henüz reklam yok. Kampanya/duyuru pop-up&apos;ı oluşturun.

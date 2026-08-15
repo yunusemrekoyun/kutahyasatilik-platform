@@ -26,10 +26,24 @@ export const SITE = {
 };
 
 // Numara verilmezse undefined döner → çağıran taraf butonu gizler (sahte link olmaz).
+/**
+ * wa.me bağlantısı — numara ULUSLARARASI biçime çevrilir.
+ *
+ * wa.me yalnız ülke koduyla başlayan, salt rakam bir numara kabul ediyor.
+ * Ham girdi olduğu gibi verildiğinde ("0532 111 22 33", "+90 532...") bağlantı
+ * sessizce açılmıyordu: danışman profillerindeki WhatsApp düğmesi, numarayı
+ * Türkiye'de alışıldığı gibi sıfırla yazan her kullanıcıda kırıktı.
+ */
 export function whatsappLink(number: string, message?: string): string | undefined {
   if (!number) return undefined;
+  let digits = number.replace(/\D/g, "");
+  if (!digits) return undefined;
+  if (digits.startsWith("00")) digits = digits.slice(2);
+  // 0532... -> 90532... ;  532... -> 90532...
+  if (digits.startsWith("0")) digits = `90${digits.slice(1)}`;
+  else if (digits.length === 10 && digits.startsWith("5")) digits = `90${digits}`;
   const text = message ? `?text=${encodeURIComponent(message)}` : "";
-  return `https://wa.me/${number}${text}`;
+  return `https://wa.me/${digits}${text}`;
 }
 
 export function telLink(phoneRaw: string): string | undefined {

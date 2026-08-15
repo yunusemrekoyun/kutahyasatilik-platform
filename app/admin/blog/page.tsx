@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ADMIN_LIST_CAP } from "@/components/admin/ListCap";
+import { ADMIN_LIST_CAP, ListCapNotice } from "@/components/admin/ListCap";
 import Image from "next/image";
 import { PlusCircle, Eye, ExternalLink, Pencil, Trash2 } from "lucide-react";
 import { prisma } from "@/lib/prisma";
@@ -11,14 +11,17 @@ export const dynamic = "force-dynamic";
 
 export default async function AdminBlog() {
   const posts = await prisma.post.findMany({ orderBy: { createdAt: "desc" }, take: ADMIN_LIST_CAP });
+  const postsTotal = await prisma.post.count();
 
   return (
     <div>
-      <PageHeader title="Blog" description={`${posts.length} yazı`}>
+      <PageHeader title="Blog" description={`${postsTotal} yazı`}>
         <Link href="/admin/blog/yeni" className={adminBtnPrimary}>
           <PlusCircle className="h-4 w-4" /> Yeni Yazı
         </Link>
       </PageHeader>
+
+      <ListCapNotice shown={posts.length} total={postsTotal} />
 
       <div className={`overflow-hidden ${adminCard}`}>
         <table className="w-full text-sm">

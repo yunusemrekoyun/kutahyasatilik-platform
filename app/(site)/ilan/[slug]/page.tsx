@@ -534,10 +534,14 @@ export default async function ListingPage({
               </div>
             </div>
 
-            {/* Danışman etiketi */}
+            {/* Satıcı etiketi — kurumsal ilan. Danışman emlak dışı bir ilan da
+                yayınlayabiliyor (emlakçı paneli kategori seçtiriyor), o yüzden
+                başlık ve unvan kategoriye bağlı. */}
             {listing.agent && (
               <div className="border border-stone bg-paper p-5">
-                <p className="text-xs font-medium uppercase tracking-wider text-muted/70">İlan Danışmanı</p>
+                <p className="text-xs font-medium uppercase tracking-wider text-muted/70">
+                  {isRealEstate ? "İlan Danışmanı" : "Satıcı"}
+                </p>
                 <div className="mt-3 flex items-center gap-3">
                   {agentLogo ? (
                     // eslint-disable-next-line @next/next/no-img-element
@@ -554,23 +558,25 @@ export default async function ListingPage({
                   <div className="min-w-0">
                     <p className="truncate font-bold text-ink">{listing.agent.name}</p>
                     <p className="truncate text-sm text-muted">
-                      {listing.agent.title || "Gayrimenkul Danışmanı"}
+                      {listing.agent.title || (isRealEstate ? "Gayrimenkul Danışmanı" : "Kurumsal satıcı")}
                       {listing.agent.agency ? ` · ${listing.agent.agency}` : ""}
                     </p>
                   </div>
                 </div>
                 {listing.agent.publicProfile && listing.agent.status === "approved" && listing.agent._count.listings > 0 && (
                   <Link href={`/danisman/${listing.agent.slug}`} className="mt-4 inline-flex items-center gap-1 text-sm font-semibold text-brand-700 hover:underline">
-                    Danışman profilini incele <ArrowRight className="h-4 w-4" />
+                    {isRealEstate ? "Danışman profilini incele" : "Satıcının diğer ilanları"} <ArrowRight className="h-4 w-4" />
                   </Link>
                 )}
                 {listing.agencyRef?.published && listing.agencyRef.status === "approved" && listing.agencyRef._count.listings > 0 && (
                   <Link href={`/emlak-ofisi/${listing.agencyRef.slug}`} className="mt-2 block text-sm font-semibold text-brand-700 hover:underline">
-                    {listing.agencyRef.name} portföyünü gör
+                    {listing.agencyRef.name} ilanlarını gör
                   </Link>
                 )}
                 <p className="mt-3 text-[11px] text-muted/70">
-                  Bu ilan, onaylı danışmanımız tarafından yayınlanmıştır. İletişim için yukarıdaki butonları kullanın.
+                  {isRealEstate
+                    ? "Bu ilan, onaylı danışmanımız tarafından yayınlanmıştır. İletişim için yukarıdaki butonları kullanın."
+                    : "Bu ilan, onaylı kurumsal satıcı tarafından yayınlanmıştır. İletişim için yukarıdaki butonları kullanın."}
                 </p>
               </div>
             )}

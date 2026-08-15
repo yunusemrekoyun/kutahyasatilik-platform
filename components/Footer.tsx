@@ -82,7 +82,23 @@ export default async function Footer() {
 
       <div className="border-t border-white/10">
         <div className="mx-auto flex max-w-7xl flex-col gap-4 px-5 py-6 text-xs text-brand-300 sm:px-6 lg:flex-row lg:items-center lg:justify-between">
-          <p>© {new Date().getFullYear()} {SITE.domain}. Tüm hakları saklıdır.</p>
+          <div>
+            <p>© {new Date().getFullYear()} {SITE.domain}. Tüm hakları saklıdır.</p>
+            {/* CC BY / BY-SA atıf ZORUNLU. Demo katalogdaki ilan görselleri
+                Wikimedia Commons'tan; kaynak belirtmeden kullanmak lisans ihlali. */}
+            <p className="mt-1 text-xs text-brand-300">
+              Örnek ilan görsellerinin bir kısmı{" "}
+              <a
+                href="https://commons.wikimedia.org/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="underline hover:text-white"
+              >
+                Wikimedia Commons
+              </a>{" "}
+              katkıcılarına aittir (CC BY / CC BY-SA).
+            </p>
+          </div>
           <div className="flex flex-wrap gap-x-5 gap-y-2">
             <Link href="/kvkk" className="hover:text-white">KVKK ve Gizlilik</Link>
             <Link href="/iletisim" className="hover:text-white">İletişim</Link>

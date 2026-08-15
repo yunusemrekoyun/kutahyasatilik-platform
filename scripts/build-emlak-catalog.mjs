@@ -21,6 +21,11 @@ const COVERS_APARTMENT = [
   ["Apartment buildings in Spain", [1, 2, 5, 6, 10]],
   ["Blocks of flats", [2, 3, 4, 5, 6, 7, 9, 10]],
   ["Housing estates in Poland", [7, 8, 9, 10]],
+  // Orta Avrupa panel blokları Türkiye'deki apartman stoğuna görsel olarak
+  // en yakın olanlar; 72 daire ilanı 37 kapağı paylaşmasın diye eklendi.
+  ["Apartment buildings in Hungary", [1, 4, 5, 6, 7, 8]],
+  ["Apartment buildings in Portugal", [1, 2, 3, 6, 8, 9]],
+  ["Apartment buildings in Slovakia", [1, 2, 3, 4, 5, 7, 9, 10]],
 ];
 
 const COVERS_VILLA = [
@@ -31,11 +36,13 @@ const COVERS_VILLA = [
   ["Swimming pools", [5, 6]],
 ];
 
+// İç mekân havuzu Commons'ta çok dar; her yeni kullanılabilir kare değerli.
 const INTERIORS = [
   ["Bedrooms", [1, 3]],
   ["Kitchens", [1, 6]],
   ["Living rooms", [7, 8]],
   ["Home offices", [3, 4]],
+  ["Apartment buildings in Portugal", [4, 5]], // modern yatak odası + manzaralı balkon
 ];
 
 const DAIRE_LABELS = [
@@ -77,7 +84,7 @@ function collect(picks, pull) {
 }
 
 process.stderr.write("İç mekânlar:\n");
-const interiors = collect(INTERIORS, 8);
+const interiors = collect(INTERIORS, 10);
 process.stderr.write("Daire kapakları:\n");
 const daireCovers = collect(COVERS_APARTMENT, 10);
 process.stderr.write("Villa kapakları:\n");

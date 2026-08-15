@@ -1,5 +1,5 @@
 import { ExternalLink, Landmark } from "lucide-react";
-import { ADMIN_LIST_CAP } from "@/components/admin/ListCap";
+import { ADMIN_LIST_CAP, ListCapNotice } from "@/components/admin/ListCap";
 import { prisma } from "@/lib/prisma";
 import { LOCAL_RESOURCE_TYPES } from "@/lib/localResources";
 import { PageHeader, StatusBadge, adminBtnGhost, adminBtnPrimary, adminCard, adminInput, adminLabel } from "@/components/admin/ui";
@@ -66,10 +66,11 @@ function ResourceFields({ resource }: { resource?: ResourceRow }) {
 }
 
 export default async function AdminLocalResourcesPage() {
-  const resources = await getResources();
+  const [resources, resourcesTotal] = await Promise.all([getResources(), prisma.localResource.count()]);
   return (
     <div>
       <PageHeader title="Resmî Yerel Araçlar" description="Belediye, imar, parsel ve e-Devlet bağlantılarını yönetin" />
+      <ListCapNotice shown={resources.length} total={resourcesTotal} />
 
       <div className="mb-6 rounded-control border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
         Yalnız doğruladığınız resmî kurum adreslerini ekleyin. Site, kullanıcıyı harici kuruma yönlendirdiğini açıkça belirtir ve hiçbir tapu ya da kimlik bilgisini kendi içinde toplamaz.

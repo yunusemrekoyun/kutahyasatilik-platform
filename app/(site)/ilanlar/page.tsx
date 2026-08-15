@@ -90,7 +90,7 @@ export default async function ListingsPage({
       parking: isRealEstate && !!get("otopark"),
       balcony: isRealEstate && !!get("balkon"),
       inSite: isRealEstate && !!get("site"),
-      verified: !!get("dogrulanmis"),
+      verified: isRealEstate && !!get("dogrulanmis"),
       agencySlug,
       agentSlug,
     }, page, PER_PAGE),

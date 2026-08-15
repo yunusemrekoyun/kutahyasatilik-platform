@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ADMIN_LIST_CAP } from "@/components/admin/ListCap";
+import { ADMIN_LIST_CAP, ListCapNotice } from "@/components/admin/ListCap";
 import { Check } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { formatDate } from "@/lib/format";
@@ -9,20 +9,23 @@ export const dynamic = "force-dynamic";
 
 export default async function AdminPages() {
   const pages = await prisma.page.findMany({ orderBy: [{ menuOrder: "asc" }, { createdAt: "desc" }], take: ADMIN_LIST_CAP });
+  const pagesTotal = await prisma.page.count();
 
   return (
     <div>
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold tracking-tight text-ink">Sayfalar</h1>
-          <p className="text-sm text-muted">{pages.length} içerik sayfası</p>
+          <p className="text-sm text-muted">{pagesTotal} içerik sayfası</p>
         </div>
         <Link href="/admin/sayfalar/yeni" className="rounded-control bg-brand-700 px-4 py-2 text-sm font-bold text-white hover:bg-brand-800">
           + Yeni Sayfa
         </Link>
       </div>
 
-      <div className="rounded-card mt-6 overflow-hidden bg-paper border border-stone">
+      <div className="mt-6"><ListCapNotice shown={pages.length} total={pagesTotal} /></div>
+
+      <div className="rounded-card overflow-hidden bg-paper border border-stone">
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-stone bg-canvas text-left text-xs text-muted">
