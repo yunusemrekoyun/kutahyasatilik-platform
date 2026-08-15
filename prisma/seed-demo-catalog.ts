@@ -19,12 +19,10 @@
 import "dotenv/config";
 import bcrypt from "bcryptjs";
 import { randomUUID } from "crypto";
-import { mkdir, writeFile, access } from "fs/promises";
-import path from "path";
 import { PrismaClient } from "../app/generated/prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
-import { getUploadDir } from "../lib/uploads";
 import { listingAmenityRows } from "../lib/listingAmenities";
+import { loadCatalog, prepareCatalogImages, type PreparedItem } from "./demo-images";
 
 const prisma = new PrismaClient({
   adapter: new PrismaPg({ connectionString: process.env.DATABASE_URL }),
@@ -49,6 +47,46 @@ const rng = makeRng(20260815);
 const pick = <T,>(list: readonly T[]): T => list[Math.floor(rng() * list.length)];
 const ri = (min: number, max: number) => Math.floor(rng() * (max - min + 1)) + min;
 const chance = (p: number) => rng() < p;
+
+// ---------------------------------------------------------------------------
+// Ürün havuzu — bir ilan = bir görsel seti
+//
+// Eskiden alt tür başına ortak bir havuz vardı ve her ilan oradan 3-5 rastgele
+// fotoğraf alıyordu; sonuç, TEK BİR İLANIN İÇİNDE farklı arabaların görünmesiydi.
+// Artık her ilan katalogdan bir "ürün" alıyor: fotoğrafların tamamı aynı modele
+// ait ve vasıta/teknolojide ilanın markası/modeli/yılı da o üründen geliyor.
+// ---------------------------------------------------------------------------
+let itemPools: Record<string, PreparedItem[]> = {};
+const itemCursor: Record<string, number> = {};
+
+/** Alt tür için sıradaki ürün; havuz biterse başa döner (setler tutarlı kalır). */
+function takeItem(subType: string): PreparedItem | null {
+  const pool = itemPools[subType];
+  if (!pool?.length) return null;
+  const index = itemCursor[subType] ?? 0;
+  itemCursor[subType] = index + 1;
+  return pool[index % pool.length];
+}
+
+/**
+ * Görseli olan alt türler.
+ *
+ * Boş dizi döndürebilir ve BU KASITLI: eskiden aday listesine geri düşüyordu,
+ * sonuçta katalogda emlak görseli yokken 6 tane fotoğrafsız daire ilanı
+ * üretiliyordu. Fotoğrafsız ilan vitrinden de elenir, listede de boş kart olur.
+ * Çağıran taraf boş dizi görürse o kategoriyi tamamen atlar.
+ */
+function withImages(candidates: string[]): string[] {
+  return candidates.filter((s) => itemPools[s]?.length);
+}
+
+/** Kategori -> alt tür ağırlıkları (tekrar eden değer = daha yüksek pay). */
+const CATEGORY_SUBTYPES: Record<string, string[]> = {
+  emlak: ["daire", "daire", "daire", "villa", "mustakil", "arsa", "tarla", "isyeri"],
+  vasita: ["otomobil", "otomobil", "otomobil", "motosiklet", "ticari", "traktor"],
+  teknoloji: ["telefon", "telefon", "bilgisayar", "bilgisayar", "tablet", "konsol", "kamera"],
+};
+const CATEGORY_WEIGHTS: Record<string, number> = { emlak: 0.5, vasita: 0.3, teknoloji: 0.2 };
 
 // Yıl hesapları sabit yazılırsa katalogda hiç güncel model olmaz ve gelecek
 // yıl fiyat/yaş hesabı sessizce kayar (kategori kaydı zaten dinamik).
@@ -113,78 +151,6 @@ const GENERIC_NEIGHBORHOODS = ["Cumhuriyet", "Fatih", "Yeni", "İstiklal", "Atat
 const neighborhoodFor = (d: string) => pick(NEIGHBORHOODS[d] ?? GENERIC_NEIGHBORHOODS);
 
 // ---------------------------------------------------------------------------
-// Görseller — kategoriye uygun, bir kez indirilip UPLOAD_DIR'e yazılır
-// ---------------------------------------------------------------------------
-const IMAGE_TOPICS: Record<string, string> = {
-  daire: "apartment,livingroom",
-  villa: "villa,house",
-  mustakil: "house,garden",
-  arsa: "land,meadow",
-  tarla: "farm,field",
-  isyeri: "office,shop",
-  otomobil: "car",
-  motosiklet: "motorcycle",
-  ticari: "van,truck",
-  traktor: "tractor",
-  telefon: "smartphone",
-  bilgisayar: "laptop",
-  tablet: "tablet,ipad",
-  konsol: "videogame,console",
-  kamera: "camera,photography",
-};
-// Emlakta 6 görsel yeter (daireler birbirine benzer, kullanıcı beklentisi de o).
-// Vasıta ve teknolojide görsel ÜRÜNÜN KENDİSİ: ~54 otomobil ilanının aynı 6
-// fotoğrafı paylaşması katalogun sahteliğini ilk bakışta ele veriyordu.
-const IMAGES_PER_TOPIC: Record<string, number> = {
-  daire: 8, villa: 6, mustakil: 6, arsa: 6, tarla: 6, isyeri: 6,
-  otomobil: 28, motosiklet: 16, ticari: 14, traktor: 12,
-  telefon: 20, bilgisayar: 18, tablet: 12, konsol: 12, kamera: 12,
-};
-const imagesFor = (topic: string) => IMAGES_PER_TOPIC[topic] ?? 6;
-
-/** Konu başına birkaç görsel indirir; dosya varsa atlar. Ağ yoksa sessizce boş döner. */
-async function ensureImages(): Promise<Record<string, string[]>> {
-  const dir = getUploadDir();
-  await mkdir(dir, { recursive: true });
-  const pools: Record<string, string[]> = {};
-
-  for (const [topic, keywords] of Object.entries(IMAGE_TOPICS)) {
-    pools[topic] = [];
-    for (let i = 0; i < imagesFor(topic); i++) {
-      const name = `demo-${topic}-${i}.jpg`;
-      const full = path.join(dir, name);
-      const url = `/uploads/${name}`;
-      try {
-        await access(full);
-        pools[topic].push(url); // zaten var
-        continue;
-      } catch {
-        /* indirilecek */
-      }
-      if (NO_IMAGES) continue;
-      try {
-        // loremflickr: anahtar kelimeye göre CC lisanslı fotoğraf. `lock` aynı
-        // görseli tekrar verir, yani katalog koşudan koşuya değişmez.
-        const res = await fetch(
-          `https://loremflickr.com/900/675/${encodeURIComponent(keywords)}?lock=${topic.length * 100 + i}`,
-          { redirect: "follow" },
-        );
-        if (!res.ok) throw new Error(String(res.status));
-        const buf = Buffer.from(await res.arrayBuffer());
-        if (buf.length < 2000) throw new Error("gorsel cok kucuk");
-        await writeFile(full, buf);
-        pools[topic].push(url);
-        process.stdout.write(".");
-      } catch {
-        process.stdout.write("x");
-      }
-    }
-  }
-  process.stdout.write("\n");
-  return pools;
-}
-
-// ---------------------------------------------------------------------------
 // Emlak
 // ---------------------------------------------------------------------------
 /** Alana uyan oda sayısı — sınırda iki seçenekten biri, hep aynı olmasın diye. */
@@ -235,7 +201,8 @@ function pickAmenities(subType: string): string[] {
 }
 
 function realEstate() {
-  const subType = pick(["daire", "daire", "daire", "villa", "mustakil", "arsa", "tarla", "isyeri"]);
+  const subType = pick(withImages(CATEGORY_SUBTYPES.emlak));
+  const item = takeItem(subType);
   const district = weightedDistrict();
   const neighborhood = neighborhoodFor(district);
   const isLand = subType === "arsa" || subType === "tarla";
@@ -272,6 +239,7 @@ function realEstate() {
 
   return {
     subType,
+    images: item?.urls ?? [],
     district,
     neighborhood,
     ...coordsFor(district),
@@ -332,11 +300,14 @@ const TRACTORS: [string, string[]][] = [
 const COLORS = ["Beyaz", "Siyah", "Gri", "Gümüş", "Kırmızı", "Lacivert", "Mavi"];
 
 function vehicle() {
-  const subType = pick(["otomobil", "otomobil", "otomobil", "motosiklet", "ticari", "traktor"]);
+  const subType = pick(withImages(CATEGORY_SUBTYPES.vasita));
+  const item = takeItem(subType);
   const table = subType === "otomobil" ? CARS : subType === "motosiklet" ? BIKES : subType === "ticari" ? VANS : TRACTORS;
-  const [marka, models] = pick(table);
-  const model = pick(models);
-  const yil = subType === "traktor" ? ri(CURRENT_YEAR - 30, CURRENT_YEAR) : ri(CURRENT_YEAR - 18, CURRENT_YEAR);
+  const [fallbackMarka, fallbackModels] = pick(table);
+  // Ürün varsa başlık FOTOĞRAFTAKİ araca göre yazılır; yoksa tabloya düşülür.
+  const marka = item?.marka ?? fallbackMarka;
+  const model = item?.model ?? pick(fallbackModels);
+  const yil = item?.yil ?? (subType === "traktor" ? ri(CURRENT_YEAR - 30, CURRENT_YEAR) : ri(CURRENT_YEAR - 18, CURRENT_YEAR));
   const age = Math.max(0, CURRENT_YEAR - yil);
   const kilometre = subType === "motosiklet" ? ri(500, 60_000) : subType === "traktor" ? ri(800, 12_000) : ri(15_000, 320_000);
 
@@ -354,7 +325,7 @@ function vehicle() {
   const yakit = subType === "motosiklet" ? "benzin" : subType === "traktor" ? "dizel" : pick(["benzin", "dizel", "dizel", "lpg", "hibrit"]);
   const vites = subType === "traktor" || subType === "motosiklet" ? "manuel" : pick(["manuel", "manuel", "otomatik"]);
   const hasar = pick(["hasarsiz", "hasarsiz", "boyali", "degisen", "hasar_kayitli"]);
-  const renk = pick(COLORS);
+  const renk = item?.renk ?? pick(COLORS);
   const district = weightedDistrict();
 
   // Başlık ile nitelik ÇELİŞMEMELİ: hasar kaydı olan bir araca "Değişensiz,
@@ -377,6 +348,7 @@ function vehicle() {
 
   return {
     subType,
+    images: item?.urls ?? [],
     district,
     // Taşınabilir bir üründe mahalle bilgisi hem gereksiz hem yanıltıcı
     // ("Mahalle: Cedit" + aynı ilanda "kargo yapılabilir").
@@ -426,17 +398,42 @@ const CAMERAS: TechTable = [
   ["Sony", [["ZV-E10 Body", 29_000], ["Alpha A6400 + 16-50 mm", 40_000]]],
 ];
 
+// Katalogdan gelen bir model için taban fiyat: alt tür tabanı × marka katsayısı.
+// Elle yazılmış model tablosu yalnız kataloğun kapsamadığı durumlarda devrede;
+// katalogdaki her modele fiyat yazmak sürdürülemez, marka kademesi yeterince
+// tutarlı bir sıralama veriyor.
+const TECH_SUBTYPE_BASE: Record<string, number> = {
+  telefon: 26_000, bilgisayar: 34_000, tablet: 17_000, konsol: 20_000, kamera: 30_000,
+};
+const TECH_BRAND_TIER: Record<string, number> = {
+  Apple: 1.55, Sony: 1.1, Samsung: 1.1, Fujifilm: 1.05, MSI: 1.05, Dell: 1.0,
+  Canon: 1.0, Nikon: 1.0, Microsoft: 0.95, Asus: 0.95, Lenovo: 0.9, HP: 0.85,
+  Acer: 0.8, Nintendo: 0.75, Huawei: 0.75, Oppo: 0.65, Xiaomi: 0.6, Poco: 0.55, Realme: 0.55,
+};
+
+function techBase(subType: string, marka: string, model: string): number {
+  const base = TECH_SUBTYPE_BASE[subType] ?? 20_000;
+  const tier = TECH_BRAND_TIER[marka] ?? 0.9;
+  // Üst segment adlandırmaları fiyatı belirgin biçimde yukarı çeker.
+  const premium = /\b(pro|ultra|max|plus)\b/i.test(model) ? 1.28 : 1;
+  return Math.round(base * tier * premium);
+}
+
 function tech() {
-  const subType = pick(["telefon", "telefon", "bilgisayar", "bilgisayar", "tablet", "konsol", "kamera"]);
+  const subType = pick(withImages(CATEGORY_SUBTYPES.teknoloji));
+  const item = takeItem(subType);
   const table =
     subType === "telefon" ? PHONES
     : subType === "bilgisayar" ? COMPUTERS
     : subType === "tablet" ? TABLETS
     : subType === "konsol" ? CONSOLES
     : CAMERAS;
-  const [marka, models] = pick(table);
-  const [model, base] = pick(models);
-  const durum = chance(0.28) ? "sifir" : "ikinci_el";
+  const [fallbackMarka, fallbackModels] = pick(table);
+  const [fallbackModel, fallbackBase] = pick(fallbackModels);
+  const marka = item?.marka ?? fallbackMarka;
+  const model = item?.model ?? fallbackModel;
+  const base = item?.marka ? techBase(subType, marka, model) : fallbackBase;
+  const durum = item?.durum ?? (chance(0.28) ? "sifir" : "ikinci_el");
   const garanti = durum === "sifir" ? "var" : chance(0.45) ? "var" : "yok";
   // Sıfırda bile ufak bir sapma: aynı modelin her ilanı kuruşu kuruşuna aynı
   // fiyattaysa liste üretilmiş gibi görünüyor.
@@ -466,6 +463,7 @@ function tech() {
 
   return {
     subType,
+    images: item?.urls ?? [],
     district,
     // Teknoloji ürünü taşınabilir: mahalle bilgisi yanıltıcı.
     neighborhood: null,
@@ -716,12 +714,24 @@ async function main() {
   // 360 GÖRSELSİZ ilan çıkıyor; vitrin sorgusu görselsiz ilanı elediği için de
   // hem web ana sayfası hem mobil ana ekran bomboş kalıyor. Bu sırayla, ağ
   // sorunu en kötü ihtimalle mevcut katalogu yerinde bırakır.
-  console.log("Görseller hazırlanıyor (indirilenler nokta, atlananlar x):");
-  const pools = await ensureImages();
-  const havePools = Object.values(pools).filter((p) => p.length).length;
-  console.log(`  ${havePools}/${Object.keys(IMAGE_TOPICS).length} konu için görsel havuzu hazır`);
-  if (RESET && !NO_IMAGES && havePools === 0) {
-    throw new Error("Hiçbir görsel havuzu hazırlanamadı; --reset ile devam edilmiyor (katalog görselsiz kalırdı).");
+  const catalog = await loadCatalog();
+  const catalogKeys = Object.keys(catalog).length;
+  if (!catalogKeys) {
+    throw new Error("prisma/demo-images.json bulunamadı veya boş; görsel kataloğu olmadan seed çalıştırılmıyor.");
+  }
+  console.log(`Görseller hazırlanıyor — ${catalogKeys} alt tür (inen nokta, atlanan x):`);
+  itemPools = await prepareCatalogImages(catalog, { skipDownload: NO_IMAGES });
+  const usable = Object.entries(itemPools).filter(([, v]) => v.length);
+  console.log(
+    `\n  ${usable.length}/${catalogKeys} alt tür hazır · ` +
+      `${usable.reduce((n, [, v]) => n + v.length, 0)} ürün · ` +
+      `${usable.reduce((n, [, v]) => n + v.reduce((m, i) => m + i.urls.length, 0), 0)} fotoğraf`,
+  );
+  for (const [key, list] of Object.entries(itemPools)) {
+    if (!list.length) console.log(`  UYARI: ${key} için kullanılabilir görsel yok, bu alt türde ilan üretilmeyecek`);
+  }
+  if (RESET && !usable.length) {
+    throw new Error("Hiçbir alt tür için görsel hazırlanamadı; --reset ile devam edilmiyor (katalog görselsiz kalırdı).");
   }
 
   if (RESET) {
@@ -733,13 +743,29 @@ async function main() {
 
   const owners = await ensureOwners();
 
-  // Dağılım: emlak yarısı, vasıta üçte biri, teknoloji kalanı.
-  const nEmlak = Math.round(TOTAL * 0.5);
-  const nVasita = Math.round(TOTAL * 0.3);
-  const nTeknoloji = TOTAL - nEmlak - nVasita;
+  // Dağılım hedefi emlak %50 / vasıta %30 / teknoloji %20, ancak yalnız GÖRSELİ
+  // OLAN kategoriler pay alır ve ağırlıklar aralarında yeniden normalize edilir.
+  // Katalog eksik geldiğinde 360 ilanın bir kısmının fotoğrafsız kalması yerine
+  // hepsi mevcut kategorilere dağılıyor.
+  const liveCategories = Object.keys(CATEGORY_SUBTYPES).filter(
+    (c) => withImages(CATEGORY_SUBTYPES[c]).length > 0,
+  );
+  if (!liveCategories.length) throw new Error("Hiçbir kategoride kullanılabilir görsel yok.");
+  const weightSum = liveCategories.reduce((n, c) => n + CATEGORY_WEIGHTS[c], 0);
+  const counts: Record<string, number> = {};
+  let assigned = 0;
+  liveCategories.forEach((c, i) => {
+    counts[c] = i === liveCategories.length - 1
+      ? TOTAL - assigned
+      : Math.round((TOTAL * CATEGORY_WEIGHTS[c]) / weightSum);
+    assigned += counts[c];
+  });
+  const skipped = Object.keys(CATEGORY_SUBTYPES).filter((c) => !liveCategories.includes(c));
+  if (skipped.length) console.log(`  Görseli olmadığı için atlanan kategori: ${skipped.join(", ")}`);
 
   const rows: {
-    category: string; subType: string; district: string; neighborhood: string | null;
+    category: string; subType: string; images: string[];
+    district: string; neighborhood: string | null;
     title: string; price: number; description: string;
     attributes: Record<string, string | number> | null;
     lat?: number; lng?: number; amenities?: string[];
@@ -748,22 +774,31 @@ async function main() {
     heating?: string | null; zoningStatus?: string | null; deedStatus?: string | null;
   }[] = [];
 
-  for (let i = 0; i < nEmlak; i++) rows.push({ category: "emlak", ...realEstate() });
-  for (let i = 0; i < nVasita; i++) rows.push({ category: "vasita", ...vehicle() });
-  for (let i = 0; i < nTeknoloji; i++) rows.push({ category: "teknoloji", ...tech() });
+  const GENERATORS: Record<string, () => Omit<(typeof rows)[number], "category">> = {
+    emlak: realEstate,
+    vasita: vehicle,
+    teknoloji: tech,
+  };
+  for (const category of liveCategories) {
+    for (let i = 0; i < counts[category]; i++) rows.push({ category, ...GENERATORS[category]() });
+  }
 
   let created = 0;
   const usedSlugs = new Set<string>();
+  const usedTitles = new Set<string>();
   for (const [index, row] of rows.entries()) {
+    // Aynı ürün birden çok ilana düşebilir (havuz ilan sayısından küçükse).
+    // Başlık birebir tekrar ederse liste kopyala-yapıştır gibi görünüyor;
+    // ilçe eki hem ayırt ediyor hem doğru bilgi.
+    if (usedTitles.has(row.title)) row.title = `${row.title} · ${row.district}`.slice(0, 140);
+    usedTitles.add(row.title);
+
     let slug = slugify(row.title);
     if (!slug || usedSlugs.has(slug)) slug = `${slug || "ilan"}-${index}`;
     usedSlugs.add(slug);
 
-    const pool = pools[row.subType] ?? [];
-    // 3-5 görsel; havuz küçükse döngüsel dağıtım (her ilan aynı sırayla başlamasın).
-    const imageCount = pool.length ? Math.min(pool.length, ri(3, 5)) : 0;
-    const offset = index % Math.max(pool.length, 1);
-    const images = Array.from({ length: imageCount }, (_, k) => pool[(offset + k) % pool.length]);
+    // Görseller ürünle birlikte geldi: ilanın tüm fotoğrafları aynı modele ait.
+    const images = row.images;
 
     // Vitrin oranı ~%12 — hepsi vitrinse vitrin anlamını yitirir.
     const featured = chance(0.12);
