@@ -1,0 +1,24 @@
+{
+  "key": "emlak-daire",
+  "photos": 4,
+  "items": [
+    { "term": "Modern living rooms", "label": "Modern oturma odası" },
+    { "term": "Living rooms in Germany", "label": "Ferah salon" },
+    { "term": "Modern kitchens", "label": "Modern mutfak" },
+    { "term": "White kitchens", "label": "Beyaz ankastre mutfak" },
+    { "term": "Kitchen islands", "label": "Adalı mutfak" },
+    { "term": "Modern bedrooms", "label": "Ebeveyn yatak odası" },
+    { "term": "Bedrooms in hotels", "label": "Ferah yatak odası" },
+    { "term": "Modern bathrooms", "label": "Yenilenmiş banyo" },
+    { "term": "Bathrooms in Germany", "label": "Banyo" },
+    { "term": "Apartment buildings in Germany", "label": "Apartman dış cephe" },
+    { "term": "Residential buildings in Turkey", "label": "Site dış cephe" },
+    { "term": "Balconies", "label": "Balkon" },
+    { "term": "Modern interior design", "label": "İç mekân" },
+    { "term": "Dining rooms", "label": "Yemek alanı" },
+    { "term": "Apartment interiors", "label": "Daire iç mekân" },
+    { "term": "Home offices", "label": "Çalışma odası" },
+    { "term": "Staircases in residential buildings", "label": "Bina girişi" },
+    { "term": "Parquet floors", "label": "Parke zemin" }
+  ]
+}

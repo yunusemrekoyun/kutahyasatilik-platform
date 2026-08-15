@@ -14,6 +14,7 @@
  * görünüyor.
  */
 import { mkdir, writeFile, access, readFile } from "fs/promises";
+import { createHash } from "crypto";
 import path from "path";
 import sharp from "sharp";
 import { getUploadDir } from "../lib/uploads";
@@ -25,6 +26,14 @@ const USER_AGENT =
 /** Kart ve galeri için 1200 piksel fazlasıyla yeterli; Commons aslı 3-5 MB olabiliyor. */
 const TARGET_WIDTH = 1200;
 const JPEG_QUALITY = 78;
+
+// Wikimedia ardışık hızlı isteklerde kısıtlıyor: aralıksız indirmede ilk ~50
+// dosyadan sonra tamamı başarısız oluyordu (aynı URL curl ile hâlâ 200 dönüyor,
+// yani kalıcı değil, hız kaynaklı). Nezaket gecikmesi + geri çekilmeli yeniden
+// deneme ile 700 dosyalık katalog sorunsuz iniyor.
+const THROTTLE_MS = 220;
+const MAX_ATTEMPTS = 4;
+const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 export type CatalogItem = {
   label: string;
@@ -61,23 +70,32 @@ async function download(url: string, dest: string): Promise<boolean> {
   } catch {
     /* indirilecek */
   }
-  try {
-    const res = await fetch(url, { headers: { "User-Agent": USER_AGENT }, redirect: "follow" });
-    if (!res.ok) return false;
-    const input = Buffer.from(await res.arrayBuffer());
-    if (input.length < 4000) return false;
-    // Küçültme burada: 700 görsel × 3 MB diskte 2 GB'a yakın yer kaplardı ve
-    // ilan sayfası her kartta orijinali indirmeye çalışırdı.
-    const output = await sharp(input)
-      .rotate() // EXIF yönünü uygula, sonra meta veriyi düşür
-      .resize({ width: TARGET_WIDTH, withoutEnlargement: true })
-      .jpeg({ quality: JPEG_QUALITY, mozjpeg: true })
-      .toBuffer();
-    await writeFile(dest, output);
-    return true;
-  } catch {
-    return false;
+  for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
+    try {
+      await sleep(THROTTLE_MS);
+      const res = await fetch(url, { headers: { "User-Agent": USER_AGENT }, redirect: "follow" });
+      if (!res.ok) {
+        // 429/503 geçici; 404 kalıcı, tekrar denemenin anlamı yok.
+        if (res.status === 404 || res.status === 403) return false;
+        await sleep(attempt * 1500);
+        continue;
+      }
+      const input = Buffer.from(await res.arrayBuffer());
+      if (input.length < 4000) return false;
+      // Küçültme burada: 700 görsel × 3 MB diskte 2 GB'a yakın yer kaplardı ve
+      // ilan sayfası her kartta orijinali indirmeye çalışırdı.
+      const output = await sharp(input)
+        .rotate() // EXIF yönünü uygula, sonra meta veriyi düşür
+        .resize({ width: TARGET_WIDTH, withoutEnlargement: true })
+        .jpeg({ quality: JPEG_QUALITY, mozjpeg: true })
+        .toBuffer();
+      await writeFile(dest, output);
+      return true;
+    } catch {
+      await sleep(attempt * 1500);
+    }
   }
+  return false;
 }
 
 /**
@@ -102,10 +120,15 @@ export async function prepareCatalogImages(
     const subType = catalogKey.includes("-") ? catalogKey.slice(catalogKey.indexOf("-") + 1) : catalogKey;
     prepared[subType] = prepared[subType] ?? [];
 
-    for (const [index, item] of items.entries()) {
+    for (const item of items) {
       const urls: string[] = [];
-      for (const [n, fileUrl] of item.files.entries()) {
-        const name = `demo-${subType}-${index}-${n}.jpg`;
+      for (const fileUrl of item.files) {
+        // Dosya adı KAYNAK URL'İN ÖZETİNDEN üretiliyor, katalogdaki sıradan
+        // değil. Sıra tabanlı adlandırmada katalogdan bir ürün ayıklandığında
+        // sonraki ürünlerin indeksi kayıyor ve diskteki mevcut dosyalar sessizce
+        // YANLIŞ ürüne bağlanıyordu — ayıklanan çöp görsel başka bir ilanda
+        // yeniden ortaya çıkıyordu.
+        const name = `demo-${subType}-${createHash("sha1").update(fileUrl).digest("hex").slice(0, 10)}.jpg`;
         const full = path.join(dir, name);
         if (options.skipDownload) {
           try {

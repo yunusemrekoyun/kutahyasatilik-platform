@@ -1,0 +1,14 @@
+{
+  "key": "emlak-villa",
+  "photos": 4,
+  "items": [
+    { "term": "Modern houses", "label": "Modern villa" },
+    { "term": "Detached houses in Germany", "label": "Müstakil villa" },
+    { "term": "Houses with swimming pools", "label": "Havuzlu villa" },
+    { "term": "Villas in Spain", "label": "Bahçeli villa" },
+    { "term": "Contemporary architecture houses", "label": "Çağdaş mimari villa" },
+    { "term": "Garden houses", "label": "Bahçe içinde villa" },
+    { "term": "Terraces of houses", "label": "Teraslı villa" },
+    { "term": "Wooden houses", "label": "Ahşap villa" }
+  ]
+}
