@@ -1,7 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
+import { Prisma } from "@/app/generated/prisma/client";
 import { findListingsForAlert } from "@/lib/matching";
+import { sanitizeAlertAttributes } from "@/lib/categories";
 import { checkRate } from "@/lib/rateLimit";
 import { trPhoneSchema } from "@/lib/validation";
 import { notifyAdmins } from "@/lib/notify";
@@ -15,6 +17,11 @@ const schema = z.object({
   name: z.string().min(2, "Ad soyad gerekli").max(120),
   phone: trPhoneSchema,
   email: z.string().email().optional().or(z.literal("")),
+  // Kayıtlı arama her kategoride; kategori gelmezse emlak (geriye uyumluluk).
+  category: z.enum(["emlak", "vasita", "teknoloji"]).optional(),
+  // Kategoriye özel kriterler: ilan filtreleriyle AYNI sözleşme
+  // (yil_min, kilometre_max, yakit ...). Kayıtta olmayan anahtarlar elenir.
+  attributes: z.record(z.string(), z.string().max(40)).optional(),
   propertyType: z.string().max(40).optional().or(z.literal("")),
   listingType: z.string().max(20).optional().or(z.literal("")),
   district: z.string().max(60).optional().or(z.literal("")),
@@ -46,14 +53,21 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ ok: false, error: "Geçersiz istek" }, { status: 400 });
   }
 
+  const category = data.category ?? "emlak";
+  // Nitelikler kayıttan süzülüyor: istemciden gelen serbest anahtar sorguya
+  // sızmasın ve saklanan talep gerçekten eşleşebilir olsun.
+  const attributes = sanitizeAlertAttributes(category, data.attributes);
   const criteria = {
+    category,
     propertyType: data.propertyType || null,
     listingType: data.listingType || "sale",
     district: data.district || null,
     minPrice: data.minPrice || null,
     maxPrice: data.maxPrice || null,
-    minArea: data.minArea || null,
-    rooms: data.rooms || null,
+    // Oda ve alan yalnız emlakta anlamlı.
+    minArea: category === "emlak" ? data.minArea || null : null,
+    rooms: category === "emlak" ? data.rooms || null : null,
+    attributes: Object.keys(attributes).length ? attributes : null,
   };
 
   const session = await resolveApiSession(req);
@@ -68,6 +82,9 @@ export async function POST(req: NextRequest) {
       status: "active",
       userId,
       ...criteria,
+      // Prisma JSON alanında SQL NULL için DbNull gerekiyor; düz null tip
+      // hatası veriyor. criteria eşleştirmeye düz haliyle gidiyor.
+      attributes: criteria.attributes ?? Prisma.DbNull,
     },
   });
 

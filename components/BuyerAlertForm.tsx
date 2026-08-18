@@ -5,13 +5,22 @@ import { useSearchParams } from "next/navigation";
 import { CheckCircle2, Lock } from "lucide-react";
 import { useUtm } from "@/lib/useUtm";
 import { isValidTrPhone, TR_PHONE_ERROR } from "@/lib/validation";
-import { DISTRICTS, PROPERTY_TYPES } from "@/lib/constants";
+import { DISTRICTS } from "@/lib/constants";
+import { CATEGORY_LIST, getCategory, getFilterableFields, isCategoryKey } from "@/lib/categories";
 import ListingCard, { type ListingCardData } from "./ListingCard";
 import ThousandsInput from "@/components/ThousandsInput";
 
 export default function BuyerAlertForm() {
   const utm = useUtm();
-  const sp = useSearchParams(); // /ilanlar filtresinden taşınan kriterler (propertyType, district, ...)
+  const sp = useSearchParams(); // /ilanlar filtresinden taşınan kriterler (category, propertyType, district, ...)
+  // Kategori artık kriterin parçası: kayıtlı arama emlak, vasıta ve teknolojide
+  // geçerli. Gelmezse emlak — hem eski bağlantılar hem doğrudan giriş için.
+  const [category, setCategory] = useState<string>(
+    isCategoryKey(sp.get("category")) ? (sp.get("category") as string) : "emlak"
+  );
+  const def = getCategory(category);
+  const isRealEstate = category === "emlak";
+  const attributeFields = getFilterableFields(category);
   const prefilled = ["propertyType", "district", "minPrice", "maxPrice", "minArea", "rooms"].some((k) => sp.get(k));
   const [status, setStatus] = useState<"idle" | "loading" | "ok" | "error">("idle");
   const [error, setError] = useState("");
@@ -28,16 +37,28 @@ export default function BuyerAlertForm() {
       return;
     }
     try {
+      // Kategoriye özel kriterler ilan filtreleriyle aynı anahtarlarla gidiyor
+      // (yil_min, kilometre_max, yakit ...); sunucu kayda göre süzüyor.
+      const attributes: Record<string, string> = {};
+      for (const field of attributeFields) {
+        for (const key of field.type === "select" ? [field.key] : [`${field.key}_min`, `${field.key}_max`]) {
+          const value = String(fd.get(key) ?? "").trim();
+          if (value) attributes[key] = value;
+        }
+      }
       const payload = {
         name: fd.get("name"),
         phone: fd.get("phone"),
         email: fd.get("email"),
+        category,
         propertyType: fd.get("propertyType"),
         district: fd.get("district"),
         minPrice: fd.get("minPrice") || undefined,
         maxPrice: fd.get("maxPrice") || undefined,
-        minArea: fd.get("minArea") || undefined,
-        rooms: fd.get("rooms"),
+        // Oda ve m² yalnız emlakta gerçek kolon.
+        minArea: isRealEstate ? fd.get("minArea") || undefined : undefined,
+        rooms: isRealEstate ? fd.get("rooms") : undefined,
+        attributes: Object.keys(attributes).length ? attributes : undefined,
         note: fd.get("note"),
         ...utm,
       };
@@ -111,11 +132,25 @@ export default function BuyerAlertForm() {
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div>
-          <label htmlFor="ba-type" className={labelCls}>Mülk Türü</label>
+          <label htmlFor="ba-category" className={labelCls}>Kategori</label>
+          <select
+            id="ba-category"
+            name="category"
+            value={category}
+            onChange={(e) => setCategory(e.target.value)}
+            className={inputCls}
+          >
+            {CATEGORY_LIST.map((c) => (
+              <option key={c.key} value={c.key}>{c.label}</option>
+            ))}
+          </select>
+        </div>
+        <div>
+          <label htmlFor="ba-type" className={labelCls}>Tür</label>
           <select id="ba-type" name="propertyType" defaultValue={sp.get("propertyType") || ""} className={inputCls}>
             <option value="">Farketmez</option>
-            {PROPERTY_TYPES.map((p) => (
-              <option key={p.value} value={p.value}>{p.label}</option>
+            {def.subTypes.map((s) => (
+              <option key={s.value} value={s.value}>{s.label}</option>
             ))}
           </select>
         </div>
@@ -139,17 +174,66 @@ export default function BuyerAlertForm() {
           <label htmlFor="ba-max" className={labelCls}>Maks. Fiyat</label>
           <ThousandsInput id="ba-max" name="maxPrice" placeholder="₺" defaultValue={sp.get("maxPrice") || ""} className={inputCls} />
         </div>
-        <div>
-          <label htmlFor="ba-area" className={labelCls}>Min. m²</label>
-          <input id="ba-area" name="minArea" type="number" min={0} inputMode="numeric" placeholder="m²" defaultValue={sp.get("minArea") || ""} className={inputCls} />
-        </div>
+        {isRealEstate && (
+          <div>
+            <label htmlFor="ba-area" className={labelCls}>Min. m²</label>
+            <input id="ba-area" name="minArea" type="number" min={0} inputMode="numeric" placeholder="m²" defaultValue={sp.get("minArea") || ""} className={inputCls} />
+          </div>
+        )}
       </div>
 
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-        <div>
-          <label htmlFor="ba-rooms" className={labelCls}>Oda Sayısı</label>
-          <input id="ba-rooms" name="rooms" placeholder="Örn. 3+1 (opsiyonel)" defaultValue={sp.get("rooms") || ""} className={inputCls} />
+      {/* Kategoriye özel kriterler kayıttan üretiliyor: vasıtada yıl/km/yakıt,
+          teknolojide durum. Emlakta kayıt boş, bu blok hiç çizilmiyor. */}
+      {attributeFields.length > 0 && (
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          {attributeFields.map((field) =>
+            field.type === "select" ? (
+              <div key={field.key}>
+                <label htmlFor={`ba-${field.key}`} className={labelCls}>{field.label}</label>
+                <select id={`ba-${field.key}`} name={field.key} defaultValue={sp.get(field.key) || ""} className={inputCls}>
+                  <option value="">Farketmez</option>
+                  {field.options?.map((o) => (
+                    <option key={o.value} value={o.value}>{o.label}</option>
+                  ))}
+                </select>
+              </div>
+            ) : (
+              <div key={field.key}>
+                <span className={labelCls}>{field.label}{field.unit ? ` (${field.unit})` : ""}</span>
+                <div className="flex items-center gap-2">
+                  <input
+                    aria-label={`${field.label} en az`}
+                    name={`${field.key}_min`}
+                    type="number"
+                    inputMode="numeric"
+                    placeholder="En az"
+                    defaultValue={sp.get(`${field.key}_min`) || ""}
+                    className={inputCls}
+                  />
+                  <span aria-hidden="true" className="text-muted/70">–</span>
+                  <input
+                    aria-label={`${field.label} en çok`}
+                    name={`${field.key}_max`}
+                    type="number"
+                    inputMode="numeric"
+                    placeholder="En çok"
+                    defaultValue={sp.get(`${field.key}_max`) || ""}
+                    className={inputCls}
+                  />
+                </div>
+              </div>
+            )
+          )}
         </div>
+      )}
+
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        {isRealEstate && (
+          <div>
+            <label htmlFor="ba-rooms" className={labelCls}>Oda Sayısı</label>
+            <input id="ba-rooms" name="rooms" placeholder="Örn. 3+1 (opsiyonel)" defaultValue={sp.get("rooms") || ""} className={inputCls} />
+          </div>
+        )}
         <div>
           <label htmlFor="ba-note" className={labelCls}>Eklemek istedikleriniz</label>
           <input id="ba-note" name="note" placeholder="Mahalle, özellik vb." className={inputCls} />

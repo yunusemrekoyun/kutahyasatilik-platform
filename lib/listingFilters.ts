@@ -125,7 +125,7 @@ export function buildWhere(filter: ListingFilter) {
  * Kayıtta tanımlı olmayan veya seçenek listesinde bulunmayan değerler atılır,
  * böylece istemciden gelen serbest metin sorguya sızmaz.
  */
-function buildAttributeConditions(filter: ListingFilter): Record<string, unknown>[] {
+export function buildAttributeConditions(filter: ListingFilter): Record<string, unknown>[] {
   if (!filter.category || !filter.attrs) return [];
   const attrs = filter.attrs;
   const out: Record<string, unknown>[] = [];

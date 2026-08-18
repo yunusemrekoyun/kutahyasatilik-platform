@@ -576,9 +576,11 @@ export async function approveListing(formData: FormData) {
     data: { moderationStatus: "approved", note: null, moderationDiff: Prisma.DbNull },
     select: {
       slug: true, agentId: true, userId: true, title: true, status: true,
-      // category: notifyMatchingAlerts emlak dışı ilanları elemek için okur —
-      // seçilmezse vasıta ilanı emlak sayılıp emlak taleplerine bildirim gider.
-      category: true,
+      // category: eşleştirme kategoriye göre daralıyor — seçilmezse vasıta
+      // ilanı emlak sayılıp emlak taleplerine bildirim gider.
+      // attributes: kategoriye özel kriterler (yıl, km) buradan karşılaştırılıyor;
+      // seçilmezse "en fazla 100.000 km" diyen talebe her araç eşleşir.
+      category: true, attributes: true,
       propertyType: true, listingType: true, district: true, price: true, areaGross: true, rooms: true,
     },
   });

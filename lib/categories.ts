@@ -352,3 +352,38 @@ export function sortableAttributeColumns(
   };
   return { attrYear: read("yil"), attrKm: read("kilometre") };
 }
+
+/**
+ * Kayıtlı arama niteliklerini kayda göre süzer.
+ *
+ * İstemciden gelen serbest anahtarlar saklanmamalı: hem sorguya sızma riski
+ * hem de kayda ait olmayan bir kriterin sessizce hiçbir zaman eşleşmemesi
+ * ("en fazla 3 bacak" gibi) kullanıcıya karşılıksız bir vaat olur.
+ *
+ * Kabul edilen biçim ilan filtreleriyle aynı: seçim alanları `yakit`,
+ * sayı alanları `yil_min` / `yil_max`.
+ */
+export function sanitizeAlertAttributes(
+  category: unknown,
+  input: Record<string, string> | undefined,
+): Record<string, string> {
+  if (!input) return {};
+  const out: Record<string, string> = {};
+  for (const field of getFilterableFields(category)) {
+    if (field.type === "select") {
+      const value = input[field.key]?.trim();
+      if (value && field.options?.some((o) => o.value === value)) out[field.key] = value;
+      continue;
+    }
+    for (const suffix of ["_min", "_max"] as const) {
+      const raw = input[`${field.key}${suffix}`]?.trim();
+      if (!raw) continue;
+      const n = Number(raw);
+      if (!Number.isFinite(n)) continue;
+      if (field.min !== undefined && n < field.min) continue;
+      if (field.max !== undefined && n > field.max) continue;
+      out[`${field.key}${suffix}`] = String(Math.trunc(n));
+    }
+  }
+  return out;
+}

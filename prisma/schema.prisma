@@ -301,6 +301,16 @@ model BuyerAlert {
   phone String
   email String?
 
+  // Kayıtlı arama artık HER KATEGORİDE. Kolon eklenmeden önce kapsam kod
+  // tarafında "emlak" olarak sabitlenmişti; vasıta ya da teknoloji arayan
+  // kullanıcıya asla eşleşme gitmiyordu.
+  //
+  // propertyType kategori içi alt tür (emlakta daire, vasıtada otomobil),
+  // attributes ise kategoriye özel sayısal/seçim kriterleri (yil_min,
+  // kilometre_max, yakit...) — ilanlardaki Listing.attributes ile aynı sözleşme.
+  category   String @default("emlak")
+  attributes Json?
+
   propertyType String? // daire | arsa | villa | tarla | isyeri | mustakil
   listingType  String? @default("sale")
   district     String?
@@ -325,6 +335,9 @@ model BuyerAlert {
   @@index([status])
   @@index([district])
   @@index([userId])
+  // Yeni ilan onaylandığında "bu ilana uyan talepler" sorgusu önce kategoriyle
+  // daralıyor; durum+kategori birlikte indeksleniyor.
+  @@index([status, category])
 }
 
 model ListingImage {

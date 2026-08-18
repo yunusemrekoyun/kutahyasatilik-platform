@@ -206,13 +206,13 @@ export default async function ListingsPage({
               </span>
               <h2 className="mt-3 text-base font-bold text-ink">Bu kriterlere uygun ilan bulunamadı</h2>
               <p className="mx-auto mt-1.5 max-w-md text-sm text-muted">
-                {isRealEstate
-                  ? "Filtreleri biraz gevşetin ya da talebinizi bırakın; uygun ilan geldiğinde haber verelim."
-                  : "Filtreleri biraz gevşetin ya da başka bir alt tür deneyin."}
+                Filtreleri biraz gevşetin ya da talebinizi bırakın; uygun ilan geldiğinde haber verelim.
               </p>
-              {/* Talep bırakma yalnız emlakta: eşleştirme emlak kriterleriyle çalışıyor. */}
-              {isRealEstate && (
-                <Link href="/alici-talebi" className="mt-4 inline-flex items-center justify-center rounded-control bg-brand-700 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-brand-800">
+              {category && (
+                <Link
+                  href={`/alici-talebi?category=${category.key}`}
+                  className="mt-4 inline-flex items-center justify-center rounded-control bg-brand-700 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-brand-800"
+                >
                   Talep Bırak
                 </Link>
               )}

@@ -22,8 +22,8 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
       data: { moderationStatus: "approved", note: null },
       select: {
         slug: true, agentId: true, userId: true, title: true, status: true,
-        // category: notifyMatchingAlerts emlak dışı ilanları elemek için okur.
-        category: true,
+        // category + attributes: eşleştirme ikisini de okuyor (bkz. lib/matching.ts).
+        category: true, attributes: true,
         propertyType: true, listingType: true, district: true, price: true, areaGross: true, rooms: true,
       },
     });

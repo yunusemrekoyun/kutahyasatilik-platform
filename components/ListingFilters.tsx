@@ -112,14 +112,26 @@ export default function ListingFilters() {
   // yeniden girmesin; giriş yapmışsa talep otomatik hesabına bağlanır.
   function saveSearch() {
     const map: [string, string][] = [
-      ["tur", "propertyType"], ["ilce", "district"],
+      ["kategori", "category"], ["tur", "propertyType"], ["ilce", "district"],
       ["min", "minPrice"], ["max", "maxPrice"],
-      ["minAlan", "minArea"], ["oda", "rooms"],
     ];
+    // Oda ve alan yalnız emlakta gerçek kolon; diğer kategorilerde taşınırsa
+    // kaydedilen arama hiçbir zaman eşleşmez.
+    if (isRealEstate) map.push(["minAlan", "minArea"], ["oda", "rooms"]);
+
     const p = new URLSearchParams();
     for (const [from, to] of map) {
       const v = sp.get(from);
       if (v) p.set(to, v);
+    }
+    // Kategoriye özel nitelikler ekrandaki filtrelerden olduğu gibi taşınıyor:
+    // "2015 üstü, en fazla 100.000 km dizel" araması kayıtlı aramaya birebir
+    // dönüşsün diye. Anahtar adları iki tarafta aynı (yil_min, yakit ...).
+    for (const field of attributeFields) {
+      for (const key of field.type === "select" ? [field.key] : [`${field.key}_min`, `${field.key}_max`]) {
+        const v = sp.get(key);
+        if (v) p.set(key, v);
+      }
     }
     const qs = p.toString();
     router.push(`/alici-talebi${qs ? `?${qs}` : ""}`);
@@ -427,10 +439,9 @@ export default function ListingFilters() {
         )}
       </div>
 
-      {/* Bu aramayı kaydet → alıcı talebi (kriterler taşınır, uygun ilan gelince haber).
-          YALNIZ emlakta: eşleştirme (lib/matching.ts) emlak kriterleri üzerinden
-          çalışıyor, vasıta alıcısına asla bildirim gelmez — karşılıksız vaat. */}
-      {isRealEstate && (
+      {/* Bu aramayı kaydet → alıcı talebi. Artık HER KATEGORİDE: eşleştirme
+          motoru kategoriyi ve kategoriye özel nitelikleri okuyor. */}
+      {category && (
         <button
           type="button"
           onClick={saveSearch}
