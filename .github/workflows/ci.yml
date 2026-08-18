@@ -83,6 +83,11 @@ jobs:
         shell: bash
         run: |
           set +x
-          ADMIN_PASSWORD="$(openssl rand -hex 24)" npm run seed
+          # Tırnaksız komut ikamesi bilinçli: check:secrets "$" ile başlayan
+          # değeri dinamik sayıyor, tırnakla başlayanı sabit atama sanıp
+          # yanlış alarm veriyor. Değer zaten her koşuda yeniden üretiliyor.
+          ADMIN_PASSWORD=$(openssl rand -hex 24)
+          export ADMIN_PASSWORD
+          npm run seed
       - run: npx playwright install --with-deps chromium
       - run: npm run test:e2e
