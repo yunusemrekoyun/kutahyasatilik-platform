@@ -16,5 +16,14 @@ import path from "node:path";
  * siliniyor, böylece Next'in artımlı derleme önbelleği bozulmuyor.
  */
 const target = path.join(process.cwd(), ".next", "standalone");
-await rm(target, { recursive: true, force: true });
+
+// maxRetries/retryDelay ŞART: bu dizin systemd servisinin çalışma dizini ve
+// silme sırasında sunucu süreci hâlâ içinden dosya okuyor. Yarış hâlinde
+// fs.rm derin yollarda ENOTEMPTY atıyor (Next 16'nın ".segments/!KHNpdGUp"
+// gibi özel karakterli önbellek klasörlerinde görüldü) ve build yarıda
+// kalıyor: standalone kısmen silinmiş oluyor, sunucu 200 dönmeye devam ederken
+// /_next/static chunk'ları 500 veriyor — yani sayfa çiziliyor ama istemci
+// tarafı ölü. Betiğin varlık sebebi zaten tam olarak bu sessiz arızayı
+// önlemekti; kendisinin ona yol açmaması gerekiyor.
+await rm(target, { recursive: true, force: true, maxRetries: 20, retryDelay: 250 });
 console.log("Önceki standalone çıktısı temizlendi.");
