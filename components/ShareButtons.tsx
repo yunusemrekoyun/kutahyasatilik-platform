@@ -1,10 +1,13 @@
 "use client";
 
+import { useState } from "react";
 import { MessageCircle, Link2, Share2 } from "lucide-react";
 import { useStore } from "@/components/store/StoreProvider";
+import ShareSheet from "@/components/ShareSheet";
 
-export default function ShareButtons({ title }: { title: string }) {
+export default function ShareButtons({ title, slug }: { title: string; slug?: string }) {
   const { toast } = useStore();
+  const [sheetOpen, setSheetOpen] = useState(false);
 
   // URL'i render'da değil, tıklama anında okuyoruz → hydration mismatch yok
   function shareWhatsApp() {
@@ -21,7 +24,13 @@ export default function ShareButtons({ title }: { title: string }) {
     }
   }
 
+  // Slug varsa kart önizlemeli paylaşım sayfası açılıyor; yoksa (eski çağrı
+  // yerleri) eski davranış korunuyor.
   async function nativeShare() {
+    if (slug) {
+      setSheetOpen(true);
+      return;
+    }
     if (navigator.share) {
       try {
         await navigator.share({ title, url: window.location.href });
@@ -43,6 +52,7 @@ export default function ShareButtons({ title }: { title: string }) {
       </button>
       <button type="button" onClick={copy} aria-label="Bağlantıyı kopyala" title="Bağlantıyı kopyala" className={btn}><Link2 aria-hidden="true" className="h-4 w-4" /></button>
       <button type="button" onClick={nativeShare} aria-label="Paylaş" title="Paylaş" className={btn}><Share2 aria-hidden="true" className="h-4 w-4" /></button>
+      {slug && <ShareSheet slug={slug} title={title} open={sheetOpen} onClose={() => setSheetOpen(false)} />}
     </div>
   );
 }

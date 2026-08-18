@@ -533,7 +533,7 @@ export default async function ListingPage({
                 <ListingDetailActions listing={snapshot} />
               </div>
               <div className="mt-4 flex items-center justify-between border-t border-stone pt-4">
-                <ShareButtons title={listing.title} />
+                <ShareButtons title={listing.title} slug={listing.slug} />
               </div>
             </div>
 
