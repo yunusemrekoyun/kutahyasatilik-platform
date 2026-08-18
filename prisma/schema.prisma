@@ -202,6 +202,15 @@ model Listing {
   // Emlak bu alani KULLANMAZ - kendi kolonlari var.
   attributes Json?
 
+  // Sıralama/aralık filtresi için attributes'tan TÜRETİLMİŞ kopyalar.
+  //
+  // Prisma JSON alanına göre orderBy desteklemiyor; "en yeni model" ve "en düşük
+  // km" sıralaması bu kolonlar olmadan mümkün değil. Yazma yollarında
+  // attributes ile birlikte doldurulur (tek doğruluk kaynağı yine attributes).
+  // Yalnız vasıtada dolu; diğer kategorilerde null.
+  attrYear Int?
+  attrKm   Int?
+
   // SEO
   metaTitle       String?
   metaDescription String?
@@ -235,6 +244,10 @@ model Listing {
   // sıralama anahtarları ise derin sayfalarda 17ms'yi 2ms'ye indiriyor.
   // Bu indeks eski [featured, createdAt] indeksinin yerini alır.
   @@index([moderationStatus, featured(sort: Desc), createdAt(sort: Desc)])
+  // Vasıta sıralamaları kategoriyle birlikte geliyor: "kategori=vasita &
+  // sira=km_asc" tek indeksten karşılansın.
+  @@index([category, attrYear])
+  @@index([category, attrKm])
   @@index([price])
   @@index([userId])
   @@index([category])

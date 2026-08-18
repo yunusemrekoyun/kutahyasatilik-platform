@@ -5,7 +5,7 @@ import { deleteVideo } from "@/lib/videoStorage";
 import { notifyAdmins } from "@/lib/notify";
 import { listingAmenityRows } from "@/lib/listingAmenities";
 import { listingImportKey } from "@/lib/listingImport";
-import { getCategory, isCategoryKey, parseAttributes, type AttributeValues, type CategoryKey } from "@/lib/categories";
+import { getCategory, isCategoryKey, parseAttributes, sortableAttributeColumns, type AttributeValues, type CategoryKey } from "@/lib/categories";
 import { Prisma } from "@/app/generated/prisma/client";
 
 // Emlakçı ilan oluştur/güncelle — web app/emlakci/panel/actions.ts submitAgentListing'in
@@ -193,7 +193,16 @@ export async function upsertAgentListing(
     ...(!id || has(body, "description") ? { description: String(body.description ?? "").trim() } : {}),
     ...(!id || has(body, "category") ? { category: categoryKey } : {}),
     ...(!id || has(body, "propertyType") ? { propertyType: ptype } : {}),
-    ...(touchesAttributes ? { attributes: isRealEstate ? Prisma.DbNull : attributes } : {}),
+    ...(touchesAttributes
+      ? {
+          attributes: isRealEstate ? Prisma.DbNull : attributes,
+          // Sıralanabilir kopyalar attributes ile BİRLİKTE yazılmalı; ayrı
+          // kalırsa yeni ilan "en yeni model" sıralamasında hiç görünmez.
+          ...(isRealEstate
+            ? { attrYear: null, attrKm: null }
+            : sortableAttributeColumns(attributes)),
+        }
+      : {}),
     ...(!id || has(body, "listingType") ? { listingType: String(body.listingType || "sale") } : {}),
     ...(!id || has(body, "status") ? { status } : {}),
     ...(!id || has(body, "price") ? { price } : {}),

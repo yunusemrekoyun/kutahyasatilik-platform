@@ -2,6 +2,7 @@
 
 import { createContext, useContext, useEffect, useState, useCallback, useRef } from "react";
 import type { ListingCardData } from "@/components/ListingCard";
+import { CATEGORY_LABELS } from "@/lib/categories";
 
 export type ListingSnapshot = ListingCardData & {
   floor?: string | null;
@@ -215,6 +216,16 @@ export default function StoreProvider({ children }: { children: React.ReactNode 
       }
       if (prev.length >= MAX_COMPARE) {
         toast(`En fazla ${MAX_COMPARE} ilan karşılaştırılabilir`, "error");
+        return prev;
+      }
+      // Karşılaştırma TEK KATEGORİ içinde anlamlı: bir daireyle bir otomobil
+      // yan yana konduğunda tablo satırlarının çoğu ("Oda", "Brüt m²", "Kat")
+      // otomobil sütununda boş kalıyordu. Kullanıcıyı yarısı boş bir tabloya
+      // götürmek yerine eklemeyi engelleyip nedenini söylüyoruz.
+      const current = prev[0]?.category ?? "emlak";
+      const incoming = l.category ?? "emlak";
+      if (prev.length && current !== incoming) {
+        toast(`${CATEGORY_LABELS[current] ?? "Bu"} ilanlarıyla karşılaştırılıyor. Önce listeyi temizleyin.`, "error");
         return prev;
       }
       toast("Karşılaştırmaya eklendi");

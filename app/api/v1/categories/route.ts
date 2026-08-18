@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { CATEGORY_LIST } from "@/lib/categories";
+import { sortOptionsFor } from "@/lib/listingFilters";
 
 export const runtime = "nodejs";
 // Kayıt kodda sabit; her istekte hesaplanacak bir şey yok.
@@ -17,5 +18,14 @@ export const dynamic = "force-static";
  * eklemek geriye uyumludur.
  */
 export function GET() {
-  return NextResponse.json({ ok: true, categories: CATEGORY_LIST });
+  // Sıralama seçenekleri de kayda dahil: mobil listeyi kopyalarsa web'e yeni
+  // bir sıralama eklendiğinde uygulama sürümü çıkmadan görünmez — kategori
+  // sekmelerinde tam olarak bu sorun yaşanmıştı.
+  return NextResponse.json({
+    ok: true,
+    categories: CATEGORY_LIST.map((category) => ({
+      ...category,
+      sortOptions: sortOptionsFor(category.key),
+    })),
+  });
 }

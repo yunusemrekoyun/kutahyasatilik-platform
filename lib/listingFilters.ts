@@ -155,11 +155,52 @@ function buildAttributeConditions(filter: ListingFilter): Record<string, unknown
   return out;
 }
 
+/**
+ * Kategoriye göre kullanılabilir sıralamalar.
+ *
+ * Fiyat ve tarih her kategoride anlamlı. Diğerleri değil: "en düşük kilometre"
+ * bir dairede, "en büyük alan" bir telefonda karşılığı olmayan seçeneklerdi ve
+ * eskiden yalnız bu dördü vardı — vasıta arayanın ilk iki refleksi (en yeni
+ * model, en az km) sitede hiç yoktu.
+ */
+export const SORT_OPTIONS: Record<string, { value: string; label: string }[]> = {
+  ortak: [
+    { value: "", label: "Önerilen" },
+    { value: "price_asc", label: "Fiyat (Artan)" },
+    { value: "price_desc", label: "Fiyat (Azalan)" },
+    { value: "oldest", label: "En Eski İlan" },
+  ],
+  emlak: [
+    { value: "area_desc", label: "Alan (Büyükten)" },
+    { value: "area_asc", label: "Alan (Küçükten)" },
+  ],
+  vasita: [
+    { value: "year_desc", label: "Model Yılı (Yeniden)" },
+    { value: "year_asc", label: "Model Yılı (Eskiden)" },
+    { value: "km_asc", label: "Kilometre (Azdan)" },
+    { value: "km_desc", label: "Kilometre (Çoktan)" },
+  ],
+  teknoloji: [],
+};
+
+/** Bir kategoride gösterilecek sıralama listesi (ortak + kategoriye özel). */
+export function sortOptionsFor(category?: string) {
+  return [...SORT_OPTIONS.ortak, ...(SORT_OPTIONS[category ?? ""] ?? [])];
+}
+
 export function buildOrderBy(sort?: string) {
   switch (sort) {
     case "price_asc": return [{ price: "asc" as const }];
     case "price_desc": return [{ price: "desc" as const }];
     case "oldest": return [{ createdAt: "asc" as const }];
+    // attrYear/attrKm attributes'tan türetilmiş kolonlar (bkz. schema.prisma).
+    // Boş olanlar sona: veri girilmemiş bir ilan listenin başını kapatmasın.
+    case "year_desc": return [{ attrYear: { sort: "desc" as const, nulls: "last" as const } }];
+    case "year_asc": return [{ attrYear: { sort: "asc" as const, nulls: "last" as const } }];
+    case "km_asc": return [{ attrKm: { sort: "asc" as const, nulls: "last" as const } }];
+    case "km_desc": return [{ attrKm: { sort: "desc" as const, nulls: "last" as const } }];
+    case "area_desc": return [{ areaGross: { sort: "desc" as const, nulls: "last" as const } }];
+    case "area_asc": return [{ areaGross: { sort: "asc" as const, nulls: "last" as const } }];
     default: return [{ featured: "desc" as const }, { createdAt: "desc" as const }];
   }
 }

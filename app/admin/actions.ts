@@ -16,7 +16,7 @@ import { sendEmail, notificationEmail } from "@/lib/email";
 import bcrypt from "bcryptjs";
 import { listingAmenityRows } from "@/lib/listingAmenities";
 import { LANDING_PAGES } from "@/lib/constants";
-import { getCategory, isCategoryKey, parseAttributes, type CategoryKey } from "@/lib/categories";
+import { getCategory, isCategoryKey, parseAttributes, sortableAttributeColumns, type CategoryKey } from "@/lib/categories";
 import { validateExternalHttpUrl } from "@/lib/externalUrl";
 import { isPasswordLengthValid, PASSWORD_ERROR } from "@/lib/passwordPolicy";
 
@@ -191,6 +191,7 @@ export async function saveListing(formData: FormData) {
     // Emlakta JSONB nitelik yok: kategori emlağa çevrilirse eski nitelikler
     // artık kalmasın diye açıkça NULL'lanıyor.
     attributes: isRealEstate ? Prisma.DbNull : attributes,
+    ...(isRealEstate ? { attrYear: null, attrKm: null } : sortableAttributeColumns(attributes)),
     listingType: String(formData.get("listingType") || "sale"),
     status: String(formData.get("status") || "active"),
     agencyId,

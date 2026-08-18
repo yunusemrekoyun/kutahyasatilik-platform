@@ -334,3 +334,21 @@ export function summarizeAttributes(category: unknown, attributes: unknown): str
   }
   return out;
 }
+
+/**
+ * attributes içindeki sayısal alanları sıralanabilir kolonlara kopyalar.
+ *
+ * Prisma JSON alanına göre orderBy desteklemiyor; "en yeni model" / "en düşük
+ * kilometre" sıralaması bu kopyalar olmadan çalışmıyor. Tek doğruluk kaynağı
+ * yine attributes — burada yalnız türetiliyor.
+ */
+export function sortableAttributeColumns(
+  attributes: Record<string, string | number> | null | undefined,
+): { attrYear: number | null; attrKm: number | null } {
+  const read = (key: string) => {
+    const raw = attributes?.[key];
+    const n = typeof raw === "number" ? raw : Number(raw);
+    return Number.isFinite(n) ? Math.trunc(n) : null;
+  };
+  return { attrYear: read("yil"), attrKm: read("kilometre") };
+}
