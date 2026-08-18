@@ -8,9 +8,17 @@ on:
 permissions:
   contents: read
 
+# Aynı dal için yeni push gelince eskisini iptal et: süperse olmuş bir koşuyu
+# sonuna kadar beklemek hem dakika yakıyor hem geri bildirimi geciktiriyor.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   verify:
     runs-on: ubuntu-latest
+    # Asılı kalan bir iş 6 saat boyunca runner tutmasın.
+    timeout-minutes: 30
     services:
       postgres:
         image: postgres:17-alpine
@@ -64,7 +72,38 @@ jobs:
       - run: npm run lint
       - run: npm run typecheck
       - run: npm test
-      - run: npm run audit:runtime
+      # Bağımlılık denetimi YALNIZ bağımlılık değiştiğinde bloklar.
+      #
+      # Her push'ta koşarken, dışarıda yeni bir uyarı yayımlandığı an alakasız
+      # bir commit kırmızıya düşüyordu (bu tam olarak yaşandı: deepmerge-ts
+      # uyarısı, kodla hiç ilgisi olmayan bir commit'i bloklad). Kendi
+      # eklediğiniz paket burada anında yakalanır; dünyanın kayması haftalık
+      # Bakım iş akışında gündeme gelir.
+      - name: Bağımlılık dosyaları değişti mi
+        id: deps
+        shell: bash
+        run: |
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            base="${{ github.event.pull_request.base.sha }}"
+          else
+            # HEAD~1 DEĞİL: tek push'ta üç commit gelirse HEAD~1 yalnız sonuncuya
+            # bakar, ortadaki package.json değişikliği denetimden kaçardı.
+            # github.event.before, push'tan önceki uç — aradaki her commit kapsanır.
+            base="${{ github.event.before }}"
+          fi
+          # Kıyas noktası yoksa (yeni dal, sıfır SHA, erişilemeyen commit)
+          # denetimi atlamak yerine çalıştır.
+          if [ -z "$base" ] || [ "$base" = "0000000000000000000000000000000000000000" ] \
+             || ! git cat-file -e "$base^{commit}" 2>/dev/null; then
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          elif git diff --name-only "$base" "${{ github.sha }}" | grep -qE '^(package\.json|package-lock\.json)$'; then
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          fi
+      - name: Bağımlılık güvenlik denetimi
+        if: steps.deps.outputs.changed == 'true'
+        run: npm run audit:runtime
       - run: npm run build
       # prepare:standalone ATLANIYORDU: check:standalone'un "public/uploads
       # standalone çıktısına kopyalanmasın" kuralı, .next/standalone/public

@@ -1,0 +1,38 @@
+name: Bakım
+
+# Ekosistem kayması denetimi.
+#
+# NEDEN AYRI: npm audit ve benzeri kontroller, sizin kodunuz hiç değişmese bile
+# dışarıda yeni bir güvenlik uyarısı yayımlandığı an kırmızıya döner. Bunları
+# her push'u bloklayan hatta koymak, CI'ın "benim yaptığım bir şey mi bozuldu"
+# sorusuna cevap vermesini engelliyor ve zamanla CI'ı ciddiye almamayı öğretiyor.
+#
+# Buradaki kontroller haftalık koşar; acil bakılması gerekirse Actions
+# sekmesinden elle tetiklenebilir. Bağımlılık DEĞİŞTİREN push'larda aynı
+# kontroller ci.yml içinde zaten çalışıyor — yani kendi eklediğiniz bir paket
+# anında yakalanır, dünyanın kayması ise haftalık gündeme gelir.
+
+on:
+  schedule:
+    # Pazartesi 06:00 UTC — hafta başı, mesai öncesi.
+    - cron: "0 6 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  bagimlilik-denetimi:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6.5.0
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - name: Çalışma zamanı bağımlılıklarında yüksek dereceli açık var mı
+        run: npm run audit:runtime
