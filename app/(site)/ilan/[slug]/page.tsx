@@ -83,7 +83,9 @@ export async function generateMetadata({
   const title = listing.metaTitle || listing.title;
   const description =
     listing.metaDescription || listing.description.slice(0, 155);
-  const image = publicImageUrl(listing.images[0]?.url);
+  // Link önizlemesi TASARLANMIŞ KART: eskiden ham ilan fotoğrafı veriliyordu,
+  // WhatsApp'ta fiyat/konum görünmüyor ve kadraj rastgele kırpılıyordu.
+  const card = `${SITE.url}/api/share/${listing.slug}`;
   return {
     title,
     description,
@@ -93,8 +95,9 @@ export async function generateMetadata({
       description,
       type: "website",
       url: `${SITE.url}/ilan/${listing.slug}`,
-      images: image ? [{ url: image }] : undefined,
+      images: [{ url: card, width: 1200, height: 630, alt: listing.title }],
     },
+    twitter: { card: "summary_large_image", title, description, images: [card] },
   };
 }
 
