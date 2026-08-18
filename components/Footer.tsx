@@ -57,7 +57,9 @@ export default async function Footer() {
             </ul>
           </div>
           <div>
-            <h2 className="eyebrow !text-gold-300">Hizmetler</h2>
+            {/* Bu sütunun yedi girişinin yedisi de emlağa özel; kapsam
+                etiketi olmadan "Hizmetler" başlığı her kategoriyi ima ediyordu. */}
+            <h2 className="eyebrow !text-gold-300">Emlak hizmetleri</h2>
             <ul className="mt-4 space-y-3 text-sm">
               <li><Link href="/satici" className="hover:text-white">Mülkünü Sat</Link></li>
               <li><Link href="/alici-talebi" className="hover:text-white">Alıcı Talebi</Link></li>

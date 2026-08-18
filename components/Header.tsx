@@ -4,37 +4,90 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import {
-  BarChart3,
-  Building2,
   ChevronDown,
   Heart,
-  Map,
   Menu,
   MessageCircle,
   Phone,
   User,
   X,
 } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 import { useSiteContact } from "@/components/SiteContactProvider";
 import { useStore } from "@/components/store/StoreProvider";
 import NotificationBell from "@/components/NotificationBell";
 import { telLink, whatsappLink } from "@/lib/site";
 
-const PROPERTY_LINKS = [
-  { href: "/daire", label: "Daire" },
-  { href: "/arsa", label: "Arsa" },
-  { href: "/villa", label: "Villa" },
-  { href: "/yatirimlik-arsa", label: "Yatırımlık Arsa" },
-  { href: "/isyeri", label: "İşyeri" },
-  // Kategoriler ayrı SEO sayfası olarak değil, /ilanlar sekmesi olarak açılır.
-  { href: "/ilanlar?kategori=vasita", label: "Vasıta" },
-  { href: "/ilanlar?kategori=teknoloji", label: "Teknoloji" },
+/**
+ * İlanlar açılır menüsü — KATEGORİYE GÖRE GRUPLU.
+ *
+ * Eskiden emlak alt türleri (Daire, Arsa...) ile Vasıta ve Teknoloji aynı düz
+ * listedeydi; menü "emlak sitesi + iki ek sekme" gibi okunuyordu.
+ *
+ * Emlağa özel ARAÇLAR (harita, bölge analizi, emlak ofisleri) da buraya, emlak
+ * grubunun içine alındı. Üst menüde dururlarken bir vasıta ilanına bakan
+ * kullanıcı başlıkta "Emlak Ağı" görüyordu. Bağlamı sorgu parametresinden
+ * okumak Header'ı useSearchParams'a bağlardı ve o da sitenin tamamının
+ * ön-render'ını bozuyor (build "useSearchParams should be wrapped in a suspense
+ * boundary" ile düşüyor). Araçları emlak grubunun içine koymak hem bu sorunu
+ * yaşatmıyor hem de aradıkları yerde duruyorlar.
+ */
+const LISTING_MENU: { title: string; href: string; items: { href: string; label: string }[] }[] = [
+  {
+    title: "Emlak",
+    href: "/ilanlar?kategori=emlak",
+    items: [
+      { href: "/daire", label: "Daire" },
+      { href: "/arsa", label: "Arsa" },
+      { href: "/villa", label: "Villa" },
+      { href: "/yatirimlik-arsa", label: "Yatırımlık Arsa" },
+      { href: "/isyeri", label: "İşyeri" },
+      { href: "/harita", label: "Haritada ara" },
+      { href: "/bolge-analizi", label: "Bölge analizi" },
+      { href: "/emlak-ofisleri", label: "Emlak ofisleri" },
+      { href: "/danismanlar", label: "Danışmanlar" },
+    ],
+  },
+  {
+    title: "Vasıta",
+    href: "/ilanlar?kategori=vasita",
+    items: [
+      { href: "/ilanlar?kategori=vasita&tur=otomobil", label: "Otomobil" },
+      { href: "/ilanlar?kategori=vasita&tur=motosiklet", label: "Motosiklet" },
+      { href: "/ilanlar?kategori=vasita&tur=ticari", label: "Ticari araç" },
+      { href: "/ilanlar?kategori=vasita&tur=traktor", label: "Traktör & tarım" },
+    ],
+  },
+  {
+    title: "Teknoloji",
+    href: "/ilanlar?kategori=teknoloji",
+    items: [
+      { href: "/ilanlar?kategori=teknoloji&tur=telefon", label: "Telefon" },
+      { href: "/ilanlar?kategori=teknoloji&tur=bilgisayar", label: "Bilgisayar" },
+      { href: "/ilanlar?kategori=teknoloji&tur=tablet", label: "Tablet" },
+      { href: "/ilanlar?kategori=teknoloji&tur=konsol", label: "Oyun konsolu" },
+      { href: "/ilanlar?kategori=teknoloji&tur=kamera", label: "Fotoğraf & kamera" },
+    ],
+  },
 ];
 
-const PRIMARY_LINKS = [
-  { href: "/harita", label: "Harita", Icon: Map },
-  { href: "/bolge-analizi", label: "Bölge Analizi", Icon: BarChart3 },
-  { href: "/emlak-ofisleri", label: "Emlak Ağı", Icon: Building2 },
+/** Aktiflik kontrolü için düz liste. */
+const PROPERTY_LINKS = LISTING_MENU.flatMap((group) => group.items);
+
+/**
+ * Üst menü BAĞLAMA DUYARLI.
+ *
+ * Harita, Bölge Analizi ve Emlak Ağı yalnız emlağa ait araçlar: harita
+ * kapsamı emlak, bölge analizi m² fiyatı üzerine kurulu, emlak ofisleri zaten
+ * adında. Vasıta ya da teknoloji ilanlarına bakan kullanıcı bunları menüde
+ * görünce site "sonradan vasıta eklenmiş bir emlak sitesi" gibi okunuyordu.
+ *
+ * Kural: emlak bağlamındayken (emlak kategorisi, emlak alt tür sayfaları,
+ * emlak araçları) görünürler; diğer kategorilerde gizlenirler. Ana sayfada ve
+ * bağlamsız yerlerde görünmeye devam ederler — site emlak ağırlıklı.
+ */
+/** Üst menü artık KATEGORİ-NÖTR: emlağa özel araçlar açılır menüdeki Emlak grubunda. */
+const PRIMARY_LINKS: { href: string; label: string; Icon?: LucideIcon }[] = [
   { href: "/blog", label: "Rehber" },
   { href: "/hakkimizda", label: "Hakkımızda" },
 ];
@@ -90,6 +143,7 @@ export default function Header() {
   const isActive = (href: string) => pathname === href || (href !== "/" && pathname?.startsWith(`${href}/`));
   const listingActive = PROPERTY_LINKS.some((item) => isActive(item.href));
 
+
   return (
     <header className="sticky top-0 z-40 border-b border-stone bg-paper/95 backdrop-blur-xl">
       <div className="mx-auto flex h-[72px] max-w-7xl items-center justify-between gap-5 px-4 sm:px-6">
@@ -129,17 +183,30 @@ export default function Header() {
             </button>
             {listingMenuOpen && (
               <div id="listing-navigation" ref={listingMenuRef} className="absolute left-0 top-full pt-3">
-                <div className="w-56 border border-stone bg-paper p-2 shadow-prestige">
-                  {PROPERTY_LINKS.map((item) => (
-                    <Link
-                      key={item.href}
-                      href={item.href}
-                      onClick={() => setListingMenuOpen(false)}
-                      aria-current={isActive(item.href) ? "page" : undefined}
-                      className={`flex min-h-11 items-center rounded-control px-3 py-2.5 text-sm transition ${isActive(item.href) ? "bg-brand-50 font-semibold text-brand-800" : "text-ink hover:bg-canvas"}`}
-                    >
-                      {item.label}
-                    </Link>
+                <div className="grid w-[620px] grid-cols-3 gap-5 border border-stone bg-paper p-5 shadow-prestige">
+                  {LISTING_MENU.map((group) => (
+                    <div key={group.title}>
+                      <Link
+                        href={group.href}
+                        onClick={() => setListingMenuOpen(false)}
+                        className="mb-2 flex min-h-11 items-center text-sm font-bold text-brand-900 hover:text-brand-700"
+                      >
+                        {group.title}
+                      </Link>
+                      <div className="flex flex-col">
+                        {group.items.map((item) => (
+                          <Link
+                            key={item.href}
+                            href={item.href}
+                            onClick={() => setListingMenuOpen(false)}
+                            aria-current={isActive(item.href) ? "page" : undefined}
+                            className={`flex min-h-10 items-center rounded-control px-2 text-sm transition ${isActive(item.href) ? "bg-brand-50 font-semibold text-brand-800" : "text-muted hover:bg-canvas hover:text-ink"}`}
+                          >
+                            {item.label}
+                          </Link>
+                        ))}
+                      </div>
+                    </div>
                   ))}
                 </div>
               </div>
@@ -185,11 +252,33 @@ export default function Header() {
 
       {mobileOpen && (
         <nav id="mobile-navigation" aria-label="Mobil menü" className="max-h-[calc(100dvh-72px)] overflow-y-auto border-t border-stone bg-paper px-5 pb-8 pt-5 lg:hidden">
-          <div className="grid grid-cols-2 gap-x-6 gap-y-1">
-            {PROPERTY_LINKS.map((item, index) => (
-              <Link ref={index === 0 ? firstMobileLinkRef : undefined} key={item.href} href={item.href} onClick={() => setMobileOpen(false)} aria-current={isActive(item.href) ? "page" : undefined} className="flex min-h-11 items-center border-b border-stone py-3 text-sm font-semibold text-ink">{item.label}</Link>
-            ))}
-          </div>
+          {/* Mobilde de kategoriye göre gruplu: 16 bağlantılık düz liste
+              kullanıcıyı hangi kategoride olduğunu anlamadan geziniyordu. */}
+          {LISTING_MENU.map((group, groupIndex) => (
+            <div key={group.title} className={groupIndex ? "mt-5" : ""}>
+              <Link
+                href={group.href}
+                onClick={() => setMobileOpen(false)}
+                className="flex min-h-11 items-center text-sm font-bold text-brand-900"
+              >
+                {group.title}
+              </Link>
+              <div className="grid grid-cols-2 gap-x-6 gap-y-1">
+                {group.items.map((item, index) => (
+                  <Link
+                    ref={groupIndex === 0 && index === 0 ? firstMobileLinkRef : undefined}
+                    key={item.href}
+                    href={item.href}
+                    onClick={() => setMobileOpen(false)}
+                    aria-current={isActive(item.href) ? "page" : undefined}
+                    className="flex min-h-11 items-center border-b border-stone py-3 text-sm text-ink"
+                  >
+                    {item.label}
+                  </Link>
+                ))}
+              </div>
+            </div>
+          ))}
           <div className="mt-5 grid gap-1">
             {PRIMARY_LINKS.map((item) => (
               <Link key={item.href} href={item.href} onClick={() => setMobileOpen(false)} aria-current={isActive(item.href) ? "page" : undefined} className="flex min-h-11 items-center gap-3 border-b border-stone py-3 text-sm font-semibold text-ink">
