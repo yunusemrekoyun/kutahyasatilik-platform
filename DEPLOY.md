@@ -146,8 +146,19 @@ npm run check:standalone
 
 systemctl restart "$SERVICE"
 systemctl is-active --quiet "$SERVICE" || fail "Servis restart sonrasında aktif değil"
-curl --fail --silent --show-error --max-time 15 "$HEALTH_URL" >/dev/null \
-  || fail "Deploy sonrası health kontrolü başarısız"
+
+# Health kontrolü BEKLEYEREK yapılır. systemctl restart, süreç doğar doğmaz
+# döner; Next.js standalone ise portu bir-iki saniye sonra bağlıyor. Tek atışlık
+# curl bu yüzden "Couldn't connect after 0 ms" ile düşüp çalışan bir deploy'u
+# başarısız gösteriyordu — servis ayakta, sadece henüz dinlemiyor.
+for attempt in $(seq 1 20); do
+  if curl --fail --silent --max-time 5 "$HEALTH_URL" >/dev/null 2>&1; then
+    echo "Health OK (${attempt}. denemede)"
+    break
+  fi
+  test "$attempt" -lt 20 || fail "Deploy sonrası health kontrolü 20 denemede başarısız"
+  sleep 2
+done
 
 printf 'Deploy tamamlandı. Önceki commit: %s, çalışan commit: %s\n' \
   "$PREVIOUS_COMMIT" "$DEPLOY_COMMIT"
