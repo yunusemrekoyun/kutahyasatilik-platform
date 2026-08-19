@@ -146,8 +146,21 @@ jobs:
         with:
           path: ~/.cache/ms-playwright
           key: playwright-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+      # Bu adım BLOKLAMAZ (continue-on-error).
+      #
+      # `playwright install-deps` apt-get çalıştırıyor ve GitHub runner'ının
+      # aynası takıldığında dakikalarca asılı kalıp zaman aşımına düşüyor —
+      # tam olarak yaşandı, apt "Mirrorlist" satırını tekrarlayıp 6 dakikada
+      # düştü. Oysa ubuntu-latest imajı chromium'un kütüphanelerini zaten
+      # taşıyor; bu adım çoğu koşuda hiçbir şey kurmuyor.
+      #
+      # Asıl kapı test:e2e. Bir kütüphane gerçekten eksikse chromium açılmaz ve
+      # e2e AÇIK bir hatayla düşer. Sinyal kaybolmuyor, yalnız gerçekten önemli
+      # olan adıma taşınıyor — dış dünyanın apt sorunu bizim commit'imizi
+      # kırmızıya düşürmüyor.
       - name: Playwright sistem bağımlılıkları
-        timeout-minutes: 6
+        continue-on-error: true
+        timeout-minutes: 5
         run: npx playwright install-deps chromium
       - name: Playwright tarayıcısı
         if: steps.playwright-cache.outputs.cache-hit != 'true'
