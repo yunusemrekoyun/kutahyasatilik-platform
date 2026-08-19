@@ -100,6 +100,9 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ slug
       slug: l.slug,
       title: l.title,
       description: l.description,
+      // Paylaşım kartı önbelleğini sürümlemek için: mobil kartı dosya adına bu
+      // damgayı koyarak saklıyor, ilan güncellenince eski kart kendiliğinden düşüyor.
+      updatedAt: l.updatedAt,
       category: l.category,
       // Kategori kaydı YALNIZ web'de duruyor; mobil kopyasını taşımasın diye
       // etiketler ve nitelik satırları burada hazırlanıp gönderiliyor.

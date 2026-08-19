@@ -26,7 +26,6 @@ export type ShareCardData = {
   currency: string;
   district: string;
   neighborhood?: string | null;
-  categoryLabel: string;
   subTypeLabel: string;
   /** Kartta gösterilecek 2-3 kısa özellik ("3+1", "120 m²", "85.000 km") */
   facts: string[];
@@ -44,12 +43,31 @@ export const CARD_SIZES: Record<CardVariant, { width: number; height: number }> 
 };
 
 /**
- * Instagram hikâyede üstteki profil şeridi ve alttaki "yanıtla" alanı
- * kadrajın yaklaşık %14'ünü kapatıyor. İçerik bu güvenli alanın içinde kalmalı,
- * yoksa fiyat ya da marka bandı Instagram'ın kendi arayüzünün altında kayboluyor.
+ * Instagram hikâyede üstteki profil şeridi ve alttaki "yanıtla" alanı kadrajın
+ * yaklaşık %14'ünü kapatıyor.
+ *
+ * ÜST güvenli alan artık BOŞ BIRAKILMIYOR: fotoğraf tepeye kadar tam kanıyor,
+ * Instagram'ın arayüzü görselin üstüne biniyor. Eskiden burası düz lacivert bir
+ * banttı — kadrajın sekizde biri hiçbir şey söylemeyen boş bir blok olarak
+ * duruyordu ve kart yarım görünüyordu.
+ *
+ * ALT güvenli alan panelin PADDING'i olarak veriliyor. Eskiden margin'di ve
+ * toplam yükseklik 260+900+760+260 = 2180 > 1920 taşıyordu; taşma yüzünden alt
+ * güvenli alan fiilen hiç uygulanmıyor, marka bandı kadrajın en dibine yapışıyordu.
  */
-const STORY_SAFE_TOP = 260;
-const STORY_SAFE_BOTTOM = 260;
+export const STORY_SAFE_BOTTOM = 260;
+
+/**
+ * Fotoğrafın bittiği yükseklik. Kalan alan bilgi paneli.
+ *
+ * 1120 değil 1000: panelin kullanılabilir yüksekliği
+ * (1920 - foto - üst padding - alt güvenli alan) içeriğin toplam boyuna eşit
+ * kalıyordu, aradaki her boşluk sıfıra iniyordu.
+ */
+export const STORY_PHOTO_HEIGHT = 1000;
+
+/** Bilgi panelinin üst iç boşluğu. */
+export const STORY_PANEL_PADDING_TOP = 52;
 
 function Badge({ text, size }: { text: string; size: number }) {
   return (
@@ -74,8 +92,8 @@ export function ShareCard({ data, variant }: { data: ShareCardData; variant: Car
   const story = variant === "story";
   const { width, height } = CARD_SIZES[variant];
 
-  // Story dikey: fotoğraf üstte büyük, bilgi altta. OG yatay: fotoğraf solda.
-  const photoHeight = story ? 900 : height;
+  // Story dikey: fotoğraf üstte tam kanar, bilgi altta. OG yatay: fotoğraf solda.
+  const photoHeight = story ? STORY_PHOTO_HEIGHT : height;
   const photoWidth = story ? width : Math.round(width * 0.52);
   // Bilgi panelinin genişliği AÇIKÇA veriliyor. flexGrow ile bırakıldığında
   // satori metnin doğal genişliğini kullanıp kutuyu taşırıyor: uzun başlık
@@ -88,6 +106,10 @@ export function ShareCard({ data, variant }: { data: ShareCardData; variant: Car
   const location = [data.neighborhood, data.district].filter(Boolean).join(", ");
 
   const titleSize = story ? 52 : 40;
+  // Başlık en fazla İKİ satır. Yükseklik satır kutusundan hesaplanıyor; sabit bir
+  // çarpanla verildiğinde ikinci satırın alt uzantıları ("ğ", "ı") kırpılıyordu.
+  const titleLineHeight = 1.28;
+  const titleMaxHeight = Math.round(titleSize * titleLineHeight * 2) + 6;
   const priceSize = story ? 92 : 62;
   const factSize = story ? 34 : 26;
 
@@ -109,16 +131,28 @@ export function ShareCard({ data, variant }: { data: ShareCardData; variant: Car
           display: "flex",
           width: photoWidth,
           height: photoHeight,
-          marginTop: story ? STORY_SAFE_TOP : 0,
           position: "relative",
           background: NAVY,
+          alignItems: "center",
+          justifyContent: "center",
         }}
       >
         {data.imageUrl ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img src={data.imageUrl} alt="" width={photoWidth} height={photoHeight} style={{ objectFit: "cover" }} />
         ) : (
-          <div style={{ display: "flex", width: "100%", height: "100%", background: NAVY_SOFT }} />
+          // Görselsiz ilan: boş lacivert yerine marka. Kart yine bitmiş görünsün.
+          <div
+            style={{
+              display: "flex",
+              color: "rgba(255,255,255,0.55)",
+              fontSize: story ? 44 : 32,
+              fontWeight: 800,
+              letterSpacing: 1,
+            }}
+          >
+            kutahyasatilik.com
+          </div>
         )}
         {data.sold && (
           <div
@@ -149,14 +183,23 @@ export function ShareCard({ data, variant }: { data: ShareCardData; variant: Car
           display: "flex",
           flexDirection: "column",
           width: infoWidth,
-          height: story ? height - photoHeight - STORY_SAFE_TOP : height,
+          // Panel kadrajın dibine kadar uzanıyor; içerik alt güvenli alanın
+          // ÜSTÜNDE bitiyor. Böylece Instagram'ın "yanıtla" şeridi boş beyaza
+          // biniyor, fiyatın ya da marka bandının üstüne değil.
+          height: story ? height - photoHeight : height,
           justifyContent: story ? "flex-start" : "center",
-          padding: `56px ${infoPadding}px`,
-          marginBottom: story ? STORY_SAFE_BOTTOM : 0,
+          padding: story
+            ? `${STORY_PANEL_PADDING_TOP}px ${infoPadding}px ${STORY_SAFE_BOTTOM}px`
+            : `56px ${infoPadding}px`,
           background: PAPER,
+          // Fotoğrafla panel arasında ince marka çizgisi — sert kesim yumuşasın.
+          borderTop: story ? `8px solid ${GOLD}` : "none",
         }}
       >
-        <div style={{ display: "flex", width: textWidth, gap: 16, alignItems: "center" }}>
+        {/* flexShrink: 0 — kolon flex'te varsayılan shrink 1. Panel dolduğunda
+            satori çocukları büzüp metni ORTASINDAN kırpıyordu ("hatasız" satırı
+            yarıdan kesilmişti). Bu bloklar asla küçülmemeli. */}
+        <div style={{ display: "flex", width: textWidth, gap: 16, alignItems: "center", flexShrink: 0 }}>
           <Badge text={data.subTypeLabel} size={story ? 30 : 24} />
           <div style={{ display: "flex", color: MUTED, fontSize: factSize, fontWeight: 600 }}>{location}</div>
         </div>
@@ -169,9 +212,10 @@ export function ShareCard({ data, variant }: { data: ShareCardData; variant: Car
             fontSize: titleSize,
             fontWeight: 600,
             color: INK,
-            lineHeight: 1.25,
+            lineHeight: titleLineHeight,
             // Uzun başlıklar kartı taşırmasın; satori satır kırpmayı destekliyor.
-            maxHeight: titleSize * 2.6,
+            maxHeight: titleMaxHeight,
+            flexShrink: 0,
             overflow: "hidden",
           }}
         >
@@ -179,7 +223,7 @@ export function ShareCard({ data, variant }: { data: ShareCardData; variant: Car
         </div>
 
         {data.facts.length > 0 && (
-          <div style={{ display: "flex", width: textWidth, gap: 28, marginTop: story ? 30 : 18, flexWrap: "wrap" }}>
+          <div style={{ display: "flex", width: textWidth, gap: 28, marginTop: story ? 30 : 18, flexWrap: "wrap", flexShrink: 0 }}>
             {data.facts.slice(0, 3).map((fact) => (
               <div key={fact} style={{ display: "flex", color: MUTED, fontSize: factSize, fontWeight: 600 }}>
                 {fact}
@@ -188,7 +232,7 @@ export function ShareCard({ data, variant }: { data: ShareCardData; variant: Car
           </div>
         )}
 
-        <div style={{ display: "flex", width: textWidth, marginTop: "auto", flexDirection: "column" }}>
+        <div style={{ display: "flex", width: textWidth, marginTop: "auto", flexDirection: "column", flexShrink: 0 }}>
           <div style={{ display: "flex", fontSize: priceSize, fontWeight: 800, color: NAVY, letterSpacing: -1 }}>
             {price}
           </div>

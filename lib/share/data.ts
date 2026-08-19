@@ -5,7 +5,7 @@
  * kararı burada, tek yerde veriliyor — iki istemcinin ayrı ayrı özet
  * hesaplaması, kategori kapsamında yaşadığımız sapmaların aynısını üretirdi.
  */
-import { CATEGORY_LABELS, getSubTypeLabel, summarizeAttributes } from "../categories";
+import { getSubTypeLabel, summarizeAttributes } from "../categories";
 import type { ShareCardData } from "./card";
 
 export type ShareListingRow = {
@@ -48,7 +48,6 @@ export function toShareCardData(listing: ShareListingRow, imageUrl: string | nul
     currency: listing.currency,
     district: listing.district,
     neighborhood: listing.neighborhood,
-    categoryLabel: CATEGORY_LABELS[listing.category] ?? "İlan",
     subTypeLabel: getSubTypeLabel(listing.category, listing.propertyType),
     facts: factsFor(listing),
     imageUrl,

@@ -85,7 +85,13 @@ export async function generateMetadata({
     listing.metaDescription || listing.description.slice(0, 155);
   // Link önizlemesi TASARLANMIŞ KART: eskiden ham ilan fotoğrafı veriliyordu,
   // WhatsApp'ta fiyat/konum görünmüyor ve kadraj rastgele kırpılıyordu.
-  const card = `${SITE.url}/api/share/${listing.slug}`;
+  //
+  // ?rev=<updatedAt>: URL sürümsüzken WhatsApp/Facebook ilk çektiği kartı
+  // kendi tarafında uzun süre saklıyor; ilan fiyatı değişse bile paylaşılan
+  // linkte ESKİ fiyat görünmeye devam ediyordu. İlan güncellenince URL de
+  // değiştiği için önizleme kendiliğinden tazeleniyor.
+  // ("v" kullanılamaz: o parametre kart boyutunu seçiyor — ?v=story.)
+  const card = `${SITE.url}/api/share/${listing.slug}?rev=${listing.updatedAt.getTime()}`;
   return {
     title,
     description,
