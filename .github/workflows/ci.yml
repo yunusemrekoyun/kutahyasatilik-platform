@@ -76,7 +76,7 @@ jobs:
       #
       # Her push'ta koşarken, dışarıda yeni bir uyarı yayımlandığı an alakasız
       # bir commit kırmızıya düşüyordu (bu tam olarak yaşandı: deepmerge-ts
-      # uyarısı, kodla hiç ilgisi olmayan bir commit'i bloklad). Kendi
+      # uyarısı, kodla hiç ilgisi olmayan bir commit'i blokladı). Kendi
       # eklediğiniz paket burada anında yakalanır; dünyanın kayması haftalık
       # Bakım iş akışında gündeme gelir.
       - name: Bağımlılık dosyaları değişti mi
@@ -128,5 +128,29 @@ jobs:
           ADMIN_PASSWORD=$(openssl rand -hex 24)
           export ADMIN_PASSWORD
           npm run seed
-      - run: npx playwright install --with-deps chromium
+      # Playwright kurulumu İKİYE BÖLÜNDÜ ve sınırlandı.
+      #
+      # NEDEN: `playwright install --with-deps` iki iş yapıyor — tarayıcıyı
+      # indirmek ve sistem kütüphanelerini apt ile kurmak. apt tarafı bir
+      # aynaya takıldığında adım sessizce dakikalarca asılı kalıyor; koşu
+      # 31 dakikada iş seviyesindeki timeout'a çarpıp "cancelled" olarak
+      # düşüyordu. Aynı adım 1.5 saat önce 3 dakikada bitmişti, yani kodla
+      # ilgisi yok. Tek atışlık, sınırsız bir adım bu farkı okunaksız kılıyordu.
+      #
+      # Artık: tarayıcı ikilisi ÖNBELLEKTE (çoğu koşuda indirme hiç olmuyor),
+      # her iki adımın kendi süre sınırı var ve hangisinin takıldığı loglarda
+      # doğrudan görünüyor.
+      - name: Playwright tarayıcı önbelleği
+        id: playwright-cache
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+      - name: Playwright sistem bağımlılıkları
+        timeout-minutes: 6
+        run: npx playwright install-deps chromium
+      - name: Playwright tarayıcısı
+        if: steps.playwright-cache.outputs.cache-hit != 'true'
+        timeout-minutes: 6
+        run: npx playwright install chromium
       - run: npm run test:e2e
