@@ -6,7 +6,13 @@ import { prisma } from "@/lib/prisma";
 import { getUserSession } from "@/lib/userAuth";
 import { slugify } from "@/lib/format";
 import { notifyAdmins } from "@/lib/notify";
-import { getCategory, parseAttributes, type AttributeValues, type CategoryKey } from "@/lib/categories";
+import {
+  getCategory,
+  parseAttributes,
+  sortableAttributeColumns,
+  type AttributeValues,
+  type CategoryKey,
+} from "@/lib/categories";
 import { DISTRICTS } from "@/lib/constants";
 
 /**
@@ -131,6 +137,12 @@ export async function submitUserListing(
       district: v.district,
       neighborhood: v.neighborhood,
       attributes: v.attributes,
+      // attributes ile BİRLİKTE yazılmalı: Prisma JSON alanına göre orderBy
+      // desteklemediği için "Model Yılı"/"Kilometre" sıralaması bu türetilmiş
+      // kolonlara bakıyor. Yazılmazsa ilan NULL kalıyor ve nulls:last yüzünden
+      // listenin en dibine düşüyor — bu akış zaten yalnız vasıta/teknoloji için
+      // çalıştığından, yazmamak sıralamayı bu kategorilerde tamamen bozuyordu.
+      ...sortableAttributeColumns(v.attributes),
       userId: session.userId,
       images: v.imageUrls.length
         ? { create: v.imageUrls.map((url, index) => ({ url, sortOrder: index })) }
@@ -256,6 +268,7 @@ export async function updateUserListing(
         district: v.district,
         neighborhood: v.neighborhood,
         attributes: v.attributes,
+        ...sortableAttributeColumns(v.attributes),
         moderationStatus: "pending",
         note: null,
         moderationDiff: diff,

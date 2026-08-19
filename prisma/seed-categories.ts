@@ -5,6 +5,7 @@
 import "dotenv/config";
 import { PrismaClient } from "../app/generated/prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
+import { sortableAttributeColumns } from "../lib/categories";
 
 const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL });
 const prisma = new PrismaClient({ adapter });
@@ -160,6 +161,10 @@ async function main() {
       neighborhood: item.neighborhood ?? null,
       featured: item.featured ?? false,
       attributes: item.attributes,
+      // Uygulamadaki dört yazma yolu gibi seed de türetilmiş sıralama kolonlarını
+      // doldurmalı; yoksa demo veride "Model Yılı"/"Kilometre" sıralaması boş görünür
+      // ve özellik bozukken çalışıyor sanılır.
+      ...sortableAttributeColumns(item.attributes),
     };
 
     await prisma.listing.upsert({

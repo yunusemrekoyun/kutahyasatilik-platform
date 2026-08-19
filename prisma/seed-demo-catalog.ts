@@ -22,6 +22,7 @@ import { randomUUID } from "crypto";
 import { PrismaClient } from "../app/generated/prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { listingAmenityRows } from "../lib/listingAmenities";
+import { sortableAttributeColumns } from "../lib/categories";
 import { loadCatalog, prepareCatalogImages, type PreparedItem } from "./demo-images";
 
 const prisma = new PrismaClient({
@@ -847,6 +848,7 @@ async function main() {
         // işareti vermek rozeti değersizleştirir.
         verified: row.category === "emlak" ? chance(0.25) : false,
         attributes: row.attributes ?? undefined,
+        ...sortableAttributeColumns(row.attributes),
         agentId: agent?.id ?? null,
         agencyId: agent?.agencyId ?? null,
         userId: seller?.id ?? null,
