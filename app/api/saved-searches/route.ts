@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getUserSession } from "@/lib/userAuth";
 import { checkRate } from "@/lib/rateLimit";
+import { reportApiError } from "@/lib/apiErrors";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -15,13 +16,20 @@ export async function GET() {
       where: { userId: session.userId, status: "active" },
       orderBy: { createdAt: "desc" },
       select: {
-        id: true, propertyType: true, listingType: true, district: true,
+        // category ve attributes ŞART: bunlarsız istemci her aramayı emlak sanıp
+        // alt türü emlak sözlüğünde arıyor ve alanı "m²" ile yazıyordu — vasıta
+        // araması "otomobil · 0 m²" gibi görünüyordu.
+        id: true, category: true, attributes: true,
+        propertyType: true, listingType: true, district: true,
         minPrice: true, maxPrice: true, minArea: true, rooms: true, createdAt: true,
       },
     });
     return NextResponse.json({ ok: true, items });
-  } catch {
-    return NextResponse.json({ ok: true, items: [] });
+  } catch (error) {
+    // Eskiden { ok: true, items: [] } dönüyordu: veritabanı hatası kullanıcıya
+    // "kayıtlı aramanız yok" olarak görünüyor, üstelik hiçbir yere iz düşmüyordu.
+    reportApiError("saved-searches:list", error);
+    return NextResponse.json({ ok: false, error: "Kayıtlı aramalar yüklenemedi." }, { status: 500 });
   }
 }
 
@@ -39,8 +47,11 @@ export async function DELETE(req: NextRequest) {
       where: { id, userId: session.userId },
       data: { status: "closed" },
     });
-  } catch {
-    /* yoksay */
+  } catch (error) {
+    // Hata yutulup { ok: true } dönüyordu: kullanıcı aramayı sildiğini sanıyor,
+    // arayüzden kayboluyor ama kayıt "active" kalıp bildirim üretmeye devam ediyordu.
+    reportApiError("saved-searches:delete", error);
+    return NextResponse.json({ ok: false, error: "Kayıtlı arama kaldırılamadı." }, { status: 500 });
   }
   return NextResponse.json({ ok: true });
 }

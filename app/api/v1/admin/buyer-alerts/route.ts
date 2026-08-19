@@ -17,21 +17,17 @@ export async function GET(req: NextRequest) {
     prisma.buyerAlert.findMany({ orderBy: { createdAt: "desc" }, skip: (page - 1) * perPage, take: perPage }),
     prisma.buyerAlert.count(),
   ]);
+  // Kaydın TAMAMI geçiliyor (web ikizi de öyle yapıyor). Alanlar tek tek
+  // sayıldığında `category` ve `attributes` dışarıda kalıyordu: countListingsForAlert
+  // kategorisiz talebi emlak sayıp emlak alanlarıyla sorguluyor, dolayısıyla her
+  // vasıta/teknoloji talebi "0 eşleşme" gösteriyordu.
   const matchCounts = await Promise.all(
-    rows.map((r) =>
-      countListingsForAlert({
-        propertyType: r.propertyType,
-        listingType: r.listingType,
-        district: r.district,
-        minPrice: r.minPrice,
-        maxPrice: r.maxPrice,
-        minArea: r.minArea,
-        rooms: r.rooms,
-      }).catch(() => 0),
-    ),
+    rows.map((r) => countListingsForAlert(r).catch(() => 0)),
   );
   const items = rows.map((r, i) => ({
     id: r.id, name: r.name, phone: r.phone, email: r.email,
+    // category/attributes olmadan mobil admin ekranı alt türü emlak sözlüğünde arar.
+    category: r.category, attributes: r.attributes,
     propertyType: r.propertyType, listingType: r.listingType, district: r.district,
     minPrice: r.minPrice, maxPrice: r.maxPrice, minArea: r.minArea, rooms: r.rooms,
     note: r.note, status: r.status, createdAt: r.createdAt, matchCount: matchCounts[i],

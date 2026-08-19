@@ -122,7 +122,16 @@ export default function ListingFilters() {
     const p = new URLSearchParams();
     for (const [from, to] of map) {
       const v = sp.get(from);
-      if (v) p.set(to, v);
+      if (!v) continue;
+      // BuyerAlert.minArea her zaman m² saklar; ekran ise dönüm gösteriyor olabilir.
+      // Çevrim yapılmadığında "5 dönüm" arayan kullanıcının kayıtlı araması
+      // "5 m²" oluyordu ve hiçbir zaman eşleşmiyordu (sayfanın kendi sorgusu
+      // çevirdiği için ekranda sonuç görünüyor, kayıtlı arama sessizce ölüyordu).
+      if (from === "minAlan" && birim === "donum") {
+        p.set(to, String(Math.round(Number(v) * 1000)));
+        continue;
+      }
+      p.set(to, v);
     }
     // Kategoriye özel nitelikler ekrandaki filtrelerden olduğu gibi taşınıyor:
     // "2015 üstü, en fazla 100.000 km dizel" araması kayıtlı aramaya birebir

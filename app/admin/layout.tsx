@@ -12,7 +12,11 @@ async function getCounts(): Promise<AdminCounts> {
   try {
     const [pendingListings, newLeads, newAlerts] = await Promise.all([
       prisma.listing.count({ where: { moderationStatus: "pending" } }),
-      prisma.lead.count({ where: { status: "new" } }),
+      // "new" ŞEMADA YOK: Lead.status varsayılanı "received"
+      // (received | reviewing | contacted | resolved). "new" yalnız eski satırlarda
+      // kalmış bir değer, dolayısıyla rozet her yeni talepte 0 gösteriyordu.
+      // Henüz ele alınmamış = received (+ geriye dönük new).
+      prisma.lead.count({ where: { status: { in: ["received", "new"] } } }),
       prisma.buyerAlert.count({ where: { status: "active" } }),
     ]);
     return { pendingListings, newLeads, newAlerts };

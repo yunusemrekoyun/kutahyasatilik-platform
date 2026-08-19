@@ -3,10 +3,14 @@
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { Search, Trash2 } from "lucide-react";
-import { PROPERTY_TYPE_LABELS } from "@/lib/constants";
+import { getSubTypeLabel, summarizeAttributes } from "@/lib/categories";
+import { formatPrice } from "@/lib/format";
 
 type Saved = {
   id: string;
+  /** Eskiden yoktu; her arama emlak sanılıyordu. */
+  category: string | null;
+  attributes: Record<string, unknown> | null;
   propertyType: string | null;
   listingType: string | null;
   district: string | null;
@@ -16,17 +20,22 @@ type Saved = {
   rooms: string | null;
 };
 
-const tl = (n: number) => `₺${n.toLocaleString("tr-TR")}`;
+// Para biçimi lib/format.formatPrice'tan. Burada yerel bir `tl` yardımcısı vardı
+// ve simgeyi BAŞA koyuyordu ("₺4.750.000"); iki repodaki tek öne-yazan yerdi.
+const tl = (n: number) => formatPrice(n, "TRY");
 
 function summary(s: Saved): string {
   const parts: string[] = [];
   if (s.district) parts.push(s.district);
-  if (s.propertyType) parts.push(PROPERTY_TYPE_LABELS[s.propertyType] || s.propertyType);
+  // Alt tür etiketi kategoriye göre çözülür; emlak sözlüğü tüm kategorileri bilmiyor.
+  if (s.propertyType) parts.push(getSubTypeLabel(s.category, s.propertyType));
   if (s.rooms) parts.push(s.rooms);
   if (s.minPrice && s.maxPrice) parts.push(`${tl(s.minPrice)}–${tl(s.maxPrice)}`);
   else if (s.maxPrice) parts.push(`≤ ${tl(s.maxPrice)}`);
   else if (s.minPrice) parts.push(`≥ ${tl(s.minPrice)}`);
-  if (s.minArea) parts.push(`${s.minArea}+ m²`);
+  // m² YALNIZ emlakta anlamlı: bir telefon aramasında "128+ m²" saçmaydı.
+  if (s.minArea && (!s.category || s.category === "emlak")) parts.push(`${s.minArea}+ m²`);
+  parts.push(...summarizeAttributes(s.category, s.attributes));
   return parts.join(" · ") || "Tüm ilanlar";
 }
 

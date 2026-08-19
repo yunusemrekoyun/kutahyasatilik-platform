@@ -2,7 +2,7 @@ import Link from "next/link";
 import { Target, ArrowRight } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { formatDate, formatNumber } from "@/lib/format";
-import { PROPERTY_TYPE_LABELS } from "@/lib/constants";
+import { getCategory, getSubTypeLabel, summarizeAttributes } from "@/lib/categories";
 import { countListingsForAlert } from "@/lib/matching";
 import { updateAlertStatus, deleteAlert } from "../actions";
 
@@ -17,17 +17,23 @@ function waLink(phone: string, name: string) {
 }
 
 function criteriaText(a: {
+  category: string | null; attributes: unknown;
   propertyType: string | null; district: string | null; listingType: string | null;
   minPrice: number | null; maxPrice: number | null; minArea: number | null; rooms: string | null;
 }) {
+  // Kayıtlı arama artık her kategoride kurulabiliyor; bu özet emlak varsayıyordu.
+  const isEstate = !a.category || a.category === "emlak";
   const parts: string[] = [];
-  parts.push(a.listingType === "rent" ? "Kiralık" : "Satılık");
-  if (a.propertyType) parts.push(PROPERTY_TYPE_LABELS[a.propertyType] || a.propertyType);
+  parts.push(getCategory(a.category).label);
+  if (isEstate) parts.push(a.listingType === "rent" ? "Kiralık" : "Satılık");
+  if (a.propertyType) parts.push(getSubTypeLabel(a.category, a.propertyType));
   if (a.district) parts.push(a.district);
   if (a.rooms) parts.push(a.rooms);
-  if (a.minArea) parts.push(`${a.minArea}+ m²`);
+  // m² yalnız emlakta anlamlı.
+  if (a.minArea && isEstate) parts.push(`${a.minArea}+ m²`);
   if (a.maxPrice) parts.push(`≤ ${formatNumber(a.maxPrice)} ₺`);
   if (a.minPrice) parts.push(`≥ ${formatNumber(a.minPrice)} ₺`);
+  parts.push(...summarizeAttributes(a.category, a.attributes));
   return parts.join(" · ");
 }
 

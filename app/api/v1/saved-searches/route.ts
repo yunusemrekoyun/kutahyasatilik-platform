@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { resolveApiSession } from "@/lib/apiAuth";
 import { checkRate } from "@/lib/rateLimit";
+import { reportApiError } from "@/lib/apiErrors";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -18,6 +19,9 @@ export async function GET(req: NextRequest) {
       orderBy: { createdAt: "desc" },
       select: {
         id: true,
+        // Web ikiziyle aynı gerekçe: bunlarsız mobil her aramayı emlak sanıyor.
+        category: true,
+        attributes: true,
         propertyType: true,
         listingType: true,
         district: true,
@@ -29,8 +33,9 @@ export async function GET(req: NextRequest) {
       },
     });
     return NextResponse.json({ ok: true, items });
-  } catch {
-    return NextResponse.json({ ok: true, items: [] });
+  } catch (error) {
+    reportApiError("v1:saved-searches:list", error);
+    return NextResponse.json({ ok: false, error: "Kayıtlı aramalar yüklenemedi." }, { status: 500 });
   }
 }
 
@@ -50,8 +55,9 @@ export async function DELETE(req: NextRequest) {
       where: { id, userId: session.id },
       data: { status: "closed" },
     });
-  } catch {
-    /* yoksay */
+  } catch (error) {
+    reportApiError("v1:saved-searches:delete", error);
+    return NextResponse.json({ ok: false, error: "Kayıtlı arama kaldırılamadı." }, { status: 500 });
   }
   return NextResponse.json({ ok: true });
 }
