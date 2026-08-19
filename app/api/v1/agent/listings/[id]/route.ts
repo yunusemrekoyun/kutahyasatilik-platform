@@ -28,6 +28,10 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
     ok: true,
     listing: {
       id: l.id, slug: l.slug, title: l.title, description: l.description,
+      // category + attributes OLMADAN mobil emlak dışı bir ilanı düzenlemeye
+      // açamıyordu: form kategoriyi bilemediği için her ilanı emlak sanıyor,
+      // nitelikler (yıl, km, yakıt...) ekrana hiç gelmiyordu.
+      category: l.category, attributes: l.attributes,
       propertyType: l.propertyType, listingType: l.listingType, status: l.status,
       price: l.price, currency: l.currency, district: l.district, neighborhood: l.neighborhood,
       address: l.address, lat: l.lat, lng: l.lng, areaGross: l.areaGross, areaNet: l.areaNet,
