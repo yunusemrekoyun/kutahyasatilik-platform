@@ -9,7 +9,13 @@ import { deleteUploadFiles } from "@/lib/uploadDeletion";
 import { deleteVideo } from "@/lib/videoStorage";
 import { notifyAdmins } from "@/lib/notify";
 import { listingAmenityRows } from "@/lib/listingAmenities";
-import { getCategory, isCategoryKey, parseAttributes, type CategoryKey } from "@/lib/categories";
+import {
+  getCategory,
+  isCategoryKey,
+  parseAttributes,
+  sortableAttributeColumns,
+  type CategoryKey,
+} from "@/lib/categories";
 // Prisma.DbNull: nullable Json kolonuna SQL NULL yazar (düz null tip hatası,
 // Prisma.JsonNull ise JSON null yazar — istediğimiz o değil).
 import { Prisma } from "@/app/generated/prisma/client";
@@ -43,16 +49,30 @@ function jsonStringList(v: FormDataEntryValue | null): string | null {
   return values.length ? JSON.stringify(values) : null;
 }
 
+/**
+ * Form durumu — doğrulama hataları FIRLATILMAZ, DÖNDÜRÜLÜR.
+ *
+ * Eskiden her doğrulama `throw new Error(...)` yapıyordu. Server action'dan
+ * fırlatılan hata Next.js'te hata sınırına düşüyor: danışman kırk küsur alan
+ * doldurup kaydete bastığında "Bir şeyler ters gitti" ekranı görüyor, HANGİ
+ * alanın sorunlu olduğunu öğrenemiyor ve girdiği her şey kayboluyordu.
+ * Bireysel ilan akışı (app/(site)/ilan-ver/actions.ts) bunu zaten doğru yapıyor.
+ */
+export type AgentListingState = { error?: string };
+
 // Emlakçı ilan ekler/günceller — ilan her zaman "beklemede" durumuna düşer ve
 // admin onayına gider. featured / yatırım puanı / SEO gibi alanlar admin tekelindedir.
-export async function submitAgentListing(formData: FormData) {
+export async function submitAgentListing(
+  _prev: AgentListingState,
+  formData: FormData,
+): Promise<AgentListingState> {
   const agent = await requireApprovedAgent();
 
   const id = str(formData.get("id"));
   const title = String(formData.get("title") || "").trim();
   const price = num(formData.get("price")) ?? 0;
   if (!title || price <= 0) {
-    throw new Error("Başlık ve fiyat zorunludur");
+    return { error: "Başlık ve fiyat zorunludur" };
   }
 
   // Kategori. Form göndermezse emlak — kolonun DB varsayılanı da bu, yani
@@ -68,7 +88,7 @@ export async function submitAgentListing(formData: FormData) {
 
   const ptype = String(formData.get("propertyType") || "") || (isRealEstate ? "daire" : "");
   if (!category.subTypes.some((s) => s.value === ptype)) {
-    throw new Error("Lütfen geçerli bir tür seçin");
+    return { error: "Lütfen geçerli bir tür seçin" };
   }
 
   // Filtre sistemini besleyen zorunlu alanlar — YALNIZ emlakta.
@@ -77,9 +97,9 @@ export async function submitAgentListing(formData: FormData) {
   const isLand = isRealEstate && (ptype === "arsa" || ptype === "tarla");
   const areaVal = num(formData.get("areaGross"));
   if (isRealEstate) {
-    if (!areaVal || areaVal <= 0) throw new Error("Alan (brüt m²) zorunludur");
-    if (!isLand && !str(formData.get("rooms"))) throw new Error("Oda sayısı zorunludur");
-    if (isLand && !str(formData.get("zoningStatus"))) throw new Error("İmar durumu zorunludur");
+    if (!areaVal || areaVal <= 0) return { error: "Alan (brüt m²) zorunludur" };
+    if (!isLand && !str(formData.get("rooms"))) return { error: "Oda sayısı zorunludur" };
+    if (isLand && !str(formData.get("zoningStatus"))) return { error: "İmar durumu zorunludur" };
   }
 
   // Kategoriye özel nitelikler (JSONB). Emlakta kayıtta alan yok, boş döner.
@@ -87,7 +107,7 @@ export async function submitAgentListing(formData: FormData) {
   if (Object.keys(attrErrors).length) {
     const [key, message] = Object.entries(attrErrors)[0];
     const label = category.fields.find((f) => f.key === key)?.label ?? key;
-    throw new Error(`${label}: ${message}`);
+    return { error: `${label}: ${message}` };
   }
 
   // İlan kotası (§5/§26): YENİ ilan oluştururken tek paketin listingQuota'sını aşma.
@@ -102,7 +122,7 @@ export async function submitAgentListing(formData: FormData) {
     if (quota != null) {
       const count = await prisma.listing.count({ where: { agentId: agent.id } });
       if (count >= quota) {
-        throw new Error(`İlan kotanız dolu (${quota}). Yeni ilan için yönetimle iletişime geçin.`);
+        return { error: `İlan kotanız dolu (${quota}). Yeni ilan için yönetimle iletişime geçin.` };
       }
     }
   }
@@ -114,7 +134,7 @@ export async function submitAgentListing(formData: FormData) {
       where: { id },
       select: { agentId: true, slug: true },
     });
-    if (!owned || owned.agentId !== agent.id) throw new Error("Yetkisiz");
+    if (!owned || owned.agentId !== agent.id) return { error: "Bu ilan size ait değil." };
     existingSlug = owned.slug;
   }
 
@@ -148,6 +168,10 @@ export async function submitAgentListing(formData: FormData) {
     propertyType: ptype,
     // Kategori emlağa çevrilirse eski nitelikler kalmasın diye açıkça NULL.
     attributes: isRealEstate ? Prisma.DbNull : attributes,
+    // Sıralanabilir kopyalar attributes ile birlikte; v1 ikizi (lib/apiAgentListing.ts)
+    // bunu yapıyordu, bu panel yapmıyordu — aynı danışmanın ilanı webden girilince
+    // model yılı/km sıralamasında kaybolup mobilden girilince görünüyordu.
+    ...(isRealEstate ? { attrYear: null, attrKm: null } : sortableAttributeColumns(attributes)),
     listingType: String(formData.get("listingType") || "sale"),
     status: String(formData.get("status") || "active") === "sold" ? "sold" : "active",
     price,

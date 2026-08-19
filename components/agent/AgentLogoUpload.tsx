@@ -9,17 +9,23 @@ import { mediaUrl } from "@/lib/media";
 export default function AgentLogoUpload({ initialLogo }: { initialLogo?: string | null }) {
   const [logo, setLogo] = useState<string>(initialLogo ?? "");
   const [uploading, setUploading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   async function handleUpload(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file) return;
     setUploading(true);
+    setError(null);
     try {
       const fd = new FormData();
       fd.append("files", file);
       const res = await fetch("/api/upload", { method: "POST", body: fd });
       const data = await res.json();
       if (data.ok && data.urls?.[0]) setLogo(data.urls[0]);
+      // Sessiz başarısızlık yerine gerçek sebebi göster (bkz. AgentListingForm).
+      else setError(typeof data.error === "string" ? data.error : "Logo yüklenemedi.");
+    } catch {
+      setError("Logo yüklenemedi. Bağlantınızı kontrol edip tekrar deneyin.");
     } finally {
       setUploading(false);
       e.target.value = "";
@@ -44,6 +50,7 @@ export default function AgentLogoUpload({ initialLogo }: { initialLogo?: string 
           {uploading ? "Yükleniyor..." : logo ? "Değiştir" : "Logo Yükle"}
           <input type="file" accept="image/*" onChange={handleUpload} className="hidden" />
         </label>
+        {error && <p role="alert" className="text-xs font-medium text-red-600">{error}</p>}
         {logo && (
           <button
             type="button"

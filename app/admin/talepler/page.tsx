@@ -2,7 +2,7 @@ import Link from "next/link";
 import { Phone, Mail, MessageCircle, Inbox } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { formatDateTime, parseJsonArray } from "@/lib/format";
-import { LEAD_TYPE_LABELS, LEAD_STATUS_LABELS } from "@/lib/constants";
+import { LEAD_TYPE_LABELS, LEAD_STATUS_LABELS, PROPERTY_TYPE_LABELS } from "@/lib/constants";
 import { updateLeadStatus, deleteLead, promoteLeadToOpportunity } from "../actions";
 import { PageHeader, StatusBadge, EmptyState, adminCard } from "@/components/admin/ui";
 
@@ -136,7 +136,7 @@ export default async function AdminLeads({
               <div className="mt-3 grid gap-x-6 gap-y-1 text-sm text-muted sm:grid-cols-2 lg:grid-cols-3">
                 {l.district && <p><span className="text-muted/70">İlçe:</span> {l.district}</p>}
                 {l.neighborhood && <p><span className="text-muted/70">Mahalle:</span> {l.neighborhood}</p>}
-                {l.propertyType && <p><span className="text-muted/70">Mülk:</span> {l.propertyType}</p>}
+                {l.propertyType && <p><span className="text-muted/70">Mülk:</span> {PROPERTY_TYPE_LABELS[l.propertyType] || l.propertyType}</p>}
                 {l.estimatedPrice && <p><span className="text-muted/70">İstenen Fiyat:</span> {l.estimatedPrice}</p>}
                 {l.preferredDate && <p><span className="text-muted/70">Tercih:</span> {l.preferredDate}</p>}
                 {l.lat != null && l.lng != null && (

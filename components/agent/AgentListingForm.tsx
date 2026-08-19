@@ -1,9 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useActionState, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { submitAgentListing } from "@/app/emlakci/panel/actions";
+import { submitAgentListing, type AgentListingState } from "@/app/emlakci/panel/actions";
 import { DISTRICTS } from "@/lib/constants";
 import { CATEGORIES, CATEGORY_LIST, isCategoryKey, type CategoryKey } from "@/lib/categories";
 import LocationPicker from "@/components/LocationPicker";
@@ -80,7 +80,12 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
 export default function AgentListingForm({ listing }: { listing?: ListingData }) {
   const [images, setImages] = useState<string[]>(listing?.images?.map((i) => i.url) ?? []);
   const [uploading, setUploading] = useState(false);
-  const [submitting, setSubmitting] = useState(false);
+  // useActionState: doğrulama hatası artık hata sınırına düşmüyor, forma geri
+  // geliyor ve girilen değerler ekranda kalıyor.
+  const [state, formAction, submitting] = useActionState<AgentListingState, FormData>(
+    submitAgentListing,
+    {},
+  );
   // Alt türler ve nitelik alanları kategori kaydından; admin formuyla aynı desen.
   const initialCategory: CategoryKey = isCategoryKey(listing?.category) ? listing.category : "emlak";
   const [category, setCategory] = useState<CategoryKey>(initialCategory);
@@ -90,6 +95,7 @@ export default function AgentListingForm({ listing }: { listing?: ListingData })
     listing?.propertyType || definition.subTypes[0]?.value || "daire"
   );
   const isLand = isRealEstate && (propertyType === "arsa" || propertyType === "tarla");
+  const [uploadError, setUploadError] = useState<string | null>(null);
 
   function switchCategory(next: CategoryKey) {
     setCategory(next);
@@ -100,12 +106,19 @@ export default function AgentListingForm({ listing }: { listing?: ListingData })
     const files = Array.from(e.target.files || []);
     if (!files.length) return;
     setUploading(true);
+    setUploadError(null);
     try {
       const fd = new FormData();
       files.forEach((f) => fd.append("files", f));
       const res = await fetch("/api/upload", { method: "POST", body: fd });
       const data = await res.json();
       if (data.ok) setImages((prev) => [...prev, ...data.urls]);
+      // Hata TAMAMEN yutuluyordu: boyut/tür reddinde ya da ağ hatasında ekranda
+      // hiçbir şey değişmiyor, danışman fotoğrafın yüklendiğini sanıp kaydediyordu.
+      // /api/upload gerçek hata gövdesi döndürüyor; onu gösteriyoruz.
+      else setUploadError(typeof data.error === "string" ? data.error : "Görsel yüklenemedi.");
+    } catch {
+      setUploadError("Görsel yüklenemedi. Bağlantınızı kontrol edip tekrar deneyin.");
     } finally {
       setUploading(false);
       e.target.value = "";
@@ -127,9 +140,15 @@ export default function AgentListingForm({ listing }: { listing?: ListingData })
   }
 
   return (
-    <form action={submitAgentListing} onSubmit={() => setSubmitting(true)} className="space-y-6">
+    <form action={formAction} className="space-y-6">
       {listing?.id && <input type="hidden" name="id" value={listing.id} />}
       <input type="hidden" name="imagesJson" value={JSON.stringify(images)} />
+
+      {state.error && (
+        <p role="alert" className="rounded-control bg-red-50 p-4 text-sm font-medium text-red-700 ring-1 ring-red-100">
+          {state.error}
+        </p>
+      )}
 
       <div className="flex items-start gap-2 rounded-control bg-amber-50 p-4 text-sm text-amber-800 ring-1 ring-amber-100">
         <Info className="mt-0.5 h-4 w-4 shrink-0" />
@@ -219,6 +238,9 @@ export default function AgentListingForm({ listing }: { listing?: ListingData })
             <input type="file" accept="image/*" multiple onChange={handleUpload} className="hidden" />
           </label>
         </div>
+        {uploadError && (
+          <p role="alert" className="mt-3 text-sm font-medium text-red-600">{uploadError}</p>
+        )}
       </section>
 
       {/* Medya: video / drone / sanal tur */}

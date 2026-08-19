@@ -13,6 +13,8 @@ import {
   X,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
+import { CATEGORY_LIST } from "@/lib/categories";
+import { LANDING_PAGES } from "@/lib/constants";
 import { useSiteContact } from "@/components/SiteContactProvider";
 import { useStore } from "@/components/store/StoreProvider";
 import NotificationBell from "@/components/NotificationBell";
@@ -32,44 +34,43 @@ import { telLink, whatsappLink } from "@/lib/site";
  * boundary" ile düşüyor). Araçları emlak grubunun içine koymak hem bu sorunu
  * yaşatmıyor hem de aradıkları yerde duruyorlar.
  */
-const LISTING_MENU: { title: string; href: string; items: { href: string; label: string }[] }[] = [
-  {
-    title: "Emlak",
-    href: "/ilanlar?kategori=emlak",
-    items: [
-      { href: "/daire", label: "Daire" },
-      { href: "/arsa", label: "Arsa" },
-      { href: "/villa", label: "Villa" },
-      { href: "/yatirimlik-arsa", label: "Yatırımlık Arsa" },
-      { href: "/isyeri", label: "İşyeri" },
-      { href: "/harita", label: "Haritada ara" },
-      { href: "/bolge-analizi", label: "Bölge analizi" },
-      { href: "/emlak-ofisleri", label: "Emlak ofisleri" },
-      { href: "/danismanlar", label: "Danışmanlar" },
-    ],
-  },
-  {
-    title: "Vasıta",
-    href: "/ilanlar?kategori=vasita",
-    items: [
-      { href: "/ilanlar?kategori=vasita&tur=otomobil", label: "Otomobil" },
-      { href: "/ilanlar?kategori=vasita&tur=motosiklet", label: "Motosiklet" },
-      { href: "/ilanlar?kategori=vasita&tur=ticari", label: "Ticari araç" },
-      { href: "/ilanlar?kategori=vasita&tur=traktor", label: "Traktör & tarım" },
-    ],
-  },
-  {
-    title: "Teknoloji",
-    href: "/ilanlar?kategori=teknoloji",
-    items: [
-      { href: "/ilanlar?kategori=teknoloji&tur=telefon", label: "Telefon" },
-      { href: "/ilanlar?kategori=teknoloji&tur=bilgisayar", label: "Bilgisayar" },
-      { href: "/ilanlar?kategori=teknoloji&tur=tablet", label: "Tablet" },
-      { href: "/ilanlar?kategori=teknoloji&tur=konsol", label: "Oyun konsolu" },
-      { href: "/ilanlar?kategori=teknoloji&tur=kamera", label: "Fotoğraf & kamera" },
-    ],
-  },
+
+/** Alt türün SEO iniş sayfası varsa güzel URL, yoksa filtreli liste bağlantısı. */
+const LANDING_BY_PROPERTY_TYPE = new Map(LANDING_PAGES.map((p) => [p.propertyType, p.slug]));
+
+/**
+ * Menü etiketi kayıttan gelir. TEK İSTİSNA burada:
+ * `tarla` alt türünün iniş sayfası bilerek "Yatırımlık Arsa" adıyla yayında
+ * (arama hacmi "tarla"dan yüksek). Menü bağlantısı o sayfaya gittiği için
+ * etiketinin de sayfayla aynı olması gerekiyor.
+ */
+const MENU_LABEL_OVERRIDES: Record<string, string> = { tarla: "Yatırımlık Arsa" };
+
+/** Emlağa özel araçlar — alt tür değiller, grubun sonuna eklenirler. */
+const ESTATE_TOOLS = [
+  { href: "/harita", label: "Haritada ara" },
+  { href: "/bolge-analizi", label: "Bölge analizi" },
+  { href: "/emlak-ofisleri", label: "Emlak ofisleri" },
+  { href: "/danismanlar", label: "Danışmanlar" },
 ];
+
+const LISTING_MENU: { title: string; href: string; items: { href: string; label: string }[] }[] =
+  CATEGORY_LIST.map((category) => ({
+    title: category.label,
+    href: `/ilanlar?kategori=${category.key}`,
+    items: [
+      ...category.subTypes.map((sub) => {
+        const landing = LANDING_BY_PROPERTY_TYPE.get(sub.value);
+        return {
+          href: landing
+            ? `/${landing}`
+            : `/ilanlar?kategori=${category.key}&tur=${sub.value}`,
+          label: MENU_LABEL_OVERRIDES[sub.value] ?? sub.label,
+        };
+      }),
+      ...(category.key === "emlak" ? ESTATE_TOOLS : []),
+    ],
+  }));
 
 /** Aktiflik kontrolü için düz liste. */
 const PROPERTY_LINKS = LISTING_MENU.flatMap((group) => group.items);

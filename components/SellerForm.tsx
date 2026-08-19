@@ -148,8 +148,12 @@ export default function SellerForm({
           <label htmlFor="sf-type" className={labelCls}>Mülk Türü <span aria-hidden="true" className="text-red-500">*</span></label>
           <select id="sf-type" name="propertyType" required defaultValue="" className={inputCls}>
             <option value="" disabled>Tür seçin</option>
+            {/* value=SLUG. Eskiden ETİKET gönderiliyordu ("Müstakil Ev") ve o değer
+                Lead.propertyType → PortfolioOpportunity → Listing.propertyType zinciri
+                boyunca taşınıyordu; oluşan ilan hiçbir tür filtresine düşmüyordu.
+                /hesabim ise aynı alanı slug sözlüğünde aradığı için etiket hiç çözülmüyordu. */}
             {PROPERTY_TYPES.map((p) => (
-              <option key={p.value} value={p.label}>{p.label}</option>
+              <option key={p.value} value={p.value}>{p.label}</option>
             ))}
           </select>
         </div>

@@ -244,6 +244,11 @@ export async function getMapPoints(filter: ListingFilter = {}) {
       areaGross: true, featured: true, lat: true, lng: true, locationVisibility: true,
       images: { select: { url: true }, orderBy: { sortOrder: "asc" as const }, take: 1 },
     },
+    // orderBy ŞART: take ile birlikte sırasız sorgu, 300'den fazla koordinatlı ilan
+    // olduğunda hangi ilanların haritaya düşeceğini PostgreSQL'in o anki plan/erişim
+    // sırasına bırakıyordu — aynı kullanıcı iki kez açtığında farklı pinler görebilirdi.
+    // Öne çıkanlar önce, sonra en yeniler; kesme artık açıklanabilir.
+    orderBy: [{ featured: "desc" as const }, { createdAt: "desc" as const }],
     take: 300,
   });
   return rows

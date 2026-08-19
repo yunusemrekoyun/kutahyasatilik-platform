@@ -2,6 +2,7 @@
 
 import { useRouter, useSearchParams } from "next/navigation";
 import { CATEGORY_LIST, isCategoryKey } from "@/lib/categories";
+import { sortOptionsFor } from "@/lib/listingFilters";
 
 /**
  * Kategori seçilmemiş hâl. Artık bir SEKME DEĞİL: "Tümü" girişi kaldırıldı,
@@ -15,7 +16,7 @@ const NONE = "";
  * bir kategorinin alt türü (daire) ve nitelikleri (yakıt) ötekinde anlamsızdır
  * ve taşınırlarsa hiç sonuç dönmeyen bir sorgu üretirler.
  */
-const CARRY_OVER = ["q", "ilce", "min", "max", "sira"];
+const CARRY_OVER = ["q", "ilce", "min", "max"];
 
 export default function CategoryTabs() {
   const router = useRouter();
@@ -30,6 +31,15 @@ export default function CategoryTabs() {
       if (value) next.set(param, value);
     }
     next.set("kategori", key);
+    // Sıralama KOŞULLU taşınır. Fiyat/tarih her kategoride geçerli ama
+    // "Kilometre (Azdan)" bir dairede yok: koşulsuz taşındığında buildOrderBy
+    // bilinmeyen değeri sessizce varsayılana düşürüyor, açılır menü ise hâlâ
+    // "Önerilen" gösteriyordu — kullanıcı sıralamayı seçili sanıp rastgele bir
+    // sıra görüyordu. Hedef kategoride tanımlıysa taşı, değilse düşür.
+    const sort = sp.get("sira");
+    if (sort && sortOptionsFor(key).some((option) => option.value === sort)) {
+      next.set("sira", sort);
+    }
     const qs = next.toString();
     router.push(`/ilanlar${qs ? `?${qs}` : ""}`);
   }

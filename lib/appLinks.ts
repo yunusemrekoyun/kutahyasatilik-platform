@@ -3,8 +3,17 @@ const TEAM_ID_PATTERN = /^[A-Z0-9]{10}$/i;
 const APP_ID_PATTERN = /^[A-Z][A-Z0-9_-]*(?:\.[A-Z][A-Z0-9_-]*)+$/i;
 const SHA256_FINGERPRINT_PATTERN = /^(?:[A-F0-9]{2}:){31}[A-F0-9]{2}$/i;
 
+/**
+ * iOS derin bağlantı yolları. Android tarafı `handle_all_urls` kullandığı için
+ * her yolu zaten karşılıyor; bu liste eksik kaldığında AYNI bağlantı Android'de
+ * uygulamada, iPhone'da tarayıcıda açılıyor. Buraya yalnız mobilin GERÇEKTEN
+ * karşılayabildiği rotalar yazılmalı (app/src/app altında bir ekranı olanlar).
+ */
 const appLinkComponents = [
   { "/": "/ilan/*" },
+  // Kategori listesi mobilde var (src/app/(tabs)/ilanlar.tsx) ama listede yoktu.
+  { "/": "/ilanlar*" },
+  { "/": "/harita*" },
   { "/": "/bildirimler*" },
   { "/": "/emlak-ofisleri*" },
   { "/": "/emlak-ofisi/*" },

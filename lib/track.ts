@@ -16,8 +16,37 @@ declare global {
   }
 }
 
-function getSessionId(): string {
+/**
+ * Analiz izni verildi mi? (AnalyticsConsent.tsx ile AYNI anahtar.)
+ *
+ * İzin eskiden yalnız Google Analytics/Ads script'ini kapatıyordu; birinci taraf
+ * takibimiz "Reddet" diyen kullanıcıda da kalıcı bir kimlikle çalışmaya devam
+ * ediyordu. Onay metni "anonim kullanım ölçümü" diyor — kalıcı bir tanımlayıcı
+ * bu vaadi karşılamıyor.
+ */
+function analyticsGranted(): boolean {
   try {
+    return globalThis.localStorage?.getItem("ks_analytics_consent") === "granted";
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Kalıcı oturum kimliği YALNIZ izin varken üretilir ve saklanır.
+ *
+ * İzin yoksa null döner ve daha önce yazılmış kimlik de silinir: kullanıcı
+ * kabul edip sonra reddettiğinde eski kimliğin sürmesi, reddi anlamsız kılardı.
+ * Olayın kendisi yine gönderilir — ilan görüntülenme sayacı buna bağlı ve bu,
+ * onay metnindeki "zorunlu işlevler" tarafında kalan hizmet verisi. Sayaç artık
+ * kime ait olduğu bilinmeyen, gerçekten anonim bir olaydan besleniyor.
+ */
+function getSessionId(): string | undefined {
+  try {
+    if (!analyticsGranted()) {
+      localStorage.removeItem("ks_sid");
+      return undefined;
+    }
     let id = localStorage.getItem("ks_sid");
     if (!id) {
       id = Math.random().toString(36).slice(2) + Date.now().toString(36);
@@ -25,16 +54,19 @@ function getSessionId(): string {
     }
     return id;
   } catch {
-    return "anon";
+    return undefined;
   }
 }
 
 export function track(payload: TrackPayload) {
   try {
+    const granted = analyticsGranted();
     const body = JSON.stringify({
       ...payload,
       pagePath: window.location.pathname,
-      referrer: document.referrer || undefined,
+      // Yönlendiren adres izne bağlı: kullanıcının hangi siteden geldiği,
+      // ölçümü reddettiğinde saklamamız gereken bir bilgi değil.
+      referrer: granted ? document.referrer || undefined : undefined,
       sessionId: getSessionId(),
     });
     // Sayfa kapanırken bile gitsin diye sendBeacon tercih edilir.
