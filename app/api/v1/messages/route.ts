@@ -54,6 +54,11 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({
       ok: true,
       myRole: me.role,
+      // mySide web ikizinde vardı, burada yoktu. İstemci balon sahipliğini
+      // myRole ile hesaplayamaz: senderRole üç değerli (user/agent/owner),
+      // myRole iki değerli (user/agent). Bireysel satıcının kendi mesajı "owner",
+      // hesabı "user" olduğundan eşitlik tutmuyor ve sohbet TERS çiziliyordu.
+      mySide: side,
       conversation: {
         id: conv.id,
         listing: conv.listing

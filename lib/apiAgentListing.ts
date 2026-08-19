@@ -3,6 +3,7 @@ import { slugify } from "@/lib/format";
 import { deleteUploadFiles } from "@/lib/uploadDeletion";
 import { deleteVideo } from "@/lib/videoStorage";
 import { notifyAdmins } from "@/lib/notify";
+import { POSTGRES_INT_MAX } from "@/lib/constants";
 import { listingAmenityRows } from "@/lib/listingAmenities";
 import { listingImportKey } from "@/lib/listingImport";
 import { getCategory, isCategoryKey, parseAttributes, sortableAttributeColumns, type AttributeValues, type CategoryKey } from "@/lib/categories";
@@ -23,7 +24,10 @@ export class AgentListingError extends Error {
 function num(v: unknown): number | null {
   if (v === null || v === undefined || v === "") return null;
   const n = Number(String(v).replace(/[^\d.-]/g, ""));
-  return Number.isFinite(n) ? n : null;
+  // PG Int kelepçesi: web ikizleri (emlakci/panel, admin, ilan-ver) hep uyguluyordu,
+  // bu mobil yol uygulamıyordu — mobilden girilen büyük bir fiyat isteği 500'e
+  // düşürüyor, danışman ilanın neden kaydedilmediğini anlayamıyordu.
+  return Number.isFinite(n) && Math.abs(n) <= POSTGRES_INT_MAX ? n : null;
 }
 function str(v: unknown): string | null {
   const s = v === null || v === undefined ? "" : String(v).trim();

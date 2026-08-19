@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { resolveApiAdmin } from "@/lib/apiAdmin";
-import { LEAD_STATUS_FLOW } from "@/lib/constants";
+import { LEAD_STATUS_FLOW, POSTGRES_INT_MAX } from "@/lib/constants";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -45,7 +45,9 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
   const lead = await prisma.lead.findUnique({ where: { id } });
   if (!lead) return NextResponse.json({ ok: false, error: "Talep bulunamadı" }, { status: 404 });
   const rawPrice = lead.estimatedPrice ? Number(lead.estimatedPrice.replace(/[^\d]/g, "")) : NaN;
-  const price = Number.isFinite(rawPrice) && rawPrice > 0 ? rawPrice : null;
+  // Kelepçe web ikizinde vardı, burada yoktu (app/admin/actions.ts).
+  const price =
+    Number.isFinite(rawPrice) && rawPrice > 0 && rawPrice <= POSTGRES_INT_MAX ? rawPrice : null;
   const title = `${lead.propertyType || "Mülk"}${lead.district ? ` · ${lead.district}` : ""} — ${lead.name}`;
   const opp = await prisma.portfolioOpportunity.create({
     data: {

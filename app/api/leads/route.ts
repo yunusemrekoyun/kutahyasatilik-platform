@@ -110,17 +110,22 @@ export async function POST(req: NextRequest) {
     },
   });
 
-  // Dönüşüm olayı kaydet
-  await prisma.analyticsEvent.create({
-    data: {
-      type: EVENT_BY_TYPE[data.type] || "conversion",
-      listingId,
-      district: data.district || null,
-      pagePath: data.pagePath || null,
-      referrer: data.referrer || null,
-      utmSource: data.utmSource || null,
-    },
-  });
+  // Dönüşüm olayı kaydet — korumalı. Talep zaten YAZILDI; buradaki bir hata
+  // isteği 500'e düşürdüğünde kullanıcı formu tekrar gönderiyor ve aynı talep
+  // ikinci kez kaydediliyordu. Analitik, talebin kendisinden daha az önemli.
+  // (v1 ikizi bunu zaten .catch ile koruyordu.)
+  await prisma.analyticsEvent
+    .create({
+      data: {
+        type: EVENT_BY_TYPE[data.type] || "conversion",
+        listingId,
+        district: data.district || null,
+        pagePath: data.pagePath || null,
+        referrer: data.referrer || null,
+        utmSource: data.utmSource || null,
+      },
+    })
+    .catch(() => {});
 
   // Bildirim: admin'e her zaman; talep bir emlakçının ilanına aitse ona da.
   const label = LEAD_LABELS[data.type] || "Yeni talep";

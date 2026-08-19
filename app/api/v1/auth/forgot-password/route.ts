@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
-import { prisma } from "@/lib/prisma";
 import { checkRate } from "@/lib/rateLimit";
-import { issueResetToken } from "@/lib/passwordReset";
+import { findResetTarget, issueResetToken } from "@/lib/passwordReset";
 import { sendEmail, notificationEmail, emailEnabled } from "@/lib/email";
 
 export const runtime = "nodejs";
@@ -30,20 +29,19 @@ export async function POST(req: NextRequest) {
     message: "E-posta adresi kayıtlıysa şifre sıfırlama bağlantısı gönderildi.",
   });
 
-  const user = await prisma.user.findUnique({
-    where: { email: data.email.toLowerCase().trim() },
-    select: { id: true, email: true },
-  });
-  if (!user) return generic;
+  // Hesap arama findResetTarget'ta ORTAK: kullanıcı + danışman. Burada elle
+  // yazıldığında web ikizi danışman dalını kazandı, bu uç kazanmadı.
+  const target = await findResetTarget(data.email);
+  if (!target) return generic;
 
-  const token = await issueResetToken("user", user.id);
+  const token = await issueResetToken(target.audience, target.id);
 
   const path = `/sifre-sifirla?token=${token}`;
   if (!emailEnabled()) {
     console.error("[sifre-sifirla][v1] E-posta yapılandırılmamış; bağlantı gönderilemedi.");
   }
   await sendEmail({
-    to: user.email,
+    to: target.email,
     subject: "Şifre sıfırlama bağlantınız",
     html: notificationEmail({
       title: "Şifre sıfırlama",

@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
-import { prisma } from "@/lib/prisma";
 import { checkRate } from "@/lib/rateLimit";
-import { issueResetToken } from "@/lib/passwordReset";
+import { findResetTarget, issueResetToken } from "@/lib/passwordReset";
 import { sendEmail, notificationEmail, emailEnabled } from "@/lib/email";
 
 export const runtime = "nodejs";
@@ -34,18 +33,8 @@ export async function POST(req: NextRequest) {
     message: "E-posta adresi kayıtlıysa şifre sıfırlama bağlantısı gönderildi.",
   });
 
-  const email = data.email.toLowerCase().trim();
-  const user = await prisma.user.findUnique({ where: { email }, select: { id: true, email: true } });
-  // Reddedilmiş danışman hesabına bağlantı gönderilmez, yanıt yine tek tip.
-  const agent = user
-    ? null
-    : await prisma.agent.findUnique({ where: { email }, select: { id: true, email: true, status: true } });
-
-  const target = user
-    ? { audience: "user" as const, id: user.id, email: user.email }
-    : agent && agent.status !== "rejected"
-      ? { audience: "agent" as const, id: agent.id, email: agent.email }
-      : null;
+  // Arama mantığı v1 ikiziyle ORTAK (bkz. lib/passwordReset.findResetTarget).
+  const target = await findResetTarget(data.email);
   if (!target) return generic;
 
   const token = await issueResetToken(target.audience, target.id);

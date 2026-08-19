@@ -19,6 +19,14 @@ export type DistrictMeta = (typeof DISTRICTS)[number];
 
 export const KUTAHYA_CENTER = { lat: 39.35, lng: 29.7, zoom: 9 };
 
+/**
+ * PostgreSQL `integer` üst sınırı. Bu kelepçe olmadan büyük bir fiyat/sayı
+ * yazma anında taşıyor ve isteği 500'e düşürüyor — kullanıcıya "bir şeyler
+ * ters gitti" olarak görünüyor. Altı ayrı yerde elle tekrarlanmıştı ve
+ * ikisinde (v1 lead→fırsat dönüşümü, mobil ilan yazma) hiç yoktu.
+ */
+export const POSTGRES_INT_MAX = 2_147_483_647;
+
 // Mülk türleri
 export const PROPERTY_TYPES = [
   { value: "daire", label: "Daire" },

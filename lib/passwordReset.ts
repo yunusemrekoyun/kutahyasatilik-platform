@@ -40,6 +40,36 @@ export async function issueResetToken(audience: ResetAudience, id: string): Prom
   return token;
 }
 
+/**
+ * E-postaya karşılık gelen sıfırlanabilir hesabı bulur (kullanıcı ya da danışman).
+ *
+ * İKİ UÇ ORTAK KULLANIR: /api/user/forgot-password (web) ve
+ * /api/v1/auth/forgot-password (mobil). Daha önce her ikisi de aramayı kendi
+ * içinde yazıyordu ve v1 ikizi danışman dalı eklendiğinde güncellenmedi —
+ * mobilden giriş yapabilen bir danışman şifresini asla sıfırlayamıyordu, üstelik
+ * "bağlantı gönderildi" yanıtını aldığı için sorunu fark edemiyordu.
+ *
+ * Reddedilmiş danışman hesabına bağlantı gönderilmez; çağıran yine TEK TİP
+ * yanıt döndürmelidir (enumeration önlemi).
+ */
+export async function findResetTarget(
+  rawEmail: string,
+): Promise<{ audience: ResetAudience; id: string; email: string } | null> {
+  const email = rawEmail.toLowerCase().trim();
+
+  const user = await prisma.user.findUnique({ where: { email }, select: { id: true, email: true } });
+  if (user) return { audience: "user", id: user.id, email: user.email };
+
+  const agent = await prisma.agent.findUnique({
+    where: { email },
+    select: { id: true, email: true, status: true },
+  });
+  if (agent && agent.status !== "rejected") {
+    return { audience: "agent", id: agent.id, email: agent.email };
+  }
+  return null;
+}
+
 export type ResolvedResetToken =
   | { ok: true; audience: ResetAudience; id: string }
   | { ok: false };
