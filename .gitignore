@@ -106,3 +106,5 @@ docker-compose.override.yml
 
 # Demo katalog görselleri UPLOAD_DIR'e iniyor; depoya girmez (yüzlerce MB).
 public/uploads/demo-*.jpg
+# Deploy betigi: sunucu adresini tasiyor ve depoda durmasi istenmiyor.
+scripts/deploy/
